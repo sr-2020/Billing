@@ -54,7 +54,7 @@ namespace BillingAPI
             //app.UseHangfireDashboard();
             #endregion
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseMvc();
         }
     }
