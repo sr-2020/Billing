@@ -29,9 +29,11 @@ namespace BillingAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-            
+
             #region hangfire
-            var connectionString = Configuration.GetConnectionString("HangFirePsgConnectionString");
+            var user = Environment.GetEnvironmentVariable("POSTGRESQL_USER");
+            var password = Environment.GetEnvironmentVariable("POSTGRESQL_PASSWORD");
+            var connectionString = $"{Configuration.GetConnectionString("HangFirePsgConnectionString")} User Id = {user}; Password = {password}";
             services.AddHangfire(config => config.UsePostgreSqlStorage(connectionString));
             #endregion
 
