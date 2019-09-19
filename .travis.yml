@@ -2,6 +2,7 @@ services:
   - docker
 
 script:
+- echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 - docker build . -t sr2020/billingapi
 - docker push sr2020/billingapi
 - make deploy server=instance.evarun.ru password=$USER_PASSWORD
