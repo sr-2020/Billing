@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BillingAPI.Filters;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Builder;
@@ -28,13 +29,21 @@ namespace BillingAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+           
+            #region mssql
             //var connectionString = @"Server = 192.168.201.119; Database = HangFire; persist security info = True; User Id = vivchenkov; Password = q8URs3bC; multipleactiveresultsets = True;";
-            //GlobalConfiguration.Configuration.UseSqlServerStorage(connectionString);
             //services.AddHangfire(config =>
             //{
             //    config.UseSqlServerStorage(connectionString);
             //});
-            //services.AddHangfire(config => config.UsePostgreSqlStorage(Configuration.GetConnectionString("HangfireConnectionPostGre")));
+            #endregion
+
+            #region postgresql
+            var connectionString = Configuration.GetConnectionString("HangFirePsgConnectionString");
+            services.AddHangfire(config => config.UsePostgreSqlStorage(connectionString));
+            #endregion
+
+            services.AddAuthentication().AddCookie();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -50,8 +59,11 @@ namespace BillingAPI
             }
 
             #region hangfire
-            //app.UseHangfireServer();
-            //app.UseHangfireDashboard();
+            app.UseHangfireServer();
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            {
+                Authorization = new[] { new HangfireAuthorizationFilter() }
+            });
             #endregion
 
             //app.UseHttpsRedirection();

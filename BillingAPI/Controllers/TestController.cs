@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Hangfire;
+using Jobs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BillingAPI.Controllers
@@ -13,14 +14,9 @@ namespace BillingAPI.Controllers
     public class TestController : ControllerBase
     {
         // GET api/version
-        [HttpGet]
         public ActionResult<string> Get()
         {
-            //RecurringJob.AddOrUpdate(
-            //    () =>
-            //    Debug.Write($"{DateTime.Now}: test completed"), 
-                
-            //    "*/1 * * * *");
+
             return "Hello world!";
         }
 
