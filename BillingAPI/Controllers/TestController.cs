@@ -17,7 +17,7 @@ namespace BillingAPI.Controllers
         public ActionResult<string> Get()
         {
 
-            return "Hello world!";
+            return "Hello world";
         }
 
     }
