@@ -1,0 +1,15 @@
+services:
+  - docker
+
+script:
+- docker build . -t sr2020/billingapi
+- docker push sr2020/billingapi
+- make deploy server=instance.evarun.ru password=$USER_PASSWORD
+
+addons:
+  ssh_known_hosts:
+    - instance.evarun.ru
+  apt:
+    packages:
+      - sshpass
+      - sox
