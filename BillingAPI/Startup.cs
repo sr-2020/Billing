@@ -29,16 +29,8 @@ namespace BillingAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-           
-            #region mssql
-            //var connectionString = @"Server = 192.168.201.119; Database = HangFire; persist security info = True; User Id = vivchenkov; Password = q8URs3bC; multipleactiveresultsets = True;";
-            //services.AddHangfire(config =>
-            //{
-            //    config.UseSqlServerStorage(connectionString);
-            //});
-            #endregion
-
-            #region postgresql
+            
+            #region hangfire
             var connectionString = Configuration.GetConnectionString("HangFirePsgConnectionString");
             services.AddHangfire(config => config.UsePostgreSqlStorage(connectionString));
             #endregion
