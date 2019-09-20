@@ -16,8 +16,7 @@ namespace BillingAPI.Controllers
         // GET api/version
         public ActionResult<string> Get()
         {
-
-            return "Hello world";
+            return GetType().Assembly.GetName().Version.ToString();
         }
 
     }
