@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BillingAPI.Filters;
+using Core;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Builder;
@@ -21,6 +22,7 @@ namespace BillingAPI
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            UnitOfWork.Init(Configuration);
         }
 
         public IConfiguration Configuration { get; }
@@ -31,13 +33,11 @@ namespace BillingAPI
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             #region hangfire
-            var user = Environment.GetEnvironmentVariable("POSTGRESQL_USER");
-            var password = Environment.GetEnvironmentVariable("POSTGRESQL_PASSWORD");
-            var connectionString = $"{Configuration.GetConnectionString("HangFirePsgConnectionString")} User Id = {user}; Password = {password}";
-            services.AddHangfire(config => config.UsePostgreSqlStorage(connectionString));
+            var hfConnectionString = UnitOfWork.GetConnectionString("HangFirePsgConnectionString");
+            services.AddHangfire(config => config.UsePostgreSqlStorage(hfConnectionString));
             #endregion
 
-            services.AddAuthentication().AddCookie();
+            //services.AddAuthentication().AddCookie();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
