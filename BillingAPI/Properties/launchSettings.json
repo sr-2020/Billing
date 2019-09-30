@@ -16,7 +16,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "api/test",
+      "launchUrl": "settings/index",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -24,7 +24,7 @@
     "BillingAPI": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "api/test",
+      "launchUrl": "settings/index",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
@@ -33,7 +33,7 @@
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/test"
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/systemsettings"
     }
   }
 }
