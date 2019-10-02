@@ -5,8 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\IoC.Container\IoC.Container.csproj" />
-    <ProjectReference Include="..\Settings\Settings.csproj" />
+    <PackageReference Include="structuremap" Version="4.7.1" />
   </ItemGroup>
 
 </Project>

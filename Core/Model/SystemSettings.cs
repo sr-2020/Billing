@@ -5,9 +5,8 @@ using System.Text;
 
 namespace Core.Model
 {
-    public class SystemSettings
+    public class SystemSettings : BaseEntity
     {
-        public int Id { get; set; }
         [Display(Name ="ключ")]
         public string Key { get; set; }
         [Display(Name = "значение")]

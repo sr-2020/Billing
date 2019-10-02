@@ -1,17 +1,72 @@
-﻿using System;
+﻿using Core;
+using Core.Model;
+using IoC;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 
 namespace Jobs
 {
-    public class JobManager
+    public interface IJobManager
     {
-        public JobManager()
+        BaseJob GetJob(string id);
+    }
+
+    public class JobManager : IJobManager
+    {
+        public BaseJob GetJob(string id)
         {
-            Console.WriteLine("JobManager created");
+            var config = ConfigureJob(id);
+            switch (config.Name)
+            {
+                case "test":
+                    return new TestJob { Config = config };
+                default:
+                    break;
+            }
+            throw new NotImplementedException("Job not configured");
         }
-        public void DoLongJob()
+
+        private JobConfig ConfigureJob(string id)
         {
-            var time = DateTime.Now.ToString("hh:mm:ss");
-            Console.WriteLine($"DoLongJob succesfully did, {time}");
+            var config = new JobConfig();
+            config = new JobConfig();
+            config.Name = GetJobNameById(id);
+            config.Instance = GetInstance(id);
+
+            var settingsManager = IocContainer.Get<IBaseRepository>();
+            var settings = settingsManager.GetList<SystemSettings>(s => s.Key.StartsWith($"job_{id}_"));
+            config.IntervalInMinutes = GetInterval(settings);
+            config.StartTime = GetStartTime(settings, "start");
+            config.EndTime = GetStartTime(settings, "end"); ;
+            return config;
+        }
+
+        private DateTime GetStartTime(List<SystemSettings> settings, string key)
+        {
+            var provider = CultureInfo.InvariantCulture;
+            var _dateTimeFormat = "yyyyMMdd HH:mm:ss";
+            var setting = settings.FirstOrDefault(s => s.Key.EndsWith(key));
+            return DateTime.ParseExact(setting.Value, _dateTimeFormat, provider);
+        }
+
+        private int GetInterval(List<SystemSettings> settings)
+        {
+            var setting = settings.FirstOrDefault(s => s.Key.EndsWith("interval"));
+            return int.Parse(setting.Value);
+        }
+
+        private string GetInstance(string id)
+        {
+            var index = id.IndexOf(":") + 1;
+            return index > 0 ? id.Substring(index, id.Length - index) : "default";
+        }
+
+        private string GetJobNameById(string id)
+        {
+            var index = id.IndexOf(":");
+            return id.Substring(0, index > 0 ? index : id.Length);
         }
     }
 }

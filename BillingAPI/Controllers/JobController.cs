@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Hangfire;
+using IoC;
 using Jobs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,21 +14,22 @@ namespace BillingAPI.Controllers
     [ApiController]
     public class JobController : ControllerBase
     {
-        [HttpGet("start")]
-        public string Start()
+        [HttpGet("start/{id}")]
+        public string Start(string id)
         {
             try
             {
-                RecurringJob.AddOrUpdate("main", (JobManager jm) =>
-                jm.DoLongJob(),
-                "0-59 * * * * ", TimeZoneInfo.Local);
+                var jm = IocContainer.Get<IJobManager>();
+                var job = jm.GetJob(id);
+                foreach (var date in job.GetJobSchedules())
+                {
+                    BackgroundJob.Schedule(() => job.DoJob(), new DateTimeOffset(date));
+                }
             }
             catch (Exception e)
             {
-
                 return e.ToString();
             }
-
             return "success";
         }
         [HttpGet("stop")]
@@ -42,9 +44,7 @@ namespace BillingAPI.Controllers
 
                 return e.ToString();
             }
-
             return "success";
         }
-
     }
 }

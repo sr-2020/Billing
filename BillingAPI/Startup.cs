@@ -6,6 +6,7 @@ using BillingAPI.Filters;
 using Core;
 using Hangfire;
 using Hangfire.PostgreSql;
+using IoC.Init;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -22,7 +23,8 @@ namespace BillingAPI
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            UnitOfWork.Init(Configuration);
+            IocInitializer.Init();
+            SystemHelper.Init(configuration);
         }
 
         public IConfiguration Configuration { get; }
@@ -34,11 +36,9 @@ namespace BillingAPI
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1); 
 
             #region hangfire
-            var hfConnectionString = UnitOfWork.GetConnectionString("Hangfire");
+            var hfConnectionString = SystemHelper.GetConnectionString("Hangfire");
             services.AddHangfire(config => config.UsePostgreSqlStorage(hfConnectionString));
             #endregion
-
-            services.AddSingleton<IUnitOfWork, UnitOfWork>();
 
             //services.AddAuthentication().AddCookie();
         }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Core;
 using Core.Model;
+using IoC;
 using Microsoft.AspNetCore.Mvc;
 using Settings;
 
@@ -11,16 +12,12 @@ namespace BillingAPI.Controllers
 {
     public class SystemSettingsController : Controller
     {
-        IUnitOfWork _unitOfWork;
-
-        public SystemSettingsController(IUnitOfWork unitOfWork)
-        {
-            _unitOfWork = unitOfWork;
-        }
+        private readonly Lazy<ISettingsManager> _manager = new Lazy<ISettingsManager>(IocContainer.Get<ISettingsManager>);
+        private ISettingsManager Manager => _manager.Value;
 
         public IActionResult Index()
         {
-            var settings = _unitOfWork.BillingContext.SystemSettings.ToList();
+            var settings = Manager.GetAll<SystemSettings>();
             return View(settings);
         }
 
@@ -28,7 +25,7 @@ namespace BillingAPI.Controllers
         {
             if (id != 0)
             {
-                var model = _unitOfWork.BillingContext.SystemSettings.Find(id);
+                var model = Manager.Get<SystemSettings>(s => s.Id == id);
                 if (model == null)
                     return new JsonResult("systemsetting not found");
                 return View(model);
@@ -41,7 +38,7 @@ namespace BillingAPI.Controllers
         {
             try
             {
-                var manager = new SettingsManager(_unitOfWork);
+                var manager = new SettingsManager();
                 manager.AddOrUpdate(setting);
             }
             catch (Exception e)
@@ -55,7 +52,7 @@ namespace BillingAPI.Controllers
         {
             try
             {
-                var manager = new SettingsManager(_unitOfWork);
+                var manager = new SettingsManager();
                 var toDelte = manager.Delete(id);
             }
             catch (Exception e)
