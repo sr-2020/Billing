@@ -11,24 +11,24 @@ namespace Jobs
     public interface IJobManager
     {
         BaseJob GetJob(string id);
+        JobConfig GetConfig(string id);
     }
 
     public class JobManager : IJobManager
     {
-        public BaseJob GetJob(string id)
+        public BaseJob GetJob(string name)
         {
-            var config = ConfigureJob(id);
-            switch (config.Name)
+            switch (name)
             {
                 case "test":
-                    return new TestJob { Config = config };
+                    return new TestJob();
                 default:
                     break;
             }
             throw new NotImplementedException("Job not configured");
         }
 
-        private JobConfig ConfigureJob(string id)
+        public JobConfig GetConfig(string id)
         {
             var config = new JobConfig();
             config = new JobConfig();

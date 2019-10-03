@@ -1,5 +1,6 @@
 ﻿using Core;
 using Core.Model;
+using Hangfire;
 using Settings;
 using System;
 using System.Collections.Generic;
@@ -10,11 +11,25 @@ namespace Jobs
 {
     public abstract class BaseJob
     {
-        public JobConfig Config { get; set; }
-
         public BaseJob() { }
 
-        public virtual void DoJob()
+        public virtual void ScheduleJob(string id, DateTime startTime, DateTime endTime, int interval)
+        {
+            var startId = BackgroundJob.Schedule(() => StartJob(id, interval), new DateTimeOffset(SystemHelper.ConvertDateTimeToLocal(startTime)));
+            var endId = BackgroundJob.Schedule(() => StopJob(id), new DateTimeOffset(SystemHelper.ConvertDateTimeToLocal(endTime)));
+        }
+
+        protected virtual void StartJob(string id, int interval)
+        {
+            RecurringJob.AddOrUpdate(id, () => DoJob(), $"*/{interval} * * * *");
+        }
+
+        protected virtual void StopJob(string id)
+        {
+            RecurringJob.RemoveIfExists(id);
+        }
+
+        protected virtual void DoJob()
         {
             try
             {
@@ -23,20 +38,8 @@ namespace Jobs
             }
             catch (Exception e)
             {
-                throw;
+                
             }
-        }
-
-        public virtual List<DateTime> GetJobSchedules(bool localTimeZone = true)
-        {
-            var result = new List<DateTime>();
-            var start = Config.StartTime;
-            var now = SystemHelper.ConvertDateTimeToMoscow();
-            if (now > start)
-                start = now;
-            for (var date = start; date <= Config.EndTime; date = date.AddMinutes(Config.IntervalInMinutes))
-                result.Add(localTimeZone ? SystemHelper.ConvertDateTimeToLocal(date) : date);
-            return result;
         }
     }
 }

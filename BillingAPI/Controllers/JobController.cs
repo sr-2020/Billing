@@ -14,17 +14,15 @@ namespace BillingAPI.Controllers
     [ApiController]
     public class JobController : ControllerBase
     {
-        [HttpGet("start/{id}")]
-        public string Start(string id)
+        [HttpGet("run/{id}")]
+        public string Run(string id)
         {
             try
             {
                 var jm = IocContainer.Get<IJobManager>();
-                var job = jm.GetJob(id);
-                foreach (var date in job.GetJobSchedules())
-                {
-                    BackgroundJob.Schedule(() => job.DoJob(), new DateTimeOffset(date));
-                }
+                var config = jm.GetConfig(id);
+                var job = jm.GetJob(config.Name);
+                job.ScheduleJob(id, config.StartTime, config.EndTime, config.IntervalInMinutes);
             }
             catch (Exception e)
             {
@@ -32,16 +30,16 @@ namespace BillingAPI.Controllers
             }
             return "success";
         }
-        [HttpGet("stop")]
-        public string Stop()
+
+        [HttpGet("stop/{id}")]
+        public string Stop(string id)
         {
             try
             {
-                RecurringJob.RemoveIfExists("main");
+                //TODO
             }
             catch (Exception e)
             {
-
                 return e.ToString();
             }
             return "success";
