@@ -37,24 +37,24 @@ namespace Jobs
 
             var settingsManager = IocContainer.Get<IBaseRepository>();
             var settings = settingsManager.GetList<SystemSettings>(s => s.Key.StartsWith($"job_{id}_"));
-            config.IntervalInMinutes = GetInterval(settings);
-            config.StartTime = GetStartTime(settings, "start");
-            config.EndTime = GetStartTime(settings, "end"); ;
+            config.CronExpression = GetCron(settings);
+            config.StartTime = GetTime(settings, "start");
+            config.EndTime = GetTime(settings, "end"); ;
             return config;
         }
 
-        private DateTime GetStartTime(List<SystemSettings> settings, string key)
+        private DateTime GetTime(List<SystemSettings> settings, string key)
         {
             var provider = CultureInfo.InvariantCulture;
-            var _dateTimeFormat = "yyyyMMdd HH:mm:ss";
+            var _dateTimeFormat = "dd.MM.yyyy HH:mm:ss";
             var setting = settings.FirstOrDefault(s => s.Key.EndsWith(key));
             return DateTime.ParseExact(setting.Value, _dateTimeFormat, provider);
         }
 
-        private int GetInterval(List<SystemSettings> settings)
+        private string GetCron(List<SystemSettings> settings)
         {
-            var setting = settings.FirstOrDefault(s => s.Key.EndsWith("interval"));
-            return int.Parse(setting.Value);
+            var setting = settings.FirstOrDefault(s => s.Key.EndsWith("cron"));
+            return setting.Value;
         }
 
         private string GetInstance(string id)

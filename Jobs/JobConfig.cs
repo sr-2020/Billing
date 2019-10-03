@@ -8,7 +8,7 @@ namespace Jobs
     {
         public string Name { get; set; }
         public string Instance { get; set; }
-        public int IntervalInMinutes { get; set; }
+        public string CronExpression { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
     }

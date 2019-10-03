@@ -22,7 +22,7 @@ namespace BillingAPI.Controllers
                 var jm = IocContainer.Get<IJobManager>();
                 var config = jm.GetConfig(id);
                 var job = jm.GetJob(config.Name);
-                job.ScheduleJob(id, config.StartTime, config.EndTime, config.IntervalInMinutes);
+                job.ScheduleJob(id, config.StartTime, config.EndTime, config.CronExpression);
             }
             catch (Exception e)
             {

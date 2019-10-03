@@ -11,17 +11,15 @@ namespace Jobs
 {
     public abstract class BaseJob
     {
-        public BaseJob() { }
-
-        public virtual void ScheduleJob(string id, DateTime startTime, DateTime endTime, int interval)
+        public virtual void ScheduleJob(string id, DateTime startTime, DateTime endTime, string cron)
         {
-            var startId = BackgroundJob.Schedule(() => StartJob(id, interval), new DateTimeOffset(SystemHelper.ConvertDateTimeToLocal(startTime)));
+            var startId = BackgroundJob.Schedule(() => StartJob(id, cron), new DateTimeOffset(SystemHelper.ConvertDateTimeToLocal(startTime)));
             var endId = BackgroundJob.Schedule(() => StopJob(id), new DateTimeOffset(SystemHelper.ConvertDateTimeToLocal(endTime)));
         }
 
-        protected virtual void StartJob(string id, int interval)
+        protected virtual void StartJob(string id, string cron)
         {
-            RecurringJob.AddOrUpdate(id, () => DoJob(), $"*/{interval} * * * *");
+            RecurringJob.AddOrUpdate(id, () => DoJob(), $"{cron}");
         }
 
         protected virtual void StopJob(string id)
