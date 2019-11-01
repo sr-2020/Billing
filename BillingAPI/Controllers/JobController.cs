@@ -10,39 +10,29 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BillingAPI.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class JobController : ControllerBase
+    public class JobController : Controller
     {
-        [HttpGet("run/{id}")]
-        public string Run(string id)
+        private readonly IJobManager Manager = IocContainer.Get<IJobManager>();
+
+        public ActionResult Index()
         {
-            try
-            {
-                var jm = IocContainer.Get<IJobManager>();
-                var config = jm.GetConfig(id);
-                var job = jm.GetJob(config.Name);
-                job.ScheduleJob(id, config.StartTime, config.EndTime, config.CronExpression);
-            }
-            catch (Exception e)
-            {
-                return e.ToString();
-            }
-            return "success";
+            var jobs = Manager.GetAllJobs();
+            return View(jobs);
         }
 
-        [HttpGet("stop/{id}")]
-        public string Stop(string id)
+        public ActionResult Edit()
         {
-            try
-            {
-                //TODO
-            }
-            catch (Exception e)
-            {
-                return e.ToString();
-            }
-            return "success";
+            return View();
+        }
+
+        public ActionResult Start()
+        {
+            return View();
+        }
+
+        public ActionResult Delete()
+        {
+            return View();
         }
     }
 }

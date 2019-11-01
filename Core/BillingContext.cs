@@ -15,6 +15,7 @@ namespace Core
             optionsBuilder.UseNpgsql(SystemHelper.GetConnectionString("billing"));
         }
 
+        public DbSet<Job> Jobs { get; set; }
         public DbSet<SystemSettings> SystemSettings { get; set; }
     }
 }

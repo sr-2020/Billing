@@ -33,7 +33,7 @@
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/systemsettings"
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/Job/test"
     }
   }
 }

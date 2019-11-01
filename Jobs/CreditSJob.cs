@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Billing.Dto
+namespace Jobs
 {
-    public class TransferResponse
+    public class CreditsJob : BaseJob
     {
     }
 }

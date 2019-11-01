@@ -16,9 +16,10 @@ namespace Core
         {
             if (_configuration == null)
                 throw new ArgumentNullException("Configuration is null");
-            var user = Environment.GetEnvironmentVariable("POSTGRESQL_USER");
-            var password = Environment.GetEnvironmentVariable("POSTGRESQL_PASSWORD");
+            var user = Environment.GetEnvironmentVariable(_configuration.GetConnectionString(dataBase + "User"));
+            var password = Environment.GetEnvironmentVariable(_configuration.GetConnectionString(dataBase + "Password"));
             var db = _configuration.GetConnectionString(dataBase);
+            
             if (string.IsNullOrEmpty(user))
                 throw new ArgumentNullException("Environment user is empty");
             if (string.IsNullOrEmpty(db))
