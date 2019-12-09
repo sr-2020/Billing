@@ -25,7 +25,7 @@ T Data - объект, если метод должен возвращать о�
 - Transfer CreateTransfer(string walletFrom, string walletTo, decimal amount, string comment) - прямой перевод между двумя кошельками; 
 - Transfer CreateTransferSINSIN(int sinFrom, int sinTo, decimal amount, string comment) - перевод между двумя физическими лицами; 
 - Transfer CreateTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment) -  перевод с физлица на юрлицо; 
-- Transfer CreateTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment) - перевод от юрлица физическому лицу; 
+- Transfer CreateTransferLegSIN(int sinFrom, int legTo, decimal amount, string comment) - перевод от юрлица физическому лицу; 
 - Transfer CreateTransferLegLeg(int legFrom, int legTo, decimal amount, string comment) - перевод между двумя юрлицами; 
 - List<Price> GetPrices(int sinId, int shopId) - получить список предложений магазина для sin; 
 - Price GetPrice(int sinId, int skuId) - получить предложение на указанный продукт для sin; 
