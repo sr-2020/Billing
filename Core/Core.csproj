@@ -13,4 +13,19 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.1.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Sr2020Context.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Sr2020Context.xsd</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Sr2020Context.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>Sr2020Context.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
 </Project>

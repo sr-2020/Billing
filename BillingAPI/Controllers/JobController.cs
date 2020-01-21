@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Core.Model;
 using Hangfire;
 using IoC;
 using Jobs;
@@ -18,6 +19,12 @@ namespace BillingAPI.Controllers
         {
             var jobs = Manager.GetAllJobs();
             return View(jobs);
+        }
+        
+        public ActionResult CreateNewJob(HangfireJob newJob)
+        {
+
+            return View();
         }
 
         public ActionResult Edit()

@@ -11,15 +11,27 @@ namespace Jobs
 {
     public interface IJobManager : IBaseRepository
     {
-        BaseJob CreateJob(JobType type);
-        List<Job> GetAllJobs();
+        HangfireJob AddOrUpdateJob(HangfireJob hangfire);
+        List<HangfireJob> GetAllJobs();
     }
 
     public class JobManager : BaseEntityRepository, IJobManager
     {
-        
-        public BaseJob CreateJob(JobType type)
+        public HangfireJob AddOrUpdateJob(HangfireJob hangfire)
         {
+            HangfireJob exists;
+            if (hangfire.Id == 0)
+            {
+                exists = Context.Job.FirstOrDefault(j => j.JobName == hangfire.JobName);
+                if (exists != null)
+                    throw new Exception($"{hangfire.JobName} already exists");
+            }
+            else
+            {
+                
+            }
+
+
             switch (type)
             {
                 case JobType.Test:
@@ -37,16 +49,16 @@ namespace Jobs
             throw new NotImplementedException("Job not configured");
         }
 
-        public BaseJob LoadJob(Job dbJob)
+        public BaseJob LoadJob(HangfireJob dbJob)
         {
-            var job = CreateJob(dbJob.JType);
+            var job = CreateJob(dbJob.JobType);
 
             return job;
         }
 
-        public List<Job> GetAllJobs()
+        public List<HangfireJob> GetAllJobs()
         {
-            return Context.Jobs.ToList();
+            return Context.Job.ToList();
         }
 
     }

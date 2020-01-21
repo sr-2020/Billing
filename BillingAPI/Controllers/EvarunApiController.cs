@@ -27,7 +27,6 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-
         protected DataResult<T> RunAction<T>(Func<T> action)
         {
             var result = new DataResult<T>();
