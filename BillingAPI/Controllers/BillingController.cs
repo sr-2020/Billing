@@ -9,20 +9,12 @@ namespace BillingAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BillingController : ControllerBase
+    public class BillingController : EvarunApiController
     {
         [HttpGet("transfer")]
         public string Transfer(string id)
         {
-            try
-            {
 
-            }
-            catch (Exception e)
-            {
-
-            }
-            return "success";
         }
 
     }

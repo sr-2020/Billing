@@ -17,7 +17,7 @@ namespace Billing
         /// <param name="amount">Сумма</param>
         /// <param name="comment">Комментарий, который будет отображаться в истории</param>
         /// <returns></returns>
-        DataBillingResponse<Transfer> MakeTransfer(int walletFrom, int walletTo, decimal amount, string comment);
+        Transfer MakeTransfer(int walletFrom, int walletTo, decimal amount, string comment);
         /// <summary>
         /// Перевод между двумя физическими лицами
         /// </summary>
@@ -26,7 +26,7 @@ namespace Billing
         /// <param name="amount">Сумма к переводу</param>
         /// <param name="comment">Комментарий который будет отображаться в истории</param>
         /// <returns></returns>
-        DataBillingResponse<Transfer> MakeTransferSINSIN(int sinFrom, int sinTo, decimal amount, string comment);
+        Transfer MakeTransferSINSIN(int sinFrom, int sinTo, decimal amount, string comment);
         /// <summary>
         /// Перевод с физлица на юрлицо
         /// </summary>
@@ -35,7 +35,7 @@ namespace Billing
         /// <param name="amount">Сумма к переводу</param>
         /// <param name="comment">Комментарий который будет отображаться в истории</param>
         /// <returns></returns>
-        DataBillingResponse<Transfer> MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
+        Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
         /// <summary>
         /// Перевод от юрлица физическому лицу
         /// </summary>
@@ -44,7 +44,7 @@ namespace Billing
         /// <param name="amount">Сумма к переводу</param>
         /// <param name="comment">Комментарий который будет отображаться в истории</param>
         /// <returns></returns>
-        DataBillingResponse<Transfer> MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
+        Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
         /// <summary>
         /// Перевод между двумя юрлицами
         /// </summary>
@@ -53,7 +53,7 @@ namespace Billing
         /// <param name="amount">Сумма к переводу</param>
         /// <param name="comment">Комментарий который будет отображаться в истории</param>
         /// <returns></returns>
-        DataBillingResponse<Transfer> MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
+        Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
         /// <summary>
         /// Создания операции кредит
         /// </summary>
@@ -63,7 +63,7 @@ namespace Billing
         /// <param name="amount">Цена предмета</param>
         /// <param name="comment">Комментарий который будет отображаться в истории</param>
         /// <returns></returns>
-        DataBillingResponse<Credit> CreateCredit(int sin, int shop, int owner, decimal amount, string comment);
+        Credit CreateCredit(int sin, int shop, int owner, decimal amount, string comment);
         /// <summary>
         /// Получение текущего статуса кошелька sin
         /// </summary>
@@ -91,7 +91,7 @@ namespace Billing
 
     public class BillingManager : IBillingManager
     {
-        public DataBillingResponse<Credit> CreateCredit(int sin, int shop, int owner, decimal amount, string comment)
+        public Credit CreateCredit(int sin, int shop, int owner, decimal amount, string comment)
         {
             throw new NotImplementedException();
         }
@@ -106,27 +106,27 @@ namespace Billing
             throw new NotImplementedException();
         }
 
-        public DataBillingResponse<Transfer> MakeTransfer(int walletFrom, int walletTo, decimal amount, string comment)
+        public Transfer MakeTransfer(int walletFrom, int walletTo, decimal amount, string comment)
         {
             throw new NotImplementedException();
         }
 
-        public DataBillingResponse<Transfer> MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment)
+        public Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment)
         {
             throw new NotImplementedException();
         }
 
-        public DataBillingResponse<Transfer> MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment)
+        public Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment)
         {
             throw new NotImplementedException();
         }
 
-        public DataBillingResponse<Transfer> MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment)
+        public Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment)
         {
             throw new NotImplementedException();
         }
 
-        public DataBillingResponse<Transfer> MakeTransferSINSIN(int sinFrom, int sinTo, decimal amount, string comment)
+        public Transfer MakeTransferSINSIN(int sinFrom, int sinTo, decimal amount, string comment)
         {
             throw new NotImplementedException();
         }
