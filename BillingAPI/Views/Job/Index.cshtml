@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Core.Model.Job>
+﻿@model IEnumerable<Core.Model.HangfireJob>
 
 @{
     ViewData["Title"] = "Jobs";
@@ -25,7 +25,7 @@
                 @Html.DisplayNameFor(model => model.JobName)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.JType)
+                @Html.DisplayNameFor(model => model.JobType)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.HangfireStartId)
@@ -55,7 +55,7 @@
                 @Html.DisplayFor(modelItem => item.JobName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.JType)
+                @Html.DisplayFor(modelItem => item.JobType)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.HangfireStartId)

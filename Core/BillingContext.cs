@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Core
@@ -14,8 +15,7 @@ namespace Core
         {
             optionsBuilder.UseNpgsql(SystemHelper.GetConnectionString("billing"));
         }
-
-        public DbSet<Job> Jobs { get; set; }
+        public DbSet<HangfireJob> Job { get; set; }
         public DbSet<SystemSettings> SystemSettings { get; set; }
     }
 }
