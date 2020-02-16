@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Billing\Billing.csproj" />
     <ProjectReference Include="..\IoC.Container\IoC.Container.csproj" />
     <ProjectReference Include="..\Jobs\Jobs.csproj" />
     <ProjectReference Include="..\Settings\Settings.csproj" />

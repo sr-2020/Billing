@@ -8,14 +8,14 @@ namespace Core.Model
     [Table("sin_details")]
     public class SINDetails : BaseEntity
     {
+        [ForeignKey("wallet")]
         [Column("wallet")]
         public int WalletId { get; set; }
-        [ForeignKey("wallet")]
         public virtual Wallet Wallet { get; set; }
         [Column("sin")]
         public int SINId { get; set; }
-        [ForeignKey("sin")]
-        public virtual SIN SIN { get; set; }
+        //[ForeignKey("sin")]
+        //public virtual SIN SIN { get; set; }
         [Column("scoring")]
         public int? Scoring { get; set; }
         [Column("work")]

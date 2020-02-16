@@ -87,6 +87,7 @@ namespace Billing
         public SINDetails CreatePhysicalWallet(string sin, decimal balance)
         {
             var check = Get<SIN>(s => s.Sin == sin);
+            //var check = new SIN { Id = 2, Character = 1, Citizenship = 1, PersonName = "test2", Sin = "test2", Race = 1 };
             if (check == null)
                 throw new Exception("sin not exists");
             var details = Get<SINDetails>(d => d.SINId == check.Id);
@@ -102,7 +103,7 @@ namespace Billing
             var newDetails = new SINDetails()
             {
                 Wallet = newWallet,
-                SIN = check
+                SINId = check.Id
             };
             Context.Add(newDetails);
             Context.SaveChanges();
@@ -111,7 +112,7 @@ namespace Billing
 
         public Lifestyles GetLifestyle(int sin)
         {
-            var details = Get<SINDetails>(s => s.SINId == sin, new string[] { "wallet" });
+            var details = Get<SINDetails>(s => s.SINId == sin, new string[] { "Wallet" });
             if (details == null)
                 throw new Exception("sin not exists");
             return LifeStyleHelper.GetLifeStyle(details.Wallet.Balance);
@@ -134,10 +135,10 @@ namespace Billing
 
         public Transfer MakeTransferSINSIN(int sinFrom, int sinTo, decimal amount, string comment)
         {
-            var sin1 = Get<SINDetails>(s => s.Id == sinFrom, new string[] { "wallet" });
+            var sin1 = Get<SINDetails>(s => s.SINId == sinFrom, new string[] { "Wallet" });
             if (sin1 == null)
                 throw new Exception($"sin {sinFrom} not exists");
-            var sin2 = Get<SINDetails>(s => s.Id == sinTo, new string[] { "wallet" });
+            var sin2 = Get<SINDetails>(s => s.SINId == sinTo, new string[] { "Wallet" });
             if (sin2 == null)
                 throw new Exception($"sin {sinTo} not exists");
             return MakeNewTransfer(sin1.Wallet, sin2.Wallet, amount, comment);
@@ -147,6 +148,8 @@ namespace Billing
         {
             if (wallet1.Balance < amount)
                 throw new Exception($"Need more money on debit wallet {wallet1}");
+            Context.Attach(wallet1);
+            Context.Attach(wallet2);
             wallet1.Balance -= amount;
             wallet1.Lifestyle = (int)LifeStyleHelper.GetLifeStyle(wallet1.Balance);
             wallet2.Balance += amount;
@@ -161,6 +164,8 @@ namespace Billing
                 NewLifeStyleFrom = wallet1.Lifestyle,
                 NewLifeStyleTo = wallet2.Lifestyle
             };
+            Context.Add(transfer);
+            Context.SaveChanges();
             return transfer;
         }
 

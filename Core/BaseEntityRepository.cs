@@ -71,7 +71,11 @@ namespace Core
 
         public virtual T Get<T>(Expression<Func<T, bool>> predicate, string[] includes = null) where T : class
         {
-            return this.GetInternal(this.Query<T>(), predicate, includes);
+            //Apply eager loading
+            var res = AddIncludes(Query<T>(), includes);
+            if(res != null)
+                return res.FirstOrDefault(predicate);
+            return null;
         }
 
         public Task<T> GetAsync<T>(Expression<Func<T, bool>> predicate, string[] includes = null) where T : class
@@ -107,14 +111,6 @@ namespace Core
             var res = AddIncludes(query, includes)
                 .Where(predicate)
                 .ToListAsync();
-            return res;
-        }
-
-        protected T GetInternal<T>(IQueryable<T> query, Expression<Func<T, bool>> predicate, string[] includes = null) where T : class
-        {
-            //Apply eager loading
-            var res = AddIncludes(query, includes)
-                .FirstOrDefault(predicate);
             return res;
         }
 

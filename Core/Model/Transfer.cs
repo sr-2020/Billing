@@ -9,13 +9,13 @@ namespace Core.Model
     public class Transfer : BaseEntity
     {
         [Column("wallet_from")]
+        [ForeignKey("WalletFrom")]
         public int WalletFromId { get; set; }
-        [ForeignKey("wallet_from")]
         public virtual Wallet WalletFrom { get; set; }
         [Column("wallet_to")]
-        public int WalletToId { get; set; }
         [ForeignKey("wallet_to")]
-        public Wallet WalletTo { get; set; }
+        public int WalletToId { get; set; }
+        public virtual Wallet WalletTo { get; set; }
         [Column("amount")]
         public decimal Amount { get; set; }
         [Column("comment")]

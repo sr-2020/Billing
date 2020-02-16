@@ -1,4 +1,5 @@
-﻿using Core;
+﻿using Billing;
+using Core;
 using Jobs;
 using Settings;
 using StructureMap;
@@ -20,6 +21,7 @@ namespace IoC.Init
             For<ISettingsManager>().Use(new SettingsManager()).SetLifecycleTo(Lifecycles.Transient);
             For<IJobManager>().Use(new JobManager()).SetLifecycleTo(Lifecycles.Transient);
             For<IBaseRepository>().Use(new BaseEntityRepository()).SetLifecycleTo(Lifecycles.Transient);
+            For<IBillingManager>().Use(new BillingManager()).SetLifecycleTo(Lifecycles.Transient);
         }
     }
 }
