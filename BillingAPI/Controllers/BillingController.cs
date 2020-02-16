@@ -18,6 +18,12 @@ namespace BillingAPI.Controllers
         private readonly Lazy<IBillingManager> _manager = new Lazy<IBillingManager>(IocContainer.Get<IBillingManager>);
 
         #region admin
+        /// <summary>
+        /// Fill all tables related with wallet for current character
+        /// </summary>
+        /// <param name="character">ID from table Character</param>
+        /// <param name="balance">initial wallet amount</param>
+        /// <returns></returns>
         [HttpGet("admin/createphysicalwallet")]
         public DataResult<SINDetails> CreatePhysicalWallet(int character, decimal balance)
         {
@@ -28,6 +34,14 @@ namespace BillingAPI.Controllers
         #endregion
 
         #region transfer
+        /// <summary>
+        /// Create transfer from Character1 to Character2 using sins
+        /// </summary>
+        /// <param name="character1">ID from table Character</param>
+        /// <param name="character2">ID from table Character</param>
+        /// <param name="amount"></param>
+        /// <param name="comment"></param>
+        /// <returns></returns>
         [HttpGet("transfer/maketransfersinsin")]
         public DataResult<Transfer> MakeTransferSINSIN(int character1, int character2, decimal amount, string comment)
         {

@@ -12,7 +12,7 @@ namespace Billing
     {
         #region in the game
 
-        Transfer MakeTransferSINSIN(int sinFrom, int sinTo, decimal amount, string comment);
+        Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment);
         Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
         Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
         Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
