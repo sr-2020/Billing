@@ -13,9 +13,9 @@ namespace Core.Model
         public int WalletId { get; set; }
         public virtual Wallet Wallet { get; set; }
         [Column("sin")]
+        [ForeignKey("sin")]
         public int SINId { get; set; }
-        //[ForeignKey("sin")]
-        //public virtual SIN SIN { get; set; }
+        public virtual SIN SIN { get; set; }
         [Column("scoring")]
         public int? Scoring { get; set; }
         [Column("work")]

@@ -19,6 +19,9 @@ namespace Core
         public DbSet<SINDetails> SINDetails { get; set; }
         public DbSet<Transfer> Transfer { get; set; }
         public DbSet<Wallet> Wallet { get; set; }
+        public DbSet<SIN> SIN { get; set; }
+
+        public DbSet<Character> Character { get; set; }
 
         //public DbSet<SystemSettings> SystemSettings { get; set; }
     }

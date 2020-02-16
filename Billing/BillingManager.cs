@@ -11,71 +11,22 @@ namespace Billing
     public interface IBillingManager
     {
         #region in the game
-        /// <summary>
-        /// Перевод между двумя физическими лицами
-        /// </summary>
-        /// <param name="sinFrom">ID паспорта отправителя</param>
-        /// <param name="sinTo">ID паспорта получателя</param>
-        /// <param name="amount">Сумма к переводу</param>
-        /// <param name="comment">Комментарий который будет отображаться в истории</param>
-        /// <returns></returns>
+
         Transfer MakeTransferSINSIN(int sinFrom, int sinTo, decimal amount, string comment);
-        /// <summary>
-        /// Перевод с физлица на юрлицо
-        /// </summary>
-        /// <param name="sinFrom">ID паспорта отправителя</param>
-        /// <param name="legTo">ID юрлица получателя</param>
-        /// <param name="amount">Сумма к переводу</param>
-        /// <param name="comment">Комментарий который будет отображаться в истории</param>
-        /// <returns></returns>
         Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
-        /// <summary>
-        /// Перевод от юрлица физическому лицу
-        /// </summary>
-        /// <param name="legFrom">ID юрлица отправителя</param>
-        /// <param name="sinTo">ID паспорта получателя</param>
-        /// <param name="amount">Сумма к переводу</param>
-        /// <param name="comment">Комментарий который будет отображаться в истории</param>
-        /// <returns></returns>
         Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
-        /// <summary>
-        /// Перевод между двумя юрлицами
-        /// </summary>
-        /// <param name="legFrom">ID юрлица отправителя</param>
-        /// <param name="legTo">ID юрлица получателя</param>
-        /// <param name="amount">Сумма к переводу</param>
-        /// <param name="comment">Комментарий который будет отображаться в истории</param>
-        /// <returns></returns>
         Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
-        /// <summary>
-        /// Создания операции кредит
-        /// </summary>
-        /// <param name="sinFrom">ID паспорта платильщика</param>
-        /// <param name="legTo">ID юрлица бенефициара</param>
-        /// <param name="owner">ID юрлица владельца</param>
-        /// <param name="amount">Цена предмета</param>
-        /// <param name="comment">Комментарий который будет отображаться в истории</param>
-        /// <returns></returns>
         //TransferDto CreateCredit(int sin, int shop, int owner, decimal amount, string comment);
-        /// <summary>
-        /// Получение текущего статуса кошелька sin
-        /// </summary>
-        /// <param name="sin"></param>
-        /// <returns></returns>
         //SinInfo GetSinInfo(int sin);
-        /// <summary>
-        /// Получение всех операций по sin
-        /// </summary>
-        /// <param name="sin"></param>
-        /// <returns></returns>
         //SinDetails GetSinDetails(int sin);
         Lifestyles GetLifestyle(int sin);
-
+        string GetSinByCharacter(int characterId);
+        int GetCharacterIdBySin(string sinString);
         #endregion
 
 
         #region admin
-        SINDetails CreatePhysicalWallet(string sin, decimal balance);
+        SINDetails CreatePhysicalWallet(int character, decimal balance);
         //create legal wallet
 
         #endregion
@@ -84,9 +35,25 @@ namespace Billing
 
     public class BillingManager : BaseEntityRepository, IBillingManager
     {
-        public SINDetails CreatePhysicalWallet(string sin, decimal balance)
+        public string GetSinByCharacter(int characterId)
         {
-            var check = Get<SIN>(s => s.Sin == sin);
+            var sin = Get<SIN>(s => s.CharacterId == characterId);
+            if (sin == null)
+                throw new Exception("sin not found");
+            return sin.Sin;
+        }
+
+        public int GetCharacterIdBySin(string sinString)
+        {
+            var sin = Get<SIN>(s => s.Sin == sinString);
+            if (sin == null)
+                throw new Exception("sin not found");
+            return sin.CharacterId;
+        }
+
+        public SINDetails CreatePhysicalWallet(int character, decimal balance)
+        {
+            var check = Get<SIN>(s => s.CharacterId == character);
             //var check = new SIN { Id = 2, Character = 1, Citizenship = 1, PersonName = "test2", Sin = "test2", Race = 1 };
             if (check == null)
                 throw new Exception("sin not exists");
@@ -133,15 +100,21 @@ namespace Billing
             throw new NotImplementedException();
         }
 
-        public Transfer MakeTransferSINSIN(int sinFrom, int sinTo, decimal amount, string comment)
+        public Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment)
         {
-            var sin1 = Get<SINDetails>(s => s.SINId == sinFrom, new string[] { "Wallet" });
+            var sin1 = Get<SIN>(s => s.CharacterId == characterFrom);
             if (sin1 == null)
-                throw new Exception($"sin {sinFrom} not exists");
-            var sin2 = Get<SINDetails>(s => s.SINId == sinTo, new string[] { "Wallet" });
+                throw new Exception($"characterFrom {characterFrom} with sin not exists");
+            var sin2 = Get<SIN>(s => s.CharacterId == characterTo);
             if (sin2 == null)
-                throw new Exception($"sin {sinTo} not exists");
-            return MakeNewTransfer(sin1.Wallet, sin2.Wallet, amount, comment);
+                throw new Exception($"characterTo {characterTo} with sin not exists");
+            var d1 = Get<SINDetails>(s => s.SINId == sin1.Id, new string[] { "Wallet" });
+            if (d1 == null)
+                throw new Exception($"wallet for {characterFrom} not exists");
+            var d2 = Get<SINDetails>(s => s.SINId == sin2.Id, new string[] { "Wallet" });
+            if (d2 == null)
+                throw new Exception($"wallet for {characterTo} not exists");
+            return MakeNewTransfer(d1.Wallet, d2.Wallet, amount, comment);
         }
 
         private Transfer MakeNewTransfer(Wallet wallet1, Wallet wallet2, decimal amount, string comment)

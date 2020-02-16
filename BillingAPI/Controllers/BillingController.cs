@@ -18,21 +18,21 @@ namespace BillingAPI.Controllers
         private readonly Lazy<IBillingManager> _manager = new Lazy<IBillingManager>(IocContainer.Get<IBillingManager>);
 
         #region admin
-        [HttpGet("createphysicalwallet")]
-        public DataResult<SINDetails> CreatePhysicalWallet(string sin, decimal balance)
+        [HttpGet("admin/createphysicalwallet")]
+        public DataResult<SINDetails> CreatePhysicalWallet(int character, decimal balance)
         {
             var manager = _manager.Value;
-            var result = RunAction(() => manager.CreatePhysicalWallet(sin, balance));
+            var result = RunAction(() => manager.CreatePhysicalWallet(character, balance));
             return result;
         }
         #endregion
 
         #region transfer
         [HttpGet("transfer/maketransfersinsin")]
-        public DataResult<Transfer> MakeTransferSINSIN(int sin1, int sin2, decimal amount, string comment)
+        public DataResult<Transfer> MakeTransferSINSIN(int character1, int character2, decimal amount, string comment)
         {
             var manager = _manager.Value;
-            var result = RunAction(() => manager.MakeTransferSINSIN(sin1, sin2, amount, comment));
+            var result = RunAction(() => manager.MakeTransferSINSIN(character1, character2, amount, comment));
             return result;
         }
         [HttpGet("transfer/maketransfersinleg")]
@@ -75,6 +75,22 @@ namespace BillingAPI.Controllers
         }
         #endregion
         #region info
+        [HttpGet("info/getcharacteridbysin")]
+        public DataResult<int> GetCharacterIdBySin(string sinString)
+        {
+            var manager = _manager.Value;
+            var result = RunAction(() => manager.GetCharacterIdBySin(sinString));
+            return result;
+        }
+
+        [HttpGet("info/getsinbycharacter")]
+        public DataResult<string> GetSinByCharacter(int characterId)
+        {
+            var manager = _manager.Value;
+            var result = RunAction(() => manager.GetSinByCharacter(characterId));
+            return result;
+        }
+
         [HttpGet("info/base")]
         public Result Base(string id)
         {

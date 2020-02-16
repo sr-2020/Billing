@@ -17,7 +17,9 @@ namespace Core.Model
         [Column("citizenship")]
         public int Citizenship { get; set; }
         [Column("character")]
-        public int Character { get; set; }
+        [ForeignKey("character")]
+        public int CharacterId { get; set; }
+        public virtual Character Character { get; set; }
 
     }
 }
