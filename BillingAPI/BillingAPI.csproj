@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Billing\Billing.csproj" />
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\IoC.Init\IoC.Init.csproj" />
     <ProjectReference Include="..\Jobs\Jobs.csproj" />
