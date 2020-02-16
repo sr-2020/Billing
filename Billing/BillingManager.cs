@@ -10,15 +10,6 @@ namespace Billing
     {
         #region in the game
         /// <summary>
-        /// Прямой перевод между двумя кошельками
-        /// </summary>
-        /// <param name="walletFrom">ID кошелька отправителя</param>
-        /// <param name="walletTo">ID кошелька получателя</param>
-        /// <param name="amount">Сумма</param>
-        /// <param name="comment">Комментарий, который будет отображаться в истории</param>
-        /// <returns></returns>
-        //TransferDto MakeTransfer(int walletFrom, int walletTo, decimal amount, string comment);
-        /// <summary>
         /// Перевод между двумя физическими лицами
         /// </summary>
         /// <param name="sinFrom">ID паспорта отправителя</param>
@@ -26,7 +17,7 @@ namespace Billing
         /// <param name="amount">Сумма к переводу</param>
         /// <param name="comment">Комментарий который будет отображаться в истории</param>
         /// <returns></returns>
-        //TransferDto MakeTransferSINSIN(int sinFrom, int sinTo, decimal amount, string comment);
+        void MakeTransferSINSIN(int sinFrom, int sinTo, decimal amount, string comment);
         /// <summary>
         /// Перевод с физлица на юрлицо
         /// </summary>
@@ -35,7 +26,7 @@ namespace Billing
         /// <param name="amount">Сумма к переводу</param>
         /// <param name="comment">Комментарий который будет отображаться в истории</param>
         /// <returns></returns>
-        //TransferDto MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
+        void MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
         /// <summary>
         /// Перевод от юрлица физическому лицу
         /// </summary>
@@ -44,7 +35,7 @@ namespace Billing
         /// <param name="amount">Сумма к переводу</param>
         /// <param name="comment">Комментарий который будет отображаться в истории</param>
         /// <returns></returns>
-        //TransferDto MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
+        void MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
         /// <summary>
         /// Перевод между двумя юрлицами
         /// </summary>
@@ -53,7 +44,7 @@ namespace Billing
         /// <param name="amount">Сумма к переводу</param>
         /// <param name="comment">Комментарий который будет отображаться в истории</param>
         /// <returns></returns>
-        //TransferDto MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
+        void MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
         /// <summary>
         /// Создания операции кредит
         /// </summary>
@@ -82,7 +73,8 @@ namespace Billing
 
 
         #region admin
-        //create phisycal wallet
+        SINDetails CreatePhysicalWallet(string sin);
+
         //create legal wallet
 
         #endregion
@@ -91,6 +83,30 @@ namespace Billing
 
     public class BillingManager : IBillingManager
     {
+        public SINDetails CreatePhysicalWallet(string sin)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void MakeTransferSINSIN(int sinFrom, int sinTo, decimal amount, string comment)
+        {
+            throw new NotImplementedException();
+        }
 
     }
 }

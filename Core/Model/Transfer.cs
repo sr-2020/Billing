@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Billing.Dto
+namespace Core.Model
 {
-    public class TransferDto
+    public class Transfer : BaseEntity
     {
+
     }
 }
