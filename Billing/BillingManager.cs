@@ -1,5 +1,7 @@
 ﻿using Billing.Dto;
+using Core;
 using Core.Model;
+using Core.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,7 +19,7 @@ namespace Billing
         /// <param name="amount">Сумма к переводу</param>
         /// <param name="comment">Комментарий который будет отображаться в истории</param>
         /// <returns></returns>
-        void MakeTransferSINSIN(int sinFrom, int sinTo, decimal amount, string comment);
+        Transfer MakeTransferSINSIN(int sinFrom, int sinTo, decimal amount, string comment);
         /// <summary>
         /// Перевод с физлица на юрлицо
         /// </summary>
@@ -26,7 +28,7 @@ namespace Billing
         /// <param name="amount">Сумма к переводу</param>
         /// <param name="comment">Комментарий который будет отображаться в истории</param>
         /// <returns></returns>
-        void MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
+        Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
         /// <summary>
         /// Перевод от юрлица физическому лицу
         /// </summary>
@@ -35,7 +37,7 @@ namespace Billing
         /// <param name="amount">Сумма к переводу</param>
         /// <param name="comment">Комментарий который будет отображаться в истории</param>
         /// <returns></returns>
-        void MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
+        Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
         /// <summary>
         /// Перевод между двумя юрлицами
         /// </summary>
@@ -44,7 +46,7 @@ namespace Billing
         /// <param name="amount">Сумма к переводу</param>
         /// <param name="comment">Комментарий который будет отображаться в истории</param>
         /// <returns></returns>
-        void MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
+        Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
         /// <summary>
         /// Создания операции кредит
         /// </summary>
@@ -67,45 +69,99 @@ namespace Billing
         /// <param name="sin"></param>
         /// <returns></returns>
         //SinDetails GetSinDetails(int sin);
-
+        Lifestyles GetLifestyle(int sin);
 
         #endregion
 
 
         #region admin
-        SINDetails CreatePhysicalWallet(string sin);
-
+        SINDetails CreatePhysicalWallet(string sin, decimal balance);
         //create legal wallet
 
         #endregion
 
     }
 
-    public class BillingManager : IBillingManager
+    public class BillingManager : BaseEntityRepository, IBillingManager
     {
-        public SINDetails CreatePhysicalWallet(string sin)
+        public SINDetails CreatePhysicalWallet(string sin, decimal balance)
+        {
+            var check = Get<SIN>(s => s.Sin == sin);
+            if (check == null)
+                throw new Exception("sin not exists");
+            var details = Get<SINDetails>(d => d.SINId == check.Id);
+            if (details != null)
+                throw new Exception("wallet already exists");
+            var newWallet = new Wallet()
+            {
+                Balance = balance,
+                Lifestyle = (int)LifeStyleHelper.GetLifeStyle(balance)
+            };
+            Context.Add(newWallet);
+            Context.SaveChanges();
+            var newDetails = new SINDetails()
+            {
+                Wallet = newWallet,
+                SIN = check
+            };
+            Context.Add(newDetails);
+            Context.SaveChanges();
+            return newDetails;
+        }
+
+        public Lifestyles GetLifestyle(int sin)
+        {
+            var details = Get<SINDetails>(s => s.SINId == sin, new string[] { "wallet" });
+            if (details == null)
+                throw new Exception("sin not exists");
+            return LifeStyleHelper.GetLifeStyle(details.Wallet.Balance);
+        }
+
+        public Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment)
         {
             throw new NotImplementedException();
         }
 
-        public void MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment)
+        public Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment)
         {
             throw new NotImplementedException();
         }
 
-        public void MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment)
+        public Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment)
         {
             throw new NotImplementedException();
         }
 
-        public void MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment)
+        public Transfer MakeTransferSINSIN(int sinFrom, int sinTo, decimal amount, string comment)
         {
-            throw new NotImplementedException();
+            var sin1 = Get<SINDetails>(s => s.Id == sinFrom, new string[] { "wallet" });
+            if (sin1 == null)
+                throw new Exception($"sin {sinFrom} not exists");
+            var sin2 = Get<SINDetails>(s => s.Id == sinTo, new string[] { "wallet" });
+            if (sin2 == null)
+                throw new Exception($"sin {sinTo} not exists");
+            return MakeNewTransfer(sin1.Wallet, sin2.Wallet, amount, comment);
         }
 
-        public void MakeTransferSINSIN(int sinFrom, int sinTo, decimal amount, string comment)
+        private Transfer MakeNewTransfer(Wallet wallet1, Wallet wallet2, decimal amount, string comment)
         {
-            throw new NotImplementedException();
+            if (wallet1.Balance < amount)
+                throw new Exception($"Need more money on debit wallet {wallet1}");
+            wallet1.Balance -= amount;
+            wallet1.Lifestyle = (int)LifeStyleHelper.GetLifeStyle(wallet1.Balance);
+            wallet2.Balance += amount;
+            wallet2.Lifestyle = (int)LifeStyleHelper.GetLifeStyle(wallet2.Balance);
+            Context.SaveChanges();
+            var transfer = new Transfer
+            {
+                Amount = amount,
+                Comment = comment,
+                WalletFrom = wallet1,
+                WalletTo = wallet2,
+                NewLifeStyleFrom = wallet1.Lifestyle,
+                NewLifeStyleTo = wallet2.Lifestyle
+            };
+            return transfer;
         }
 
     }

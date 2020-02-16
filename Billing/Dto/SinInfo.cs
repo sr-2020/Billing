@@ -10,6 +10,6 @@ namespace Billing.Dto
     {
         public int SIN { get; set; }
         public decimal Balance { get; set; }
-        public SinLifeStyle CurrentLifeStyle { get; set; }
+        //public SinLifeStyle CurrentLifeStyle { get; set; }
     }
 }
