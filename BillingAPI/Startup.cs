@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BillingAPI.Extensions;
 using BillingAPI.Filters;
 using Core;
 using Hangfire;
@@ -33,7 +34,11 @@ namespace BillingAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1); 
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            #region swagger
+            services.AddEvaSwaggerGen();
+            #endregion
 
             #region hangfire
             var hfConnectionString = SystemHelper.GetConnectionString("Hangfire");
@@ -45,6 +50,7 @@ namespace BillingAPI
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        
         {
             if (env.IsDevelopment())
             {
@@ -61,6 +67,10 @@ namespace BillingAPI
             {
                 Authorization = new[] { new HangfireAuthorizationFilter() }
             });
+            #endregion
+
+            #region swagger
+            app.UseEvaSwagger();
             #endregion
 
             app.UseMvc(routes =>

@@ -6,6 +6,10 @@
     <UserSecretsId>3e08d324-1646-4b0c-bb73-54537917fbf6</UserSecretsId>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Folder Include="wwwroot\" />
   </ItemGroup>
@@ -15,8 +19,10 @@
     <PackageReference Include="Hangfire.PostgreSql" Version="1.6.3" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.1.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.4.10" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.10" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>

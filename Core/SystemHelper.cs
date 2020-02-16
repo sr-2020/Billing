@@ -14,6 +14,7 @@ namespace Core
 
         public static string GetConnectionString(string dataBase)
         {
+               
             if (_configuration == null)
                 throw new ArgumentNullException("Configuration is null");
             var user = Environment.GetEnvironmentVariable(_configuration.GetConnectionString(dataBase + "User"));

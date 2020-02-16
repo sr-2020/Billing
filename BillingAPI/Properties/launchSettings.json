@@ -1,12 +1,13 @@
 {
-  "$schema": "http://json.schemastore.org/launchsettings.json",
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:32791"
+      "applicationUrl": "http://localhost:32768",
+      "sslPort": 0
     }
   },
+  "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
     "Kestrel - Development": {
       "commandName": "Project",
@@ -14,22 +15,22 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:32791"
+      "applicationUrl": "http://localhost:32768"
     },
     "Kestrel - Test": {
       "commandName": "Project",
-      "launchBrowser": false,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Test"
       },
-      "applicationUrl": "http://localhost:32791"
+      "applicationUrl": "http://localhost:32768"
     },
-    "Docker - Test": {
+    "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:32791/hangfire",
+      "launchUrl": "{Scheme}://{ServiceHost}:32768/swagger/v1/index.html",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Test"
+        "Key": "Value",
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
   }

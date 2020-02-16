@@ -19,41 +19,45 @@ namespace Jobs
     {
         public HangfireJob AddOrUpdateJob(HangfireJob hangfire)
         {
-            HangfireJob exists;
-            if (hangfire.Id == 0)
-            {
-                exists = Context.Job.FirstOrDefault(j => j.JobName == hangfire.JobName);
-                if (exists != null)
-                    throw new Exception($"{hangfire.JobName} already exists");
-            }
-            else
-            {
+            Add(hangfire);
+            Context.SaveChanges();
+            return hangfire;
+            //HangfireJob exists;
+            //if (hangfire.Id == 0)
+            //{
+            //    exists = Context.Job.FirstOrDefault(j => j.JobName == hangfire.JobName);
+            //    if (exists != null)
+            //        throw new Exception($"{hangfire.JobName} already exists");
+            //}
+            //else
+            //{
                 
-            }
+            //}
 
 
-            switch (type)
-            {
-                case JobType.Test:
-                    return new TestJob();
-                case JobType.Scoring:
-                    return new ScoringJob();
-                case JobType.Profits:
-                    return new ProfitsJob();
-                case JobType.Credits:
-                    return new CreditsJob();
+            //switch (type)
+            //{
+            //    case JobType.Test:
+            //        return new TestJob();
+            //    case JobType.Scoring:
+            //        return new ScoringJob();
+            //    case JobType.Profits:
+            //        return new ProfitsJob();
+            //    case JobType.Credits:
+            //        return new CreditsJob();
 
-                default:
-                    break;
-            }
-            throw new NotImplementedException("Job not configured");
+            //    default:
+            //        break;
+            //}
+            //throw new NotImplementedException("Job not configured");
         }
 
         public BaseJob LoadJob(HangfireJob dbJob)
         {
-            var job = CreateJob(dbJob.JobType);
+            throw new NotImplementedException();
+            //var job = CreateJob(dbJob.JobType);
 
-            return job;
+            //return job;
         }
 
         public List<HangfireJob> GetAllJobs()

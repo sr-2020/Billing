@@ -13,7 +13,11 @@ namespace BillingAPI.Controllers
     [ApiController]
     public class TestController : ControllerBase
     {
-        // GET api/version
+        /// <summary>
+        /// Получить общую версию проекта
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("")]
         public ActionResult<string> Get()
         {
             return GetType().Assembly.GetName().Version.ToString();

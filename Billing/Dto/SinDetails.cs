@@ -7,7 +7,7 @@ namespace Billing.Dto
 {
     public class SinDetails
     {
-        List<Transfer> AllTransfers { get; set; }
-        List<Credit> AllCredits { get; set; }
+        //List<Transfer> AllTransfers { get; set; }
+        //List<Credit> AllCredits { get; set; }
     }
 }
