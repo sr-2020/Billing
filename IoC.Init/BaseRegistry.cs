@@ -21,7 +21,7 @@ namespace IoC.Init
             For<ISettingsManager>().Use(new SettingsManager()).SetLifecycleTo(Lifecycles.Transient);
             For<IJobManager>().Use(new JobManager()).SetLifecycleTo(Lifecycles.Transient);
             For<IBaseRepository>().Use(new BaseEntityRepository()).SetLifecycleTo(Lifecycles.Transient);
-            For<IBillingManager>().Use(new BillingManager()).SetLifecycleTo(Lifecycles.Transient);
+            //For<IBillingManager>().Use(new BillingManager()).SetLifecycleTo(Lifecycles.Transient);
         }
     }
 }

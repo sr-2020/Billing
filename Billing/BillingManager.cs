@@ -9,37 +9,37 @@ using System.Text;
 
 namespace Billing
 {
-    public interface IBillingManager
-    {
-        #region in the game
+    //public interface IBillingManager : IDisposable
+    //{
+    //    #region in the game
 
-        Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment);
-        Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
-        Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
-        Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
-        //TransferDto CreateCredit(int sin, int shop, int owner, decimal amount, string comment);
-        //SinInfo GetSinInfo(int sin);
-        //SinDetails GetSinDetails(int sin);
-        Lifestyles GetLifestyle(int sin);
-        string GetSinByCharacter(int characterId);
-        int GetCharacterIdBySin(string sinString);
-        #endregion
-        #region info
+    //    Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment);
+    //    Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
+    //    Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
+    //    Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
+    //    //TransferDto CreateCredit(int sin, int shop, int owner, decimal amount, string comment);
+    //    //SinInfo GetSinInfo(int sin);
+    //    //SinDetails GetSinDetails(int sin);
+    //    Lifestyles GetLifestyle(int sin);
+    //    string GetSinByCharacter(int characterId);
+    //    int GetCharacterIdBySin(string sinString);
+    //    #endregion
+    //    #region info
 
-        List<Transfer> GetTransfers(int characterId);
+    //    List<Transfer> GetTransfers(int characterId);
 
-        #endregion
+    //    #endregion
 
 
-        #region admin
-        SINDetails CreatePhysicalWallet(int character, decimal balance);
-        //create legal wallet
+    //    #region admin
+    //    SINDetails CreatePhysicalWallet(int character, decimal balance);
+    //    //create legal wallet
 
-        #endregion
+    //    #endregion
 
-    }
+    //}
 
-    public class BillingManager : BaseEntityRepository, IBillingManager
+    public class BillingManager : BaseEntityRepository, IDisposable
     {
         private SINDetails GetSINDetailByCharacterId(int characterId, bool includeWallet = false)
         {
@@ -159,5 +159,9 @@ namespace Billing
             return transfer;
         }
 
+        public void Dispose()
+        {
+            Context.Dispose();
+        }
     }
 }

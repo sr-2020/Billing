@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Core
 {
-    public interface IBaseRepository
+    public interface IBaseRepository 
     {
         int? GetId<T>(Expression<Func<T, bool>> predicate, string[] includes = null) where T : BaseEntity;
         T Get<T>(Expression<Func<T, bool>> predicate, string[] includes = null) where T : class;
@@ -36,37 +36,37 @@ namespace Core
 
         public virtual void Add<T>(T entity) where T : class
         {
-            this.Context.Set<T>().Add(entity);
+            Context.Set<T>().Add(entity);
         }
 
         public virtual void AddRange<T>(IEnumerable<T> entities) where T : class
         {
-            this.Context.Set<T>().AddRange(entities);
+            Context.Set<T>().AddRange(entities);
         }
 
         public virtual void Remove<T>(T entity) where T : class
         {
-            this.Context.Set<T>().Remove(entity);
+            Context.Set<T>().Remove(entity);
         }
 
         public virtual void RemoveRange<T>(IEnumerable<T> entities) where T : class
         {
-            this.Context.Set<T>().RemoveRange(entities);
+            Context.Set<T>().RemoveRange(entities);
         }
 
         public virtual List<T> GetList<T>(Expression<Func<T, bool>> predicate, string[] includes = null) where T : class
         {
-            return this.FindInternal(this.Query<T>(), predicate, includes);
+            return FindInternal(Query<T>(), predicate, includes);
         }
 
         public Task<List<T>> GetListAsync<T>(Expression<Func<T, bool>> predicate, string[] includes = null) where T : class
         {
-            return FindInternalAsync(this.Query<T>(), predicate, includes);
+            return FindInternalAsync(Query<T>(), predicate, includes);
         }
 
         public virtual int? GetId<T>(Expression<Func<T, bool>> predicate, string[] includes = null) where T : BaseEntity
         {
-            return this.AddIncludes(this.Query<T>(), includes).Where(predicate).Select(x => (int?)x.Id).FirstOrDefault();
+            return AddIncludes(Query<T>(), includes).Where(predicate).Select(x => (int?)x.Id).FirstOrDefault();
         }
 
         public virtual T Get<T>(Expression<Func<T, bool>> predicate, string[] includes = null) where T : class
@@ -85,12 +85,12 @@ namespace Core
 
         public virtual bool Exists<T>(Expression<Func<T, bool>> predicate) where T : class
         {
-            return this.ExistsInternal(this.Query<T>(), predicate);
+            return this.ExistsInternal(Query<T>(), predicate);
         }
 
         public virtual List<T> GetAll<T>(string[] includes = null) where T : class
         {
-            return this.GetAllInternal(this.Query<T>(), includes);
+            return this.GetAllInternal(Query<T>(), includes);
         }
 
         #region protected
@@ -131,7 +131,7 @@ namespace Core
         protected List<T> GetAllInternal<T>(IQueryable<T> query, string[] includes = null) where T : class
         {
             //Apply eager loading
-            var res = this.AddIncludes(query, includes)
+            var res = AddIncludes(query, includes)
                 .ToList();
             return res;
         }
