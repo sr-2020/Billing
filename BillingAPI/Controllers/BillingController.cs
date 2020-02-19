@@ -104,7 +104,11 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetSinByCharacter(characterId));
             return result;
         }
-
+        /// <summary>
+        /// Get all transfers(senders and recipients) and  for current character
+        /// </summary>
+        /// <param name="characterId"></param>
+        /// <returns></returns>
         [HttpGet("info/gettransfers")]
         public DataResult<List<Transfer>> GetTransfers(int characterId)
         {
