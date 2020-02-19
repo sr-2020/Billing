@@ -4,6 +4,7 @@ using Core.Model;
 using Core.Primitives;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Billing
@@ -23,6 +24,11 @@ namespace Billing
         string GetSinByCharacter(int characterId);
         int GetCharacterIdBySin(string sinString);
         #endregion
+        #region info
+
+        List<Transfer> GetTransfers(int characterId);
+
+        #endregion
 
 
         #region admin
@@ -35,6 +41,22 @@ namespace Billing
 
     public class BillingManager : BaseEntityRepository, IBillingManager
     {
+        private SINDetails GetSINDetailByCharacterId(int characterId, bool includeWallet = false)
+        {
+            var includes = new List<string>();
+            if (includeWallet)
+                includes.Add("Wallet");
+            if(includes.Any())
+                return Get<SINDetails>(s => s.SIN.CharacterId == characterId, includes.ToArray());
+            return Get<SINDetails>(s => s.SIN.CharacterId == characterId);
+        }
+
+        public List<Transfer> GetTransfers(int characterId)
+        {
+            var sd = GetSINDetailByCharacterId(characterId);
+            return GetList<Transfer>(t => t.WalletFromId == sd.WalletId || t.WalletToId == sd.WalletId);
+        }
+
         public string GetSinByCharacter(int characterId)
         {
             var sin = Get<SIN>(s => s.CharacterId == characterId);
@@ -63,7 +85,8 @@ namespace Billing
             var newWallet = new Wallet()
             {
                 Balance = balance,
-                Lifestyle = (int)LifeStyleHelper.GetLifeStyle(balance)
+                Lifestyle = (int)LifeStyleHelper.GetLifeStyle(balance),
+                
             };
             Context.Add(newWallet);
             Context.SaveChanges();
@@ -102,16 +125,10 @@ namespace Billing
 
         public Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment)
         {
-            var sin1 = Get<SIN>(s => s.CharacterId == characterFrom);
-            if (sin1 == null)
-                throw new Exception($"characterFrom {characterFrom} with sin not exists");
-            var sin2 = Get<SIN>(s => s.CharacterId == characterTo);
-            if (sin2 == null)
-                throw new Exception($"characterTo {characterTo} with sin not exists");
-            var d1 = Get<SINDetails>(s => s.SINId == sin1.Id, new string[] { "Wallet" });
+            var d1 = GetSINDetailByCharacterId(characterFrom, true); 
             if (d1 == null)
                 throw new Exception($"wallet for {characterFrom} not exists");
-            var d2 = Get<SINDetails>(s => s.SINId == sin2.Id, new string[] { "Wallet" });
+            var d2 = GetSINDetailByCharacterId(characterTo, true);
             if (d2 == null)
                 throw new Exception($"wallet for {characterTo} not exists");
             return MakeNewTransfer(d1.Wallet, d2.Wallet, amount, comment);

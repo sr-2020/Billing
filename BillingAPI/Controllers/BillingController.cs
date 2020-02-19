@@ -72,21 +72,21 @@ namespace BillingAPI.Controllers
         }
         #endregion
         #region renta
-        [HttpGet("renta/createprice")]
-        public Result CreatePrice()
-        {
-            throw new NotImplementedException();
-        }
-        [HttpGet("renta/createpricebyparams ")]
-        public Result CreatePriceByParams()
-        {
-            throw new NotImplementedException();
-        }
-        [HttpGet("renta/confirmrenta ")]
-        public Result ConfirmRenta()
-        {
-            throw new NotImplementedException();
-        }
+        //[HttpGet("renta/createprice")]
+        //public Result CreatePrice()
+        //{
+        //    throw new NotImplementedException();
+        //}
+        //[HttpGet("renta/createpricebyparams ")]
+        //public Result CreatePriceByParams()
+        //{
+        //    throw new NotImplementedException();
+        //}
+        //[HttpGet("renta/confirmrenta ")]
+        //public Result ConfirmRenta()
+        //{
+        //    throw new NotImplementedException();
+        //}
         #endregion
         #region info
         [HttpGet("info/getcharacteridbysin")]
@@ -97,7 +97,7 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        [HttpGet("info/getsinbycharacter")]
+        [HttpGet("info/getsinbycharacterId")]
         public DataResult<string> GetSinByCharacter(int characterId)
         {
             var manager = _manager.Value;
@@ -105,16 +105,14 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        [HttpGet("info/base")]
-        public Result Base(string id)
+        [HttpGet("info/gettransfers")]
+        public DataResult<List<Transfer>> GetTransfers(int characterId)
         {
-            throw new NotImplementedException();
+            var manager = _manager.Value;
+            var result = RunAction(() => manager.GetTransfers(characterId));
+            return result;
         }
-        [HttpGet("info/advanced")]
-        public Result Advanced(string id)
-        {
-            throw new NotImplementedException();
-        }
+
         #endregion
     }
 }

@@ -17,7 +17,8 @@ namespace Core.Model
         public int SINId { get; set; }
         public virtual SIN SIN { get; set; }
         [Column("scoring")]
-        public int? Scoring { get; set; }
+        public int? ScoringId { get; set; }
+        //public Scoring Scoring { get; set; }
         [Column("work")]
         public int? Work { get; set; }
         [Column("ikar")]
