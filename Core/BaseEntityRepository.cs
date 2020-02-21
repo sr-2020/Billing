@@ -32,6 +32,7 @@ namespace Core
         public BaseEntityRepository()
         {
             Context = new BillingContext();
+            
         }
 
         public virtual void Add<T>(T entity) where T : class

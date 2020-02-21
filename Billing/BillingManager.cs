@@ -138,21 +138,21 @@ namespace Billing
         {
             if (wallet1.Balance < amount)
                 throw new Exception($"Need more money on debit wallet {wallet1}");
-            Context.Attach(wallet1);
-            Context.Attach(wallet2);
             wallet1.Balance -= amount;
             wallet1.Lifestyle = (int)LifeStyleHelper.GetLifeStyle(wallet1.Balance);
+            Context.Entry(wallet1).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
             wallet2.Balance += amount;
             wallet2.Lifestyle = (int)LifeStyleHelper.GetLifeStyle(wallet2.Balance);
+            Context.Entry(wallet2).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
             Context.SaveChanges();
             var transfer = new Transfer
             {
                 Amount = amount,
                 Comment = comment,
-                WalletFrom = wallet1,
-                WalletTo = wallet2,
-                NewLifeStyleFrom = wallet1.Lifestyle,
-                NewLifeStyleTo = wallet2.Lifestyle
+                WalletFromId = wallet1.Id,
+                WalletToId = wallet2.Id,
+                NewBalanceFrom = wallet1.Balance,
+                NewBalanceTo = wallet2.Balance
             };
             Context.Add(transfer);
             Context.SaveChanges();

@@ -22,9 +22,9 @@ namespace Core.Model
         public string Comment { get; set; }
         [Column("renta")]
         public int? Renta { get; set; }
-        [Column("newlifestyle_from")]
-        public int NewLifeStyleFrom { get; set; }
-        [Column("newlifestyle_to")]
-        public int NewLifeStyleTo { get; set; }
+        [Column("newbalance_from")]
+        public decimal NewBalanceFrom { get; set; }
+        [Column("newbalance_to")]
+        public decimal NewBalanceTo { get; set; }
     }
 }
