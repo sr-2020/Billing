@@ -211,6 +211,8 @@ namespace Billing
                 throw new BillingException($"wallet1 is null");
             if(wallet2 == null)
                 throw new BillingException($"wallet2 is null");
+            if(wallet1.Id == wallet2.Id)
+                throw new BillingException($"impossible to transfer on to yourself");
             if (wallet1.Balance < amount)
                 throw new BillingException($"Need more money on wallet {wallet1.Id}");
             wallet1.Balance -= amount;
