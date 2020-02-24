@@ -56,7 +56,8 @@ namespace Billing
                 CharacterId = characterId,
                 CurrentBalance = sin.Wallet.Balance,
                 CurrentScoring = sin.Scoring.CurrentScoring,
-                SIN = sin.Sin
+                SIN = sin.Sin,
+                LifeStyle = LifeStyleHelper.GetLifeStyle(sin.Wallet.Balance).ToString()
             };
             return balance;
         }

@@ -10,5 +10,6 @@ namespace Billing.DTO
         public string SIN { get; set; }
         public decimal CurrentBalance { get; set; }
         public decimal CurrentScoring { get; set; }
+        public string LifeStyle { get; set; }
     }
 }
