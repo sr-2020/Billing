@@ -1,4 +1,4 @@
-﻿using Billing.Dto;
+﻿using Billing.DTO;
 using Core;
 using Core.Model;
 using Core.Primitives;
@@ -7,6 +7,7 @@ using Settings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace Billing
@@ -19,21 +20,24 @@ namespace Billing
         Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
         Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
         Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
-        //TransferDto CreateCredit(int sin, int shop, int owner, decimal amount, string comment);
-        //SinInfo GetSinInfo(int sin);
-        //SinDetails GetSinDetails(int sin);
         string GetSinByCharacter(int characterId);
         int GetCharacterIdBySin(string sinString);
+
         #endregion
         #region info
 
-        List<Transfer> GetTransfers(int characterId);
+        List<TransferDto> GetTransfers(int characterId);
+        BalanceDto GetBalance(int characterId);
+
 
         #endregion
 
 
         #region admin
         SIN CreateOrUpdatePhysicalWallet(int character, decimal balance);
+        ProductType CreateOrUpdateProductType(string code, string name, string description);
+
+
         //create legal wallet
 
         #endregion
@@ -42,19 +46,56 @@ namespace Billing
 
     public class BillingManager : BaseEntityRepository, IBillingManager
     {
-        public BillingManager() : base() { }
-
-        public List<Transfer> GetTransfers(int characterId)
+        public BalanceDto GetBalance(int characterId)
         {
-            var sd = Get<SIN>(s => s.CharacterId == characterId);
-            if (sd == null)
-                throw new Exception("character not found");
-            return GetList<Transfer>(t => t.WalletFromId == sd.WalletId || t.WalletToId == sd.WalletId);
+            var sin = GetSIN(characterId, s => s.Wallet, s => s.Scoring);
+            if (sin == null)
+                throw new Exception("sin not found");
+            var balance = new BalanceDto
+            {
+                CharacterId = characterId,
+                CurrentBalance = sin.Wallet.Balance,
+                CurrentScoring = sin.Scoring.CurrentScoring,
+                SIN = sin.Sin
+            };
+            return balance;
         }
+
+        public List<TransferDto> GetTransfers(int characterId)
+        {
+            var sin = GetSIN(characterId);
+            if (sin == null)
+                throw new Exception("sin not found");
+            var listFrom = GetList<Transfer>(t => t.WalletFromId == sin.WalletId);
+            var allList = new List<TransferDto>();
+            if (listFrom != null)
+                allList.AddRange(listFrom
+                    .Select(s => CreateTransferDto(s, TransferType.Outcoming))
+                    .ToList());
+            var listTo = GetList<Transfer>(t => t.WalletToId == sin.WalletId);
+            if (listTo != null)
+                allList.AddRange(listTo
+                    .Select(s => CreateTransferDto(s, TransferType.Incoming))
+                    .ToList());
+            return allList.OrderBy(t => t.OperationTime).ToList();
+        }
+
+        private TransferDto CreateTransferDto(Transfer transfer, TransferType type)
+        {
+            return new TransferDto
+            {
+                Comment = transfer.Comment,
+                TransferType = type.ToString(),
+                Amount = transfer.Amount,
+                NewBalance = type == TransferType.Incoming ? transfer.NewBalanceTo : transfer.NewBalanceFrom,
+                OperationTime = transfer.OperationTime
+            };
+        }
+
 
         public string GetSinByCharacter(int characterId)
         {
-            var sin = Get<SIN>(s => s.CharacterId == characterId);
+            var sin = GetSIN(characterId);
             if (sin == null)
                 throw new Exception("sin not found");
             return sin.Sin;
@@ -68,9 +109,24 @@ namespace Billing
             return sin.CharacterId;
         }
 
+        public ProductType CreateOrUpdateProductType(string code, string name, string description)
+        {
+            var type = Get<ProductType>(p => p.Code == code);
+            if (type == null)
+            {
+                type = new ProductType();
+                type.Code = code;
+            }
+            Add(type);
+            type.Name = name;
+            type.Description = description;
+            Context.SaveChanges();
+            return type;
+        }
+
         public SIN CreateOrUpdatePhysicalWallet(int character, decimal balance)
         {
-            var sin = Get<SIN>(s => s.CharacterId == character);
+            var sin = GetSIN(character);
 
             if (sin == null)
             {
@@ -80,8 +136,8 @@ namespace Billing
                     ScoringId = 0,
                     WalletId = 0
                 };
-                Context.Add(sin);
             }
+            Add(sin);
             sin.EVersion = IocContainer.Get<ISettingsManager>().GetValue("eversion");
 
             var wallet = Get<Wallet>(w => w.Id == sin.WalletId);
@@ -89,8 +145,8 @@ namespace Billing
             {
                 wallet = new Wallet();
                 sin.Wallet = wallet;
-                Context.Add(wallet);
             }
+            Add(wallet);
             wallet.Balance = balance;
             wallet.Lifestyle = (int)LifeStyleHelper.GetLifeStyle(balance);
 
@@ -99,14 +155,14 @@ namespace Billing
             {
                 scoring = new Scoring
                 {
-                    CurrentScoring = 0
+                    CurrentScoring = 1
                 };
-                Context.Add(scoring);
                 sin.Scoring = scoring;
             }
+            Add(scoring);
             Context.SaveChanges();
 
-
+            //TODO
             var categoryCalculates = GetList<ScoringCategoryCalculate>(c => c.ScoringId == scoring.Id);
 
 
@@ -131,13 +187,21 @@ namespace Billing
 
         public Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment)
         {
-            var d1 = Get<SIN>(s => s.CharacterId == characterFrom, x => x.Wallet);
+            var d1 = GetSIN(characterFrom, s => s.Wallet);
             if (d1 == null)
                 throw new Exception($"sin for {characterFrom} not exists");
-            var d2 = Get<SIN>(s => s.CharacterId == characterTo, x => x.Wallet);
+            var d2 = GetSIN(characterTo, s => s.Wallet);
             if (d2 == null)
                 throw new Exception($"sin for {characterTo} not exists");
             return MakeNewTransfer(d1.Wallet, d2.Wallet, amount, comment);
+        }
+
+        #region private
+
+        private SIN GetSIN(int characterId, params Expression<Func<SIN, object>>[] includes)
+        {
+            var sin = Get(s => s.CharacterId == characterId, includes);
+            return sin;
         }
 
         private Transfer MakeNewTransfer(Wallet wallet1, Wallet wallet2, decimal amount, string comment)
@@ -146,10 +210,10 @@ namespace Billing
                 throw new Exception($"Need more money on wallet {wallet1}");
             wallet1.Balance -= amount;
             wallet1.Lifestyle = (int)LifeStyleHelper.GetLifeStyle(wallet1.Balance);
-            Context.Entry(wallet1).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            Add(wallet1);
             wallet2.Balance += amount;
             wallet2.Lifestyle = (int)LifeStyleHelper.GetLifeStyle(wallet2.Balance);
-            Context.Entry(wallet2).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            Add(wallet2);
             Context.SaveChanges();
             var transfer = new Transfer
             {
@@ -158,12 +222,13 @@ namespace Billing
                 WalletFromId = wallet1.Id,
                 WalletToId = wallet2.Id,
                 NewBalanceFrom = wallet1.Balance,
-                NewBalanceTo = wallet2.Balance
+                NewBalanceTo = wallet2.Balance,
+                OperationTime = DateTime.Now
             };
-            Context.Add(transfer);
+            Add(transfer);
             Context.SaveChanges();
             return transfer;
         }
-
+        #endregion
     }
 }

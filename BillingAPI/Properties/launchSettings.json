@@ -15,7 +15,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:32768"
+      "applicationUrl": "http://localhost:32769"
     },
     "Kestrel - Test": {
       "commandName": "Project",
@@ -27,7 +27,7 @@
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:32768/swagger/v1/index.html",
+      "launchUrl": "{Scheme}://{ServiceHost}:32769/swagger/v1/index.html",
       "environmentVariables": {
         "Key": "Value",
         "ASPNETCORE_ENVIRONMENT": "Development"

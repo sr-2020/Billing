@@ -26,5 +26,7 @@ namespace Core.Model
         public decimal NewBalanceFrom { get; set; }
         [Column("newbalance_to")]
         public decimal NewBalanceTo { get; set; }
+        [Column("operation_time")]
+        public DateTime OperationTime { get; set; }
     }
 }

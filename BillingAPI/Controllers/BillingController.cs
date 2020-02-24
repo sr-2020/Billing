@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Billing;
+using Billing.DTO;
 using BillingAPI.Model;
 using Core.Model;
 using IoC;
@@ -30,6 +31,21 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.CreateOrUpdatePhysicalWallet(character, balance));
             return result;
         }
+        /// <summary>
+        /// Create or update allowed product type
+        /// </summary>
+        /// <param name="code">unique code</param>
+        /// <param name="name">shot description</param>
+        /// <param name="description">full description</param>
+        /// <returns></returns>
+        [HttpGet("admin/createorupdateproduct")]
+        public DataResult<ProductType> CreateOrUpdateProductType(string code, string name, string description)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.CreateOrUpdateProductType(code, name, description));
+            return result;
+        }
+
         #endregion
 
         #region transfer
@@ -88,6 +104,20 @@ namespace BillingAPI.Controllers
         //}
         #endregion
         #region info
+
+        /// <summary>
+        /// Get base info for current character
+        /// </summary>
+        /// <param name="characterId"></param>
+        /// <returns></returns>
+        [HttpGet("info/getbalance")]
+        public DataResult<BalanceDto> GetBalance(int characterId)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetBalance(characterId));
+            return result;
+        }
+
         [HttpGet("info/getcharacteridbysin")]
         public DataResult<int> GetCharacterIdBySin(string sinString)
         {
@@ -109,7 +139,7 @@ namespace BillingAPI.Controllers
         /// <param name="characterId"></param>
         /// <returns></returns>
         [HttpGet("info/gettransfers")]
-        public DataResult<List<Transfer>> GetTransfers(int characterId)
+        public DataResult<List<TransferDto>> GetTransfers(int characterId)
         {
             var manager = IocContainer.Get<IBillingManager>();
             var result = RunAction(() => manager.GetTransfers(characterId));

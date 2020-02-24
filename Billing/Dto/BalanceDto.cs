@@ -1,0 +1,14 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Billing.DTO
+{
+    public class BalanceDto
+    {
+        public int CharacterId { get; set; }
+        public string SIN { get; set; }
+        public decimal CurrentBalance { get; set; }
+        public decimal CurrentScoring { get; set; }
+    }
+}

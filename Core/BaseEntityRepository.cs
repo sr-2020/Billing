@@ -17,8 +17,8 @@ namespace Core
         List<T> GetList<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class;
         void RemoveRange<T>(IEnumerable<T> entities) where T : class;
         void Remove<T>(T entity) where T : class;
-        void AddRange<T>(IEnumerable<T> entities) where T : class;
-        void Add<T>(T entity) where T : class;
+        void AddRange<T>(IEnumerable<T> entities) where T : BaseEntity;
+        void Add<T>(T entity) where T : BaseEntity;
     }
 
 
@@ -31,13 +31,22 @@ namespace Core
             Context = new BillingContext();
         }
 
-        public virtual void Add<T>(T entity) where T : class
+        public virtual void Add<T>(T entity) where T : BaseEntity
         {
-            Context.Set<T>().Add(entity);
+            if(entity.Id != 0)
+                Context.Entry(entity).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            else
+                Context.Entry(entity).State = Microsoft.EntityFrameworkCore.EntityState.Added;
         }
 
-        public virtual void AddRange<T>(IEnumerable<T> entities) where T : class
+        public virtual void AddRange<T>(IEnumerable<T> entities) where T : BaseEntity
         {
+            foreach (var entity in entities)
+            {
+                if (entity.Id != 0)
+                    Context.Entry(entity).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                Context.Set<T>().Add(entity);
+            }
             Context.Set<T>().AddRange(entities);
         }
 
