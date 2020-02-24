@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BillingAPI.Model;
+using Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,9 +19,14 @@ namespace BillingAPI.Controllers
                 action();
                 result.Status = true;
             }
-            catch (Exception e)
+            catch (BillingException e)
             {
-                result.Message = e.ToString();
+                result.Message = e.Message;
+                result.Status = false;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.ToString();
                 result.Status = false;
             }
             return result;
@@ -34,9 +40,14 @@ namespace BillingAPI.Controllers
                 result.Data = action();
                 result.Status = true;
             }
-            catch (Exception e)
+            catch (BillingException e)
             {
-                result.Message = e.ToString();
+                result.Message = e.Message;
+                result.Status = false;
+            }
+            catch (Exception ex)
+            {
+                result.Message = ex.ToString();
                 result.Status = false;
             }
             return result;

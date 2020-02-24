@@ -50,7 +50,7 @@ namespace Billing
         {
             var sin = GetSIN(characterId, s => s.Wallet, s => s.Scoring);
             if (sin == null)
-                throw new Exception("sin not found");
+                throw new BillingException("sin not found");
             var balance = new BalanceDto
             {
                 CharacterId = characterId,
@@ -66,7 +66,7 @@ namespace Billing
         {
             var sin = GetSIN(characterId);
             if (sin == null)
-                throw new Exception("sin not found");
+                throw new BillingException("sin not found");
             var listFrom = GetList<Transfer>(t => t.WalletFromId == sin.WalletId);
             var allList = new List<TransferDto>();
             if (listFrom != null)
@@ -190,10 +190,10 @@ namespace Billing
         {
             var d1 = GetSIN(characterFrom, s => s.Wallet);
             if (d1 == null)
-                throw new Exception($"sin for {characterFrom} not exists");
+                throw new BillingException($"sin for {characterFrom} not exists");
             var d2 = GetSIN(characterTo, s => s.Wallet);
             if (d2 == null)
-                throw new Exception($"sin for {characterTo} not exists");
+                throw new BillingException($"sin for {characterTo} not exists");
             return MakeNewTransfer(d1.Wallet, d2.Wallet, amount, comment);
         }
 
@@ -207,8 +207,12 @@ namespace Billing
 
         private Transfer MakeNewTransfer(Wallet wallet1, Wallet wallet2, decimal amount, string comment)
         {
+            if(wallet1 == null)
+                throw new BillingException($"wallet1 is null");
+            if(wallet2 == null)
+                throw new BillingException($"wallet2 is null");
             if (wallet1.Balance < amount)
-                throw new Exception($"Need more money on wallet {wallet1}");
+                throw new BillingException($"Need more money on wallet {wallet1.Id}");
             wallet1.Balance -= amount;
             wallet1.Lifestyle = (int)LifeStyleHelper.GetLifeStyle(wallet1.Balance);
             Add(wallet1);
