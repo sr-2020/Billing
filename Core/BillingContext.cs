@@ -16,13 +16,16 @@ namespace Core
             optionsBuilder.UseNpgsql(SystemHelper.GetConnectionString("billing"));
         }
         public DbSet<HangfireJob> Job { get; set; }
-        public DbSet<SINDetails> SINDetails { get; set; }
+        public DbSet<HangFireJobType> JobType { get; set; }
         public DbSet<Transfer> Transfer { get; set; }
         public DbSet<Wallet> Wallet { get; set; }
         public DbSet<SIN> SIN { get; set; }
-
+        public DbSet<Scoring> Scoring { get; set; }
+        public DbSet<ScoringCategory> ScoringCategory { get; set; }
+        public DbSet<ScoringFactor> ScoringFactor { get; set; }
+        public DbSet<ScoringFactor> ScoringFactorCalculate { get; set; }
+        public DbSet<ScoringFactor> ScoringCategoryCalculate { get; set; }
         public DbSet<Character> Character { get; set; }
-
-        //public DbSet<SystemSettings> SystemSettings { get; set; }
+        public DbSet<SystemSettings> SystemSettings { get; set; }
     }
 }

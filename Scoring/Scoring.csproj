@@ -6,8 +6,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
-    <ProjectReference Include="..\IoC.Container\IoC.Container.csproj" />
-    <ProjectReference Include="..\Settings\Settings.csproj" />
   </ItemGroup>
 
 </Project>

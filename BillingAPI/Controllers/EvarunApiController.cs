@@ -16,14 +16,13 @@ namespace BillingAPI.Controllers
             try
             {
                 action();
-                result.Status = ResultStatus.Success;
+                result.Status = true;
             }
             catch (Exception e)
             {
                 result.Message = e.ToString();
-                result.Status = ResultStatus.Error;
+                result.Status = false;
             }
-            HttpContext.Response.StatusCode = (int)result.Status;
             return result;
         }
 
@@ -33,14 +32,13 @@ namespace BillingAPI.Controllers
             try
             {
                 result.Data = action();
-                result.Status = ResultStatus.Success;
+                result.Status = true;
             }
             catch (Exception e)
             {
                 result.Message = e.ToString();
-                result.Status = ResultStatus.Error;
+                result.Status = false;
             }
-            HttpContext.Response.StatusCode = (int)result.Status;
             return result;
         }
 

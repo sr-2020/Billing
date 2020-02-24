@@ -5,11 +5,11 @@ using System.Text;
 
 namespace Core.Model
 {
-    [Table("Scoring")]
+    [Table("scoring")]
     public class Scoring : BaseEntity
     {
+        [Column("current_scoring")]
         public decimal CurrentScoring { get; set; }
-        public List<ScoringCategoryCalculate> CategoryCalculates { get; set; }
-        public List<ScoringFactorCalculate> FactorCalculates { get; set; }
+        public virtual List<ScoringCategoryCalculate> CategoryCalculates { get; set; }
     }
 }

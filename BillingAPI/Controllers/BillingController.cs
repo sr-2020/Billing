@@ -15,7 +15,6 @@ namespace BillingAPI.Controllers
     [ApiController]
     public class BillingController : EvarunApiController
     {
-        //private readonly Lazy<IBillingManager> _manager = new Lazy<IBillingManager>(IocContainer.Get<IBillingManager>);
 
         #region admin
         /// <summary>
@@ -25,13 +24,11 @@ namespace BillingAPI.Controllers
         /// <param name="balance">initial wallet amount</param>
         /// <returns></returns>
         [HttpGet("admin/createphysicalwallet")]
-        public DataResult<SINDetails> CreatePhysicalWallet(int character, decimal balance)
+        public DataResult<SIN> CreatePhysicalWallet(int character, decimal balance)
         {
-            using (var manager = new BillingManager())
-            {
-                var result = RunAction(() => manager.CreatePhysicalWallet(character, balance));
-                return result;
-            }
+            var manager = IocContainer.Get<IBillingManager>(); 
+            var result = RunAction(() => manager.CreateOrUpdatePhysicalWallet(character, balance));
+            return result;
         }
         #endregion
 
@@ -47,38 +44,30 @@ namespace BillingAPI.Controllers
         [HttpGet("transfer/maketransfersinsin")]
         public DataResult<Transfer> MakeTransferSINSIN(int character1, int character2, decimal amount, string comment)
         {
-            using (var manager = new BillingManager())
-            {
-                var result = RunAction(() => manager.MakeTransferSINSIN(character1, character2, amount, comment));
-                return result;
-            }
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.MakeTransferSINSIN(character1, character2, amount, comment));
+            return result;
         }
         [HttpGet("transfer/maketransfersinleg")]
         public DataResult<Transfer> MakeTransferSINLeg(int sin, int leg, decimal amount, string comment)
         {
-            using (var manager = new BillingManager())
-            {
-                var result = RunAction(() => manager.MakeTransferSINLeg(sin, leg, amount, comment));
-                return result;
-            }
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.MakeTransferSINLeg(sin, leg, amount, comment));
+            return result;
         }
         [HttpGet("transfer/maketransferlegsin")]
         public DataResult<Transfer> MakeTransferLegSIN(int leg, int sin, decimal amount, string comment)
         {
-            using (var manager = new BillingManager())
-            {
-                var result = RunAction(() => manager.MakeTransferSINLeg(leg, sin, amount, comment));
-                return result;
-            }
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.MakeTransferSINLeg(leg, sin, amount, comment));
+            return result;
         }
         [HttpGet("transfer/maketransferlegleg")]
         public DataResult<Transfer> MakeTransferLegLeg(int leg1, int leg2, decimal amount, string comment)
         {
-            using (var manager = new BillingManager())
-            {
-                var result = RunAction(() => manager.MakeTransferSINLeg(leg1, leg2, amount, comment));
-                return result;
-            }
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.MakeTransferSINLeg(leg1, leg2, amount, comment));
+            return result;
         }
         #endregion
         #region renta
@@ -102,21 +91,17 @@ namespace BillingAPI.Controllers
         [HttpGet("info/getcharacteridbysin")]
         public DataResult<int> GetCharacterIdBySin(string sinString)
         {
-            using (var manager = new BillingManager())
-            {
-                var result = RunAction(() => manager.GetCharacterIdBySin(sinString));
-                return result;
-            }
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetCharacterIdBySin(sinString));
+            return result;
         }
 
         [HttpGet("info/getsinbycharacterId")]
         public DataResult<string> GetSinByCharacter(int characterId)
         {
-            using (var manager = new BillingManager())
-            {
-                var result = RunAction(() => manager.GetSinByCharacter(characterId));
-                return result;
-            }
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetSinByCharacter(characterId));
+            return result;
         }
         /// <summary>
         /// Get all transfers(senders and recipients) and  for current character
@@ -126,11 +111,9 @@ namespace BillingAPI.Controllers
         [HttpGet("info/gettransfers")]
         public DataResult<List<Transfer>> GetTransfers(int characterId)
         {
-            using (var manager = new BillingManager())
-            {
-                var result = RunAction(() => manager.GetTransfers(characterId));
-                return result;
-            }
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetTransfers(characterId));
+            return result;
         }
 
         #endregion

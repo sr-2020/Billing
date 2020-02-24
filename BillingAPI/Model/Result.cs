@@ -10,7 +10,7 @@ namespace BillingAPI.Model
     public class Result
     {
         [DataMember]
-        public ResultStatus Status { get; set; }
+        public bool Status { get; set; }
         [DataMember]
         public string Message { get; set; }
 
@@ -27,9 +27,4 @@ namespace BillingAPI.Model
         public T Data { get; set; }
     }
 
-    public enum ResultStatus
-    {
-        Success = 200,
-        Error = 400
-    }
 }

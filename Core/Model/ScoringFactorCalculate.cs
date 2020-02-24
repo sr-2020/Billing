@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Core.Model
 {
-    public class ScoringFactorCalculate
+    [Table("scoring_factor_calculate")]
+    public class ScoringFactorCalculate : BaseEntity
     {
-        public int SinId { get; set; }
-        public SINDetails Sin { get; set; }
+        [Column("factor")]
+        [ForeignKey("factor")]
         public int FactorId { get; set; }
         public ScoringFactor Factor { get; set; }
+        [Column("base")]
         public decimal Base { get; set; }
+        [Column("current")]
         public decimal Current { get; set; }
         public void Calculate()
         {

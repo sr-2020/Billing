@@ -4,8 +4,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Hangfire;
+using IoC;
 using Jobs;
 using Microsoft.AspNetCore.Mvc;
+using Settings;
 
 namespace BillingAPI.Controllers
 {
@@ -20,7 +22,7 @@ namespace BillingAPI.Controllers
         [HttpGet("")]
         public ActionResult<string> Get()
         {
-            return GetType().Assembly.GetName().Version.ToString();
+            return IocContainer.Get<ISettingsManager>().GetValue("eversion");
         }
 
     }

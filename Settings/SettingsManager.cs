@@ -7,12 +7,23 @@ namespace Settings
 {
     public interface ISettingsManager: IBaseRepository 
     {
+        string GetValue(string name);
         //int AddOrUpdate(SystemSettings setting);
         //SystemSettings Delete(int id);
     }
 
     public class SettingsManager : BaseEntityRepository, ISettingsManager
     {
+        public string GetValue(string name)
+        {
+            var result = Get<SystemSettings>(s => s.Key == name);
+            if(result != null)
+                return result.Value;
+            return string.Empty;
+        }
+
+
+
         //public int AddOrUpdate(SystemSettings setting)
         //{
         //    if (string.IsNullOrEmpty(setting.Key))
