@@ -134,7 +134,7 @@ namespace BillingAPI.Controllers
             return result;
         }
         /// <summary>
-        /// Get all transfers(senders and recipients) and  for current character
+        /// Get all transfers(income and outcome) for current character
         /// </summary>
         /// <param name="characterId"></param>
         /// <returns></returns>
