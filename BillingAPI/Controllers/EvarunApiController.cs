@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Http;
 using BillingAPI.Model;
 using Core;
 using Microsoft.AspNetCore.Http;
@@ -29,6 +30,8 @@ namespace BillingAPI.Controllers
                 result.Message = ex.ToString();
                 result.Status = false;
             }
+            if (result.Status == false)
+                throw new HttpResponseException(System.Net.HttpStatusCode.UnprocessableEntity);
             return result;
         }
 
@@ -50,6 +53,8 @@ namespace BillingAPI.Controllers
                 result.Message = ex.ToString();
                 result.Status = false;
             }
+            if (result.Status == false)
+                throw new HttpResponseException(System.Net.HttpStatusCode.UnprocessableEntity);
             return result;
         }
 

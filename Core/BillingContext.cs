@@ -28,5 +28,8 @@ namespace Core
         public DbSet<Character> Character { get; set; }
         public DbSet<SystemSettings> SystemSettings { get; set; }
         public DbSet<ProductType> ProductTypes { get; set; }
+        public DbSet<ShopWallet> ShopWallet { get; set; }
+        public DbSet<CorporationWallet> CorporationWallet { get; set; }
+
     }
 }

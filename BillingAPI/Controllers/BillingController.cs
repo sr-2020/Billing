@@ -46,6 +46,22 @@ namespace BillingAPI.Controllers
             return result;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="corporationId">any id</param>
+        /// <returns></returns>
+        [HttpGet("admin/CreateOrUpdateCorporation")]
+        public DataResult<CorporationWallet> CreateOrUpdateCorporation(int corporationId)
+        {
+            throw new Exception("123");
+        }
+
+        public DataResult<ShopWallet> CreateOrUpdateShop(int soptId)
+        {
+            throw new Exception("123");
+        }
+
         #endregion
 
         #region transfer

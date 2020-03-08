@@ -93,7 +93,6 @@ namespace Billing
             };
         }
 
-
         public string GetSinByCharacter(int characterId)
         {
             var sin = GetSIN(characterId);
@@ -208,13 +207,15 @@ namespace Billing
         private Transfer MakeNewTransfer(Wallet wallet1, Wallet wallet2, decimal amount, string comment)
         {
             if(wallet1 == null)
-                throw new BillingException($"wallet1 is null");
+                throw new BillingException($"Админы нае***сь и не завели кошелек отправителю");
             if(wallet2 == null)
-                throw new BillingException($"wallet2 is null");
+                throw new BillingException($"Админы нае***сь и не завели кошелек получателю");
             if(wallet1.Id == wallet2.Id)
-                throw new BillingException($"impossible to transfer on to yourself");
+                throw new BillingException($"Данная схема ухода от налогов невозможна, проще говоря сам себе не переведешь, никто не переведет.");
             if (wallet1.Balance < amount)
-                throw new BillingException($"Need more money on wallet {wallet1.Id}");
+                throw new BillingException($"Денег нет, но вы держитесь");
+            if(amount <= 0)
+                throw new BillingException($"Ублюдок, мать твою, а ну иди сюда говно собачье, решил ко мне лезть? Ты, засранец вонючий, мать твою, а?");
             wallet1.Balance -= amount;
             wallet1.Lifestyle = (int)LifeStyleHelper.GetLifeStyle(wallet1.Balance);
             Add(wallet1);
