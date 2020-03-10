@@ -24,13 +24,13 @@ namespace BillingAPI.Controllers
             {
                 result.Message = e.Message;
                 result.Status = false;
-                throw new HttpResponseException(System.Net.HttpStatusCode.UnprocessableEntity);
+                Response.StatusCode = 422;
             }
             catch (Exception ex)
             {
                 result.Message = ex.ToString();
                 result.Status = false;
-                throw new HttpResponseException(System.Net.HttpStatusCode.InternalServerError);
+                Response.StatusCode = 500;
             }
 
             return result;
@@ -48,14 +48,14 @@ namespace BillingAPI.Controllers
             {
                 result.Message = e.Message;
                 result.Status = false;
+                Response.StatusCode = 422;
             }
             catch (Exception ex)
             {
                 result.Message = ex.ToString();
                 result.Status = false;
+                Response.StatusCode = 500;
             }
-            if (result.Status == false)
-                throw new HttpResponseException(System.Net.HttpStatusCode.UnprocessableEntity);
             return result;
         }
 

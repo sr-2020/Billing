@@ -263,7 +263,9 @@ namespace Billing
                 TransferType = type.ToString(),
                 Amount = transfer.Amount,
                 NewBalance = type == TransferType.Incoming ? transfer.NewBalanceTo : transfer.NewBalanceFrom,
-                OperationTime = transfer.OperationTime
+                OperationTime = transfer.OperationTime,
+                From = transfer.WalletFrom.Id,
+                To = transfer.WalletTo.Id
             };
         }
         private SIN GetSIN(int characterId, params Expression<Func<SIN, object>>[] includes)
