@@ -24,14 +24,15 @@ namespace BillingAPI.Controllers
             {
                 result.Message = e.Message;
                 result.Status = false;
+                throw new HttpResponseException(System.Net.HttpStatusCode.UnprocessableEntity);
             }
             catch (Exception ex)
             {
                 result.Message = ex.ToString();
                 result.Status = false;
+                throw new HttpResponseException(System.Net.HttpStatusCode.InternalServerError);
             }
-            if (result.Status == false)
-                throw new HttpResponseException(System.Net.HttpStatusCode.UnprocessableEntity);
+
             return result;
         }
 

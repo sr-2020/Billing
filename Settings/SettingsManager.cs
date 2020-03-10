@@ -8,12 +8,22 @@ namespace Settings
     public interface ISettingsManager: IBaseRepository 
     {
         string GetValue(string name);
+        decimal GetDecimalValue(string name);
+        int GetIntValue(string name);
         //int AddOrUpdate(SystemSettings setting);
         //SystemSettings Delete(int id);
     }
 
     public class SettingsManager : BaseEntityRepository, ISettingsManager
     {
+        public int GetIntValue(string name)
+        {
+            var result = Get<SystemSettings>(s => s.Key == name);
+            if (result != null)
+                return int.Parse(result.Value);
+            throw new Exception($"systemSetting {name} not found");
+        }
+
         public string GetValue(string name)
         {
             var result = Get<SystemSettings>(s => s.Key == name);
@@ -22,7 +32,13 @@ namespace Settings
             return string.Empty;
         }
 
-
+        public decimal GetDecimalValue(string name)
+        {
+            var result = Get<SystemSettings>(s => s.Key == name);
+            if (result != null)
+                return decimal.Parse(result.Value);
+            throw new Exception($"systemSetting {name} not found");
+        }
 
         //public int AddOrUpdate(SystemSettings setting)
         //{

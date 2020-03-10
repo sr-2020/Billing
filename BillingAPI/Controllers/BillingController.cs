@@ -47,19 +47,30 @@ namespace BillingAPI.Controllers
         }
 
         /// <summary>
-        /// 
+        /// Get corporation wallet. If wallet not exists, then create it
         /// </summary>
         /// <param name="corporationId">any id</param>
+        /// <param name="amount">if negative value then amount will no change or 0 </param>
         /// <returns></returns>
-        [HttpGet("admin/CreateOrUpdateCorporation")]
-        public DataResult<CorporationWallet> CreateOrUpdateCorporation(int corporationId)
+        [HttpGet("admin/CreateOrUpdateCorporationWallet")]
+        public DataResult<CorporationWallet> CreateOrUpdateCorporationWallet(int corporationId, decimal amount)
         {
-            throw new Exception("123");
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.CreateOrUpdateCorporationWallet(corporationId, amount));
+            return result;
         }
-
-        public DataResult<ShopWallet> CreateOrUpdateShop(int soptId)
+        /// <summary>
+        /// Get shop wallet. If wallet not exists, then create it
+        /// </summary>
+        /// <param name="shopId">any id</param>
+        /// <param name="amount">if negative value then amount will no change or 0</param>
+        /// <returns></returns>
+        [HttpGet("admin/CreateOrUpdateShopWallet")]
+        public DataResult<ShopWallet> CreateOrUpdateShopWallet(int shopId, decimal amount)
         {
-            throw new Exception("123");
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.CreateOrUpdateShopWallet(shopId, amount));
+            return result;
         }
 
         #endregion
@@ -102,12 +113,25 @@ namespace BillingAPI.Controllers
             return result;
         }
         #endregion
+
         #region renta
-        //[HttpGet("renta/createprice")]
-        //public Result CreatePrice()
-        //{
-        //    throw new NotImplementedException();
-        //}
+        /// <summary>
+        /// Create personal price to current productType for current character
+        /// </summary>
+        /// <param name="productType"></param>
+        /// <param name="corporation"></param>
+        /// <param name="shop"></param>
+        /// <param name="character"></param>
+        /// <param name="basePrice"></param>
+        /// <param name="shopComission"></param>
+        /// <returns></returns>
+        [HttpGet("renta/createprice")]
+        public DataResult<PriceDto> CreatePrice(int productType, int corporation, int shop, int character, decimal basePrice, decimal shopComission = 0)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetPrice(productType, corporation, shop, character, basePrice, shopComission));
+            return result;
+        }
         //[HttpGet("renta/createpricebyparams ")]
         //public Result CreatePriceByParams()
         //{
@@ -119,6 +143,7 @@ namespace BillingAPI.Controllers
         //    throw new NotImplementedException();
         //}
         #endregion
+
         #region info
 
         /// <summary>
@@ -146,7 +171,7 @@ namespace BillingAPI.Controllers
         public DataResult<string> GetSinByCharacter(int characterId)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetSinByCharacter(characterId));
+            var result = RunAction(() => manager.GetSinStringByCharacter(characterId));
             return result;
         }
         /// <summary>

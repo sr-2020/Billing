@@ -30,6 +30,8 @@ namespace Core
         public DbSet<ProductType> ProductTypes { get; set; }
         public DbSet<ShopWallet> ShopWallet { get; set; }
         public DbSet<CorporationWallet> CorporationWallet { get; set; }
+        public DbSet<Price> Price { get; set; }
+        public DbSet<Renta> Renta { get; set; }
 
     }
 }

@@ -2,6 +2,7 @@
 using Core;
 using Core.Model;
 using Core.Primitives;
+using InternalServices;
 using IoC;
 using Settings;
 using System;
@@ -20,8 +21,9 @@ namespace Billing
         Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
         Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
         Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
-        string GetSinByCharacter(int characterId);
+        string GetSinStringByCharacter(int characterId);
         int GetCharacterIdBySin(string sinString);
+        PriceDto GetPrice(int productType, int corporation, int shop, int character, decimal basePrice, decimal shopComission = 0);
 
         #endregion
         #region info
@@ -32,12 +34,11 @@ namespace Billing
 
         #endregion
 
-
         #region admin
         SIN CreateOrUpdatePhysicalWallet(int character, decimal balance);
         ProductType CreateOrUpdateProductType(string code, string name, string description);
-
-
+        CorporationWallet CreateOrUpdateCorporationWallet(int foreignKey, decimal amount);
+        ShopWallet CreateOrUpdateShopWallet(int foreignKey, decimal amount);
         //create legal wallet
 
         #endregion
@@ -46,6 +47,59 @@ namespace Billing
 
     public class BillingManager : BaseEntityRepository, IBillingManager
     {
+        public PriceDto GetPrice(int productType, int corporation, int shop, int character, decimal basePrice, decimal shopComission = 0)
+        {
+            var newPrice = CreateNewPrice(productType, corporation, shop, character, basePrice, shopComission);
+            var dto = new PriceDto()
+            {
+                CurrentScoring = newPrice.CurrentScoring,
+                DateTill = newPrice.DateCreated.AddMinutes(IocContainer.Get<ISettingsManager>().GetIntValue("price_minutes")),
+                Discount = newPrice.Discount,
+                PriceId = newPrice.Id
+            };
+            return dto;
+        }
+
+        public CorporationWallet CreateOrUpdateCorporationWallet(int foreignKey, decimal amount)
+        {
+            var db = Get<CorporationWallet>(w => w.Foreign == foreignKey);
+            if (db == null)
+            {
+                var newWallet = new Wallet();
+                Add(newWallet);
+                db = new CorporationWallet
+                {
+                    Foreign = foreignKey,
+                    Wallet = newWallet
+                };
+            }
+            if (amount >= 0)
+                db.Wallet.Balance = amount;
+            Add(db);
+            Context.SaveChanges();
+            return db;
+        }
+
+        public ShopWallet CreateOrUpdateShopWallet(int foreignKey, decimal amount)
+        {
+            var db = Get<ShopWallet>(w => w.Foreign == foreignKey);
+            if (db == null)
+            {
+                var newWallet = new Wallet();
+                Add(newWallet);
+                db = new ShopWallet
+                {
+                    Foreign = foreignKey,
+                    Wallet = newWallet
+                };
+            }
+            if (amount >= 0)
+                db.Wallet.Balance = amount;
+            Add(db);
+            Context.SaveChanges();
+            return db;
+        }
+
         public BalanceDto GetBalance(int characterId)
         {
             var sin = GetSIN(characterId, s => s.Wallet, s => s.Scoring);
@@ -81,19 +135,7 @@ namespace Billing
             return allList.OrderBy(t => t.OperationTime).ToList();
         }
 
-        private TransferDto CreateTransferDto(Transfer transfer, TransferType type)
-        {
-            return new TransferDto
-            {
-                Comment = transfer.Comment,
-                TransferType = type.ToString(),
-                Amount = transfer.Amount,
-                NewBalance = type == TransferType.Incoming ? transfer.NewBalanceTo : transfer.NewBalanceFrom,
-                OperationTime = transfer.OperationTime
-            };
-        }
-
-        public string GetSinByCharacter(int characterId)
+        public string GetSinStringByCharacter(int characterId)
         {
             var sin = GetSIN(characterId);
             if (sin == null)
@@ -139,7 +181,6 @@ namespace Billing
             }
             Add(sin);
             sin.EVersion = IocContainer.Get<ISettingsManager>().GetValue("eversion");
-
             var wallet = Get<Wallet>(w => w.Id == sin.WalletId);
             if (wallet == null)
             {
@@ -147,9 +188,9 @@ namespace Billing
                 sin.Wallet = wallet;
             }
             Add(wallet);
-            wallet.Balance = balance;
-            wallet.Lifestyle = (int)LifeStyleHelper.GetLifeStyle(balance);
-
+            if(balance >= 0)
+                wallet.Balance = balance;
+            wallet.Lifestyle = (int)LifeStyleHelper.GetLifeStyle(wallet.Balance);
             var scoring = Get<Scoring>(s => s.Id == sin.ScoringId);
             if (scoring == null)
             {
@@ -189,32 +230,45 @@ namespace Billing
         {
             var d1 = GetSIN(characterFrom, s => s.Wallet);
             if (d1 == null)
-                throw new BillingException($"sin for {characterFrom} not exists");
+            {
+                d1 = CreateOrUpdatePhysicalWallet(characterFrom, 0);
+            }
             var d2 = GetSIN(characterTo, s => s.Wallet);
             if (d2 == null)
-                throw new BillingException($"sin for {characterTo} not exists");
+            {
+                d2 = CreateOrUpdatePhysicalWallet(characterTo, 0);
+            }
             return MakeNewTransfer(d1.Wallet, d2.Wallet, amount, comment);
         }
 
         #region private
-
+        private TransferDto CreateTransferDto(Transfer transfer, TransferType type)
+        {
+            return new TransferDto
+            {
+                Comment = transfer.Comment,
+                TransferType = type.ToString(),
+                Amount = transfer.Amount,
+                NewBalance = type == TransferType.Incoming ? transfer.NewBalanceTo : transfer.NewBalanceFrom,
+                OperationTime = transfer.OperationTime
+            };
+        }
         private SIN GetSIN(int characterId, params Expression<Func<SIN, object>>[] includes)
         {
             var sin = Get(s => s.CharacterId == characterId, includes);
             return sin;
         }
-
         private Transfer MakeNewTransfer(Wallet wallet1, Wallet wallet2, decimal amount, string comment)
         {
-            if(wallet1 == null)
+            if (wallet1 == null)
                 throw new BillingException($"Админы нае***сь и не завели кошелек отправителю");
-            if(wallet2 == null)
+            if (wallet2 == null)
                 throw new BillingException($"Админы нае***сь и не завели кошелек получателю");
-            if(wallet1.Id == wallet2.Id)
+            if (wallet1.Id == wallet2.Id)
                 throw new BillingException($"Данная схема ухода от налогов невозможна, проще говоря сам себе не переведешь, никто не переведет.");
             if (wallet1.Balance < amount)
                 throw new BillingException($"Денег нет, но вы держитесь");
-            if(amount <= 0)
+            if (amount <= 0)
                 throw new BillingException($"Ублюдок, мать твою, а ну иди сюда говно собачье, решил ко мне лезть? Ты, засранец вонючий, мать твою, а?");
             wallet1.Balance -= amount;
             wallet1.Lifestyle = (int)LifeStyleHelper.GetLifeStyle(wallet1.Balance);
@@ -236,6 +290,50 @@ namespace Billing
             Add(transfer);
             Context.SaveChanges();
             return transfer;
+        }
+        private Price CreateNewPrice(int productType, int corporation, int shop, int character, decimal basePrice, decimal shopComission = 0)
+        {
+            if (productType == 0 || corporation == 0 || shop == 0 || character == 0)
+                throw new BillingException($"Все параметры должны быть больше 0 - product_type:{productType}, corporation:{corporation}, shop:{shop}, character:{character}");
+            //productType
+            var pt = Get<ProductType>(p => p.Id == productType);
+            if (pt == null)
+                throw new BillingException("product_type not found");
+            //corporation
+            var corpWallet = Get<CorporationWallet>(c => c.Foreign == corporation);
+            if (corpWallet == null)
+                corpWallet = CreateOrUpdateCorporationWallet(corporation, 0);
+            //shop
+            var shopWallet = Get<ShopWallet>(s => s.Foreign == shop);
+            if (shopWallet == null)
+                shopWallet = CreateOrUpdateShopWallet(shop, 0);
+            //character
+            var sin = GetSIN(character, s => s.Scoring);
+            decimal discount = 0;
+            try
+            {
+                discount = EreminService.GetDiscount(character);
+            }
+            catch (Exception e)
+            {
+                discount = 0;
+            }
+
+            var price = new Price
+            {
+                ProductTypeId = pt.Id,
+                CorporationId = corpWallet.Id,
+                ShopId = shopWallet.Id,
+                BasePrice = basePrice,
+                CurrentScoring = sin.Scoring.CurrentScoring,
+                DateCreated = DateTime.Now,
+                Discount = discount,
+                SinId = sin.Id,
+                ShopComission = shopComission
+            };
+            Add(price);
+            Context.SaveChanges();
+            return price;
         }
         #endregion
     }

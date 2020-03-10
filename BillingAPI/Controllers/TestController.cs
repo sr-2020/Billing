@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Hangfire;
+using InternalServices;
 using IoC;
 using Jobs;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +24,12 @@ namespace BillingAPI.Controllers
         public ActionResult<string> Get()
         {
             return IocContainer.Get<ISettingsManager>().GetValue("eversion");
+        }
+        [HttpGet("testaction")]
+        public ActionResult Test(int id)
+        {
+            var test = EreminService.GetCharacter(id);
+            return new JsonResult("ok");
         }
 
     }

@@ -11,6 +11,8 @@ COPY ["Core/Core.csproj", "Core/"]
 COPY ["Settings/Settings.csproj", "Settings/"]
 COPY ["IoC.Container/IoC.Container.csproj", "IoC.Container/"]
 COPY ["IoC.Init/IoC.Init.csproj", "IoC.Container/"]
+COPY ["InternalServices/InternalServices.csproj", "InternalServices/"]
+COPY ["Serialization/Serialization.csproj", "Serialization/"]
 
 RUN dotnet restore "BillingAPI/BillingAPI.csproj"
 
