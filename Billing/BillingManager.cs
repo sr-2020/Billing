@@ -79,6 +79,7 @@ namespace Billing
             if (db == null)
             {
                 var newWallet = new Wallet();
+                newWallet.WalletType = (int)WalletTypes.Corporation;
                 Add(newWallet);
                 db = new CorporationWallet
                 {
@@ -99,6 +100,7 @@ namespace Billing
             if (db == null)
             {
                 var newWallet = new Wallet();
+                newWallet.WalletType = (int)WalletTypes.Shop;
                 Add(newWallet);
                 db = new ShopWallet
                 {
@@ -198,6 +200,7 @@ namespace Billing
             if (wallet == null)
             {
                 wallet = new Wallet();
+                wallet.WalletType = (int)WalletTypes.Character;
                 sin.Wallet = wallet;
             }
             Add(wallet);
