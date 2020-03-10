@@ -132,7 +132,11 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetPrice(productType, corporation, shop, character, basePrice, shopComission));
             return result;
         }
-
+        /// <summary>
+        /// Create renta
+        /// </summary>
+        /// <param name="priceId">personal price created on api/billing/renta/createprice</param>
+        /// <returns></returns>
         [HttpGet("renta/createrenta ")]
         public DataResult<Renta> ConfirmRenta(int priceId)
         {

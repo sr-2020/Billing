@@ -54,6 +54,10 @@ namespace Billing
             var price = Get<Price>(p => p.Id == priceId);
             if (price == null)
                 throw new BillingException("Персональное предложение не найдено");
+            var dateTill = price.DateCreated.AddMinutes(IocContainer.Get<ISettingsManager>().GetIntValue("price_minutes"));
+            if (dateTill < DateTime.Now)
+                throw new BillingException($"Персональное предложение больше не действительно, оно истекло {dateTill.ToString("HH:mm:ss")}");
+            
             throw new NotImplementedException("Заглушка");
         }
 
