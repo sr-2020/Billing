@@ -243,15 +243,7 @@ namespace Billing
         public Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment)
         {
             var d1 = GetSIN(characterFrom, s => s.Wallet);
-            if (d1 == null)
-            {
-                d1 = CreateOrUpdatePhysicalWallet(characterFrom, 0);
-            }
             var d2 = GetSIN(characterTo, s => s.Wallet);
-            if (d2 == null)
-            {
-                d2 = CreateOrUpdatePhysicalWallet(characterTo, 0);
-            }
             return MakeNewTransfer(d1.Wallet, d2.Wallet, amount, comment);
         }
 
@@ -305,8 +297,7 @@ namespace Billing
             var sin = Get(s => s.CharacterId == characterId, includes);
             if(sin == null)
             {
-                CreateOrUpdatePhysicalWallet(characterId, 0);
-                sin = Get(s => s.CharacterId == characterId, includes);
+                sin = CreateOrUpdatePhysicalWallet(characterId, 0);
             }
             return sin;
         }
