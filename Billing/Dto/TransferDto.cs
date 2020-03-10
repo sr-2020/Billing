@@ -17,7 +17,7 @@ namespace Billing.DTO
         public string Comment { get; set; }
         public decimal Amount { get; set; }
         public DateTime OperationTime { get; set; }
-        public int From { get; set; }
-        public int To { get; set; }
+        public string From { get; set; }
+        public string To { get; set; }
     }
 }

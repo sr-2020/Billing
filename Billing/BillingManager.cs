@@ -57,7 +57,7 @@ namespace Billing
             var dateTill = price.DateCreated.AddMinutes(IocContainer.Get<ISettingsManager>().GetIntValue("price_minutes"));
             if (dateTill < DateTime.Now)
                 throw new BillingException($"Персональное предложение больше не действительно, оно истекло {dateTill.ToString("HH:mm:ss")}");
-            
+
             throw new NotImplementedException("Заглушка");
         }
 
@@ -66,7 +66,7 @@ namespace Billing
             var newPrice = CreateNewPrice(productType, corporation, shop, character, basePrice, shopComission);
             var dto = new PriceDto()
             {
-                FinalPrice = (newPrice.BasePrice - (newPrice.BasePrice * (newPrice.Discount/100))) * newPrice.CurrentScoring,
+                FinalPrice = (newPrice.BasePrice - (newPrice.BasePrice * (newPrice.Discount / 100))) * newPrice.CurrentScoring,
                 DateTill = newPrice.DateCreated.AddMinutes(IocContainer.Get<ISettingsManager>().GetIntValue("price_minutes")),
                 PriceId = newPrice.Id
             };
@@ -136,13 +136,13 @@ namespace Billing
             var sin = GetSIN(characterId);
             if (sin == null)
                 throw new BillingException("sin not found");
-            var listFrom = GetList<Transfer>(t => t.WalletFromId == sin.WalletId);
+            var listFrom = GetList<Transfer>(t => t.WalletFromId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
             var allList = new List<TransferDto>();
             if (listFrom != null)
                 allList.AddRange(listFrom
                     .Select(s => CreateTransferDto(s, TransferType.Outcoming))
                     .ToList());
-            var listTo = GetList<Transfer>(t => t.WalletToId == sin.WalletId);
+            var listTo = GetList<Transfer>(t => t.WalletToId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
             if (listTo != null)
                 allList.AddRange(listTo
                     .Select(s => CreateTransferDto(s, TransferType.Incoming))
@@ -204,7 +204,7 @@ namespace Billing
                 sin.Wallet = wallet;
             }
             Add(wallet);
-            if(balance >= 0)
+            if (balance >= 0)
                 wallet.Balance = balance;
             wallet.Lifestyle = (int)LifeStyleHelper.GetLifeStyle(wallet.Balance);
             var scoring = Get<Scoring>(s => s.Id == sin.ScoringId);
@@ -258,6 +258,8 @@ namespace Billing
         }
 
         #region private
+
+        private string _ownerName = "Владелец кошелька";
         private TransferDto CreateTransferDto(Transfer transfer, TransferType type)
         {
             return new TransferDto
@@ -267,10 +269,39 @@ namespace Billing
                 Amount = transfer.Amount,
                 NewBalance = type == TransferType.Incoming ? transfer.NewBalanceTo : transfer.NewBalanceFrom,
                 OperationTime = transfer.OperationTime,
-                From = transfer.WalletFrom.Id,
-                To = transfer.WalletTo.Id
+                From = type == TransferType.Incoming ? GetWalletName(transfer.WalletFrom) : _ownerName,
+                To = type == TransferType.Incoming ? _ownerName : GetWalletName(transfer.WalletTo)
             };
         }
+
+        private string GetWalletName(Wallet wallet)
+        {
+            if (wallet == null)
+                return string.Empty;
+            if(wallet.WalletType == (int)WalletTypes.Character)
+            {
+                var sin = Get<SIN>(s => s.WalletId == wallet.Id);
+                if (sin == null)
+                    return string.Empty;
+                return $"Character {sin.CharacterId} {sin.PersonName} {sin.Sin}";
+            }
+            if(wallet.WalletType == (int)WalletTypes.Corporation)
+            {
+                var corp = Get<CorporationWallet>(c => c.WalletId == wallet.Id);
+                if (corp == null)
+                    return string.Empty;
+                return $"Corporation {corp.Foreign}";
+            }
+            if(wallet.WalletType == (int)WalletTypes.Shop)
+            {
+                var shop = Get<ShopWallet>(c => c.WalletId == wallet.Id);
+                if (shop == null)
+                    return string.Empty;
+                return $"Shop {shop.Foreign}";
+            }
+            return string.Empty;
+        }
+
         private SIN GetSIN(int characterId, params Expression<Func<SIN, object>>[] includes)
         {
             var sin = Get(s => s.CharacterId == characterId, includes);
