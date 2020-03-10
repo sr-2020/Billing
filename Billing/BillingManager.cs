@@ -118,8 +118,6 @@ namespace Billing
         public BalanceDto GetBalance(int characterId)
         {
             var sin = GetSIN(characterId, s => s.Wallet, s => s.Scoring);
-            if (sin == null)
-                throw new BillingException("sin not found");
             var balance = new BalanceDto
             {
                 CharacterId = characterId,
@@ -305,6 +303,8 @@ namespace Billing
         private SIN GetSIN(int characterId, params Expression<Func<SIN, object>>[] includes)
         {
             var sin = Get(s => s.CharacterId == characterId, includes);
+            if(sin == null)
+                sin = CreateOrUpdatePhysicalWallet(characterId, 0);
             return sin;
         }
         private Transfer MakeNewTransfer(Wallet wallet1, Wallet wallet2, decimal amount, string comment)
