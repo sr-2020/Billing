@@ -24,6 +24,8 @@ namespace Billing
         string GetSinStringByCharacter(int characterId);
         int GetCharacterIdBySin(string sinString);
         PriceDto GetPrice(int productType, int corporation, int shop, int character, decimal basePrice, decimal shopComission = 0);
+        Renta ConfirmRenta(int priceId);
+
 
         #endregion
         #region info
@@ -47,14 +49,21 @@ namespace Billing
 
     public class BillingManager : BaseEntityRepository, IBillingManager
     {
+        public Renta ConfirmRenta(int priceId)
+        {
+            var price = Get<Price>(p => p.Id == priceId);
+            if (price == null)
+                throw new BillingException("Персональное предложение не найдено");
+            throw new NotImplementedException("Заглушка");
+        }
+
         public PriceDto GetPrice(int productType, int corporation, int shop, int character, decimal basePrice, decimal shopComission = 0)
         {
             var newPrice = CreateNewPrice(productType, corporation, shop, character, basePrice, shopComission);
             var dto = new PriceDto()
             {
-                CurrentScoring = newPrice.CurrentScoring,
+                FinalPrice = (newPrice.BasePrice - (newPrice.BasePrice * (newPrice.Discount/100))) * newPrice.CurrentScoring,
                 DateTill = newPrice.DateCreated.AddMinutes(IocContainer.Get<ISettingsManager>().GetIntValue("price_minutes")),
-                Discount = newPrice.Discount,
                 PriceId = newPrice.Id
             };
             return dto;
@@ -298,7 +307,7 @@ namespace Billing
             //productType
             var pt = Get<ProductType>(p => p.Id == productType);
             if (pt == null)
-                throw new BillingException("product_type not found");
+                throw new BillingException("product_type не найден");
             //corporation
             var corpWallet = Get<CorporationWallet>(c => c.Foreign == corporation);
             if (corpWallet == null)

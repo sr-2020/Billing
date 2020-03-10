@@ -8,7 +8,8 @@ namespace Billing.DTO
     {
         public int PriceId { get; set; }
         public DateTime DateTill { get; set; }
-        public decimal CurrentScoring { get; set; }
-        public decimal Discount { get; set; }
+        public decimal FinalPrice { get; set; }
+        //public decimal CurrentScoring { get; set; }
+        //public decimal Discount { get; set; }
     }
 }

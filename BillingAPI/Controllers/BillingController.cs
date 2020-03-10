@@ -132,16 +132,14 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetPrice(productType, corporation, shop, character, basePrice, shopComission));
             return result;
         }
-        //[HttpGet("renta/createpricebyparams ")]
-        //public Result CreatePriceByParams()
-        //{
-        //    throw new NotImplementedException();
-        //}
-        //[HttpGet("renta/confirmrenta ")]
-        //public Result ConfirmRenta()
-        //{
-        //    throw new NotImplementedException();
-        //}
+
+        [HttpGet("renta/createrenta ")]
+        public DataResult<Renta> ConfirmRenta(int priceId)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.ConfirmRenta(priceId));
+            return result;
+        }
         #endregion
 
         #region info
