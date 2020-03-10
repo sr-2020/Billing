@@ -181,7 +181,7 @@ namespace Billing
 
         public SIN CreateOrUpdatePhysicalWallet(int character, decimal balance)
         {
-            var sin = GetSIN(character);
+            var sin = Get<SIN>(s => s.CharacterId == character);
 
             if (sin == null)
             {
