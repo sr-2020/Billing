@@ -304,7 +304,10 @@ namespace Billing
         {
             var sin = Get(s => s.CharacterId == characterId, includes);
             if(sin == null)
-                sin = CreateOrUpdatePhysicalWallet(characterId, 0);
+            {
+                CreateOrUpdatePhysicalWallet(characterId, 0);
+                sin = Get(s => s.CharacterId == characterId, includes);
+            }
             return sin;
         }
         private Transfer MakeNewTransfer(Wallet wallet1, Wallet wallet2, decimal amount, string comment)
