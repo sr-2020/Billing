@@ -310,7 +310,7 @@ namespace Billing
             var sin = Get(s => s.CharacterId == characterId, includes);
             if (sin == null)
             {
-                sin = CreateOrUpdatePhysicalWallet(characterId, 0);
+                sin = CreateOrUpdatePhysicalWallet(characterId, 50);
             }
             return sin;
         }
