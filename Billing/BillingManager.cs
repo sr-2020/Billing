@@ -216,9 +216,11 @@ namespace Billing
             }
             Add(scoring);
             Context.SaveChanges();
-            if (balance >= 0)
+            if (balance > 0)
             {
                 var mir = Get<Wallet>(w => w.Id == GetMIRId());
+                if(wallet.Balance > 0)
+                    MakeNewTransfer(wallet, mir, wallet.Balance, "Сброс кошелька");
                 wallet.Balance = 0;
                 MakeNewTransfer(mir, wallet, balance, "Заведение кошелька");
             }
