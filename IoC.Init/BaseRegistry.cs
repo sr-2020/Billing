@@ -18,9 +18,8 @@ namespace IoC.Init
         }
         protected virtual void RegisterContexts()
         {
-            For<ISettingsManager>().Use(new SettingsManager()).SetLifecycleTo(Lifecycles.Singleton);
-            For<IJobManager>().Use(new JobManager()).SetLifecycleTo(Lifecycles.Transient);
-            //For<IBaseRepository>().Use(new BaseEntityRepository()).SetLifecycleTo(Lifecycles.Transient);
+            For<ISettingsManager>().Use<SettingsManager>().SetLifecycleTo(Lifecycles.Transient);
+            For<IJobManager>().Use<JobManager>().SetLifecycleTo(Lifecycles.Transient);
             For<IBillingManager>().Use<BillingManager>().SetLifecycleTo(Lifecycles.Transient);
         }
     }
