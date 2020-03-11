@@ -203,10 +203,7 @@ namespace Billing
                 sin.Wallet = wallet;
             }
             Add(wallet);
-            if (balance >= 0)
-            {
-                wallet.Balance = balance;
-            }
+            
             var scoring = Get<Scoring>(s => s.Id == sin.ScoringId);
             if (scoring == null)
             {
@@ -218,6 +215,12 @@ namespace Billing
             }
             Add(scoring);
             Context.SaveChanges();
+            if (balance >= 0)
+            {
+                var mir = Get<Wallet>(w => w.Id == GetMIRId());
+                MakeNewTransfer(mir, wallet, balance, "Заведение кошелька");
+                wallet.Balance = balance;
+            }
             //TODO
             var categoryCalculates = GetList<ScoringCategoryCalculate>(c => c.ScoringId == scoring.Id);
 
@@ -251,6 +254,12 @@ namespace Billing
         #region private
 
         private string _ownerName = "Владелец кошелька";
+
+        private int GetMIRId()
+        {
+            return IocContainer.Get<ISettingsManager>().GetIntValue("MIR_ID");
+        }
+
         private TransferDto CreateTransferDto(Transfer transfer, TransferType type)
         {
             return new TransferDto
@@ -269,34 +278,34 @@ namespace Billing
         {
             if (wallet == null)
                 return string.Empty;
-            if(wallet.WalletType == (int)WalletTypes.Character)
+            switch (wallet.WalletType)
             {
-                var sin = Get<SIN>(s => s.WalletId == wallet.Id);
-                if (sin == null)
+                case (int)WalletTypes.Character:
+                    var sin = Get<SIN>(s => s.WalletId == wallet.Id);
+                    if (sin == null)
+                        return string.Empty;
+                    return $"Character {sin.CharacterId} {sin.PersonName} {sin.Sin}";
+                case (int)WalletTypes.Corporation:
+                    var corp = Get<CorporationWallet>(c => c.WalletId == wallet.Id);
+                    if (corp == null)
+                        return string.Empty;
+                    return $"Corporation {corp.Foreign}";
+                case (int)WalletTypes.Shop:
+                    var shop = Get<ShopWallet>(c => c.WalletId == wallet.Id);
+                    if (shop == null)
+                        return string.Empty;
+                    return $"Shop {shop.Foreign}";
+                case (int)WalletTypes.MIR:
+                    return "MIR";
+                default:
                     return string.Empty;
-                return $"Character {sin.CharacterId} {sin.PersonName} {sin.Sin}";
             }
-            if(wallet.WalletType == (int)WalletTypes.Corporation)
-            {
-                var corp = Get<CorporationWallet>(c => c.WalletId == wallet.Id);
-                if (corp == null)
-                    return string.Empty;
-                return $"Corporation {corp.Foreign}";
-            }
-            if(wallet.WalletType == (int)WalletTypes.Shop)
-            {
-                var shop = Get<ShopWallet>(c => c.WalletId == wallet.Id);
-                if (shop == null)
-                    return string.Empty;
-                return $"Shop {shop.Foreign}";
-            }
-            return string.Empty;
         }
 
         private SIN GetSIN(int characterId, params Expression<Func<SIN, object>>[] includes)
         {
             var sin = Get(s => s.CharacterId == characterId, includes);
-            if(sin == null)
+            if (sin == null)
             {
                 sin = CreateOrUpdatePhysicalWallet(characterId, 0);
             }
