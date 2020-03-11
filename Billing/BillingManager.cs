@@ -123,7 +123,8 @@ namespace Billing
                 CharacterId = characterId,
                 CurrentBalance = sin.Wallet.Balance,
                 CurrentScoring = sin.Scoring.CurrentScoring,
-                ForecastLifeStyle = sin.Scoring.CurrentScoring,
+                SIN = sin.Sin,
+                //ForecastLifeStyle = sin.Scoring.CurrentScoring,
                 LifeStyle = LifeStyleHelper.GetLifeStyle(sin.Wallet.Balance).ToString()
             };
             return balance;
