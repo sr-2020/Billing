@@ -6,6 +6,7 @@
     <UserSecretsId>3e08d324-1646-4b0c-bb73-54537917fbf6</UserSecretsId>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
+    <EnvironmentName>Development</EnvironmentName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
