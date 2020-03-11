@@ -11,6 +11,6 @@ namespace Billing.DTO
         public decimal CurrentBalance { get; set; }
         public decimal CurrentScoring { get; set; }
         public string LifeStyle { get; set; }
-        public decimal ForecastLifeStyle { get; set; }
+        //public decimal ForecastLifeStyle { get; set; }
     }
 }
