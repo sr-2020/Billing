@@ -8,6 +8,7 @@ namespace Core.Primitives
     {
         Character,
         Shop,
-        Corporation
+        Corporation,
+        MIR
     }
 }

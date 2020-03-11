@@ -123,7 +123,7 @@ namespace Billing
                 CharacterId = characterId,
                 CurrentBalance = sin.Wallet.Balance,
                 CurrentScoring = sin.Scoring.CurrentScoring,
-                SIN = sin.Sin,
+                ForecastLifeStyle = sin.Scoring.CurrentScoring,
                 LifeStyle = LifeStyleHelper.GetLifeStyle(sin.Wallet.Balance).ToString()
             };
             return balance;
@@ -203,8 +203,9 @@ namespace Billing
             }
             Add(wallet);
             if (balance >= 0)
+            {
                 wallet.Balance = balance;
-            wallet.Lifestyle = (int)LifeStyleHelper.GetLifeStyle(wallet.Balance);
+            }
             var scoring = Get<Scoring>(s => s.Id == sin.ScoringId);
             if (scoring == null)
             {
@@ -216,7 +217,6 @@ namespace Billing
             }
             Add(scoring);
             Context.SaveChanges();
-
             //TODO
             var categoryCalculates = GetList<ScoringCategoryCalculate>(c => c.ScoringId == scoring.Id);
 
@@ -314,10 +314,8 @@ namespace Billing
             if (amount <= 0)
                 throw new BillingException($"Ублюдок, мать твою, а ну иди сюда говно собачье, решил ко мне лезть? Ты, засранец вонючий, мать твою, а?");
             wallet1.Balance -= amount;
-            wallet1.Lifestyle = (int)LifeStyleHelper.GetLifeStyle(wallet1.Balance);
             Add(wallet1);
             wallet2.Balance += amount;
-            wallet2.Lifestyle = (int)LifeStyleHelper.GetLifeStyle(wallet2.Balance);
             Add(wallet2);
             Context.SaveChanges();
             var transfer = new Transfer
