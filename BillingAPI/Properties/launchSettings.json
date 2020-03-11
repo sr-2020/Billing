@@ -27,6 +27,7 @@
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
+      "stdoutLogEnabled": true,
       "launchUrl": "{Scheme}://{ServiceHost}:32768/swagger/v1/index.html",
       "environmentVariables": {
         "Key": "Value",
