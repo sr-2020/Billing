@@ -1,13 +1,15 @@
-﻿using Core.Model;
-using Core.Primitives;
+﻿using Core.Primitives;
+using IoC;
+using Settings;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Core
+namespace Billing
 {
     public class LifeStyleHelper
     {
+
         public static readonly Dictionary<Lifestyles, int> MaxValues = new Dictionary<Lifestyles, int>
         {
             { Lifestyles.Wood, 100 },
@@ -20,10 +22,12 @@ namespace Core
 
         public static Lifestyles GetLifeStyle(decimal balance)
         {
-            foreach (var lifestyle in MaxValues)
+            var manager = IocContainer.Get<ISettingsManager>();
+
+            foreach (Lifestyles lifestyle in Enum.GetValues(typeof(Lifestyles)))
             {
-                if (balance < lifestyle.Value)
-                    return lifestyle.Key;
+                if (balance < manager.GetIntValue(lifestyle.ToString().ToLower()))
+                    return lifestyle;
             }
             return Lifestyles.Iridium;
         }

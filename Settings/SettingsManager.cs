@@ -1,33 +1,42 @@
 ﻿using Core;
 using Core.Model;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Settings
 {
-    public interface ISettingsManager: IBaseRepository 
+    public interface ISettingsManager : IBaseRepository
     {
         string GetValue(string name);
         decimal GetDecimalValue(string name);
         int GetIntValue(string name);
+        List<SystemSettings> GetAllSettings();
+        SystemSettings SetValue(string key, string value);
+
         //int AddOrUpdate(SystemSettings setting);
         //SystemSettings Delete(int id);
     }
 
     public class SettingsManager : BaseEntityRepository, ISettingsManager
     {
+        public List<SystemSettings> GetAllSettings()
+        {
+            return GetList<SystemSettings>(s => true);
+        }
+
         public int GetIntValue(string name)
         {
             var result = Get<SystemSettings>(s => s.Key == name);
             if (result != null)
                 return int.Parse(result.Value);
-            throw new Exception($"systemSetting {name} not found");
+            return 0;
         }
 
         public string GetValue(string name)
         {
             var result = Get<SystemSettings>(s => s.Key == name);
-            if(result != null)
+            if (result != null)
                 return result.Value;
             return string.Empty;
         }
@@ -37,41 +46,18 @@ namespace Settings
             var result = Get<SystemSettings>(s => s.Key == name);
             if (result != null)
                 return decimal.Parse(result.Value);
-            throw new Exception($"systemSetting {name} not found");
+            return 0;
         }
-
-        //public int AddOrUpdate(SystemSettings setting)
-        //{
-        //    if (string.IsNullOrEmpty(setting.Key))
-        //        throw new ArgumentNullException("Key не может быть пустым");
-        //    var dbSetting = Context.SystemSettings.FirstOrDefault(s => s.Id == setting.Id);
-        //    var isExist = Context.SystemSettings.FirstOrDefault(s => s.Key == setting.Key);
-        //    if (isExist != null && isExist.Id != setting.Id)
-        //        throw new Exception("Setting с этим ключом уже существует");
-        //    if (dbSetting != null)
-        //    {
-        //        dbSetting.Key = setting.Key;
-        //        dbSetting.Value = setting.Value;
-        //        Context.Update(dbSetting);
-        //        setting = dbSetting;
-        //    }
-        //    else
-        //    {
-        //        Context.Add(setting);
-        //    }
-        //    Context.SaveChanges();
-        //    return setting.Id;
-        //}
-
-        //public SystemSettings Delete(int id)
-        //{
-        //    var toDelete = Context.SystemSettings.FirstOrDefault(s => s.Id == id);
-        //    if (toDelete == null)
-        //        return null;
-        //    Context.Remove(toDelete);
-        //    Context.SaveChanges();
-        //    return toDelete;
-        //}
+        public SystemSettings SetValue(string key, string value)
+        {
+            var ss = Get<SystemSettings>(s => s.Key == key);
+            if (ss == null)
+                throw new Exception($"systemSetting {key} not found");
+            ss.Value = value;
+            Add(ss);
+            Context.SaveChanges();
+            return ss;
+        }
 
     }
 }

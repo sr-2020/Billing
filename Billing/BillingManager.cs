@@ -49,12 +49,13 @@ namespace Billing
 
     public class BillingManager : BaseEntityRepository, IBillingManager
     {
+        ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
         public Renta ConfirmRenta(int priceId)
         {
             var price = Get<Price>(p => p.Id == priceId);
             if (price == null)
                 throw new BillingException("Персональное предложение не найдено");
-            var dateTill = price.DateCreated.AddMinutes(IocContainer.Get<ISettingsManager>().GetIntValue("price_minutes"));
+            var dateTill = price.DateCreated.AddMinutes(_settings.GetIntValue("price_minutes"));
             if (dateTill < DateTime.Now)
                 throw new BillingException($"Персональное предложение больше не действительно, оно истекло {dateTill.ToString("HH:mm:ss")}");
 
@@ -67,7 +68,7 @@ namespace Billing
             var dto = new PriceDto()
             {
                 FinalPrice = (newPrice.BasePrice - (newPrice.BasePrice * (newPrice.Discount / 100))) * newPrice.CurrentScoring,
-                DateTill = newPrice.DateCreated.AddMinutes(IocContainer.Get<ISettingsManager>().GetIntValue("price_minutes")),
+                DateTill = newPrice.DateCreated.AddMinutes(_settings.GetIntValue("price_minutes")),
                 PriceId = newPrice.Id
             };
             return dto;
@@ -124,7 +125,7 @@ namespace Billing
                 CurrentBalance = sin.Wallet.Balance,
                 CurrentScoring = sin.Scoring.CurrentScoring,
                 SIN = sin.Sin,
-                //ForecastLifeStyle = sin.Scoring.CurrentScoring,
+                ForecastLifeStyle = sin.Scoring.CurrentScoring,
                 LifeStyle = LifeStyleHelper.GetLifeStyle(sin.Wallet.Balance).ToString()
             };
             return balance;
@@ -194,7 +195,7 @@ namespace Billing
                 };
             }
             Add(sin);
-            sin.EVersion = IocContainer.Get<ISettingsManager>().GetValue("eversion");
+            sin.EVersion = _settings.GetValue("eversion");
             var wallet = Get<Wallet>(w => w.Id == sin.WalletId);
             if (wallet == null)
             {
@@ -218,8 +219,8 @@ namespace Billing
             if (balance >= 0)
             {
                 var mir = Get<Wallet>(w => w.Id == GetMIRId());
+                wallet.Balance = 0;
                 MakeNewTransfer(mir, wallet, balance, "Заведение кошелька");
-                wallet.Balance = balance;
             }
             //TODO
             var categoryCalculates = GetList<ScoringCategoryCalculate>(c => c.ScoringId == scoring.Id);
@@ -257,7 +258,7 @@ namespace Billing
 
         private int GetMIRId()
         {
-            return IocContainer.Get<ISettingsManager>().GetIntValue("MIR_ID");
+            return _settings.GetIntValue("MIR_ID");
         }
 
         private TransferDto CreateTransferDto(Transfer transfer, TransferType type)
