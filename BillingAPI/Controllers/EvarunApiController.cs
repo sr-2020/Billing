@@ -13,59 +13,97 @@ namespace BillingAPI.Controllers
 {
     public abstract class EvarunApiController : ControllerBase
     {
-        protected DataResult<T> RunAction<T>(Func<T> action)
+        protected DataResult<T> RunAction<T>(Func<T> action, string logmessage = "")
         {
+            var guid = Guid.NewGuid();
             var result = new DataResult<T>();
             try
             {
-                Console.WriteLine("Action started");
+                Start(logmessage, guid);
                 result.Data = action();
                 result.Status = true;
-                Console.WriteLine("Action finished");
+                Finish(guid);
             }
-            catch (BillingException e)
+            catch(BillingAuthException e)
             {
-                Console.WriteLine("---------WARNING---------");
-                Console.WriteLine(e.Message);
-                Console.WriteLine("---------WARNING---------");
+                HandleAuthBillingException(e, guid);
                 result.Message = e.Message;
                 result.Status = false;
-                Response.StatusCode = 422;
             }
-            catch (Exception ex)
+            catch (BillingException ex)
             {
-                Console.WriteLine("---------ERROR---------");
-                Console.WriteLine(ex.ToString());
-                Console.WriteLine("---------ERROR---------");
-                result.Message = ex.ToString();
+                HandleBillingException(ex, guid);
+                result.Message = ex.Message;
                 result.Status = false;
-                Response.StatusCode = 500;
+
+            }
+            catch (Exception exc)
+            {
+                HandleException(exc, guid);
+                result.Message = exc.ToString();
+                result.Status = false;
             }
             return result;
         }
 
-        protected Result RunAction(Action action)
+        protected Result RunAction(Action action, string logmessage)
         {
             var result = new Result();
+            var guid = Guid.NewGuid();
             try
             {
+                Start(logmessage, guid);
                 action();
                 result.Status = true;
+                Finish(guid);
             }
-            catch (BillingException e)
+            catch (BillingAuthException e)
             {
+                HandleAuthBillingException(e, guid);
                 result.Message = e.Message;
                 result.Status = false;
-                Response.StatusCode = 422;
             }
-            catch (Exception ex)
+            catch (BillingException ex)
             {
-                Debug.Fail(ex.ToString());
-                result.Message = ex.ToString();
+                HandleBillingException(ex, guid);
+                result.Message = ex.Message;
                 result.Status = false;
-                Response.StatusCode = 500;
+
+            }
+            catch (Exception exc)
+            {
+                HandleException(exc, guid);
+                result.Message = exc.ToString();
+                result.Status = false;
             }
             return result;
         }
+
+        private void Start(string message, Guid guid)
+        {
+            Console.WriteLine($"Action {message} for {guid} started");
+        }
+
+        private void Finish(Guid guid)
+        {
+            Console.WriteLine($"Action for {guid} finished");
+        }
+        private void HandleAuthBillingException(BillingAuthException e, Guid guid)
+        {
+            Response.StatusCode = 401;
+            Console.WriteLine($"AUTH ERROR for {guid}: {e.Message} ");
+        }
+
+        private void HandleBillingException(BillingException e, Guid guid)
+        {
+            Response.StatusCode = 422;
+            Console.WriteLine($"CUSTOM ERROR for {guid}: {e.Message}");
+        }
+        private void HandleException(Exception e, Guid guid)
+        {
+            Response.StatusCode = 500;
+            Console.WriteLine($"ERROR for {guid}: {e.ToString()}");
+        }
+
     }
 }

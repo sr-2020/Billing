@@ -20,10 +20,8 @@ namespace Core.Model
         [Column("shop")]
         public int ShopId { get; set; }
         public virtual ShopWallet Shop { get; set; }
-        [ForeignKey("sin")]
-        [Column("sin")]
-        public int SinId { get; set; }
-        public virtual SIN Sin { get; set; }
+        [Column("character")]
+        public int CharacterId { get; set; }
         [Column("base_price")]
         public decimal BasePrice { get; set; }
         [Column("date_created")]
@@ -34,5 +32,7 @@ namespace Core.Model
         public decimal Discount { get; set; }
         [Column("shop_comission")]
         public decimal ShopComission { get; set; }
+        [Column("final_price")]
+        public decimal FinalPrice { get; set; }
     }
 }

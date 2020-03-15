@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Billing
 {
-    public class LifeStyleHelper
+    public class BillingHelper
     {
 
         public static readonly Dictionary<Lifestyles, int> MaxValues = new Dictionary<Lifestyles, int>
@@ -31,6 +31,13 @@ namespace Billing
             }
             return Lifestyles.Iridium;
         }
+
+        public static decimal GetFinalPrice(decimal basePrice, decimal discount, decimal scoring)
+        {
+            return (basePrice - (basePrice * (discount / 100))) * scoring;
+        }
+
+
 
     }
 }

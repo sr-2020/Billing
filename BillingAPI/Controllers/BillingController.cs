@@ -18,58 +18,66 @@ namespace BillingAPI.Controllers
     {
 
         #region admin
+
         /// <summary>
         /// Fill all tables related with wallet for current character
         /// </summary>
-        /// <param name="character">ID from table Character</param>
+        /// <param name="characterId">ID from table Character</param>
         /// <param name="balance">initial wallet amount</param>
         /// <returns></returns>
         [HttpGet("admin/createphysicalwallet")]
-        public DataResult<SIN> CreatePhysicalWallet(int character, decimal balance)
+        public DataResult<SIN> CreatePhysicalWallet(int characterId, decimal balance)
         {
             var manager = IocContainer.Get<IBillingManager>(); 
-            var result = RunAction(() => manager.CreateOrUpdatePhysicalWallet(character, balance));
+            var result = RunAction(() => manager.CreateOrUpdatePhysicalWallet(characterId, balance), $"createphysicalwallet {characterId} {balance}");
             return result;
         }
+
         /// <summary>
         /// Create or update allowed product type
         /// </summary>
         /// <param name="code">unique code</param>
         /// <param name="name">shot description</param>
         /// <param name="description">full description</param>
+        /// <param name="lifestyle">lifestyle, from 1 to 6</param>
+        /// <param name="basePrice">recommended price</param>
         /// <returns></returns>
-        [HttpGet("admin/createorupdateproduct")]
-        public DataResult<ProductType> CreateOrUpdateProductType(string code, string name, string description)
+        [HttpPut("admin/createorupdateproduct")]
+        public DataResult<ProductType> CreateOrUpdateProductType(string code, string name, string description, int lifestyle, int basePrice)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdateProductType(code, name, description));
+            var result = RunAction(() => manager.CreateOrUpdateProductType(code, name, description, lifestyle, basePrice), $"createorupdateproduct {code} {name} {lifestyle} {basePrice}");
             return result;
         }
 
         /// <summary>
         /// Get corporation wallet. If wallet not exists, then create it
         /// </summary>
-        /// <param name="corporationId">any id</param>
-        /// <param name="amount">if negative value then amount will no change or 0 </param>
+        /// <param name="foreignId">Some unique id, set 0 if u want to autogenerate it</param>
+        /// <param name="amount">if negative then amount will not change</param>
+        /// <param name="name">Some name</param>
         /// <returns></returns>
-        [HttpGet("admin/CreateOrUpdateCorporationWallet")]
-        public DataResult<CorporationWallet> CreateOrUpdateCorporationWallet(int corporationId, decimal amount)
+        [HttpPut("admin/createorupdatecorporationwallet")]
+        public DataResult<CorporationWallet> CreateOrUpdateCorporationWallet(int foreignId, decimal amount, string name)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdateCorporationWallet(corporationId, amount));
+            var result = RunAction(() => manager.CreateOrUpdateCorporationWallet(foreignId, amount, name), $"createorupdatecorporationwallet {foreignId} {amount} {name}");
             return result;
         }
+
         /// <summary>
         /// Get shop wallet. If wallet not exists, then create it
         /// </summary>
-        /// <param name="shopId">any id</param>
+        /// <param name="foreignId">Some unique id, set 0 if u want to autogenerate it</param>
         /// <param name="amount">if negative value then amount will no change or 0</param>
+        /// <param name="name">Some name</param>
+        /// <param name="comission">Some name</param>
         /// <returns></returns>
-        [HttpGet("admin/CreateOrUpdateShopWallet")]
-        public DataResult<ShopWallet> CreateOrUpdateShopWallet(int shopId, decimal amount)
+        [HttpPut("admin/createorupdateshopwallet")]
+        public DataResult<ShopWallet> CreateOrUpdateShopWallet(int foreignId, decimal amount, string name, int comission)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdateShopWallet(shopId, amount));
+            var result = RunAction(() => manager.CreateOrUpdateShopWallet(foreignId, amount, name, comission), $"createorupdateshopwallet {foreignId} {amount} {name} {comission}");
             return result;
         }
 
@@ -123,21 +131,30 @@ namespace BillingAPI.Controllers
         /// <param name="shop"></param>
         /// <param name="character"></param>
         /// <param name="basePrice"></param>
-        /// <param name="shopComission"></param>
+        /// <param name="comission"></param>
         /// <returns></returns>
-        [HttpGet("renta/createprice")]
-        public DataResult<PriceDto> CreatePrice(int productType, int corporation, int shop, int character, decimal basePrice, decimal shopComission = 0)
+        [HttpPost("renta/createprice")]
+        public DataResult<PriceDto> CreatePrice(int productType, int corporation, int shop, int character, decimal basePrice, int comission)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetPrice(productType, corporation, shop, character, basePrice, shopComission));
+            var result = RunAction(() => manager.GetPrice(productType, corporation, shop, character, basePrice, comission));
             return result;
         }
+
+        [HttpPost("renta/createprice")]
+        public DataResult<PriceDto> CreatePrice(int skuId, int character)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetPrice(skuId, character));
+            return result;
+        }
+
         /// <summary>
         /// Create renta
         /// </summary>
         /// <param name="priceId">personal price created on api/billing/renta/createprice</param>
         /// <returns></returns>
-        [HttpGet("renta/createrenta ")]
+        [HttpPost("renta/createrenta ")]
         public DataResult<Renta> ConfirmRenta(int priceId)
         {
             var manager = IocContainer.Get<IBillingManager>();
@@ -147,6 +164,41 @@ namespace BillingAPI.Controllers
         #endregion
 
         #region info
+        [HttpGet("info/getrentas")]
+        public DataResult<List<RentaDto>> GetRentas(int characterId)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetRentas(characterId), "getrentas");
+            return result;
+        }
+
+        /// <summary>
+        /// Get all shops
+        /// </summary>
+        /// <returns>list of</returns>
+        [HttpGet("info/getshops")]
+        public DataResult<List<ShopDto>> GetShops()
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetShops(), "getshops");
+            return result;
+        }
+
+        [HttpGet("info/getcorps")]
+        public DataResult<List<CorporationDto>> GetCorps()
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetCorps(), "getcorps");
+            return result;
+        }
+
+        [HttpGet("info/getproducttypes")]
+        public DataResult<List<ProductTypeDto>> GetProductTypes()
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetProductTypes(), "getproducttypes");
+            return result;
+        }
 
         /// <summary>
         /// Get base info for current character
@@ -157,7 +209,7 @@ namespace BillingAPI.Controllers
         public DataResult<BalanceDto> GetBalance(int characterId)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetBalance(characterId));
+            var result = RunAction(() => manager.GetBalance(characterId), $"getbalance for {characterId}");
             return result;
         }
 
@@ -176,6 +228,7 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetSinStringByCharacter(characterId));
             return result;
         }
+
         /// <summary>
         /// Get all transfers(income and outcome) for current character
         /// </summary>
@@ -185,7 +238,7 @@ namespace BillingAPI.Controllers
         public DataResult<List<TransferDto>> GetTransfers(int characterId)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetTransfers(characterId));
+            var result = RunAction(() => manager.GetTransfers(characterId), $"gettransfers for {characterId}");
             return result;
         }
 

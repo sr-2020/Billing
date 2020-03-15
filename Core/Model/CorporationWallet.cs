@@ -14,6 +14,7 @@ namespace Core.Model
         [Column("wallet")]
         public int? WalletId { get; set; }
         public virtual Wallet Wallet { get; set; }
-
+        [Column("name")]
+        public string Name { get; set; }
     }
 }
