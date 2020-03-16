@@ -37,7 +37,7 @@ namespace BillingAPI.Controllers
         /// Create or update allowed product type
         /// </summary>
         /// <param name="code">unique code</param>
-        /// <param name="name">shot description</param>
+        /// <param name="name">short description</param>
         /// <param name="description">full description</param>
         /// <param name="lifestyle">lifestyle, from 1 to 6</param>
         /// <param name="basePrice">recommended price</param>
