@@ -124,7 +124,7 @@ namespace BillingAPI.Controllers
 
         #region renta
         /// <summary>
-        /// Create personal price to current productType for current character
+        /// Create new price
         /// </summary>
         /// <param name="productType"></param>
         /// <param name="corporation"></param>
@@ -140,8 +140,13 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetPrice(productType, corporation, shop, character, basePrice, comission));
             return result;
         }
-
-        [HttpPost("renta/createprice")]
+        /// <summary>
+        /// Create new price using sku
+        /// </summary>
+        /// <param name="skuId"></param>
+        /// <param name="character"></param>
+        /// <returns></returns>
+        [HttpPost("renta/createpricebysku")]
         public DataResult<PriceDto> CreatePrice(int skuId, int character)
         {
             var manager = IocContainer.Get<IBillingManager>();
@@ -154,7 +159,7 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <param name="priceId">personal price created on api/billing/renta/createprice</param>
         /// <returns></returns>
-        [HttpPost("renta/createrenta ")]
+        [HttpPost("renta/createrenta")]
         public DataResult<Renta> ConfirmRenta(int priceId)
         {
             var manager = IocContainer.Get<IBillingManager>();
@@ -164,6 +169,11 @@ namespace BillingAPI.Controllers
         #endregion
 
         #region info
+        /// <summary>
+        /// Get all rentas for current character
+        /// </summary>
+        /// <param name="characterId"></param>
+        /// <returns></returns>
         [HttpGet("info/getrentas")]
         public DataResult<List<RentaDto>> GetRentas(int characterId)
         {
@@ -183,7 +193,10 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetShops(), "getshops");
             return result;
         }
-
+        /// <summary>
+        /// Get all corporations
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("info/getcorps")]
         public DataResult<List<CorporationDto>> GetCorps()
         {
@@ -191,7 +204,10 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetCorps(), "getcorps");
             return result;
         }
-
+        /// <summary>
+        /// get all product types
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("info/getproducttypes")]
         public DataResult<List<ProductTypeDto>> GetProductTypes()
         {
