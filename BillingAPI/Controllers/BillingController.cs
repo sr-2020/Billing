@@ -22,14 +22,14 @@ namespace BillingAPI.Controllers
         /// <summary>
         /// Fill all tables related with wallet for current character
         /// </summary>
-        /// <param name="characterId">ID from table Character</param>
+        /// <param name="character">ID from table Character</param>
         /// <param name="balance">initial wallet amount</param>
         /// <returns></returns>
         [HttpGet("admin/createphysicalwallet")]
-        public DataResult<SIN> CreatePhysicalWallet(int characterId, decimal balance)
+        public DataResult<SIN> CreatePhysicalWallet(int character, decimal balance)
         {
             var manager = IocContainer.Get<IBillingManager>(); 
-            var result = RunAction(() => manager.CreateOrUpdatePhysicalWallet(characterId, balance), $"createphysicalwallet {characterId} {balance}");
+            var result = RunAction(() => manager.CreateOrUpdatePhysicalWallet(character, balance), $"createphysicalwallet {character} {balance}");
             return result;
         }
 
