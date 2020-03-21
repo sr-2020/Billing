@@ -339,7 +339,8 @@ namespace Billing
             Wallet wallet;
             if (id > 0)
             {
-                wallet = Get<Wallet>(w => w.Id == id && w.WalletType == (int)type);
+                var inttype = (int)type;
+                wallet = Get<Wallet>(w => w.Id == id && w.WalletType == inttype);
                 if (wallet == null)
                     throw new Exception($"кошелек {id} type {type} не найден");
             }
