@@ -8,15 +8,7 @@ namespace Core.Model
     [Table("product_type")]
     public class ProductType : BaseEntity
     {
-        [Column("code")]
-        public string Code { get; set; }
         [Column("name")]
         public string Name { get; set; }
-        [Column("description")]
-        public string Description { get; set; }
-        [Column("lifestyle")]
-        public int Lifestyle { get; set; }
-        [Column("base_price")]
-        public int BasePrice { get; set; }
     }
 }

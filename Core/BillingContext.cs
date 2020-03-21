@@ -32,6 +32,9 @@ namespace Core
         public DbSet<CorporationWallet> CorporationWallet { get; set; }
         public DbSet<Price> Price { get; set; }
         public DbSet<Renta> Renta { get; set; }
+        public DbSet<Sku> Sku { get; set; }
+        public DbSet<Specialisation> Specialisation { get; set; }
+        public DbSet<Contract> Contract { get; set; }
 
     }
 }

@@ -57,14 +57,15 @@ namespace Billing
 
         public List<ProductTypeDto> GetProductTypes()
         {
-            return GetList<ProductType>(p => true).Select(p =>
-                new ProductTypeDto
-                    {
-                        Code = p.Code,
-                        Name = p.Name,
-                        Description = p.Description,
-                        LifeStyle = ((Lifestyles)p.Lifestyle).ToString()
-                    }).ToList();
+            throw new NotImplementedException();
+            //return GetList<ProductType>(p => true).Select(p =>
+            //    new ProductTypeDto
+            //        {
+            //            Code = p.Code,
+            //            Name = p.Name,
+            //            Description = p.Description,
+            //            LifeStyle = ((Lifestyles)p.Lifestyle).ToString()
+            //        }).ToList();
         }
 
         public List<CorporationDto> GetCorps()
@@ -84,50 +85,53 @@ namespace Billing
                 {
                     Name = s.Name,
                     ForeignId = s.Foreign,
-                    Comission = s.Comission
+                    Comission = BillingHelper.GetComission(s.LifeStyle),
+                    Lifestyle = s.LifeStyle
                 }).ToList();
         }
 
         public List<RentaDto> GetRentas(int characterId)
         {
-            return GetList<Renta>(r => r.CharacterId == characterId, r => r.ProductType, r => r.Shop).Select(r =>
-                    new RentaDto
-                    {
-                        FinalPrice = r.FinalPrice,
-                        ProductType = r.ProductType.Name,
-                        Shop = r.Shop.Name
-                    }).ToList();
+            throw new NotImplementedException();
+            //return GetList<Renta>(r => r.CharacterId == characterId, r => r.ProductType, r => r.Shop).Select(r =>
+            //        new RentaDto
+            //        {
+            //            FinalPrice = r.FinalPrice,
+            //            ProductType = r.ProductType.Name,
+            //            Shop = r.Shop.Name
+            //        }).ToList();
         }
 
         public Renta ConfirmRenta(int priceId)
         {
-            var price = Get<Price>(p => p.Id == priceId, p => p.ProductType, s => s.Shop);
-            if (price == null)
-                throw new BillingException("Персональное предложение не найдено");
-            var dateTill = price.DateCreated.AddMinutes(_settings.GetIntValue("price_minutes"));
-            if (dateTill < DateTime.Now)
-                throw new BillingException($"Персональное предложение больше не действительно, оно истекло {dateTill.ToString("HH:mm:ss")}");
-            var sin = GetSIN(price.CharacterId, s => s.Wallet);
-            if (sin.Wallet.Balance - price.FinalPrice < 0)
-            {
-                throw new BillingException("Недостаточно средств");
-            }
-            var mir = GetMIR();
-            MakeNewTransfer(mir, sin.Wallet, price.FinalPrice, $"Первый платеж по ренте {price.ProductType.Name} купленный в {price.Shop.Name}");
-            var renta = new Renta
-            {
-                BasePrice = price.BasePrice,
-                CharacterId = sin.CharacterId,
-                CorporationId = price.CorporationId,
-                CurrentScoring = price.CurrentScoring,
-                DateCreated = DateTime.Now,
-                Discount = price.Discount,
-                FinalPrice = price.FinalPrice,
-                ProductTypeId = price.ProductTypeId,
-                ShopComission = price.ShopComission,
-                ShopId = price.ShopId
-            };
-            return renta;
+            throw new NotImplementedException();
+            //var price = Get<Price>(p => p.Id == priceId, p => p.ProductType, s => s.Shop);
+            //if (price == null)
+            //    throw new BillingException("Персональное предложение не найдено");
+            //var dateTill = price.DateCreated.AddMinutes(_settings.GetIntValue("price_minutes"));
+            //if (dateTill < DateTime.Now)
+            //    throw new BillingException($"Персональное предложение больше не действительно, оно истекло {dateTill.ToString("HH:mm:ss")}");
+            //var sin = GetSIN(price.CharacterId, s => s.Wallet);
+            //if (sin.Wallet.Balance - price.FinalPrice < 0)
+            //{
+            //    throw new BillingException("Недостаточно средств");
+            //}
+            //var mir = GetMIR();
+            //MakeNewTransfer(mir, sin.Wallet, price.FinalPrice, $"Первый платеж по ренте {price.ProductType.Name} купленный в {price.Shop.Name}");
+            //var renta = new Renta
+            //{
+            //    BasePrice = price.BasePrice,
+            //    CharacterId = sin.CharacterId,
+            //    CorporationId = price.CorporationId,
+            //    CurrentScoring = price.CurrentScoring,
+            //    DateCreated = DateTime.Now,
+            //    Discount = price.Discount,
+            //    FinalPrice = price.FinalPrice,
+            //    ProductTypeId = price.ProductTypeId,
+            //    ShopComission = price.ShopComission,
+            //    ShopId = price.ShopId
+            //};
+            //return renta;
         }
 
         public PriceDto GetPrice(int skuId, int character)
@@ -191,12 +195,16 @@ namespace Billing
                 shop = new ShopWallet
                 {
                     Foreign = foreignKey,
-                    Wallet = newWallet
+                    Wallet = newWallet,
+                    LifeStyle = (int)Lifestyles.Wood
                 };
             }
             shop.Name = name;
             shop.Wallet.Balance = amount;
-            shop.Comission = comission;
+            if(Enum.IsDefined(typeof(Lifestyles), shop.LifeStyle))
+                shop.LifeStyle = shop.LifeStyle;
+            else
+                shop.LifeStyle = (int)Lifestyles.Wood;
             Add(shop);
             Context.SaveChanges();
             return shop;
@@ -254,24 +262,25 @@ namespace Billing
 
         public ProductType CreateOrUpdateProductType(string code, string name, string description, int lifestyle, int basePrice)
         {
-            var type = Get<ProductType>(p => p.Code == code);
-            if (!Enum.IsDefined(typeof(Lifestyles), lifestyle))
-                throw new BillingException($"lifestyle must be valid from 1 to 6, recieved {lifestyle}");
+            throw new NotImplementedException();
+            //var type = Get<ProductType>(p => p.Code == code);
+            //if (!Enum.IsDefined(typeof(Lifestyles), lifestyle))
+            //    throw new BillingException($"lifestyle must be valid from 1 to 6, recieved {lifestyle}");
 
-            if (type == null)
-            {
-                type = new ProductType
-                {
-                    Code = code
-                };
-            }
-            type.BasePrice = basePrice;
-            type.Name = name;
-            type.Description = description;
-            type.Lifestyle = lifestyle;
-            Add(type);
-            Context.SaveChanges();
-            return type;
+            //if (type == null)
+            //{
+            //    type = new ProductType
+            //    {
+            //        Code = code
+            //    };
+            //}
+            //type.BasePrice = basePrice;
+            //type.Name = name;
+            //type.Description = description;
+            //type.Lifestyle = lifestyle;
+            //Add(type);
+            //Context.SaveChanges();
+            //return type;
         }
 
         public SIN CreateOrUpdatePhysicalWallet(int character = 0, decimal balance = 50)
@@ -460,32 +469,33 @@ namespace Billing
         }
         private Price CreateNewPrice(ProductType productType, CorporationWallet corporation, ShopWallet shop, SIN sin)
         {
-            decimal discount;
-            try
-            {
-                discount = EreminService.GetDiscount(sin.CharacterId);
-            }
-            catch (Exception e)
-            {
-                discount = 0;
-            }
-
-            var price = new Price
-            {
-                ProductTypeId = productType.Id,
-                CorporationId = corporation.Id,
-                ShopId = shop.Id,
-                BasePrice = productType.BasePrice,
-                CurrentScoring = sin.Scoring.CurrentScoring,
-                DateCreated = DateTime.Now,
-                Discount = discount,
-                CharacterId = sin.CharacterId,
-                ShopComission = shop.Comission,
-                FinalPrice = BillingHelper.GetFinalPrice(productType.BasePrice, discount, sin.Scoring.CurrentScoring)
-            };
-            Add(price);
-            Context.SaveChanges();
-            return price;
+            throw new NotImplementedException();
+            //decimal discount;
+            //try
+            //{
+            //    discount = EreminService.GetDiscount(sin.CharacterId);
+            //}
+            //catch (Exception e)
+            //{
+            //    discount = 0;
+            //}
+            
+            //var price = new Price
+            //{
+            //    ProductTypeId = productType.Id,
+            //    CorporationId = corporation.Id,
+            //    ShopId = shop.Id,
+            //    BasePrice = productType.BasePrice,
+            //    CurrentScoring = sin.Scoring.CurrentScoring,
+            //    DateCreated = DateTime.Now,
+            //    Discount = discount,
+            //    CharacterId = sin.CharacterId,
+            //    ShopComission = shop.Comission,
+            //    FinalPrice = BillingHelper.GetFinalPrice(productType.BasePrice, discount, sin.Scoring.CurrentScoring)
+            //};
+            //Add(price);
+            //Context.SaveChanges();
+            //return price;
         }
         #endregion
     }

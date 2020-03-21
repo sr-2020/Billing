@@ -10,5 +10,6 @@ namespace Billing.DTO
         public int ForeignId { get; set; }
         public string Name { get; set; }
         public int Comission { get; set; }
+        public int Lifestyle { get; set; }
     }
 }

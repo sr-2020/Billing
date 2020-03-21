@@ -10,20 +10,9 @@ namespace Billing
     public class BillingHelper
     {
 
-        public static readonly Dictionary<Lifestyles, int> MaxValues = new Dictionary<Lifestyles, int>
-        {
-            { Lifestyles.Wood, 100 },
-            { Lifestyles.Bronze, 200 },
-            { Lifestyles.Silver, 300 },
-            { Lifestyles.Gold, 400 },
-            { Lifestyles.Platinum, 500 },
-            { Lifestyles.Iridium, 600 },
-        };
-
         public static Lifestyles GetLifeStyle(decimal balance)
         {
             var manager = IocContainer.Get<ISettingsManager>();
-
             foreach (Lifestyles lifestyle in Enum.GetValues(typeof(Lifestyles)))
             {
                 if (balance < manager.GetIntValue(lifestyle.ToString().ToLower()))
@@ -37,7 +26,11 @@ namespace Billing
             return (basePrice - (basePrice * (discount / 100))) * scoring;
         }
 
-
+        public static int GetComission(int shopLifestyle)
+        {
+            var manager = IocContainer.Get<ISettingsManager>();
+            return manager.GetIntValue($"shop{((Lifestyles)shopLifestyle).ToString().ToLower()}");
+        }
 
     }
 }

@@ -8,13 +8,10 @@ namespace Core.Model
     [Table("renta")]
     public class Renta : BaseEntity
     {
-        [ForeignKey("product_type")]
-        [Column("product_type")]
-        public int ProductTypeId { get; set; }
-        public virtual ProductType ProductType { get; set; }
-        [ForeignKey("corporation")]
-        [Column("corporation")]
-        public int CorporationId { get; set; }
+        [ForeignKey("sku")]
+        [Column("sku")]
+        public int SkuId { get; set; }
+        public virtual Sku Sku { get; set; }
         public virtual CorporationWallet Corporation { get; set; }
         [ForeignKey("shop")]
         [Column("shop")]

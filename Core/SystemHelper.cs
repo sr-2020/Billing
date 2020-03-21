@@ -19,13 +19,15 @@ namespace Core
                 throw new ArgumentNullException("Configuration is null");
             var user = Environment.GetEnvironmentVariable(_configuration.GetConnectionString(dataBase + "User"));
             var password = Environment.GetEnvironmentVariable(_configuration.GetConnectionString(dataBase + "Password"));
-            var db = _configuration.GetConnectionString(dataBase);
+            var host = Environment.GetEnvironmentVariable(_configuration.GetConnectionString("host"));
             
+            var db = Environment.GetEnvironmentVariable(_configuration.GetConnectionString(dataBase));
+
             if (string.IsNullOrEmpty(user))
                 throw new ArgumentNullException("Environment user is empty");
             if (string.IsNullOrEmpty(db))
                 throw new ArgumentException("DataBase connection string is empty");
-            return $"{db} User Id = {user}; Password = {password}";
+            return $"Server = {host}; Database = {db}; persist security info = True;User Id = {user}; Password = {password}";
         }
 
         public static DateTime ConvertDateTimeToLocal(DateTime? dateTime = null)
