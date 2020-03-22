@@ -123,34 +123,20 @@ namespace BillingAPI.Controllers
         #endregion
 
         #region renta
-        /// <summary>
-        /// Create new price
-        /// </summary>
-        /// <param name="productType"></param>
-        /// <param name="corporation"></param>
-        /// <param name="shop"></param>
-        /// <param name="character"></param>
-        /// <param name="basePrice"></param>
-        /// <param name="comission"></param>
-        /// <returns></returns>
-        [HttpPost("renta/createprice")]
-        public DataResult<PriceDto> CreatePrice(int productType, int corporation, int shop, int character, decimal basePrice, int comission)
+
+        [HttpGet("renta/getsku")]
+        public DataResult<List<SkuDto>> GetSkus(int shop)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetPrice(productType, corporation, shop, character, basePrice, comission));
+            var result = RunAction(() => manager.GetSkus(shop), $"getsku {shop}");
             return result;
         }
-        /// <summary>
-        /// Create new price using sku
-        /// </summary>
-        /// <param name="skuId"></param>
-        /// <param name="character"></param>
-        /// <returns></returns>
-        [HttpPost("renta/createpricebysku")]
-        public DataResult<PriceDto> CreatePrice(int skuId, int character)
+
+        [HttpPost("renta/createpricesbyshop")]
+        public DataResult<List<PriceDto>> GetPriceByShop(int character, int shop)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetPrice(skuId, character));
+            var result = RunAction(() => manager.GetPrice(shop, character));
             return result;
         }
 
@@ -169,6 +155,7 @@ namespace BillingAPI.Controllers
         #endregion
 
         #region info
+
         /// <summary>
         /// Get all rentas for current character
         /// </summary>

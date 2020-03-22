@@ -32,8 +32,8 @@ namespace Billing
         #region web
 
         Renta ConfirmRenta(int priceId);
-        PriceDto GetPrice(int productTypeId, int corporationId, int shopId, int character, decimal basePrice, int comission);
-        PriceDto GetPrice(int skuId, int character);
+        List<SkuDto> GetSkus(int shop);
+        List<PriceDto> GetPrice(int shopId, int character);
         List<ShopDto> GetShops();
         List<CorporationDto> GetCorps();
         List<ProductTypeDto> GetProductTypes();
@@ -57,15 +57,12 @@ namespace Billing
 
         public List<ProductTypeDto> GetProductTypes()
         {
-            throw new NotImplementedException();
-            //return GetList<ProductType>(p => true).Select(p =>
-            //    new ProductTypeDto
-            //        {
-            //            Code = p.Code,
-            //            Name = p.Name,
-            //            Description = p.Description,
-            //            LifeStyle = ((Lifestyles)p.Lifestyle).ToString()
-            //        }).ToList();
+            return GetList<ProductType>(p => true).Select(p =>
+                new ProductTypeDto
+                {
+                    Id = p.Id,
+                    Name = p.Name
+                }).ToList();
         }
 
         public List<CorporationDto> GetCorps()
@@ -73,8 +70,8 @@ namespace Billing
             return GetList<CorporationWallet>(c => true).Select(c =>
                 new CorporationDto
                 {
-                    Name = c.Name,
-                    ForeignId = c.Foreign
+                    Id = c.Id,
+                    Name = c.Name
                 }).ToList();
         }
 
@@ -84,11 +81,27 @@ namespace Billing
                 new ShopDto
                 {
                     Name = s.Name,
-                    ForeignId = s.Foreign,
                     Comission = BillingHelper.GetComission(s.LifeStyle),
                     Lifestyle = s.LifeStyle
                 }).ToList();
         }
+
+        public List<SkuDto> GetSkus(int shop)
+        {
+            return GetSkuList(shop).Select(s => new SkuDto
+            {
+                BasePrice = s.Nomenklatura.BasePrice,
+                CorporationName = s.Corporation.Name,
+                Count = s.Count,
+                Description = s.Nomenklatura.Description,
+                Hidden = string.Empty,
+                NomenklaturaName = s.Nomenklatura.Name,
+                SkuName = s.Name,
+                TypeName = s.Nomenklatura.Name
+            }).ToList();
+        }
+
+
 
         public List<RentaDto> GetRentas(int characterId)
         {
@@ -134,31 +147,9 @@ namespace Billing
             //return renta;
         }
 
-        public PriceDto GetPrice(int skuId, int character)
+        public List<PriceDto> GetPrice(int character, int shop)
         {
             throw new NotImplementedException();
-        }
-
-        public PriceDto GetPrice(int productTypeId, int corporationId, int shopId, int character, decimal basePrice, int comission)
-        {
-            var productType = Get<ProductType>(t => t.Id == productTypeId);
-            if (productType == null)
-                throw new Exception($"producttype {productTypeId} not found");
-            var corporation = Get<CorporationWallet>(c => c.Foreign == corporationId);
-            if (corporation == null)
-                corporation = CreateOrUpdateCorporationWallet();
-            var shop = Get<ShopWallet>(s => s.Foreign == shopId);
-            if (shop == null)
-                shop = CreateOrUpdateShopWallet();
-            var sin = GetSIN(character);
-            var newPrice = CreateNewPrice(productType, corporation, shop, sin);
-            var dto = new PriceDto()
-            {
-                FinalPrice = newPrice.FinalPrice,
-                DateTill = newPrice.DateCreated.AddMinutes(_settings.GetIntValue("price_minutes")),
-                PriceId = newPrice.Id
-            };
-            return dto;
         }
 
         public CorporationWallet CreateOrUpdateCorporationWallet(int foreignKey = 0, decimal amount = 0, string name = "default corporation")
@@ -186,22 +177,23 @@ namespace Billing
             return corporation;
         }
 
-        public ShopWallet CreateOrUpdateShopWallet(int foreignKey = 0, decimal amount = 0, string name = "default shop", int comission = 1)
+        public ShopWallet CreateOrUpdateShopWallet(int shopId = 0, decimal amount = 0, string name = "default shop", int comission = 1)
         {
-            var shop = Get<ShopWallet>(w => w.Foreign == foreignKey, s => s.Wallet);
+            ShopWallet shop = null;
+            if (shopId > 0)
+                shop = Get<ShopWallet>(w => w.Id == shopId, s => s.Wallet);
             if (shop == null)
             {
                 var newWallet = CreateOrUpdateWallet(WalletTypes.Shop);
                 shop = new ShopWallet
                 {
-                    Foreign = foreignKey,
                     Wallet = newWallet,
                     LifeStyle = (int)Lifestyles.Wood
                 };
             }
             shop.Name = name;
             shop.Wallet.Balance = amount;
-            if(Enum.IsDefined(typeof(Lifestyles), shop.LifeStyle))
+            if (Enum.IsDefined(typeof(Lifestyles), shop.LifeStyle))
                 shop.LifeStyle = shop.LifeStyle;
             else
                 shop.LifeStyle = (int)Lifestyles.Wood;
@@ -343,6 +335,18 @@ namespace Billing
 
         private string _ownerName = "Владелец кошелька";
 
+        private List<Sku> GetSkuList(int shopId)
+        {
+            var result = new List<Sku>();
+            var contracts = GetList<Contract>(c => c.ShopId == shopId);
+            foreach (var contract in contracts)
+            {
+                result.AddRange(GetList<Sku>(s => s.CorporationId == contract.CorporationId && s.Enabled, s => s.Corporation, s => s.Nomenklatura, s => s.Nomenklatura.ProductType));
+            }
+            //TODO filter by specialisation
+            //TODO filter by contractlimit
+            return result;
+        }
         private Wallet CreateOrUpdateWallet(WalletTypes type, int id = 0, decimal amount = 0)
         {
             Wallet wallet;
@@ -419,7 +423,7 @@ namespace Billing
                     var shop = Get<ShopWallet>(c => c.WalletId == wallet.Id);
                     if (shop == null)
                         return string.Empty;
-                    return $"Shop {shop.Foreign}";
+                    return $"Shop {shop.Id}";
                 case (int)WalletTypes.MIR:
                     return "MIR";
                 default:
@@ -467,35 +471,33 @@ namespace Billing
             Context.SaveChanges();
             return transfer;
         }
-        private Price CreateNewPrice(ProductType productType, CorporationWallet corporation, ShopWallet shop, SIN sin)
+        private Price CreateNewPrice(Sku sku, ShopWallet shop, SIN sin)
         {
-            throw new NotImplementedException();
-            //decimal discount;
-            //try
-            //{
-            //    discount = EreminService.GetDiscount(sin.CharacterId);
-            //}
-            //catch (Exception e)
-            //{
-            //    discount = 0;
-            //}
-            
-            //var price = new Price
-            //{
-            //    ProductTypeId = productType.Id,
-            //    CorporationId = corporation.Id,
-            //    ShopId = shop.Id,
-            //    BasePrice = productType.BasePrice,
-            //    CurrentScoring = sin.Scoring.CurrentScoring,
-            //    DateCreated = DateTime.Now,
-            //    Discount = discount,
-            //    CharacterId = sin.CharacterId,
-            //    ShopComission = shop.Comission,
-            //    FinalPrice = BillingHelper.GetFinalPrice(productType.BasePrice, discount, sin.Scoring.CurrentScoring)
-            //};
-            //Add(price);
-            //Context.SaveChanges();
-            //return price;
+            decimal discount;
+            try
+            {
+                discount = EreminService.GetDiscount(sin.CharacterId);
+            }
+            catch (Exception e)
+            {
+                discount = 0;
+            }
+
+            var price = new Price
+            {
+                SkuId = sku.Id,
+                ShopId = shop.Id,
+                BasePrice = sku.Nomenklatura.BasePrice,
+                CurrentScoring = sin.Scoring.CurrentScoring,
+                DateCreated = DateTime.Now,
+                Discount = discount,
+                CharacterId = sin.CharacterId,
+                ShopComission = BillingHelper.GetComission(shop.LifeStyle),
+                FinalPrice = BillingHelper.GetFinalPrice(sku.Nomenklatura.BasePrice, discount, sin.Scoring.CurrentScoring)
+            };
+            Add(price);
+            Context.SaveChanges();
+            return price;
         }
         #endregion
     }

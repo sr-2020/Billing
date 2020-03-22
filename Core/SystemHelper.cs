@@ -14,15 +14,12 @@ namespace Core
 
         public static string GetConnectionString(string dataBase)
         {
-               
             if (_configuration == null)
                 throw new ArgumentNullException("Configuration is null");
             var user = Environment.GetEnvironmentVariable(_configuration.GetConnectionString(dataBase + "User"));
             var password = Environment.GetEnvironmentVariable(_configuration.GetConnectionString(dataBase + "Password"));
             var host = Environment.GetEnvironmentVariable(_configuration.GetConnectionString("host"));
-            
             var db = Environment.GetEnvironmentVariable(_configuration.GetConnectionString(dataBase));
-
             if (string.IsNullOrEmpty(user))
                 throw new ArgumentNullException("Environment user is empty");
             if (string.IsNullOrEmpty(db))

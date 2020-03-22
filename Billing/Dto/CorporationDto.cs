@@ -7,7 +7,6 @@ namespace Billing.DTO
     public class CorporationDto
     {
         public int Id { get; set; }
-        public int ForeignId { get; set; }
         public string Name { get; set; }
     }
 }
