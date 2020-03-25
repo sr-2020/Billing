@@ -30,7 +30,8 @@ namespace Billing
         #endregion
 
         #region web
-
+        void BreakContract(int corporation, int shop);
+        Contract CreateContract(int corporation, int shop);
         Renta ConfirmRenta(int priceId);
         List<SkuDto> GetSkus(int shop);
         List<PriceDto> GetPrice(int shopId, int character);
@@ -54,6 +55,31 @@ namespace Billing
     public class BillingManager : BaseEntityRepository, IBillingManager
     {
         ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
+
+        public void BreakContract(int corporation, int shop)
+        {
+            var contract = Get<Contract>(c => c.CorporationId == corporation && c.ShopId == shop);
+            if (contract == null)
+                throw new BillingException("Контракт не найден");
+            Remove(contract);
+            Context.SaveChanges();
+        }
+
+        public Contract CreateContract(int corporation, int shop) 
+        {
+            var contract = Get<Contract>(c => c.CorporationId == corporation && c.ShopId == shop);
+            if (contract != null)
+                throw new BillingException("Контракт уже заключен");
+            //TODO CONTRACT LIMIT
+            var newContract = new Contract
+            {
+                ShopId = shop,
+                CorporationId = corporation
+            };
+            Add(newContract);
+            Context.SaveChanges();
+            return newContract;
+        }
 
         public List<ProductTypeDto> GetProductTypes()
         {

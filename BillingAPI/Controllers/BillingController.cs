@@ -124,15 +124,23 @@ namespace BillingAPI.Controllers
 
         #region renta
 
-        [HttpGet("renta/getsku")]
-        public DataResult<List<SkuDto>> GetSkus(int shop)
+        [HttpPost("renta/createcontract")]
+        public DataResult<Contract> CreateContract(int corporation, int shop)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetSkus(shop), $"getsku {shop}");
+            var result = RunAction(() => manager.CreateContract(corporation, shop), $"CreateContract {corporation} {shop}");
             return result;
         }
 
-        [HttpPost("renta/createpricesbyshop")]
+        [HttpDelete("renta/breakcontract")]
+        public Result BreakContract(int corporation, int shop)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.BreakContract(corporation, shop), $"BreakContract {corporation} {shop}");
+            return result;
+        }
+
+        [HttpPost("renta/createprices")]
         public DataResult<List<PriceDto>> GetPriceByShop(int character, int shop)
         {
             var manager = IocContainer.Get<IBillingManager>();
@@ -155,7 +163,18 @@ namespace BillingAPI.Controllers
         #endregion
 
         #region info
-
+        /// <summary>
+        /// Get all allowed sku for current shop
+        /// </summary>
+        /// <param name="shop"></param>
+        /// <returns></returns>
+        [HttpGet("info/getsku")]
+        public DataResult<List<SkuDto>> GetSkus(int shop)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetSkus(shop), $"getsku {shop}");
+            return result;
+        }
         /// <summary>
         /// Get all rentas for current character
         /// </summary>
