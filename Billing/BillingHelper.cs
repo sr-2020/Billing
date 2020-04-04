@@ -21,6 +21,14 @@ namespace Billing
             return Lifestyles.Iridium;
         }
 
+        public static Lifestyles GetLifestyle(int lifestyle)
+        {
+            if (Enum.IsDefined(typeof(Lifestyles), lifestyle))
+                return (Lifestyles)lifestyle;
+            else
+                return Lifestyles.Wood;
+        }
+
         public static decimal GetFinalPrice(decimal basePrice, decimal discount, decimal scoring)
         {
             return (basePrice - (basePrice * (discount / 100))) * scoring;

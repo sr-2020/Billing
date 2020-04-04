@@ -9,6 +9,7 @@ namespace Core.Model
     public class Sku : BaseEntity
     {
         [Column("nomenklatura")]
+        public int NomenklaturaId { get; set; }
         public virtual Nomenklatura Nomenklatura { get; set; }
         [Column("count")]
         public int Count { get; set; }

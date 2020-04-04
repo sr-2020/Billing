@@ -8,8 +8,6 @@ namespace Core.Model
     [Table("corporation_wallet")]
     public class CorporationWallet : BaseEntity
     {
-        [Column("id_foreign")]
-        public int Foreign { get; set; }
         [ForeignKey("wallet")]
         [Column("wallet")]
         public int? WalletId { get; set; }

@@ -36,48 +36,82 @@ namespace BillingAPI.Controllers
         /// <summary>
         /// Create or update allowed product type
         /// </summary>
-        /// <param name="code">unique code</param>
+        /// <param name="id">0 for create new, specified for update</param>
         /// <param name="name">short description</param>
-        /// <param name="description">full description</param>
-        /// <param name="lifestyle">lifestyle, from 1 to 6</param>
-        /// <param name="basePrice">recommended price</param>
         /// <returns></returns>
         [HttpPut("admin/createorupdateproduct")]
-        public DataResult<ProductType> CreateOrUpdateProductType(string code, string name, string description, int lifestyle, int basePrice)
+        public DataResult<ProductType> CreateOrUpdateProductType(int id, string name)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdateProductType(code, name, description, lifestyle, basePrice), $"createorupdateproduct {code} {name} {lifestyle} {basePrice}");
+            var result = RunAction(() => manager.CreateOrUpdateProductType(id, name), $"createorupdateproduct {id} {name}");
+            return result;
+        }
+
+        /// <summary>
+        /// Create or update allowed nomenklatura
+        /// </summary>
+        /// <param name="id">0 for create new, specified for update</param>
+        /// <param name="name">Header of product</param>
+        /// <param name="code">it will be executed when user byu sku of this nomenklatura</param>
+        /// <param name="producttype">id from getproducttypes</param>
+        /// <param name="lifestyle">from 1 to 6</param>
+        /// <param name="baseprice">decimal base price</param>
+        /// <param name="description">description shown for user</param>
+        /// <returns></returns>
+        [HttpPut("admin/createorupdatenomenklatura")]
+        public DataResult<Nomenklatura> CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.CreateOrUpdateNomenklatura(id, name, code, producttype, lifestyle, baseprice, description), $"createorupdatenomenklatura {id}:{name}:{code}:{producttype}:{lifestyle}:{baseprice}:{description}");
+            return result;
+        }
+
+        /// <summary>
+        /// Create or update allowed sku
+        /// </summary>
+        /// <param name="id">0 for create new, specified for update</param>
+        /// <param name="nomenklatura">id from getnomenklaturas</param>
+        /// <param name="count">count of this item, minimum 1</param>
+        /// <param name="corporation">id from getcorps</param>
+        /// <param name="name">header</param>
+        /// <param name="enabled"></param>
+        /// <returns></returns>
+        [HttpPut("admin/createorupdatesku")]
+        public DataResult<Sku> CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.CreateOrUpdateSku(id, nomenklatura, count, corporation, name, enabled), $"CreateOrUpdateSku {id}:{name}:{nomenklatura}:{count}:{corporation}:{name}:{enabled}");
             return result;
         }
 
         /// <summary>
         /// Get corporation wallet. If wallet not exists, then create it
         /// </summary>
-        /// <param name="foreignId">Some unique id, set 0 if u want to autogenerate it</param>
+        /// <param name="id">0 for create new, specified for update</param>
         /// <param name="amount">if negative then amount will not change</param>
         /// <param name="name">Some name</param>
         /// <returns></returns>
         [HttpPut("admin/createorupdatecorporationwallet")]
-        public DataResult<CorporationWallet> CreateOrUpdateCorporationWallet(int foreignId, decimal amount, string name)
+        public DataResult<CorporationWallet> CreateOrUpdateCorporationWallet(int id, decimal amount, string name)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdateCorporationWallet(foreignId, amount, name), $"createorupdatecorporationwallet {foreignId} {amount} {name}");
+            var result = RunAction(() => manager.CreateOrUpdateCorporationWallet(id, amount, name), $"createorupdatecorporationwallet {id} {amount} {name}");
             return result;
         }
 
         /// <summary>
         /// Get shop wallet. If wallet not exists, then create it
         /// </summary>
-        /// <param name="foreignId">Some unique id, set 0 if u want to autogenerate it</param>
+        /// <param name="foreignId">0 for create new, specified for update</param>
         /// <param name="amount">if negative value then amount will no change or 0</param>
         /// <param name="name">Some name</param>
-        /// <param name="comission">Some name</param>
+        /// <param name="lifestyle">lifestyle from 1 to 6</param>
         /// <returns></returns>
         [HttpPut("admin/createorupdateshopwallet")]
-        public DataResult<ShopWallet> CreateOrUpdateShopWallet(int foreignId, decimal amount, string name, int comission)
+        public DataResult<ShopWallet> CreateOrUpdateShopWallet(int foreignId, decimal amount, string name, int lifestyle)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdateShopWallet(foreignId, amount, name, comission), $"createorupdateshopwallet {foreignId} {amount} {name} {comission}");
+            var result = RunAction(() => manager.CreateOrUpdateShopWallet(foreignId, amount, name, lifestyle), $"createorupdateshopwallet {foreignId} {amount} {name} {lifestyle}");
             return result;
         }
 

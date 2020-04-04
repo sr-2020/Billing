@@ -33,7 +33,7 @@ namespace Core
 
         public virtual void Add<T>(T entity) where T : BaseEntity
         {
-            if(entity.Id != 0)
+            if(entity.Id > 0)
                 Context.Entry(entity).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
             else
                 Context.Entry(entity).State = Microsoft.EntityFrameworkCore.EntityState.Added;
@@ -43,11 +43,12 @@ namespace Core
         {
             foreach (var entity in entities)
             {
-                if (entity.Id != 0)
-                    Context.Entry(entity).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                Context.Set<T>().Add(entity);
+                Add(entity);
+                //if (entity.Id > 0)
+                //    Context.Entry(entity).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                //Context.Set<T>().Add(entity);
             }
-            Context.Set<T>().AddRange(entities);
+            //Context.Set<T>().AddRange(entities);
         }
 
         public virtual void Remove<T>(T entity) where T : class

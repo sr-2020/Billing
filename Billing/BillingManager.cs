@@ -42,11 +42,12 @@ namespace Billing
         #endregion
 
         #region admin
-
+        Sku CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled);
+        Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description);
         SIN CreateOrUpdatePhysicalWallet(int character, decimal balance);
-        ProductType CreateOrUpdateProductType(string code, string name, string description, int lifestyle, int basePrice);
-        CorporationWallet CreateOrUpdateCorporationWallet(int foreignKey, decimal amount, string name);
-        ShopWallet CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int comission);
+        ProductType CreateOrUpdateProductType(int id, string name);
+        CorporationWallet CreateOrUpdateCorporationWallet(int id, decimal amount, string name);
+        ShopWallet CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle);
 
         #endregion
 
@@ -65,7 +66,7 @@ namespace Billing
             Context.SaveChanges();
         }
 
-        public Contract CreateContract(int corporation, int shop) 
+        public Contract CreateContract(int corporation, int shop)
         {
             var contract = Get<Contract>(c => c.CorporationId == corporation && c.ShopId == shop);
             if (contract != null)
@@ -93,23 +94,25 @@ namespace Billing
 
         public List<CorporationDto> GetCorps()
         {
-            return GetList<CorporationWallet>(c => true).Select(c =>
-                new CorporationDto
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                }).ToList();
+            return GetList<CorporationWallet>(c => true, c => c.Wallet).Select(c =>
+                  new CorporationDto
+                  {
+                      Id = c.Id,
+                      Name = c.Name,
+                      Balance = c.Wallet.Balance
+                  }).ToList();
         }
 
         public List<ShopDto> GetShops()
         {
-            return GetList<ShopWallet>(c => true).Select(s =>
-                new ShopDto
-                {
-                    Name = s.Name,
-                    Comission = BillingHelper.GetComission(s.LifeStyle),
-                    Lifestyle = s.LifeStyle
-                }).ToList();
+            return GetList<ShopWallet>(c => true, c => c.Wallet).Select(s =>
+                  new ShopDto
+                  {
+                      Name = s.Name,
+                      Comission = BillingHelper.GetComission(s.LifeStyle),
+                      Lifestyle = s.LifeStyle,
+                      Balance = s.Wallet.Balance
+                  }).ToList();
         }
 
         public List<SkuDto> GetSkus(int shop)
@@ -178,32 +181,28 @@ namespace Billing
             throw new NotImplementedException();
         }
 
-        public CorporationWallet CreateOrUpdateCorporationWallet(int foreignKey = 0, decimal amount = 0, string name = "default corporation")
+        public CorporationWallet CreateOrUpdateCorporationWallet(int corpId = 0, decimal amount = 0, string name = "unknown corporation")
         {
-            var corporation = Get<CorporationWallet>(w => w.Foreign == foreignKey, c => c.Wallet);
+            CorporationWallet corporation = null;
+            if (corpId > 0)
+                corporation = Get<CorporationWallet>(w => w.Id == corpId, c => c.Wallet);
             if (corporation == null)
             {
                 var newWallet = CreateOrUpdateWallet(WalletTypes.Corporation);
                 corporation = new CorporationWallet
                 {
-                    Foreign = foreignKey,
-                    Wallet = newWallet
+                    Wallet = newWallet,
+                    Id = corpId
                 };
             }
             corporation.Name = name;
             corporation.Wallet.Balance = amount;
             Add(corporation);
             Context.SaveChanges();
-            if (corporation.Foreign == 0)
-            {
-                corporation.Foreign = corporation.Id;
-                Add(corporation);
-                Context.SaveChanges();
-            }
             return corporation;
         }
 
-        public ShopWallet CreateOrUpdateShopWallet(int shopId = 0, decimal amount = 0, string name = "default shop", int comission = 1)
+        public ShopWallet CreateOrUpdateShopWallet(int shopId = 0, decimal amount = 0, string name = "default shop", int lifestyle = 1)
         {
             ShopWallet shop = null;
             if (shopId > 0)
@@ -214,15 +213,12 @@ namespace Billing
                 shop = new ShopWallet
                 {
                     Wallet = newWallet,
-                    LifeStyle = (int)Lifestyles.Wood
+                    Id = shopId
                 };
             }
             shop.Name = name;
             shop.Wallet.Balance = amount;
-            if (Enum.IsDefined(typeof(Lifestyles), shop.LifeStyle))
-                shop.LifeStyle = shop.LifeStyle;
-            else
-                shop.LifeStyle = (int)Lifestyles.Wood;
+            shop.LifeStyle = (int)BillingHelper.GetLifestyle(lifestyle);
             Add(shop);
             Context.SaveChanges();
             return shop;
@@ -278,27 +274,90 @@ namespace Billing
             return sin.CharacterId;
         }
 
-        public ProductType CreateOrUpdateProductType(string code, string name, string description, int lifestyle, int basePrice)
+        public ProductType CreateOrUpdateProductType(int id, string name)
         {
-            throw new NotImplementedException();
-            //var type = Get<ProductType>(p => p.Code == code);
-            //if (!Enum.IsDefined(typeof(Lifestyles), lifestyle))
-            //    throw new BillingException($"lifestyle must be valid from 1 to 6, recieved {lifestyle}");
+            ProductType type = null;
+            if (id > 0)
+                type = Get<ProductType>(p => p.Id == id);
+            if (type == null)
+            {
+                type = new ProductType();
+                type.Id = id;
+                Add(type);
+            }
+            type.Name = name;
+            Context.SaveChanges();
+            return type;
+        }
 
-            //if (type == null)
-            //{
-            //    type = new ProductType
-            //    {
-            //        Code = code
-            //    };
-            //}
-            //type.BasePrice = basePrice;
-            //type.Name = name;
-            //type.Description = description;
-            //type.Lifestyle = lifestyle;
-            //Add(type);
-            //Context.SaveChanges();
-            //return type;
+        public Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttypeid, int lifestyle, decimal baseprice, string description)
+        {
+            Nomenklatura nomenklatura = null;
+            if (id > 0)
+                nomenklatura = Get<Nomenklatura>(n => n.Id == id);
+            if (nomenklatura == null)
+            {
+                nomenklatura = new Nomenklatura();
+                Add(nomenklatura);
+            }
+            if (!string.IsNullOrEmpty(name))
+                nomenklatura.Name = name;
+            if (!string.IsNullOrEmpty(code))
+                nomenklatura.Code = code;
+            if(baseprice > 0)
+                nomenklatura.BasePrice = baseprice;
+            if (!string.IsNullOrEmpty(description))
+                nomenklatura.Description = description;
+            ProductType producttype = null;
+            if (producttypeid > 0)
+                producttype = Get<ProductType>(p => p.Id == producttypeid);
+            else
+                producttype = Get<ProductType>(p => p.Id == nomenklatura.ProductTypeId);
+            if (producttype == null)
+                producttype = CreateOrUpdateProductType(producttypeid, "unknown producttype");
+            nomenklatura.ProductTypeId = producttype.Id;
+            if (lifestyle > 0)
+                nomenklatura.Lifestyle = (int)BillingHelper.GetLifeStyle(lifestyle);
+            nomenklatura.Lifestyle = (int)BillingHelper.GetLifeStyle(nomenklatura.Lifestyle);
+            Context.SaveChanges();
+            return nomenklatura;
+        }
+
+        public Sku CreateOrUpdateSku(int id, int nomenklaturaid, int count, int corporationid, string name, bool enabled)
+        {
+            Sku sku = null;
+            if (id > 0)
+                sku = Get<Sku>(s => s.Id == id);
+            if(sku == null)
+            {
+                sku = new Sku
+                {
+                };
+                Add(sku);
+            }
+            sku.Enabled = enabled;
+            if (count >= 0)
+                sku.Count = count;
+            if (!string.IsNullOrEmpty(name))
+                sku.Name = name;
+            CorporationWallet corporation = null;
+            if (corporationid > 0)
+                corporation = Get<CorporationWallet>(c => c.Id == corporationid);
+            else
+                corporation = Get<CorporationWallet>(c => c.Id == sku.CorporationId);
+            if (corporation == null)
+                corporation = CreateOrUpdateCorporationWallet(corporationid);
+            sku.CorporationId = corporation.Id;
+            Nomenklatura nomenklatura = null;
+            if (nomenklaturaid > 0)
+                nomenklatura = Get<Nomenklatura>(n => n.Id == nomenklaturaid);
+            else
+                nomenklatura = Get<Nomenklatura>(n => n.Id == sku.NomenklaturaId);
+            if (nomenklatura == null)
+                nomenklatura = CreateOrUpdateNomenklatura(nomenklaturaid, "unknown nomenklatura", "", 0, 1, 0, "unknown nomenklatura");
+            sku.NomenklaturaId = nomenklatura.Id;
+            Context.SaveChanges();
+            return sku;
         }
 
         public SIN CreateOrUpdatePhysicalWallet(int character = 0, decimal balance = 50)
@@ -444,7 +503,7 @@ namespace Billing
                     var corp = Get<CorporationWallet>(c => c.WalletId == wallet.Id);
                     if (corp == null)
                         return string.Empty;
-                    return $"Corporation {corp.Foreign}";
+                    return $"Corporation {corp.Id}";
                 case (int)WalletTypes.Shop:
                     var shop = Get<ShopWallet>(c => c.WalletId == wallet.Id);
                     if (shop == null)

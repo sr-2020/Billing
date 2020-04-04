@@ -10,5 +10,6 @@ namespace Billing.DTO
         public string Name { get; set; }
         public int Comission { get; set; }
         public int Lifestyle { get; set; }
+        public decimal Balance { get; set; }
     }
 }
