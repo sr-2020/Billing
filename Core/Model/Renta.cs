@@ -12,7 +12,6 @@ namespace Core.Model
         [Column("sku")]
         public int SkuId { get; set; }
         public virtual Sku Sku { get; set; }
-        public virtual CorporationWallet Corporation { get; set; }
         [ForeignKey("shop")]
         [Column("shop")]
         public int ShopId { get; set; }

@@ -28,7 +28,7 @@ namespace BillingAPI.Controllers
         [HttpGet("admin/createphysicalwallet")]
         public DataResult<SIN> CreatePhysicalWallet(int character, decimal balance)
         {
-            var manager = IocContainer.Get<IBillingManager>(); 
+            var manager = IocContainer.Get<IBillingManager>();
             var result = RunAction(() => manager.CreateOrUpdatePhysicalWallet(character, balance), $"createphysicalwallet {character} {balance}");
             return result;
         }
@@ -157,6 +157,29 @@ namespace BillingAPI.Controllers
         #endregion
 
         #region renta
+        [HttpPost("renta/writeqr")]
+        public DataResult<ShopQR> WriteQR(int qr, int shop, int sku)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.WriteQR(qr, shop, sku), $"writeqr {qr}:{shop}:{sku}");
+            return result;
+        }
+
+        [HttpPost("renta/writefreeqr")]
+        public DataResult<ShopQR> WriteFreeQR(int shop, int sku)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.WriteFreeQR(shop, sku), $"writefreeqr {shop} {sku}");
+            return result;
+        }
+
+        [HttpPost("renta/dropqr")]
+        public DataResult<ShopQR> CleanQR(int qr)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.CleanQR(qr), $"dropqr {qr}");
+            return result;
+        }
 
         [HttpPost("renta/createcontract")]
         public DataResult<Contract> CreateContract(int corporation, int shop)
@@ -174,11 +197,19 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        [HttpPost("renta/createprices")]
-        public DataResult<List<PriceDto>> GetPriceByShop(int character, int shop)
+        [HttpPost("renta/createprice")]
+        public DataResult<PriceDto> GetPriceByShop(int character, int shop, int sku)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetPrice(shop, character));
+            var result = RunAction(() => manager.GetPrice(shop, character, sku), $"createprice {character}:{shop}:{sku}");
+            return result;
+        }
+
+        [HttpPost("renta/createpricebyqr")]
+        public DataResult<PriceDto> GetPriceByQR(int character, int qr)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetPriceByQR(character, qr), $"createpricebyqr {character}:{qr}");
             return result;
         }
 
@@ -197,18 +228,55 @@ namespace BillingAPI.Controllers
         #endregion
 
         #region info
+
+        [HttpGet("info/getcontracts")]
+        public DataResult<List<Contract>> GetContrats(int shopid, int corporationId)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetContrats(shopid, corporationId), $"GetContrats {shopid}:{corporationId}");
+            return result;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="corporationId"></param>
+        /// <param name="nomenklaturaId"></param>
+        /// <param name="enabled"></param>
+        /// <returns></returns>
+        [HttpGet("info/getskus")]
+        public DataResult<List<SkuDto>> GetSkus(int corporationId, int nomenklaturaId, bool enabled)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetSkus(corporationId, nomenklaturaId, enabled), $"getskus {corporationId}:{nomenklaturaId}:{enabled}");
+            return result;
+        }
+
         /// <summary>
         /// Get all allowed sku for current shop
         /// </summary>
         /// <param name="shop"></param>
         /// <returns></returns>
-        [HttpGet("info/getsku")]
-        public DataResult<List<SkuDto>> GetSkus(int shop)
+        [HttpGet("info/getskuforshop")]
+        public DataResult<List<SkuDto>> GetSkusForShop(int shop)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetSkus(shop), $"getsku {shop}");
+            var result = RunAction(() => manager.GetSkusForShop(shop), $"getskuforshop {shop}");
             return result;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="producttype"></param>
+        /// <param name="lifestyle"></param>
+        /// <returns></returns>
+        [HttpGet("info/getnomenklaturas")]
+        public DataResult<List<NomenklaturaDto>> GetNomenklaturas(int producttype, int lifestyle)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetNomenklaturas(producttype, lifestyle), $"getnomenklaturas {producttype}");
+            return result;
+        }
+
         /// <summary>
         /// Get all rentas for current character
         /// </summary>

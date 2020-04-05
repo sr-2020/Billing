@@ -16,7 +16,6 @@ namespace Billing
     public interface IBillingManager
     {
         #region application
-
         Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment);
         Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
         Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
@@ -26,22 +25,29 @@ namespace Billing
         List<TransferDto> GetTransfers(int characterId);
         BalanceDto GetBalance(int characterId);
         List<RentaDto> GetRentas(int characterId);
-
         #endregion
 
         #region web
+        ShopQR WriteQR(int qr, int shop, int sku);
+        ShopQR WriteFreeQR(int shop, int sku);
+        ShopQR CleanQR(int qr);
         void BreakContract(int corporation, int shop);
         Contract CreateContract(int corporation, int shop);
         Renta ConfirmRenta(int priceId);
-        List<SkuDto> GetSkus(int shop);
-        List<PriceDto> GetPrice(int shopId, int character);
+        List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool enabled);
+        List<SkuDto> GetSkusForShop(int shop);
+        PriceDto GetPriceByQR(int character, int qr);
+        PriceDto GetPrice(int character, int shop, int sku);
         List<ShopDto> GetShops();
         List<CorporationDto> GetCorps();
         List<ProductTypeDto> GetProductTypes();
+        List<NomenklaturaDto> GetNomenklaturas(int producttype, int lifestyle);
+        List<Contract> GetContrats(int shopid, int corporationId);
 
         #endregion
 
         #region admin
+
         Sku CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled);
         Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description);
         SIN CreateOrUpdatePhysicalWallet(int character, decimal balance);
@@ -50,13 +56,45 @@ namespace Billing
         ShopWallet CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle);
 
         #endregion
-
     }
 
     public class BillingManager : BaseEntityRepository, IBillingManager
     {
         ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
 
+        public ShopQR WriteQR(int qrid, int shop, int skuid)
+        {
+            //check allow
+            var sku = SkuAllowed(shop, skuid);
+            if (sku == null)
+                throw new BillingException("Магазин не может продавать этот товар в данный момент");
+            var qr = Get<ShopQR>(q => q.Id == qrid);
+            if (qr == null)
+                throw new Exception($"qr {qrid} not found");
+            qr.ShopId = shop;
+            qr.SkuId = skuid;
+            Add(qr);
+            Context.SaveChanges();
+            return qr;
+        }
+        public ShopQR WriteFreeQR(int shop, int sku)
+        {
+            var qr = Get<ShopQR>(q => q.ShopId == null);
+            if (qr == null)
+                throw new BillingException("не найдено свободных QR");
+            return WriteQR(qr.Id, shop, sku);
+        }
+        public ShopQR CleanQR(int qrid)
+        {
+            var qr = Get<ShopQR>(q => q.Id == qrid);
+            if (qr == null)
+                throw new Exception($"qr {qrid} not fount");
+            qr.ShopId = null;
+            qr.SkuId = null;
+            Add(qr);
+            Context.SaveChanges();
+            return qr;
+        }
         public void BreakContract(int corporation, int shop)
         {
             var contract = Get<Contract>(c => c.CorporationId == corporation && c.ShopId == shop);
@@ -82,14 +120,23 @@ namespace Billing
             return newContract;
         }
 
+        public List<NomenklaturaDto> GetNomenklaturas(int producttype, int lifestyle)
+        {
+            var list = GetList<Nomenklatura>(n =>
+                (n.ProductTypeId == producttype || producttype == 0)
+                && (n.Lifestyle == lifestyle || lifestyle == 0), n => n.ProductType);
+            return list.Select(s => new NomenklaturaDto(s)).ToList();
+        }
+        public List<Contract> GetContrats(int shopid, int corporationId)
+        {
+            var list = GetList<Contract>(c => (c.ShopId == shopid || shopid == 0) && (c.CorporationId == corporationId || corporationId == 0));
+            return list;
+        }
+
         public List<ProductTypeDto> GetProductTypes()
         {
             return GetList<ProductType>(p => true).Select(p =>
-                new ProductTypeDto
-                {
-                    Id = p.Id,
-                    Name = p.Name
-                }).ToList();
+                new ProductTypeDto(p)).ToList();
         }
 
         public List<CorporationDto> GetCorps()
@@ -115,22 +162,16 @@ namespace Billing
                   }).ToList();
         }
 
-        public List<SkuDto> GetSkus(int shop)
+        public List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool enabled)
         {
-            return GetSkuList(shop).Select(s => new SkuDto
-            {
-                BasePrice = s.Nomenklatura.BasePrice,
-                CorporationName = s.Corporation.Name,
-                Count = s.Count,
-                Description = s.Nomenklatura.Description,
-                Hidden = string.Empty,
-                NomenklaturaName = s.Nomenklatura.Name,
-                SkuName = s.Name,
-                TypeName = s.Nomenklatura.Name
-            }).ToList();
+            var list = GetList<Sku>(s => (s.CorporationId == corporationId || corporationId == 0) && (s.NomenklaturaId == nomenklaturaId || nomenklaturaId == 0) && s.Enabled == enabled, s => s.Corporation, s => s.Nomenklatura, s => s.Nomenklatura.ProductType);
+            return list.Select(s => new SkuDto(s)).ToList();
         }
 
-
+        public List<SkuDto> GetSkusForShop(int shop)
+        {
+            return GetSkuList(shop).Select(s => new SkuDto(s)).ToList();
+        }
 
         public List<RentaDto> GetRentas(int characterId)
         {
@@ -146,41 +187,59 @@ namespace Billing
 
         public Renta ConfirmRenta(int priceId)
         {
-            throw new NotImplementedException();
-            //var price = Get<Price>(p => p.Id == priceId, p => p.ProductType, s => s.Shop);
-            //if (price == null)
-            //    throw new BillingException("Персональное предложение не найдено");
-            //var dateTill = price.DateCreated.AddMinutes(_settings.GetIntValue("price_minutes"));
-            //if (dateTill < DateTime.Now)
-            //    throw new BillingException($"Персональное предложение больше не действительно, оно истекло {dateTill.ToString("HH:mm:ss")}");
-            //var sin = GetSIN(price.CharacterId, s => s.Wallet);
-            //if (sin.Wallet.Balance - price.FinalPrice < 0)
-            //{
-            //    throw new BillingException("Недостаточно средств");
-            //}
-            //var mir = GetMIR();
-            //MakeNewTransfer(mir, sin.Wallet, price.FinalPrice, $"Первый платеж по ренте {price.ProductType.Name} купленный в {price.Shop.Name}");
-            //var renta = new Renta
-            //{
-            //    BasePrice = price.BasePrice,
-            //    CharacterId = sin.CharacterId,
-            //    CorporationId = price.CorporationId,
-            //    CurrentScoring = price.CurrentScoring,
-            //    DateCreated = DateTime.Now,
-            //    Discount = price.Discount,
-            //    FinalPrice = price.FinalPrice,
-            //    ProductTypeId = price.ProductTypeId,
-            //    ShopComission = price.ShopComission,
-            //    ShopId = price.ShopId
-            //};
-            //return renta;
+            var price = Get<Price>(p => p.Id == priceId, p => p.Sku, s => s.Shop);
+            if (price == null)
+                throw new BillingException("Персональное предложение не найдено");
+            var dateTill = price.DateCreated.AddMinutes(_settings.GetIntValue("price_minutes"));
+            if (dateTill < DateTime.Now)
+                throw new BillingException($"Персональное предложение больше не действительно, оно истекло {dateTill.ToString("HH:mm:ss")}");
+            var sku = SkuAllowed(price.ShopId, price.SkuId);
+            if (sku == null)
+                throw new BillingException("Sku недоступно для продажи в данный момент");
+            var sin = GetSIN(price.CharacterId, s => s.Wallet);
+            if (sin.Wallet.Balance - price.FinalPrice < 0)
+            {
+                throw new BillingException("Недостаточно средств");
+            }
+            var mir = GetMIR();
+            MakeNewTransfer(mir, sin.Wallet, price.FinalPrice, $"Первый платеж по ренте {price.Sku.Name} купленный в {price.Shop.Name}");
+            var renta = new Renta
+            {
+                BasePrice = price.BasePrice,
+                CharacterId = sin.CharacterId,
+                CurrentScoring = price.CurrentScoring,
+                SkuId = price.SkuId,
+                DateCreated = DateTime.Now,
+                Discount = price.Discount,
+                FinalPrice = price.FinalPrice,
+                ShopComission = price.ShopComission,
+                ShopId = price.ShopId
+            };
+            return renta;
         }
 
-        public List<PriceDto> GetPrice(int character, int shop)
+        public PriceDto GetPriceByQR(int character, int qrid)
         {
-            throw new NotImplementedException();
+            var qr = Get<ShopQR>(q => q.Id == qrid);
+            if (qr == null)
+                throw new Exception($"qr {qrid} not found");
+            if (qr.ShopId == null || qr.SkuId == null)
+                throw new BillingException("пустой qr");
+            return GetPrice(character, qr.ShopId.Value, qr.SkuId.Value);
         }
-
+        public PriceDto GetPrice(int character, int shopid, int skuid)
+        {
+            var sku = SkuAllowed(shopid, skuid);
+            if (sku == null)
+                throw new BillingException("sku недоступен для продажи в данный момент");
+            var shop = Get<ShopWallet>(s => s.Id == shopid);
+            var sin = GetSIN(character);
+            if (shop == null || sin == null)
+                throw new Exception("some went wrong");
+            var price = CreateNewPrice(sku, shop, sin);
+            var dto = new PriceDto(price);
+            return dto;
+        }
         public CorporationWallet CreateOrUpdateCorporationWallet(int corpId = 0, decimal amount = 0, string name = "unknown corporation")
         {
             CorporationWallet corporation = null;
@@ -304,7 +363,7 @@ namespace Billing
                 nomenklatura.Name = name;
             if (!string.IsNullOrEmpty(code))
                 nomenklatura.Code = code;
-            if(baseprice > 0)
+            if (baseprice > 0)
                 nomenklatura.BasePrice = baseprice;
             if (!string.IsNullOrEmpty(description))
                 nomenklatura.Description = description;
@@ -328,11 +387,9 @@ namespace Billing
             Sku sku = null;
             if (id > 0)
                 sku = Get<Sku>(s => s.Id == id);
-            if(sku == null)
+            if (sku == null)
             {
-                sku = new Sku
-                {
-                };
+                sku = new Sku();
                 Add(sku);
             }
             sku.Enabled = enabled;
@@ -419,14 +476,18 @@ namespace Billing
         #region private
 
         private string _ownerName = "Владелец кошелька";
-
+        private Sku SkuAllowed(int shop, int sku)
+        {
+            var skuList = GetSkuList(shop);
+            return skuList.FirstOrDefault(s => s.Id == sku);
+        }
         private List<Sku> GetSkuList(int shopId)
         {
             var result = new List<Sku>();
             var contracts = GetList<Contract>(c => c.ShopId == shopId);
             foreach (var contract in contracts)
             {
-                result.AddRange(GetList<Sku>(s => s.CorporationId == contract.CorporationId && s.Enabled, s => s.Corporation, s => s.Nomenklatura, s => s.Nomenklatura.ProductType));
+                result.AddRange(GetList<Sku>(s => s.CorporationId == contract.CorporationId && s.Enabled && s.Count > 0, s => s.Corporation, s => s.Nomenklatura, s => s.Nomenklatura.ProductType));
             }
             //TODO filter by specialisation
             //TODO filter by contractlimit
@@ -556,6 +617,7 @@ namespace Billing
             Context.SaveChanges();
             return transfer;
         }
+
         private Price CreateNewPrice(Sku sku, ShopWallet shop, SIN sin)
         {
             decimal discount;
@@ -570,7 +632,7 @@ namespace Billing
 
             var price = new Price
             {
-                SkuId = sku.Id,
+                Sku = sku,
                 ShopId = shop.Id,
                 BasePrice = sku.Nomenklatura.BasePrice,
                 CurrentScoring = sin.Scoring.CurrentScoring,

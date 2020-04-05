@@ -35,6 +35,6 @@ namespace Core
         public DbSet<Sku> Sku { get; set; }
         public DbSet<Specialisation> Specialisation { get; set; }
         public DbSet<Contract> Contract { get; set; }
-
+        public DbSet<ShopQR> ShopQR { get; set; }
     }
 }

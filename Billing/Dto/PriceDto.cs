@@ -1,15 +1,26 @@
-﻿using System;
+﻿using Core.Model;
+using IoC;
+using Settings;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Billing.DTO
 {
-    public class PriceDto
+    public class PriceDto : SkuDto
     {
+        public PriceDto(Price price):base(price.Sku)
+        {
+            this.PriceId = price.Id;
+            this.DateCreated = price.DateCreated;
+            this.DateTill = price.DateCreated.AddMinutes(IocContainer.Get<ISettingsManager>().GetIntValue("price_minutes"));
+            this.FinalPrice = price.FinalPrice;
+            this.ShopComission = price.ShopComission;
+        }
         public int PriceId { get; set; }
+        public DateTime DateCreated { get; set; }
         public DateTime DateTill { get; set; }
         public decimal FinalPrice { get; set; }
-        //public decimal CurrentScoring { get; set; }
-        //public decimal Discount { get; set; }
+        public decimal ShopComission { get; set; }
     }
 }
