@@ -16,9 +16,11 @@ namespace Billing.DTO
             this.DateTill = price.DateCreated.AddMinutes(IocContainer.Get<ISettingsManager>().GetIntValue("price_minutes"));
             this.FinalPrice = price.FinalPrice;
             this.ShopComission = price.ShopComission;
+            this.ShopName = price.Shop.Name;
         }
         public int PriceId { get; set; }
         public DateTime DateCreated { get; set; }
+        public string ShopName { get; set; }
         public DateTime DateTill { get; set; }
         public decimal FinalPrice { get; set; }
         public decimal ShopComission { get; set; }

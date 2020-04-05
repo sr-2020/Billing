@@ -188,7 +188,7 @@ namespace Billing
 
         public Renta ConfirmRenta(int character, int priceId)
         {
-            var price = Get<Price>(p => p.Id == priceId, p => p.Sku, s => s.Shop);
+            var price = Get<Price>(p => p.Id == priceId, p => p.Sku, s => s.Shop, s => s.Shop.Wallet);
             if (price == null)
                 throw new BillingException("Персональное предложение не найдено");
             if (price.CharacterId != character)
@@ -206,6 +206,10 @@ namespace Billing
             }
             var mir = GetMIR();
             MakeNewTransfer(mir, sin.Wallet, price.FinalPrice, $"Первый платеж по ренте {price.Sku.Name} купленный в {price.Shop.Name}");
+            var comission = price.BasePrice * (price.ShopComission / 100);
+            MakeNewTransfer(price.Shop.Wallet, mir, comission, $"комиссия за продажу {price.Sku.Name} с син {sin.CharacterId}");
+            sku.Count--;
+            Add(sku);
             var renta = new Renta
             {
                 BasePrice = price.BasePrice,
@@ -214,10 +218,11 @@ namespace Billing
                 SkuId = price.SkuId,
                 DateCreated = DateTime.Now,
                 Discount = price.Discount,
-                FinalPrice = price.FinalPrice,
                 ShopComission = price.ShopComission,
                 ShopId = price.ShopId
             };
+            Add(renta);
+            Context.SaveChanges();
             return renta;
         }
 
@@ -236,7 +241,7 @@ namespace Billing
             if (sku == null)
                 throw new BillingException("sku недоступен для продажи в данный момент");
             var shop = Get<ShopWallet>(s => s.Id == shopid);
-            var sin = GetSIN(character);
+            var sin = GetSIN(character, s => s.Scoring);
             if (shop == null || sin == null)
                 throw new Exception("some went wrong");
             var price = CreateNewPrice(sku, shop, sin);
@@ -636,7 +641,7 @@ namespace Billing
             var price = new Price
             {
                 Sku = sku,
-                ShopId = shop.Id,
+                Shop = shop,
                 BasePrice = sku.Nomenklatura.BasePrice,
                 CurrentScoring = sin.Scoring.CurrentScoring,
                 DateCreated = DateTime.Now,

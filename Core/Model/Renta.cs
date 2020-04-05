@@ -28,8 +28,5 @@ namespace Core.Model
         public decimal Discount { get; set; }
         [Column("shop_comission")]
         public decimal ShopComission { get; set; }
-        [Column("final_price")]
-        public decimal FinalPrice { get; set; }
-
     }
 }
