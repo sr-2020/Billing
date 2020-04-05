@@ -34,7 +34,7 @@ namespace Billing
         void BreakContract(int corporation, int shop);
         Contract CreateContract(int corporation, int shop);
         Renta ConfirmRenta(int character, int priceId);
-        List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool enabled);
+        List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled);
         List<SkuDto> GetSkusForShop(int shop);
         PriceDto GetPriceByQR(int character, int qr);
         PriceDto GetPrice(int character, int shop, int sku);
@@ -163,9 +163,9 @@ namespace Billing
                   }).ToList();
         }
 
-        public List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool enabled)
+        public List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled)
         {
-            var list = GetList<Sku>(s => (s.CorporationId == corporationId || corporationId == 0) && (s.NomenklaturaId == nomenklaturaId || nomenklaturaId == 0) && s.Enabled == enabled, s => s.Corporation, s => s.Nomenklatura, s => s.Nomenklatura.ProductType);
+            var list = GetList<Sku>(s => (s.CorporationId == corporationId || corporationId == 0) && (s.NomenklaturaId == nomenklaturaId || nomenklaturaId == 0) && (s.Enabled == enabled || !enabled.HasValue), s => s.Corporation, s => s.Nomenklatura, s => s.Nomenklatura.ProductType);
             return list.Select(s => new SkuDto(s)).ToList();
         }
 

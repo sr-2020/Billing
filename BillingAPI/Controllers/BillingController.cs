@@ -245,7 +245,7 @@ namespace BillingAPI.Controllers
         /// <param name="enabled"></param>
         /// <returns></returns>
         [HttpGet("info/getskus")]
-        public DataResult<List<SkuDto>> GetSkus(int corporationId, int nomenklaturaId, bool enabled)
+        public DataResult<List<SkuDto>> GetSkus(int corporationId, int nomenklaturaId, bool? enabled)
         {
             var manager = IocContainer.Get<IBillingManager>();
             var result = RunAction(() => manager.GetSkus(corporationId, nomenklaturaId, enabled), $"getskus {corporationId}:{nomenklaturaId}:{enabled}");
