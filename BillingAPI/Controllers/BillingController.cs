@@ -173,7 +173,7 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        [HttpPost("renta/dropqr")]
+        [HttpDelete("renta/dropqr")]
         public DataResult<ShopQR> CleanQR(int qr)
         {
             var manager = IocContainer.Get<IBillingManager>();
@@ -214,15 +214,16 @@ namespace BillingAPI.Controllers
         }
 
         /// <summary>
-        /// Create renta
+        /// 
         /// </summary>
-        /// <param name="priceId">personal price created on api/billing/renta/createprice</param>
+        /// <param name="character"></param>
+        /// <param name="priceId"></param>
         /// <returns></returns>
         [HttpPost("renta/createrenta")]
-        public DataResult<Renta> ConfirmRenta(int priceId)
+        public DataResult<Renta> ConfirmRenta(int character, int priceId)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.ConfirmRenta(priceId));
+            var result = RunAction(() => manager.ConfirmRenta(character, priceId), $"createrenta {character}:{priceId}");
             return result;
         }
         #endregion

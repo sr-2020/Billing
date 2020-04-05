@@ -33,7 +33,7 @@ namespace Billing
         ShopQR CleanQR(int qr);
         void BreakContract(int corporation, int shop);
         Contract CreateContract(int corporation, int shop);
-        Renta ConfirmRenta(int priceId);
+        Renta ConfirmRenta(int character, int priceId);
         List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool enabled);
         List<SkuDto> GetSkusForShop(int shop);
         PriceDto GetPriceByQR(int character, int qr);
@@ -185,11 +185,13 @@ namespace Billing
             //        }).ToList();
         }
 
-        public Renta ConfirmRenta(int priceId)
+        public Renta ConfirmRenta(int character, int priceId)
         {
             var price = Get<Price>(p => p.Id == priceId, p => p.Sku, s => s.Shop);
             if (price == null)
                 throw new BillingException("Персональное предложение не найдено");
+            if (price.CharacterId != character)
+                throw new Exception("Персональное предложение заведено на другого персонажа");
             var dateTill = price.DateCreated.AddMinutes(_settings.GetIntValue("price_minutes"));
             if (dateTill < DateTime.Now)
                 throw new BillingException($"Персональное предложение больше не действительно, оно истекло {dateTill.ToString("HH:mm:ss")}");
