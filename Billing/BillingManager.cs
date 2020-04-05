@@ -155,6 +155,7 @@ namespace Billing
             return GetList<ShopWallet>(c => true, c => c.Wallet).Select(s =>
                   new ShopDto
                   {
+                      Id = s.Id,
                       Name = s.Name,
                       Comission = BillingHelper.GetComission(s.LifeStyle),
                       Lifestyle = s.LifeStyle,
