@@ -17,7 +17,7 @@ install:
 
 script:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - docker build . -t sr2020/billingapi:$IMAGE_TAG
+  - docker build . -t sr2020/billingapi:$IMAGE_TAG -t sr2020/billingapi:latest
   - docker push sr2020/billingapi
   - kubectl set image deployment/billing billing=sr2020/billingapi:$IMAGE_TAG --record
   - kubectl rollout status deployment/billing
