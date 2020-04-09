@@ -379,9 +379,9 @@ namespace Billing
             {
                 type = new ProductType();
                 type.Id = id;
-                Add(type);
             }
             type.Name = name;
+            Add(type);
             Context.SaveChanges();
             return type;
         }
