@@ -57,12 +57,13 @@ namespace BillingAPI.Controllers
         /// <param name="lifestyle">from 1 to 6</param>
         /// <param name="baseprice">decimal base price</param>
         /// <param name="description">description shown for user</param>
+        /// <param name="pictureurl">url for picture</param>
         /// <returns></returns>
         [HttpPut("admin/createorupdatenomenklatura")]
-        public DataResult<Nomenklatura> CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description)
+        public DataResult<Nomenklatura> CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description, string pictureurl)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdateNomenklatura(id, name, code, producttype, lifestyle, baseprice, description), $"createorupdatenomenklatura {id}:{name}:{code}:{producttype}:{lifestyle}:{baseprice}:{description}");
+            var result = RunAction(() => manager.CreateOrUpdateNomenklatura(id, name, code, producttype, lifestyle, baseprice, description, pictureurl), $"createorupdatenomenklatura {id}:{name}:{code}:{producttype}:{lifestyle}:{baseprice}:{description}:{pictureurl}");
             return result;
         }
 
@@ -83,6 +84,31 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.CreateOrUpdateSku(id, nomenklatura, count, corporation, name, enabled), $"CreateOrUpdateSku {id}:{name}:{nomenklatura}:{count}:{corporation}:{name}:{enabled}");
             return result;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="corpid">id for delete</param>
+        /// <returns></returns>
+        [HttpDelete("admin/deletecorporation")]
+        public Result DeleteCorporation(int corpid)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.DeleteCorporation(corpid), $"deletecorporation {corpid}");
+            return result;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="shopid">id for delete</param>
+        /// <returns></returns>
+        [HttpDelete("admin/deleteshop")]
+        public Result DeleteShop(int shopid)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.DeleteShop(shopid), $"deleteshop {shopid}");
+            return result;
+        }
 
         /// <summary>
         /// Get corporation wallet. If wallet not exists, then create it
@@ -90,12 +116,13 @@ namespace BillingAPI.Controllers
         /// <param name="id">0 for create new, specified for update</param>
         /// <param name="amount">if negative then amount will not change</param>
         /// <param name="name">Some name</param>
+        /// <param name="logoUrl">Url to picture</param>
         /// <returns></returns>
         [HttpPut("admin/createorupdatecorporationwallet")]
-        public DataResult<CorporationWallet> CreateOrUpdateCorporationWallet(int id, decimal amount, string name)
+        public DataResult<CorporationWallet> CreateOrUpdateCorporationWallet(int id, decimal amount, string name, string logoUrl)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdateCorporationWallet(id, amount, name), $"createorupdatecorporationwallet {id} {amount} {name}");
+            var result = RunAction(() => manager.CreateOrUpdateCorporationWallet(id, amount, name, logoUrl), $"createorupdatecorporationwallet {id}:{amount}:{name}:{logoUrl}");
             return result;
         }
 

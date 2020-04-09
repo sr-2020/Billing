@@ -22,6 +22,7 @@ namespace Core.Model
         [Column("product_type")]
         public int ProductTypeId { get; set; }
         public virtual ProductType ProductType { get; set; }
-
+        [Column("picture_url")]
+        public string PictureUrl { get; set; }
     }
 }

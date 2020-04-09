@@ -15,6 +15,7 @@ namespace Billing.DTO
             this.LifeStyle = BillingHelper.GetLifeStyle(nomenklatura.Lifestyle).ToString();
             this.Code = nomenklatura.Code;
             this.Description = nomenklatura.Description;
+            this.UrlPicture = nomenklatura.PictureUrl;
         }
         public int NomenklaturaId { get; set; }
         public string NomenklaturaName { get; set; }
@@ -22,5 +23,6 @@ namespace Billing.DTO
         public string LifeStyle { get; set; }
         public decimal BasePrice { get; set; }
         public string Description { get; set; }
+        public string UrlPicture { get; set; }
     }
 }

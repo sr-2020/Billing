@@ -14,5 +14,7 @@ namespace Core.Model
         public virtual Wallet Wallet { get; set; }
         [Column("name")]
         public string Name { get; set; }
+        [Column("logo_url")]
+        public string CorporationLogoUrl { get; set; }
     }
 }

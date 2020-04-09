@@ -49,19 +49,20 @@ namespace Billing
         #region admin
 
         Sku CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled);
-        Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description);
+        Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description, string pictureurl);
         SIN CreateOrUpdatePhysicalWallet(int character, decimal balance);
         ProductType CreateOrUpdateProductType(int id, string name);
-        CorporationWallet CreateOrUpdateCorporationWallet(int id, decimal amount, string name);
+        CorporationWallet CreateOrUpdateCorporationWallet(int id, decimal amount, string name, string logoUrl);
         ShopWallet CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle);
-
+        void DeleteCorporation(int corpid);
+        void DeleteShop(int shopid);
         #endregion
     }
 
     public class BillingManager : BaseEntityRepository, IBillingManager
     {
         ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
-
+        public static string UrlNotFound = "https://www.clickon.ru/preview/original/pic/8781_logo.png";
         public ShopQR WriteQR(int qrid, int shop, int skuid)
         {
             //check allow
@@ -248,7 +249,7 @@ namespace Billing
             var dto = new PriceDto(price);
             return dto;
         }
-        public CorporationWallet CreateOrUpdateCorporationWallet(int corpId = 0, decimal amount = 0, string name = "unknown corporation")
+        public CorporationWallet CreateOrUpdateCorporationWallet(int corpId = 0, decimal amount = 0, string name = "unknown corporation", string logoUrl = "")
         {
             CorporationWallet corporation = null;
             if (corpId > 0)
@@ -259,11 +260,16 @@ namespace Billing
                 corporation = new CorporationWallet
                 {
                     Wallet = newWallet,
-                    Id = corpId
+                    Id = corpId,
+                    CorporationLogoUrl = UrlNotFound
                 };
             }
-            corporation.Name = name;
-            corporation.Wallet.Balance = amount;
+            if (!string.IsNullOrEmpty(logoUrl))
+                corporation.CorporationLogoUrl = logoUrl;
+            if (!string.IsNullOrEmpty(name))
+                corporation.Name = name;
+            if (amount > 0)
+                corporation.Wallet.Balance = amount;
             Add(corporation);
             Context.SaveChanges();
             return corporation;
@@ -289,6 +295,28 @@ namespace Billing
             Add(shop);
             Context.SaveChanges();
             return shop;
+        }
+
+        public void DeleteCorporation(int corpid)
+        {
+            var corporation = Get<CorporationWallet>(c => c.Id == corpid);
+            if (corporation == null)
+                throw new Exception("corporation not found");
+            var wallet = Get<Wallet>(w => w.Id == corporation.WalletId);
+            Remove(corporation);
+            Remove(wallet);
+            Context.SaveChanges();
+        }
+
+        public void DeleteShop(int shopid)
+        {
+            var shop = Get<ShopWallet>(c => c.Id == shopid);
+            if (shop == null)
+                throw new Exception("shop not found");
+            var wallet = Get<Wallet>(w => w.Id == shop.WalletId);
+            Remove(shop);
+            Remove(wallet);
+            Context.SaveChanges();
         }
 
         public BalanceDto GetBalance(int characterId)
@@ -357,7 +385,7 @@ namespace Billing
             return type;
         }
 
-        public Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttypeid, int lifestyle, decimal baseprice, string description)
+        public Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttypeid, int lifestyle, decimal baseprice, string description, string pictureurl)
         {
             Nomenklatura nomenklatura = null;
             if (id > 0)
@@ -365,6 +393,7 @@ namespace Billing
             if (nomenklatura == null)
             {
                 nomenklatura = new Nomenklatura();
+                nomenklatura.PictureUrl = UrlNotFound;
                 Add(nomenklatura);
             }
             if (!string.IsNullOrEmpty(name))
@@ -375,6 +404,8 @@ namespace Billing
                 nomenklatura.BasePrice = baseprice;
             if (!string.IsNullOrEmpty(description))
                 nomenklatura.Description = description;
+            if (!string.IsNullOrEmpty(pictureurl))
+                nomenklatura.PictureUrl = pictureurl;
             ProductType producttype = null;
             if (producttypeid > 0)
                 producttype = Get<ProductType>(p => p.Id == producttypeid);
@@ -419,7 +450,7 @@ namespace Billing
             else
                 nomenklatura = Get<Nomenklatura>(n => n.Id == sku.NomenklaturaId);
             if (nomenklatura == null)
-                nomenklatura = CreateOrUpdateNomenklatura(nomenklaturaid, "unknown nomenklatura", "", 0, 1, 0, "unknown nomenklatura");
+                nomenklatura = CreateOrUpdateNomenklatura(nomenklaturaid, "unknown nomenklatura", string.Empty, 0, 1, 0, "unknown nomenklatura", string.Empty);
             sku.NomenklaturaId = nomenklatura.Id;
             Context.SaveChanges();
             return sku;

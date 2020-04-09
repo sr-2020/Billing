@@ -14,11 +14,13 @@ namespace Billing.DTO
             this.Count = sku.Count;
             this.CorporationName = sku.Corporation?.Name;
             this.Enabled = sku.Enabled;
+            this.CorporationLogo = sku.Corporation?.CorporationLogoUrl;
         }
         public int SkuId { get; set; }
         public string SkuName { get; set; }
         public int Count { get; set; }
         public string CorporationName { get; set; }
         public bool Enabled { get; set; }
+        public string CorporationLogo { get; set; }
     }
 }
