@@ -394,7 +394,6 @@ namespace Billing
             {
                 nomenklatura = new Nomenklatura();
                 nomenklatura.PictureUrl = UrlNotFound;
-                Add(nomenklatura);
             }
             if (!string.IsNullOrEmpty(name))
                 nomenklatura.Name = name;
@@ -417,6 +416,7 @@ namespace Billing
             if (lifestyle > 0)
                 nomenklatura.Lifestyle = (int)BillingHelper.GetLifeStyle(lifestyle);
             nomenklatura.Lifestyle = (int)BillingHelper.GetLifeStyle(nomenklatura.Lifestyle);
+            Add(nomenklatura);
             Context.SaveChanges();
             return nomenklatura;
         }
@@ -429,7 +429,6 @@ namespace Billing
             if (sku == null)
             {
                 sku = new Sku();
-                Add(sku);
             }
             sku.Enabled = enabled;
             if (count >= 0)
@@ -452,6 +451,7 @@ namespace Billing
             if (nomenklatura == null)
                 nomenklatura = CreateOrUpdateNomenklatura(nomenklaturaid, "unknown nomenklatura", string.Empty, 0, 1, 0, "unknown nomenklatura", string.Empty);
             sku.NomenklaturaId = nomenklatura.Id;
+            Add(sku);
             Context.SaveChanges();
             return sku;
         }
