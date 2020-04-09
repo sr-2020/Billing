@@ -147,7 +147,8 @@ namespace Billing
                   {
                       Id = c.Id,
                       Name = c.Name,
-                      Balance = c.Wallet.Balance
+                      Balance = c.Wallet.Balance,
+                      CorporationUrl = c.CorporationLogoUrl
                   }).ToList();
         }
 
