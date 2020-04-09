@@ -10,7 +10,7 @@ namespace Billing
     public class BillingHelper
     {
 
-        public static Lifestyles GetLifeStyle(decimal balance)
+        public static Lifestyles GetLifeStyleByBalance(decimal balance)
         {
             var manager = IocContainer.Get<ISettingsManager>();
             foreach (Lifestyles lifestyle in Enum.GetValues(typeof(Lifestyles)))

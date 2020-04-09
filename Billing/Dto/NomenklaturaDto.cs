@@ -12,7 +12,7 @@ namespace Billing.DTO
             this.BasePrice = nomenklatura.BasePrice;
             this.NomenklaturaId = nomenklatura.Id;
             this.NomenklaturaName = nomenklatura.Name;
-            this.LifeStyle = BillingHelper.GetLifeStyle(nomenklatura.Lifestyle).ToString();
+            this.LifeStyle = BillingHelper.GetLifestyle(nomenklatura.Lifestyle).ToString();
             this.Code = nomenklatura.Code;
             this.Description = nomenklatura.Description;
             this.UrlPicture = nomenklatura.PictureUrl;

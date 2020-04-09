@@ -329,8 +329,8 @@ namespace Billing
                 CurrentBalance = sin.Wallet.Balance,
                 CurrentScoring = sin.Scoring.CurrentScoring,
                 SIN = sin.Sin,
-                ForecastLifeStyle = BillingHelper.GetLifeStyle(sin.Wallet.Balance).ToString(),
-                LifeStyle = BillingHelper.GetLifeStyle(sin.Wallet.Balance).ToString()
+                ForecastLifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
+                LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString()
             };
             return balance;
         }
@@ -415,8 +415,8 @@ namespace Billing
                 producttype = CreateOrUpdateProductType(producttypeid, "unknown producttype");
             nomenklatura.ProductTypeId = producttype.Id;
             if (lifestyle > 0)
-                nomenklatura.Lifestyle = (int)BillingHelper.GetLifeStyle(lifestyle);
-            nomenklatura.Lifestyle = (int)BillingHelper.GetLifeStyle(nomenklatura.Lifestyle);
+                nomenklatura.Lifestyle = (int)BillingHelper.GetLifeStyleByBalance(lifestyle);
+            nomenklatura.Lifestyle = (int)BillingHelper.GetLifeStyleByBalance(nomenklatura.Lifestyle);
             Add(nomenklatura);
             Context.SaveChanges();
             return nomenklatura;
