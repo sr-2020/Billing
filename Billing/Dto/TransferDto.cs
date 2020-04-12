@@ -19,5 +19,6 @@ namespace Billing.DTO
         public DateTime OperationTime { get; set; }
         public string From { get; set; }
         public string To { get; set; }
+        public bool Anonimous { get; set; }
     }
 }

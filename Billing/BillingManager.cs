@@ -53,7 +53,7 @@ namespace Billing
         Sku CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled);
         Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description, string pictureurl);
         SIN CreateOrUpdatePhysicalWallet(int character, decimal balance);
-        ProductType CreateOrUpdateProductType(int id, string name);
+        ProductType CreateOrUpdateProductType(int id, string name, int discounttype);
         CorporationWallet CreateOrUpdateCorporationWallet(int id, decimal amount, string name, string logoUrl);
         ShopWallet CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle);
         void DeleteCorporation(int corpid);
@@ -403,7 +403,7 @@ namespace Billing
             return sin.CharacterId;
         }
 
-        public ProductType CreateOrUpdateProductType(int id, string name)
+        public ProductType CreateOrUpdateProductType(int id, string name, int discounttype = 1)
         {
             ProductType type = null;
             if (id > 0)
@@ -412,7 +412,10 @@ namespace Billing
             {
                 type = new ProductType();
             }
-            type.Name = name;
+            if (discounttype != 0)
+                type.DiscountType = discounttype;
+            if(!string.IsNullOrEmpty(name))
+                type.Name = name;
             Add(type);
             Context.SaveChanges();
             return type;
@@ -542,7 +545,18 @@ namespace Billing
         {
             var d1 = GetSIN(characterFrom, s => s.Wallet);
             var d2 = GetSIN(characterTo, s => s.Wallet);
-            return MakeNewTransfer(d1.Wallet, d2.Wallet, amount, comment);
+            var anon = false;
+            try
+            {
+                var anonFrom = EreminService.GetAnonimous(characterFrom);
+                var anonto = EreminService.GetAnonimous(characterTo);
+                anon = anonFrom || anonto;
+            }
+            catch (Exception e)
+            {
+
+            }
+            return MakeNewTransfer(d1.Wallet, d2.Wallet, amount, comment, anon);
         }
 
         #region private
@@ -570,7 +584,7 @@ namespace Billing
         }
         private List<Sku> GetSkuList(int shopId)
         {
-            var skuids = ExecuteQuery<int>($"SELECT* FROM get_sku({shopId})");
+            var skuids = ExecuteQuery<int>($"SELECT * FROM get_sku({shopId})");
             var result = GetList<Sku>(s=>skuids.Contains(s.Id), s => s.Corporation, s => s.Nomenklatura, s => s.Nomenklatura.ProductType);
             //TODO filter by contractlimit
             return result;
@@ -628,7 +642,8 @@ namespace Billing
                 NewBalance = type == TransferType.Incoming ? transfer.NewBalanceTo : transfer.NewBalanceFrom,
                 OperationTime = transfer.OperationTime,
                 From = type == TransferType.Incoming ? GetWalletName(transfer.WalletFrom) : _ownerName,
-                To = type == TransferType.Incoming ? _ownerName : GetWalletName(transfer.WalletTo)
+                To = type == TransferType.Incoming ? _ownerName : GetWalletName(transfer.WalletTo),
+                Anonimous = transfer.Anonymous
             };
         }
 
@@ -669,7 +684,7 @@ namespace Billing
             }
             return sin;
         }
-        private Transfer MakeNewTransfer(Wallet wallet1, Wallet wallet2, decimal amount, string comment)
+        private Transfer MakeNewTransfer(Wallet wallet1, Wallet wallet2, decimal amount, string comment, bool anonymous = false)
         {
             if (wallet1 == null)
                 throw new BillingException($"Нет кошелька отправителя");
@@ -694,19 +709,36 @@ namespace Billing
                 WalletToId = wallet2.Id,
                 NewBalanceFrom = wallet1.Balance,
                 NewBalanceTo = wallet2.Balance,
-                OperationTime = DateTime.Now
+                OperationTime = DateTime.Now,
+                Anonymous = anonymous
             };
             Add(transfer);
             Context.SaveChanges();
             return transfer;
         }
+        private DiscountType GetDiscountTypeForSku(Sku sku)
+        {
+            if (sku == null)
+                throw new Exception("sku not found");
+            var nomenklatura = sku.Nomenklatura;
+            if (nomenklatura == null)
+                nomenklatura = Get<Nomenklatura>(n => n.Id == sku.NomenklaturaId);
+            if(nomenklatura == null)
+                throw new Exception("Nomenklatura not found");
+            var producttype = nomenklatura.ProductType;
+            if (producttype == null)
+                producttype = Get<ProductType>(p => p.Id == nomenklatura.ProductTypeId);
+            if (producttype == null)
+                throw new Exception("ProductType not found");
+            return BillingHelper.GetDiscountType(producttype.DiscountType);
 
+        }
         private Price CreateNewPrice(Sku sku, ShopWallet shop, SIN sin)
         {
             decimal discount;
             try
             {
-                discount = EreminService.GetDiscount(sin.CharacterId);
+                discount = EreminService.GetDiscount(sin.CharacterId, GetDiscountTypeForSku(sku));
             }
             catch (Exception e)
             {

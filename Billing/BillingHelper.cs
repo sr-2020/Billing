@@ -1,4 +1,5 @@
-﻿using Core.Primitives;
+﻿using Core.Model;
+using Core.Primitives;
 using IoC;
 using Settings;
 using System;
@@ -9,6 +10,14 @@ namespace Billing
 {
     public class BillingHelper
     {
+        public static DiscountType GetDiscountType(int discountType)
+        {
+            if (Enum.IsDefined(typeof(DiscountType), discountType))
+                return (DiscountType)discountType;
+            else
+                return DiscountType.Gesheftmaher;
+        }
+
 
         public static Lifestyles GetLifeStyleByBalance(decimal balance)
         {

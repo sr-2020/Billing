@@ -28,5 +28,7 @@ namespace Core.Model
         public decimal NewBalanceTo { get; set; }
         [Column("operation_time")]
         public DateTime OperationTime { get; set; }
+        [Column("anonymous")]
+        public bool Anonymous { get; set; }
     }
 }

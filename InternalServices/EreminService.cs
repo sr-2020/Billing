@@ -1,4 +1,5 @@
-﻿using InternalServices.EreminModel;
+﻿using Core.Primitives;
+using InternalServices.EreminModel;
 using Serialization;
 using System;
 using System.Net.Http;
@@ -23,18 +24,28 @@ namespace InternalServices
             throw new Exception(response.Content.ReadAsStringAsync().Result);
         }
 
-        public static decimal GetDiscount(int characterId)
+        public static bool GetAnonimous(int characterId)
         {
-            var character = GetCharacter(characterId);
-            return GetDiscount(character);
+            var model = GetCharacter(characterId);
+            if (model != null)
+            {
+                return model.workModel.billing.anonymous;
+            }
+            return false;
         }
 
-        public static decimal GetDiscount(CharacterModel model)
+        public static decimal GetDiscount(int characterId, DiscountType discountType)
         {
+            var model = GetCharacter(characterId);
             if (model != null)
-                return ParseToDecimal(model.workModel.discountImplants);
+            {
+                var gesheft = ParseToDecimal(model.workModel.discounts.all);
+                decimal samurai = 0;
+                if(discountType == DiscountType.Samurai)
+                    samurai = ParseToDecimal(model.workModel.discounts.samurai);
+                return gesheft > samurai ? gesheft : samurai;
+            }
             return 0;
-
         }
 
         private static decimal ParseToDecimal(string value)

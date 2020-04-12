@@ -37,12 +37,13 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <param name="id">0 for create new, specified for update</param>
         /// <param name="name">short description</param>
+        /// <param name="discounttype">1 - for gesheftmaher only, 2 - for samurai too(weapons)</param>
         /// <returns></returns>
         [HttpPut("admin/createorupdateproduct")]
-        public DataResult<ProductType> CreateOrUpdateProductType(int id, string name)
+        public DataResult<ProductType> CreateOrUpdateProductType(int id, string name, int discounttype)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdateProductType(id, name), $"createorupdateproduct {id} {name}");
+            var result = RunAction(() => manager.CreateOrUpdateProductType(id, name, discounttype), $"createorupdateproduct {id}:{name}:{discounttype}");
             return result;
         }
 

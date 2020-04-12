@@ -10,5 +10,7 @@ namespace Core.Model
     {
         [Column("name")]
         public string Name { get; set; }
+        [Column("discount_type")]
+        public int DiscountType { get; set; }
     }
 }
