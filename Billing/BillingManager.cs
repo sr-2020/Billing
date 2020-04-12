@@ -28,6 +28,8 @@ namespace Billing
         #endregion
 
         #region web
+        Specialisation SetSpecialisation(int productType, int shop);
+        void DropSpecialisation(int productType, int shop);
         ShopQR WriteQR(int qr, int shop, int sku);
         ShopQR WriteFreeQR(int shop, int sku);
         ShopQR CleanQR(int qr);
@@ -63,6 +65,36 @@ namespace Billing
     {
         ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
         public static string UrlNotFound = "https://www.clickon.ru/preview/original/pic/8781_logo.png";
+
+        public Specialisation SetSpecialisation(int productTypeid, int shopid)
+        {
+            var specialisation = Get<Specialisation>(s => s.ProductTypeId == productTypeid && s.ShopId == shopid);
+            if (specialisation != null)
+                throw new BillingException("У магазина уже есть эта специализация");
+            var producttype = Get<ProductType>(p => p.Id == productTypeid);
+            if (producttype == null)
+                throw new BillingException("ProductType не найден");
+            var shop = Get<ShopWallet>(s => s.Id == shopid);
+            if (shop == null)
+                throw new BillingException("shop не найден");
+            specialisation = new Specialisation
+            {
+                ProductTypeId = producttype.Id,
+                ShopId = shop.Id
+            };
+            Add(specialisation);
+            Context.SaveChanges();
+            return specialisation;
+        }
+        public void DropSpecialisation(int productType, int shop)
+        {
+            var specialisation = Get<Specialisation>(s => s.ProductTypeId == productType && s.ShopId == shop);
+            if (specialisation == null)
+                throw new BillingException("У магазина нет указанной специализации");
+            Remove(specialisation);
+            Context.SaveChanges();
+        }
+
         public ShopQR WriteQR(int qrid, int shop, int skuid)
         {
             //check allow
@@ -154,15 +186,16 @@ namespace Billing
 
         public List<ShopDto> GetShops()
         {
-            return GetList<ShopWallet>(c => true, c => c.Wallet).Select(s =>
-                  new ShopDto
-                  {
-                      Id = s.Id,
-                      Name = s.Name,
-                      Comission = BillingHelper.GetComission(s.LifeStyle),
-                      Lifestyle = s.LifeStyle,
-                      Balance = s.Wallet.Balance
-                  }).ToList();
+            return GetList<ShopWallet>(c => true, new string[] { "Wallet","Specialisations", "Specialisations.ProductType" }).Select(s =>
+                    new ShopDto
+                    {
+                        Id = s.Id,
+                        Name = s.Name,
+                        Comission = BillingHelper.GetComission(s.LifeStyle),
+                        Lifestyle = s.LifeStyle,
+                        Balance = s.Wallet.Balance,
+                        Specialisations = CreateSpecialisationDto(s)
+                    }).ToList();
         }
 
         public List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled)
@@ -378,7 +411,6 @@ namespace Billing
             if (type == null)
             {
                 type = new ProductType();
-                type.Id = id;
             }
             type.Name = name;
             Add(type);
@@ -432,7 +464,7 @@ namespace Billing
                 sku = new Sku();
             }
             sku.Enabled = enabled;
-            if (count >= 0)
+            if (count > 0)
                 sku.Count = count;
             if (!string.IsNullOrEmpty(name))
                 sku.Name = name;
@@ -516,6 +548,21 @@ namespace Billing
         #region private
 
         private string _ownerName = "Владелец кошелька";
+
+        private List<SpecialisationDto> CreateSpecialisationDto(ShopWallet shop)
+        {
+            var list = new List<SpecialisationDto>();
+            if (shop.Specialisations == null)
+                return list;
+            list.AddRange(shop.Specialisations.Select(s => new SpecialisationDto
+            {
+                ProductTypeId = s.ProductTypeId,
+                ProductTypeName = s.ProductType?.Name,
+                ShopId = s.ShopId,
+                ShopName = shop.Name
+            }));
+            return list;
+        }
         private Sku SkuAllowed(int shop, int sku)
         {
             var skuList = GetSkuList(shop);
@@ -523,16 +570,12 @@ namespace Billing
         }
         private List<Sku> GetSkuList(int shopId)
         {
-            var result = new List<Sku>();
-            var contracts = GetList<Contract>(c => c.ShopId == shopId);
-            foreach (var contract in contracts)
-            {
-                result.AddRange(GetList<Sku>(s => s.CorporationId == contract.CorporationId && s.Enabled && s.Count > 0, s => s.Corporation, s => s.Nomenklatura, s => s.Nomenklatura.ProductType));
-            }
-            //TODO filter by specialisation
+            var skuids = ExecuteQuery<int>($"SELECT* FROM get_sku({shopId})");
+            var result = GetList<Sku>(s=>skuids.Contains(s.Id), s => s.Corporation, s => s.Nomenklatura, s => s.Nomenklatura.ProductType);
             //TODO filter by contractlimit
             return result;
         }
+
         private Wallet CreateOrUpdateWallet(WalletTypes type, int id = 0, decimal amount = 0)
         {
             Wallet wallet;

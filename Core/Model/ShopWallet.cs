@@ -16,5 +16,6 @@ namespace Core.Model
         public string Name { get; set; }
         [Column("lifestyle")]
         public int LifeStyle { get; set; }
+        public virtual List<Specialisation> Specialisations { get; set; }
     }
 }

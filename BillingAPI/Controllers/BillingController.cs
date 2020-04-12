@@ -16,7 +16,6 @@ namespace BillingAPI.Controllers
     [ApiController]
     public class BillingController : EvarunApiController
     {
-
         #region admin
 
         /// <summary>
@@ -184,6 +183,23 @@ namespace BillingAPI.Controllers
         #endregion
 
         #region renta
+        
+        [HttpPost("renta/setspecialisation")]
+        public DataResult<Specialisation> SetScpecialisation(int productType, int shop)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.SetSpecialisation(productType, shop), $"setspecialisation {productType}:{shop}");
+            return result;
+        }
+
+        [HttpDelete("renta/dropspecialisation")]
+        public Result DropScpecialisation(int productType, int shop)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.DropSpecialisation(productType, shop), $"dropspecialisation {productType}:{shop}");
+            return result;
+        }
+
         [HttpPost("renta/writeqr")]
         public DataResult<ShopQR> WriteQR(int qr, int shop, int sku)
         {
@@ -319,9 +335,9 @@ namespace BillingAPI.Controllers
         }
 
         /// <summary>
-        /// Get all shops
+        /// 
         /// </summary>
-        /// <returns>list of</returns>
+        /// <returns></returns>
         [HttpGet("info/getshops")]
         public DataResult<List<ShopDto>> GetShops()
         {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Core.Model;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,5 +12,6 @@ namespace Billing.DTO
         public int Comission { get; set; }
         public int Lifestyle { get; set; }
         public decimal Balance { get; set; }
+        public List<SpecialisationDto> Specialisations { get; set; }
     }
 }

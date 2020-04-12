@@ -1,7 +1,10 @@
 ﻿using Core.Model;
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -9,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Core
 {
-    public interface IBaseRepository 
+    public interface IBaseRepository
     {
         T Get<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class;
         T Get<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class;
@@ -22,7 +25,7 @@ namespace Core
     }
 
 
-    public class BaseEntityRepository: IBaseRepository
+    public class BaseEntityRepository : IBaseRepository
     {
         protected readonly BillingContext Context;
 
@@ -31,9 +34,17 @@ namespace Core
             Context = new BillingContext();
         }
 
+        public List<T> ExecuteQuery<T>(string query)
+        {
+            using (var connection =  Context.Database.GetDbConnection())
+            {
+                return connection.Query<T>(query).ToList();
+            }
+        }
+
         public virtual void Add<T>(T entity) where T : BaseEntity
         {
-            if(entity.Id > 0)
+            if (entity.Id > 0)
                 Context.Entry(entity).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
             else
                 Context.Entry(entity).State = Microsoft.EntityFrameworkCore.EntityState.Added;
@@ -44,11 +55,8 @@ namespace Core
             foreach (var entity in entities)
             {
                 Add(entity);
-                //if (entity.Id > 0)
-                //    Context.Entry(entity).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                //Context.Set<T>().Add(entity);
+
             }
-            //Context.Set<T>().AddRange(entities);
         }
 
         public virtual void Remove<T>(T entity) where T : class
@@ -72,7 +80,7 @@ namespace Core
         public virtual T Get<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class
         {
             var res = AddIncludes(Query<T>(), includes);
-            if(res != null)
+            if (res != null)
                 return res.FirstOrDefault(predicate);
             return null;
         }
