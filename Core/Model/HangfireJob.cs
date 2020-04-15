@@ -17,10 +17,8 @@ namespace Core.Model
         public string Cron { get; set; }
         [Column("job_name")]
         public string JobName { get; set; }
-        [ForeignKey("job_type")]
-        public int JobTypeId { get; set; }
-        [ForeignKey("job_type")]
-        public virtual HangFireJobType JobType { get; set; }
+        [Column("job_type")]
+        public int JobType { get; set; }
         [Column("hangfire_startid")]
         public string HangfireStartId { get; set; }
         [Column("hangfire_reccurentid")]

@@ -38,8 +38,8 @@ namespace Billing
         Renta ConfirmRenta(int character, int priceId);
         List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled);
         List<SkuDto> GetSkusForShop(int shop);
-        PriceDto GetPriceByQR(int character, int qr);
-        PriceDto GetPrice(int character, int shop, int sku);
+        PriceShopDto GetPriceByQR(int character, int qr);
+        PriceShopDto GetPrice(int character, int shop, int sku);
         List<ShopDto> GetShops();
         List<CorporationDto> GetCorps();
         List<ProductTypeDto> GetProductTypes();
@@ -261,7 +261,7 @@ namespace Billing
             return renta;
         }
 
-        public PriceDto GetPriceByQR(int character, int qrid)
+        public PriceShopDto GetPriceByQR(int character, int qrid)
         {
             var qr = Get<ShopQR>(q => q.Id == qrid);
             if (qr == null)
@@ -270,7 +270,7 @@ namespace Billing
                 throw new BillingException("пустой qr");
             return GetPrice(character, qr.ShopId.Value, qr.SkuId.Value);
         }
-        public PriceDto GetPrice(int character, int shopid, int skuid)
+        public PriceShopDto GetPrice(int character, int shopid, int skuid)
         {
             var sku = SkuAllowed(shopid, skuid);
             if (sku == null)
@@ -280,7 +280,7 @@ namespace Billing
             if (shop == null || sin == null)
                 throw new Exception("some went wrong");
             var price = CreateNewPrice(sku, shop, sin);
-            var dto = new PriceDto(price);
+            var dto = new PriceShopDto(new PriceDto(price));
             return dto;
         }
         public CorporationWallet CreateOrUpdateCorporationWallet(int corpId = 0, decimal amount = 0, string name = "unknown corporation", string logoUrl = "")

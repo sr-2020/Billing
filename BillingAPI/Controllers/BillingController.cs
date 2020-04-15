@@ -242,7 +242,7 @@ namespace BillingAPI.Controllers
         }
 
         [HttpPost("renta/createprice")]
-        public DataResult<PriceDto> GetPriceByShop(int character, int shop, int sku)
+        public DataResult<PriceShopDto> GetPriceByShop(int character, int shop, int sku)
         {
             var manager = IocContainer.Get<IBillingManager>();
             var result = RunAction(() => manager.GetPrice(shop, character, sku), $"createprice {character}:{shop}:{sku}");
@@ -250,7 +250,7 @@ namespace BillingAPI.Controllers
         }
 
         [HttpPost("renta/createpricebyqr")]
-        public DataResult<PriceDto> GetPriceByQR(int character, int qr)
+        public DataResult<PriceShopDto> GetPriceByQR(int character, int qr)
         {
             var manager = IocContainer.Get<IBillingManager>();
             var result = RunAction(() => manager.GetPriceByQR(character, qr), $"createpricebyqr {character}:{qr}");

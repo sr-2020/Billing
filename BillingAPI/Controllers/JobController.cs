@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BillingAPI.Model;
 using Core.Model;
+using Core.Primitives;
 using Hangfire;
 using IoC;
 using Jobs;
@@ -12,36 +14,28 @@ using Microsoft.AspNetCore.Mvc;
 namespace BillingAPI.Controllers
 {
     [Route("api/[controller]")]
-    public class JobController : Controller
+    public class JobController : EvarunApiController
     {
         private readonly IJobManager Manager = IocContainer.Get<IJobManager>();
         [HttpGet("getalljobs")]
-        public ActionResult Index()
+        public DataResult<List<HangfireJob>> Index()
         {
-            var jobs = Manager.GetAllJobs();
-            return View(jobs);
+            var result = RunAction(() => Manager.GetAllJobs(), $"getalljobs");
+            return result;
         }
 
-        [HttpPost("createnewjob")]
-        public ActionResult CreateNewJob(HangfireJob newJob)
+        [HttpPost("createorupdatejob")]
+        public DataResult<HangfireJob> CreateOrUpdateJob(int id, DateTime? start, DateTime? end, string cron, string jobname, int jobtype)
         {
-            Manager.AddOrUpdateJob(newJob);
-            return new JsonResult("ok");
+            var result = RunAction(() => Manager.AddOrUpdateJob(id, start ?? DateTime.MinValue, end ?? DateTime.MinValue, cron, jobname, jobtype), $"createorupdatejob");
+            return result;
         }
-        [ApiExplorerSettings(IgnoreApi = true)]
-        public ActionResult Edit()
+        [HttpGet("getjobtypes")]
+        public DataResult<IEnumerable<JobType>> GetJobTypes()
         {
-            return View();
+            var result = RunAction(() => { return Enum.GetValues(typeof(JobType)).Cast<JobType>(); }, $"GetJobTypes");
+            return result;
         }
-        [ApiExplorerSettings(IgnoreApi = true)]
-        public ActionResult Start()
-        {
-            return View();
-        }
-        [ApiExplorerSettings(IgnoreApi = true)]
-        public ActionResult Delete()
-        {
-            return View();
-        }
+
     }
 }

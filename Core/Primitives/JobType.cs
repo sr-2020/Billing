@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jobs
+namespace Core.Primitives
 {
-    public class CreditsJob : BaseJob
+    public enum JobType
     {
+        Test = 1,
+        Renta = 2
     }
 }

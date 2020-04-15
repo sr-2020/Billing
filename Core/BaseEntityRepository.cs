@@ -36,10 +36,8 @@ namespace Core
 
         public List<T> ExecuteQuery<T>(string query)
         {
-            using (var connection =  Context.Database.GetDbConnection())
-            {
-                return connection.Query<T>(query).ToList();
-            }
+            var connection = Context.Database.GetDbConnection();
+            return connection.Query<T>(query).ToList();
         }
 
         public virtual void Add<T>(T entity) where T : BaseEntity

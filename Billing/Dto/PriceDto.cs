@@ -11,14 +11,14 @@ namespace Billing.DTO
     {
         public PriceDto(Price price) : base(price.Sku)
         {
-            this.IdOffer = price.Id;
+            this.PriceId = price.Id;
             this.DateCreated = new DateTimeOffset(price.DateCreated).ToUnixTimeSeconds();
             this.DateTill = new DateTimeOffset(price.DateCreated.AddMinutes(IocContainer.Get<ISettingsManager>().GetIntValue("price_minutes"))).ToUnixTimeSeconds();
             this.FinalPrice = price.FinalPrice;
             this.ShopComission = price.ShopComission;
             this.ShopName = price.Shop.Name;
         }
-        public int IdOffer { get; set; }
+        public int PriceId { get; set; }
         public long DateCreated { get; set; }
         public string ShopName { get; set; }
         public long DateTill { get; set; }
