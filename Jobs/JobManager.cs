@@ -3,6 +3,7 @@ using Core.Model;
 using Core.Primitives;
 using Hangfire;
 using IoC;
+using NCrontab;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -12,13 +13,13 @@ namespace Jobs
 {
     public interface IJobManager : IBaseRepository
     {
-        HangfireJob AddOrUpdateJob(int id, DateTime start, DateTime end, string cron, string jobname, int jobtype);
+        HangfireJob AddOrUpdateJob(int id, DateTimeOffset? start, DateTimeOffset? end, string cron, string jobname, int jobtype);
         List<HangfireJob> GetAllJobs();
     }
 
     public class JobManager : BaseEntityRepository, IJobManager
     {
-        public HangfireJob AddOrUpdateJob(int id, DateTime start, DateTime end, string cron, string jobname, int jobtype)
+        public HangfireJob AddOrUpdateJob(int id, DateTimeOffset? start, DateTimeOffset? end, string cron, string jobname, int jobtype)
         {
             HangfireJob job = null;
             if (id > 0)
@@ -27,29 +28,23 @@ namespace Jobs
             {
                 job = new HangfireJob();
             }
-            if (job.StartTime != start)
+            if (start.HasValue && start > DateTimeOffset.Now)
             {
-                if (start > SystemHelper.ConvertDateTimeToLocal(DateTime.Now))
-                {
-                    job.StartTime = start;
-                }
+                job.StartTime = start.Value;
             }
-            if (job.EndTime != end)
+            if (end.HasValue && end > DateTimeOffset.Now)
             {
-                if (end > SystemHelper.ConvertDateTimeToLocal(DateTime.Now) && end > job.EndTime)
-                {
-                    job.EndTime = end;
-                }
+                job.EndTime = end.Value;
             }
-            if (!string.IsNullOrEmpty(cron))
+            if (SystemHelper.CronParse(cron) != null)
             {
                 job.Cron = cron;
             }
-            if(!string.IsNullOrEmpty(jobname))
+            if (!string.IsNullOrEmpty(jobname))
             {
                 job.JobName = jobname;
             }
-            if(Enum.IsDefined(typeof(JobType), jobtype))
+            if (Enum.IsDefined(typeof(JobType), jobtype))
             {
                 job.JobType = jobtype;
             }
@@ -69,25 +64,25 @@ namespace Jobs
 
         private HangfireJob CreateOrUpdateStopJob(HangfireJob job)
         {
-            if(!string.IsNullOrEmpty(job.HangfireEndId))
+            if (!string.IsNullOrEmpty(job.HangfireEndId))
             {
                 RecurringJob.RemoveIfExists(job.HangfireEndId);
             }
-            var date = SystemHelper.ConvertDateTimeToLocal(job.EndTime);
-            job.HangfireEndId = BackgroundJob.Schedule(() => RecurringJob.RemoveIfExists(job.HangfireReccurentId), new DateTimeOffset(date));
+            var date = job.EndTime;
+            job.HangfireEndId = BackgroundJob.Schedule(() => RecurringJob.RemoveIfExists(job.HangfireReccurentId), date);
             return job;
         }
 
         private HangfireJob CreateOrUpdateStartJob(HangfireJob job)
         {
-            if (job.StartTime < SystemHelper.ConvertDateTimeToLocal(DateTime.Now))
+            if (job.StartTime < DateTimeOffset.Now)
                 return job;
             if (!string.IsNullOrEmpty(job.HangfireStartId))
             {
                 RecurringJob.RemoveIfExists(job.HangfireStartId);
             }
-            var date = SystemHelper.ConvertDateTimeToLocal(job.StartTime);
-            job.HangfireStartId = BackgroundJob.Schedule(() => CreateOrUpdateRecurringJob((JobType)job.JobType, job.Id), new DateTimeOffset(date));
+            var date = job.StartTime;
+            job.HangfireStartId = BackgroundJob.Schedule(() => CreateOrUpdateRecurringJob((JobType)job.JobType, job.Id), date);
             return job;
         }
 
@@ -119,6 +114,7 @@ namespace Jobs
             {
                 dbJob.HangfireReccurentId = Guid.NewGuid().ToString();
             }
+            
             RecurringJob.AddOrUpdate(dbJob.HangfireReccurentId, () => job.DoJob(), $"{dbJob.Cron}");
             return dbJob;
         }

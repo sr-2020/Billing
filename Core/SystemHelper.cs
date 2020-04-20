@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using NCrontab;
 using System;
 
 namespace Core
@@ -27,18 +28,19 @@ namespace Core
             return $"Server = {host}; Database = {db}; persist security info = True;User Id = {user}; Password = {password}";
         }
 
-        public static DateTime ConvertDateTimeToLocal(DateTime? dateTime = null)
+        public static DateTimeOffset? SetMoscowTimeSpan(string dateTime)
         {
-            if (!dateTime.HasValue)
-                dateTime = DateTime.Now;
-            return TimeZoneInfo.ConvertTime(dateTime.Value, TimeZoneInfo.FindSystemTimeZoneById("Europe/Moscow"), TimeZoneInfo.Local);
+            if (string.IsNullOrEmpty(dateTime))
+                return null;
+            var result = DateTimeOffset.ParseExact(dateTime, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.CurrentUICulture, System.Globalization.DateTimeStyles.AssumeLocal);
+            return new DateTimeOffset(result.Ticks, TimeSpan.FromHours(3));
         }
 
-        public static DateTime ConvertDateTimeToMoscow(DateTime? dateTime = null)
+        public static CrontabSchedule CronParse(string cron)
         {
-            if (!dateTime.HasValue)
-                dateTime = DateTime.Now;
-            return TimeZoneInfo.ConvertTime(dateTime.Value, TimeZoneInfo.Local, TimeZoneInfo.FindSystemTimeZoneById("Europe/Moscow"));
+            if (string.IsNullOrWhiteSpace(cron))
+                return null;
+            return CrontabSchedule.Parse(cron);
         }
     }
 }

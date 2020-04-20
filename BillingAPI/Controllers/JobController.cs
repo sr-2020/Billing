@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Billing;
 using BillingAPI.Model;
+using Core;
 using Core.Model;
 using Core.Primitives;
 using Hangfire;
@@ -23,11 +25,20 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => Manager.GetAllJobs(), $"getalljobs");
             return result;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="start">yyyy-MM-dd HH:mm:ss</param>
+        /// <param name="end">yyyy-MM-dd HH:mm:ss</param>
+        /// <param name="cron"></param>
+        /// <param name="jobname"></param>
+        /// <param name="jobtype"></param>
+        /// <returns></returns>
         [HttpPost("createorupdatejob")]
-        public DataResult<HangfireJob> CreateOrUpdateJob(int id, DateTime? start, DateTime? end, string cron, string jobname, int jobtype)
+        public DataResult<HangfireJob> CreateOrUpdateJob(int id, string start, string end, string cron, string jobname, int jobtype)
         {
-            var result = RunAction(() => Manager.AddOrUpdateJob(id, start ?? DateTime.MinValue, end ?? DateTime.MinValue, cron, jobname, jobtype), $"createorupdatejob");
+            var result = RunAction(() => Manager.AddOrUpdateJob(id, SystemHelper.SetMoscowTimeSpan(start), SystemHelper.SetMoscowTimeSpan(end), cron, jobname, jobtype), $"createorupdatejob");
             return result;
         }
         [HttpGet("getjobtypes")]
