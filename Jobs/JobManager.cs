@@ -69,7 +69,7 @@ namespace Jobs
                 RecurringJob.RemoveIfExists(job.HangfireEndId);
             }
             var date = job.EndTime;
-            job.HangfireEndId = BackgroundJob.Schedule(() => RecurringJob.RemoveIfExists(job.HangfireReccurentId), date);
+            job.HangfireEndId = BackgroundJob.Schedule(() => RecurringJob.RemoveIfExists(job.HangfireRecurringId), date);
             return job;
         }
 
@@ -82,15 +82,15 @@ namespace Jobs
                 RecurringJob.RemoveIfExists(job.HangfireStartId);
             }
             var date = job.StartTime;
-            job.HangfireStartId = BackgroundJob.Schedule(() => CreateOrUpdateRecurringJob((JobType)job.JobType, job.Id), date);
+            job.HangfireStartId = BackgroundJob.Schedule(() => CreateOrUpdateRecurringJob(job.Id), date);
             return job;
         }
 
-        public void CreateOrUpdateRecurringJob(JobType jobtype, int dbJobId)
+        public void CreateOrUpdateRecurringJob(int dbJobId)
         {
             BaseJob job;
             var dbJob = Get<HangfireJob>(j => j.Id == dbJobId);
-            switch (jobtype)
+            switch ((JobType)dbJob.JobType)
             {
                 case JobType.Renta:
                     job = new RentaJob();
@@ -110,12 +110,12 @@ namespace Jobs
 
         private HangfireJob CreateOrUpdateRecurringJob(HangfireJob dbJob, BaseJob job)
         {
-            if (string.IsNullOrEmpty(dbJob.HangfireReccurentId))
+            if (string.IsNullOrEmpty(dbJob.HangfireRecurringId))
             {
-                dbJob.HangfireReccurentId = Guid.NewGuid().ToString();
+                dbJob.HangfireRecurringId = Guid.NewGuid().ToString();
             }
             
-            RecurringJob.AddOrUpdate(dbJob.HangfireReccurentId, () => job.DoJob(), $"{dbJob.Cron}");
+            RecurringJob.AddOrUpdate(dbJob.HangfireRecurringId, () => job.DoJob(), $"{dbJob.Cron}");
             return dbJob;
         }
     }

@@ -3,6 +3,7 @@ using Settings;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace Jobs
 {
@@ -12,6 +13,7 @@ namespace Jobs
         public override void Handle()
         {
             base.Handle();
+            Thread.Sleep(60000);
             var manager = IocContainer.Get<ISettingsManager>();
             var oldValue = manager.GetIntValue("test");
             manager.SetValue("test", (++oldValue).ToString());

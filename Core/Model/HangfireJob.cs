@@ -21,8 +21,8 @@ namespace Core.Model
         public int JobType { get; set; }
         [Column("hangfire_startid")]
         public string HangfireStartId { get; set; }
-        [Column("hangfire_reccurentid")]
-        public string HangfireReccurentId { get; set; }
+        [Column("hangfire_recurringid")]
+        public string HangfireRecurringId { get; set; }
         [Column("hangfire_endid")]
         public string HangfireEndId { get; set; }
     }
