@@ -86,6 +86,10 @@ namespace BillingAPI
             app.UseEvaSwagger();
             #endregion
 
+            #region cors
+            app.UseCors("FullAccessPolicy");
+            #endregion
+
             app.UseMvc(routes =>
             {
                 routes
