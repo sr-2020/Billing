@@ -19,10 +19,16 @@ namespace BillingAPI.Controllers
     public class JobController : EvarunApiController
     {
         private readonly IJobManager Manager = IocContainer.Get<IJobManager>();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="finished">if true, all jobs will be displayed, if false, then only not finished will be displaed</param>
+        /// <returns></returns>
         [HttpGet("getalljobs")]
-        public DataResult<List<HangfireJob>> Index()
+        public DataResult<List<HangfireJob>> Index(bool finished)
         {
-            var result = RunAction(() => Manager.GetAllJobs(), $"getalljobs");
+            var result = RunAction(() => Manager.GetAllJobs(finished), $"getalljobs");
             return result;
         }
         /// <summary>

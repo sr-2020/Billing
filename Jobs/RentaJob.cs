@@ -11,7 +11,7 @@ namespace Jobs
         public override void Handle()
         {
             base.Handle();
-            Console.WriteLine("Renta");
+            
         }
 
     }

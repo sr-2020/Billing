@@ -45,6 +45,19 @@ namespace BillingAPI
             services.AddHangfire(config => config.UsePostgreSqlStorage(hfConnectionString));
             #endregion
 
+            #region cors
+            services.AddCors(options =>
+            {
+                options.AddPolicy("FullAccessPolicy", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
+                });
+            });
+            #endregion
+
             //services.AddAuthentication().AddCookie();
         }
 

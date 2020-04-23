@@ -14,7 +14,7 @@ namespace Jobs
     public interface IJobManager : IBaseRepository
     {
         HangfireJob AddOrUpdateJob(int id, DateTimeOffset? start, DateTimeOffset? end, string cron, string jobname, int jobtype);
-        List<HangfireJob> GetAllJobs();
+        List<HangfireJob> GetAllJobs(bool finished);
     }
 
     public class JobManager : BaseEntityRepository, IJobManager
@@ -57,9 +57,10 @@ namespace Jobs
             return job;
         }
 
-        public List<HangfireJob> GetAllJobs()
+        public List<HangfireJob> GetAllJobs(bool finished)
         {
-            return Context.Job.ToList();
+            var filter = DateTimeOffset.Now;
+            return GetList<HangfireJob>(j => j.EndTime > filter || !finished).ToList();
         }
 
         private HangfireJob CreateOrUpdateStopJob(HangfireJob job)
@@ -114,7 +115,7 @@ namespace Jobs
             {
                 dbJob.HangfireRecurringId = Guid.NewGuid().ToString();
             }
-            
+
             RecurringJob.AddOrUpdate(dbJob.HangfireRecurringId, () => job.DoJob(), $"{dbJob.Cron}");
             return dbJob;
         }
