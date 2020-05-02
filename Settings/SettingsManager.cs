@@ -11,6 +11,7 @@ namespace Settings
         string GetValue(string name);
         decimal GetDecimalValue(string name);
         int GetIntValue(string name);
+        bool GetBoolValue(string name);
         List<SystemSettings> GetAllSettings();
         SystemSettings SetValue(string key, string value);
 
@@ -25,12 +26,20 @@ namespace Settings
             return GetList<SystemSettings>(s => true);
         }
 
+        public bool GetBoolValue(string name)
+        {
+            var result = Get<SystemSettings>(s => s.Key == name);
+            if (result != null)
+                return bool.Parse(result.Value);
+            throw new Exception($"SystemSetting {name} does not exists");
+        }
+        
         public int GetIntValue(string name)
         {
             var result = Get<SystemSettings>(s => s.Key == name);
             if (result != null)
                 return int.Parse(result.Value);
-            return 0;
+            throw new Exception($"SystemSetting {name} does not exists");
         }
 
         public string GetValue(string name)
@@ -38,7 +47,7 @@ namespace Settings
             var result = Get<SystemSettings>(s => s.Key == name);
             if (result != null)
                 return result.Value;
-            return string.Empty;
+            throw new Exception($"SystemSetting {name} does not exists");
         }
 
         public decimal GetDecimalValue(string name)
@@ -46,7 +55,7 @@ namespace Settings
             var result = Get<SystemSettings>(s => s.Key == name);
             if (result != null)
                 return decimal.Parse(result.Value);
-            return 0;
+            throw new Exception($"SystemSetting {name} does not exists");
         }
         public SystemSettings SetValue(string key, string value)
         {

@@ -24,32 +24,29 @@ namespace BillingAPI.Controllers
                 result.Status = true;
                 Finish(guid);
             }
-            catch(BillingAuthException e)
+            catch (BillingAuthException e)
             {
-                HandleAuthBillingException(e, guid);
-                result.Message = e.Message;
-                result.Status = false;
+                return HandleException(401, e, guid, result);
             }
             catch (BillingException ex)
             {
-                HandleBillingException(ex, guid);
-                result.Message = ex.Message;
-                result.Status = false;
-
+                return HandleException(422, ex, guid, result);
+            }
+            catch (ShopException se)
+            {
+                return HandleException(418, se, guid, result);
             }
             catch (Exception exc)
             {
-                HandleException(exc, guid);
-                result.Message = exc.ToString();
-                result.Status = false;
+                return HandleException(500, exc, guid, result);
             }
             return result;
         }
 
-        protected Result RunAction(Action action, string logmessage)
+        protected Result RunAction(Action action, string logmessage = "")
         {
-            var result = new Result();
             var guid = Guid.NewGuid();
+            var result = new Result();
             try
             {
                 Start(logmessage, guid);
@@ -59,22 +56,19 @@ namespace BillingAPI.Controllers
             }
             catch (BillingAuthException e)
             {
-                HandleAuthBillingException(e, guid);
-                result.Message = e.Message;
-                result.Status = false;
+                return HandleException(401, e, guid, result);
             }
             catch (BillingException ex)
             {
-                HandleBillingException(ex, guid);
-                result.Message = ex.Message;
-                result.Status = false;
-
+                return HandleException(422, ex, guid, result);
+            }
+            catch (ShopException se)
+            {
+                return HandleException(418, se, guid, result);
             }
             catch (Exception exc)
             {
-                HandleException(exc, guid);
-                result.Message = exc.ToString();
-                result.Status = false;
+                return HandleException(500, exc, guid, result);
             }
             return result;
         }
@@ -88,22 +82,13 @@ namespace BillingAPI.Controllers
         {
             Console.WriteLine($"Action for {guid} finished");
         }
-        private void HandleAuthBillingException(BillingAuthException e, Guid guid)
+        private T HandleException<T>(int code, Exception e, Guid guid, T result) where T : Result 
         {
-            Response.StatusCode = 401;
-            Console.WriteLine($"AUTH ERROR for {guid}: {e.Message} ");
+            Response.StatusCode = code;
+            Console.WriteLine($"ERROR for {guid}: {e.Message}: {code}");
+            result.Message = e.Message;
+            result.Status = false;
+            return result;
         }
-
-        private void HandleBillingException(BillingException e, Guid guid)
-        {
-            Response.StatusCode = 422;
-            Console.WriteLine($"CUSTOM ERROR for {guid}: {e.Message}");
-        }
-        private void HandleException(Exception e, Guid guid)
-        {
-            Response.StatusCode = 500;
-            Console.WriteLine($"ERROR for {guid}: {e.ToString()}");
-        }
-
     }
 }

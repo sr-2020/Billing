@@ -48,6 +48,10 @@ namespace Billing
 
         #endregion
 
+        #region jobs
+        void ProcessRentas();
+        #endregion
+
         #region admin
 
         Sku CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled);
@@ -65,6 +69,19 @@ namespace Billing
     {
         ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
         public static string UrlNotFound = "https://www.clickon.ru/preview/original/pic/8781_logo.png";
+
+
+
+        public void ProcessRentas()
+        {
+            var rentas = GetAllRentas();
+            var bulkCount = 500;
+            var pageCount = (rentas.Count + bulkCount - 1) / bulkCount;
+            for (int i = 0; i < pageCount; i++)
+            {
+                ProcessBulk(rentas.Skip(i).Take(bulkCount).ToList());
+            }
+        }
 
         public Specialisation SetSpecialisation(int productTypeid, int shopid)
         {
@@ -186,16 +203,16 @@ namespace Billing
 
         public List<ShopDto> GetShops()
         {
-            return GetList<ShopWallet>(c => true, new string[] { "Wallet","Specialisations", "Specialisations.ProductType" }).Select(s =>
-                    new ShopDto
-                    {
-                        Id = s.Id,
-                        Name = s.Name,
-                        Comission = BillingHelper.GetComission(s.LifeStyle),
-                        Lifestyle = s.LifeStyle,
-                        Balance = s.Wallet.Balance,
-                        Specialisations = CreateSpecialisationDto(s)
-                    }).ToList();
+            return GetList<ShopWallet>(c => true, new string[] { "Wallet", "Specialisations", "Specialisations.ProductType" }).Select(s =>
+                     new ShopDto
+                     {
+                         Id = s.Id,
+                         Name = s.Name,
+                         Comission = BillingHelper.GetComission(s.LifeStyle),
+                         Lifestyle = s.LifeStyle,
+                         Balance = s.Wallet.Balance,
+                         Specialisations = CreateSpecialisationDto(s)
+                     }).ToList();
         }
 
         public List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled)
@@ -260,12 +277,11 @@ namespace Billing
             Context.SaveChanges();
             return renta;
         }
-
         public PriceShopDto GetPriceByQR(int character, int qrid)
         {
             var qr = Get<ShopQR>(q => q.Id == qrid);
             if (qr == null)
-                throw new Exception($"qr {qrid} not found");
+                throw new BillingException($"qr {qrid} not found");
             if (qr.ShopId == null || qr.SkuId == null)
                 throw new BillingException("пустой qr");
             return GetPrice(character, qr.ShopId.Value, qr.SkuId.Value);
@@ -414,7 +430,7 @@ namespace Billing
             }
             if (discounttype != 0)
                 type.DiscountType = discounttype;
-            if(!string.IsNullOrEmpty(name))
+            if (!string.IsNullOrEmpty(name))
                 type.Name = name;
             Add(type);
             Context.SaveChanges();
@@ -507,6 +523,8 @@ namespace Billing
             Add(sin);
             sin.EVersion = _settings.GetValue("eversion");
             var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId, balance);
+            sin.Wallet = wallet;
+            Context.SaveChanges(); 
             var scoring = Get<Scoring>(s => s.Id == sin.ScoringId);
             if (scoring == null)
             {
@@ -563,6 +581,30 @@ namespace Billing
 
         private string _ownerName = "Владелец кошелька";
 
+        private List<Renta> GetAllRentas()
+        {
+            return GetList<Renta>(r => true);
+        }
+
+        private void ProcessBulk(List<Renta> rentas)
+        {
+            var mir = GetMIR();
+            foreach (var renta in rentas)
+            {
+                ProcessRenta(renta, mir);
+            }
+            Context.SaveChanges();
+        }
+        private void ProcessRenta(Renta renta, Wallet mir)
+        {
+            var sin = GetSIN(renta.CharacterId, s => s.Wallet);
+            var finalPrice = BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
+            MakeNewTransfer(sin.Wallet, mir, finalPrice, $"списание по рентному платежу за покупку {renta}");
+            if (sin.Wallet.Balance > 0)
+            {
+
+            }
+        }
         private List<SpecialisationDto> CreateSpecialisationDto(ShopWallet shop)
         {
             var list = new List<SpecialisationDto>();
@@ -585,7 +627,7 @@ namespace Billing
         private List<Sku> GetSkuList(int shopId)
         {
             var skuids = ExecuteQuery<int>($"SELECT * FROM get_sku({shopId})");
-            var result = GetList<Sku>(s=>skuids.Contains(s.Id), s => s.Corporation, s => s.Nomenklatura, s => s.Nomenklatura.ProductType);
+            var result = GetList<Sku>(s => skuids.Contains(s.Id), s => s.Corporation, s => s.Nomenklatura, s => s.Nomenklatura.ProductType);
             //TODO filter by contractlimit
             return result;
         }
@@ -684,7 +726,7 @@ namespace Billing
             }
             return sin;
         }
-        private Transfer MakeNewTransfer(Wallet wallet1, Wallet wallet2, decimal amount, string comment, bool anonymous = false)
+        private Transfer MakeNewTransfer(Wallet wallet1, Wallet wallet2, decimal amount, string comment, bool anonymous = false, bool save = true)
         {
             if (wallet1 == null)
                 throw new BillingException($"Нет кошелька отправителя");
@@ -692,7 +734,8 @@ namespace Billing
                 throw new BillingException($"Нет кошелька получателя");
             if (wallet1.Id == wallet2.Id)
                 throw new BillingException($"Самому себе нельзя переводить.");
-            if (wallet1.Balance < amount && wallet1.WalletType != (int)WalletTypes.MIR)
+            //баланса хватает, или один из кошельков MIR
+            if (wallet1.Balance < amount && (wallet1.WalletType != (int)WalletTypes.MIR || wallet2.WalletType != (int)WalletTypes.MIR))
                 throw new BillingException($"Денег нет, но вы держитесь");
             if (amount <= 0)
                 throw new BillingException($"Нельзя перевести отрицательное значение");
@@ -713,7 +756,8 @@ namespace Billing
                 Anonymous = anonymous
             };
             Add(transfer);
-            Context.SaveChanges();
+            if (save)
+                Context.SaveChanges();
             return transfer;
         }
         private DiscountType GetDiscountTypeForSku(Sku sku)
@@ -723,7 +767,7 @@ namespace Billing
             var nomenklatura = sku.Nomenklatura;
             if (nomenklatura == null)
                 nomenklatura = Get<Nomenklatura>(n => n.Id == sku.NomenklaturaId);
-            if(nomenklatura == null)
+            if (nomenklatura == null)
                 throw new Exception("Nomenklatura not found");
             var producttype = nomenklatura.ProductType;
             if (producttype == null)

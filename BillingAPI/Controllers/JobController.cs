@@ -24,11 +24,12 @@ namespace BillingAPI.Controllers
         /// 
         /// </summary>
         /// <param name="finished">if true, all jobs will be displayed, if false, then only not finished will be displaed</param>
+        /// <param name="jobType"></param>
         /// <returns></returns>
         [HttpGet("getalljobs")]
-        public DataResult<List<HangfireJob>> Index(bool finished)
+        public DataResult<List<HangfireJob>> Index(bool? finished, int jobType)
         {
-            var result = RunAction(() => Manager.GetAllJobs(finished), $"getalljobs");
+            var result = RunAction(() => Manager.GetAllJobs(finished ?? true, jobType), $"getalljobs");
             return result;
         }
         /// <summary>
@@ -48,9 +49,9 @@ namespace BillingAPI.Controllers
             return result;
         }
         [HttpGet("getjobtypes")]
-        public DataResult<IEnumerable<JobType>> GetJobTypes()
+        public DataResult<IEnumerable<string>> GetJobTypes()
         {
-            var result = RunAction(() => { return Enum.GetValues(typeof(JobType)).Cast<JobType>(); }, $"GetJobTypes");
+            var result = RunAction(() => { return Enum.GetValues(typeof(JobType)).Cast<JobType>().Select(s => s.ToString()); }, $"GetJobTypes");
             return result;
         }
 
