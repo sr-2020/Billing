@@ -722,7 +722,8 @@ namespace Billing
             var sin = Get(s => s.CharacterId == characterId, includes);
             if (sin == null)
             {
-                sin = CreateOrUpdatePhysicalWallet(characterId);
+                var defaultBalance = _settings.GetIntValue("defaultbalance");
+                sin = CreateOrUpdatePhysicalWallet(characterId, defaultBalance);
             }
             return sin;
         }
