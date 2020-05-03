@@ -49,5 +49,10 @@ namespace Billing
             return manager.GetIntValue($"shop{((Lifestyles)shopLifestyle).ToString().ToLower()}");
         }
 
+        public static decimal CalculateComission(decimal basePrice, decimal comission)
+        {
+            return basePrice * comission;
+        }
+
     }
 }

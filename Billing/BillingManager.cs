@@ -74,12 +74,12 @@ namespace Billing
 
         public void ProcessRentas()
         {
-            var rentas = GetAllRentas();
+            var rentas = GetList<Renta>(r => true, r => r.Shop.Wallet, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation.Wallet);
             var bulkCount = 500;
             var pageCount = (rentas.Count + bulkCount - 1) / bulkCount;
             for (int i = 0; i < pageCount; i++)
             {
-                ProcessBulk(rentas.Skip(i).Take(bulkCount).ToList());
+                ProcessBulk(rentas.Skip(i * bulkCount).Take(bulkCount).ToList());
             }
         }
 
@@ -228,24 +228,31 @@ namespace Billing
 
         public List<RentaDto> GetRentas(int characterId)
         {
-            throw new NotImplementedException();
-            //return GetList<Renta>(r => r.CharacterId == characterId, r => r.ProductType, r => r.Shop).Select(r =>
-            //        new RentaDto
-            //        {
-            //            FinalPrice = r.FinalPrice,
-            //            ProductType = r.ProductType.Name,
-            //            Shop = r.Shop.Name
-            //        }).ToList();
+            return GetList<Renta>(r => r.CharacterId == characterId, r => r.Sku.Nomenklatura.ProductType, r => r.Shop)
+                    .Select(r =>
+                    new RentaDto
+                    {
+                        FinalPrice = BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring),
+                        ProductType = r.Sku.Nomenklatura.ProductType.Name,
+                        Shop = r.Shop.Name,
+                        NomenklaturaName = r.Sku.Nomenklatura.Name,
+                        SkuName = r.Sku.Name,
+                        Corporation = r.Sku.Corporation.Name
+                    }).ToList();
         }
 
         public Renta ConfirmRenta(int character, int priceId)
         {
+            var block = _settings.GetBoolValue(SystemSettingsEnum.block);
+            if (block)
+                throw new ShopException("В данный момент ведется пересчет рентных платежей, попробуйте купить чуть позже");
+
             var price = Get<Price>(p => p.Id == priceId, p => p.Sku, s => s.Shop, s => s.Shop.Wallet);
             if (price == null)
                 throw new BillingException("Персональное предложение не найдено");
             if (price.CharacterId != character)
                 throw new Exception("Персональное предложение заведено на другого персонажа");
-            var dateTill = price.DateCreated.AddMinutes(_settings.GetIntValue("price_minutes"));
+            var dateTill = price.DateCreated.AddMinutes(_settings.GetIntValue(SystemSettingsEnum.price_minutes));
             if (dateTill < DateTime.Now)
                 throw new BillingException($"Персональное предложение больше не действительно, оно истекло {dateTill.ToString("HH:mm:ss")}");
             var sku = SkuAllowed(price.ShopId, price.SkuId);
@@ -288,9 +295,12 @@ namespace Billing
         }
         public PriceShopDto GetPrice(int character, int shopid, int skuid)
         {
+            var block = _settings.GetBoolValue(SystemSettingsEnum.block);
+            if (block)
+                throw new ShopException("В данный момент ведется пересчет рентных платежей, попробуйте получить цену чуть позже");
             var sku = SkuAllowed(shopid, skuid);
             if (sku == null)
-                throw new BillingException("sku недоступен для продажи в данный момент");
+                throw new BillingException("sku недоступен для продажи");
             var shop = Get<ShopWallet>(s => s.Id == shopid);
             var sin = GetSIN(character, s => s.Scoring);
             if (shop == null || sin == null)
@@ -521,10 +531,10 @@ namespace Billing
                 };
             }
             Add(sin);
-            sin.EVersion = _settings.GetValue("eversion");
+            sin.EVersion = _settings.GetValue(SystemSettingsEnum.eversion);
             var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId, balance);
             sin.Wallet = wallet;
-            Context.SaveChanges(); 
+            Context.SaveChanges();
             var scoring = Get<Scoring>(s => s.Id == sin.ScoringId);
             if (scoring == null)
             {
@@ -561,6 +571,9 @@ namespace Billing
 
         public Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment)
         {
+            var block = _settings.GetBoolValue(SystemSettingsEnum.block);
+            if (block)
+                throw new BillingException("В данный момент ведется пересчет рентных платежей, попробуйте сделать перевод чуть позже");
             var d1 = GetSIN(characterFrom, s => s.Wallet);
             var d2 = GetSIN(characterTo, s => s.Wallet);
             var anon = false;
@@ -581,11 +594,6 @@ namespace Billing
 
         private string _ownerName = "Владелец кошелька";
 
-        private List<Renta> GetAllRentas()
-        {
-            return GetList<Renta>(r => true);
-        }
-
         private void ProcessBulk(List<Renta> rentas)
         {
             var mir = GetMIR();
@@ -599,10 +607,14 @@ namespace Billing
         {
             var sin = GetSIN(renta.CharacterId, s => s.Wallet);
             var finalPrice = BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
-            MakeNewTransfer(sin.Wallet, mir, finalPrice, $"списание по рентному платежу за покупку {renta}");
+            var comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
+            //с кошелька списываем всегда
+            MakeNewTransfer(sin.Wallet, mir, finalPrice, $"Рентный платеж: {renta.Sku.Name} в {renta.Shop.Name}", false, false);
+            //если баланс положительный
             if (sin.Wallet.Balance > 0)
             {
-
+                MakeNewTransfer(renta.Sku.Corporation.Wallet, mir, renta.BasePrice, $"Рентное начисление: {renta.Sku.Name} с {sin.Sin} ", false, false);
+                MakeNewTransfer(renta.Shop.Wallet, mir, finalPrice, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} с {sin.Sin}", false, false);
             }
         }
         private List<SpecialisationDto> CreateSpecialisationDto(ShopWallet shop)
@@ -671,7 +683,7 @@ namespace Billing
 
         private int GetMIRId()
         {
-            return _settings.GetIntValue("MIR_ID");
+            return _settings.GetIntValue(SystemSettingsEnum.MIR_ID);
         }
 
         private TransferDto CreateTransferDto(Transfer transfer, TransferType type)
@@ -722,7 +734,7 @@ namespace Billing
             var sin = Get(s => s.CharacterId == characterId, includes);
             if (sin == null)
             {
-                var defaultBalance = _settings.GetIntValue("defaultbalance");
+                var defaultBalance = _settings.GetIntValue(SystemSettingsEnum.defaultbalance);
                 sin = CreateOrUpdatePhysicalWallet(characterId, defaultBalance);
             }
             return sin;

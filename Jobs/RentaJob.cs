@@ -21,23 +21,18 @@ namespace Jobs
             Start();
             try
             {
-                
-                
-                
+                _billingManager.ProcessRentas();
             }
             catch (Exception e)
             {
-
+                Console.WriteLine("ошибка обработки рент");
             }
             finally
             {
                 //unlock
                 Finish();
-                
             }
         }
-
-
 
         private void Start()
         {
@@ -52,6 +47,9 @@ namespace Jobs
         {
             Console.WriteLine("RentaJob processing finish");
             _settingManager.SetValue("block", "false");
+            var version = _settingManager.GetIntValue(Core.Primitives.SystemSettingsEnum.eversion);
+            version++;
+            _settingManager.SetValue(Core.Primitives.SystemSettingsEnum.eversion, version.ToString());
         }
 
     }

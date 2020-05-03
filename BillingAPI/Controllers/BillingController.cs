@@ -184,7 +184,7 @@ namespace BillingAPI.Controllers
         #endregion
 
         #region renta
-        
+
         [HttpPost("renta/setspecialisation")]
         public DataResult<Specialisation> SetScpecialisation(int productType, int shop)
         {
@@ -331,7 +331,7 @@ namespace BillingAPI.Controllers
         public DataResult<List<RentaDto>> GetRentas(int characterId)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetRentas(characterId), "getrentas");
+            var result = RunAction(() => manager.GetRentas(characterId), $"getrentas {characterId}");
             return result;
         }
 
