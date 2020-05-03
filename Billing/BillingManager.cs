@@ -587,7 +587,19 @@ namespace Billing
             {
 
             }
-            return MakeNewTransfer(d1.Wallet, d2.Wallet, amount, comment, anon);
+            var transfer = MakeNewTransfer(d1.Wallet, d2.Wallet, amount, comment, anon);
+            if(transfer != null)
+            {
+                try
+                {
+                    EreminAPIAdapter.SendNotification(characterTo, "Кошелек", $"Вам переведено денег {amount}");
+                }
+                catch (Exception e)
+                {
+                    Console.Error.WriteLine("ошибка notification");
+                }
+            }
+            return transfer;
         }
 
         #region private
