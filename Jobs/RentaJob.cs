@@ -26,6 +26,7 @@ namespace Jobs
             catch (Exception e)
             {
                 Console.WriteLine("ошибка обработки рент");
+                Console.Error.WriteLine(e.Message);
             }
             finally
             {
