@@ -605,7 +605,15 @@ namespace Billing
             var mir = GetMIR();
             foreach (var renta in rentas)
             {
-                ProcessRenta(renta, mir);
+                try
+                {
+                    ProcessRenta(renta, mir);
+                }
+                catch (Exception e)
+                {
+
+                    Console.Error.WriteLine(e.Message);
+                }
             }
             Context.SaveChanges();
         }

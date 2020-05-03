@@ -323,6 +323,18 @@ namespace BillingAPI.Controllers
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("test/processrentas")]
+        public Result ProcessRentas()
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.ProcessRentas(), $"processrentas");
+            return result;
+        }
+
+        /// <summary>
         /// Get all rentas for current character
         /// </summary>
         /// <param name="characterId"></param>
