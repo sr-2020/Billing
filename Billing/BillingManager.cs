@@ -228,7 +228,8 @@ namespace Billing
 
         public List<RentaDto> GetRentas(int characterId)
         {
-            return GetList<Renta>(r => r.CharacterId == characterId, r => r.Sku.Nomenklatura.ProductType, r => r.Shop)
+            var list = GetList<Renta>(r => r.CharacterId == characterId, r => r.Sku.Nomenklatura.ProductType, r=>r.Sku.Corporation, r => r.Shop);
+            return list
                     .Select(r =>
                     new RentaDto
                     {
