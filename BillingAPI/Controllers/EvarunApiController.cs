@@ -85,7 +85,7 @@ namespace BillingAPI.Controllers
         private T HandleException<T>(int code, Exception e, Guid guid, T result) where T : Result 
         {
             Response.StatusCode = code;
-            Console.WriteLine($"ERROR for {guid}: {e.Message}: {code}");
+            Console.Error.WriteLine($"ERROR for {guid}: {e.Message}: {code}");
             result.Message = e.Message;
             result.Status = false;
             return result;
