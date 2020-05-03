@@ -28,7 +28,6 @@ namespace Core.Model
         public decimal Discount { get; set; }
         [Column("shop_comission")]
         public decimal ShopComission { get; set; }
-        [Column("processing")]
-        public bool Processing { get; set; }
+
     }
 }

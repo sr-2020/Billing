@@ -588,16 +588,9 @@ namespace Billing
 
             }
             var transfer = MakeNewTransfer(d1.Wallet, d2.Wallet, amount, comment, anon);
-            if(transfer != null)
+            if (transfer != null)
             {
-                try
-                {
-                    EreminAPIAdapter.SendNotification(characterTo, "Кошелек", $"Вам переведено денег {amount}");
-                }
-                catch (Exception e)
-                {
-                    Console.Error.WriteLine("ошибка notification");
-                }
+                EreminAPIAdapter.SendNotification(characterTo, "Кошелек", $"Вам переведено денег {amount}");
             }
             return transfer;
         }
@@ -622,6 +615,7 @@ namespace Billing
             var comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
             //с кошелька списываем всегда
             MakeNewTransfer(sin.Wallet, mir, finalPrice, $"Рентный платеж: {renta.Sku.Name} в {renta.Shop.Name}", false, false);
+            EreminAPIAdapter.SendNotification(sin.CharacterId, "Кошелек", $"Списание {finalPrice} по рентному договору");
             //если баланс положительный
             if (sin.Wallet.Balance > 0)
             {
