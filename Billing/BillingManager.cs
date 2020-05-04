@@ -248,9 +248,11 @@ namespace Billing
             var block = _settings.GetBoolValue(SystemSettingsEnum.block);
             if (block)
                 throw new ShopException("В данный момент ведется пересчет рентных платежей, попробуйте купить чуть позже");
-            var price = Get<Price>(p => p.Id == priceId && !p.Confirmed, p => p.Sku, s => s.Shop, s => s.Shop.Wallet);
+            var price = Get<Price>(p => p.Id == priceId, p => p.Sku, s => s.Shop, s => s.Shop.Wallet);
             if (price == null)
                 throw new BillingException("Персональное предложение не найдено");
+            if(price.Confirmed)
+                throw new Exception("Персональным предложением уже воспользовались");
             if (price.CharacterId != character)
                 throw new Exception("Персональное предложение заведено на другого персонажа");
             var dateTill = price.DateCreated.AddMinutes(_settings.GetIntValue(SystemSettingsEnum.price_minutes));
