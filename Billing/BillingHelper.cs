@@ -54,5 +54,10 @@ namespace Billing
             return basePrice * comission;
         }
 
+        public static bool HasQrWrite(string code)
+        {
+            return !string.IsNullOrEmpty(code);
+        }
+
     }
 }

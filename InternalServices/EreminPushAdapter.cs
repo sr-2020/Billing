@@ -6,7 +6,7 @@ using System.Text;
 
 namespace InternalServices
 {
-    public class EreminAPIAdapter
+    public class EreminPushAdapter
     {
         const string URL = "http://push.evarun.ru";
 

@@ -35,7 +35,7 @@ namespace Billing
         ShopQR CleanQR(int qr);
         void BreakContract(int corporation, int shop);
         Contract CreateContract(int corporation, int shop);
-        Renta ConfirmRenta(int character, int priceId);
+        RentaDto ConfirmRenta(int character, int priceId);
         List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled);
         List<SkuDto> GetSkusForShop(int shop);
         PriceShopDto GetPriceByQR(int character, int qr);
@@ -45,6 +45,7 @@ namespace Billing
         List<ProductTypeDto> GetProductTypes();
         List<NomenklaturaDto> GetNomenklaturas(int producttype, int lifestyle);
         List<Contract> GetContrats(int shopid, int corporationId);
+        void WriteOffer(int offerId, string qr);
 
         #endregion
 
@@ -228,7 +229,7 @@ namespace Billing
 
         public List<RentaDto> GetRentas(int characterId)
         {
-            var list = GetList<Renta>(r => r.CharacterId == characterId, r => r.Sku.Nomenklatura.ProductType, r=>r.Sku.Corporation, r => r.Shop);
+            var list = GetList<Renta>(r => r.CharacterId == characterId, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation, r => r.Shop);
             return list
                     .Select(r =>
                     new RentaDto
@@ -242,7 +243,7 @@ namespace Billing
                     }).ToList();
         }
 
-        public Renta ConfirmRenta(int character, int priceId)
+        public RentaDto ConfirmRenta(int character, int priceId)
         {
             var block = _settings.GetBoolValue(SystemSettingsEnum.block);
             if (block)
@@ -265,9 +266,9 @@ namespace Billing
                 throw new BillingException("Недостаточно средств");
             }
             var mir = GetMIR();
-            MakeNewTransfer(mir, sin.Wallet, price.FinalPrice, $"Первый платеж по ренте {price.Sku.Name} купленный в {price.Shop.Name}");
-            var comission = price.BasePrice * (price.ShopComission / 100);
-            MakeNewTransfer(price.Shop.Wallet, mir, comission, $"комиссия за продажу {price.Sku.Name} с син {sin.CharacterId}");
+            MakeNewTransfer(sin.Wallet, mir, price.FinalPrice, $"Первый платеж за: {price.Sku.Name}, место покупки: {price.Shop.Name}");
+            MakeNewTransfer(mir, price.Shop.Wallet, price.ShopComission, $"Комиссия за: {price.Sku.Name} с син {sin.CharacterId}");
+            MakeNewTransfer(mir, sku.Corporation.Wallet, price.BasePrice, $"Покупка предмета: {price.Sku.Name} пользователем: {sin.CharacterId}");
             sku.Count--;
             Add(sku);
             var renta = new Renta
@@ -279,11 +280,18 @@ namespace Billing
                 DateCreated = DateTime.Now,
                 Discount = price.Discount,
                 ShopComission = price.ShopComission,
-                ShopId = price.ShopId
+                ShopId = price.ShopId,
+                HasQRWrite = BillingHelper.HasQrWrite(sku.Nomenklatura.Code),
+                PriceId = priceId
             };
             Add(renta);
             Context.SaveChanges();
-            return renta;
+            var dto = new RentaDto
+            {
+                HasQRWrite = renta.HasQRWrite,
+                OfferId = priceId
+            };
+            return dto;
         }
         public PriceShopDto GetPriceByQR(int character, int qrid)
         {
@@ -393,6 +401,25 @@ namespace Billing
                 LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString()
             };
             return balance;
+        }
+
+        public void WriteOffer(int offerId, string qr)
+        {
+            var renta = Get<Renta>(p => p.PriceId == offerId && p.HasQRWrite, r=>r.Sku.Nomenklatura);
+            if (renta == null)
+                throw new ShopException($"offer {offerId} записать на qr невозможно");
+            var code = renta.Sku.Nomenklatura.Code;
+            var name = renta.Sku.Name;
+            var description = renta.Sku.Nomenklatura.Description;
+            //TODO
+            var count = 1;
+            if (!EreminService.WriteQR(qr, code, name, description, count, new { offerId }))
+            {
+                throw new ShopException("запись на qr не получилось");
+            }
+            renta.HasQRWrite = false;
+            Add(renta);
+            Context.SaveChanges();
         }
 
         public List<TransferDto> GetTransfers(int characterId)
@@ -591,7 +618,7 @@ namespace Billing
             var transfer = MakeNewTransfer(d1.Wallet, d2.Wallet, amount, comment, anon);
             if (transfer != null)
             {
-                EreminAPIAdapter.SendNotification(characterTo, "Кошелек", $"Вам переведено денег {amount}");
+                EreminPushAdapter.SendNotification(characterTo, "Кошелек", $"Вам переведено денег {amount}");
             }
             return transfer;
         }
@@ -624,12 +651,12 @@ namespace Billing
             var comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
             //с кошелька списываем всегда
             MakeNewTransfer(sin.Wallet, mir, finalPrice, $"Рентный платеж: {renta.Sku.Name} в {renta.Shop.Name}", false, false);
-            EreminAPIAdapter.SendNotification(sin.CharacterId, "Кошелек", $"Списание {finalPrice} по рентному договору");
+            EreminPushAdapter.SendNotification(sin.CharacterId, "Кошелек", $"Списание {finalPrice} по рентному договору");
             //если баланс положительный
             if (sin.Wallet.Balance > 0)
             {
-                MakeNewTransfer(renta.Sku.Corporation.Wallet, mir, renta.BasePrice, $"Рентное начисление: {renta.Sku.Name} с {sin.Sin} ", false, false);
-                MakeNewTransfer(renta.Shop.Wallet, mir, finalPrice, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} с {sin.Sin}", false, false);
+                MakeNewTransfer(mir, renta.Sku.Corporation.Wallet, renta.BasePrice, $"Рентное начисление: {renta.Sku.Name} с {sin.Sin} ", false, false);
+                MakeNewTransfer(mir, renta.Shop.Wallet, finalPrice, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} с {sin.Sin}", false, false);
             }
         }
         private List<SpecialisationDto> CreateSpecialisationDto(ShopWallet shop)
@@ -654,7 +681,7 @@ namespace Billing
         private List<Sku> GetSkuList(int shopId)
         {
             var skuids = ExecuteQuery<int>($"SELECT * FROM get_sku({shopId})");
-            var result = GetList<Sku>(s => skuids.Contains(s.Id), s => s.Corporation, s => s.Nomenklatura, s => s.Nomenklatura.ProductType);
+            var result = GetList<Sku>(s => skuids.Contains(s.Id), s => s.Corporation.Wallet, s => s.Nomenklatura.ProductType);
             //TODO filter by contractlimit
             return result;
         }
@@ -754,32 +781,32 @@ namespace Billing
             }
             return sin;
         }
-        private Transfer MakeNewTransfer(Wallet wallet1, Wallet wallet2, decimal amount, string comment, bool anonymous = false, bool save = true)
+        private Transfer MakeNewTransfer(Wallet walletFrom, Wallet walletTo, decimal amount, string comment, bool anonymous = false, bool save = true)
         {
-            if (wallet1 == null)
+            if (walletFrom == null)
                 throw new BillingException($"Нет кошелька отправителя");
-            if (wallet2 == null)
+            if (walletTo == null)
                 throw new BillingException($"Нет кошелька получателя");
-            if (wallet1.Id == wallet2.Id)
+            if (walletFrom.Id == walletTo.Id)
                 throw new BillingException($"Самому себе нельзя переводить.");
             //баланса хватает, или один из кошельков MIR
-            if (wallet1.Balance < amount && (wallet1.WalletType != (int)WalletTypes.MIR || wallet2.WalletType != (int)WalletTypes.MIR))
+            if (walletFrom.Balance < amount && walletFrom.WalletType != (int)WalletTypes.MIR && walletTo.WalletType != (int)WalletTypes.MIR)
                 throw new BillingException($"Денег нет, но вы держитесь");
             if (amount <= 0)
                 throw new BillingException($"Нельзя перевести отрицательное значение");
-            wallet1.Balance -= amount;
-            Add(wallet1);
-            wallet2.Balance += amount;
-            Add(wallet2);
+            walletFrom.Balance -= amount;
+            Add(walletFrom);
+            walletTo.Balance += amount;
+            Add(walletTo);
             Context.SaveChanges();
             var transfer = new Transfer
             {
                 Amount = amount,
                 Comment = comment,
-                WalletFromId = wallet1.Id,
-                WalletToId = wallet2.Id,
-                NewBalanceFrom = wallet1.Balance,
-                NewBalanceTo = wallet2.Balance,
+                WalletFromId = walletFrom.Id,
+                WalletToId = walletTo.Id,
+                NewBalanceFrom = walletFrom.Balance,
+                NewBalanceTo = walletTo.Balance,
                 OperationTime = DateTime.Now,
                 Anonymous = anonymous
             };

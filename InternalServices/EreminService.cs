@@ -3,6 +3,7 @@ using InternalServices.EreminModel;
 using Serialization;
 using System;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace InternalServices
@@ -16,10 +17,10 @@ namespace InternalServices
             var client = new HttpClient();
             var url = $"{URL}/character/model/{characterId}";
             var response = client.GetAsync(url).Result;
-            if(response.StatusCode == System.Net.HttpStatusCode.OK)
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 var model = Serializer.Deserialize<CharacterModel>(response.Content.ReadAsStringAsync().Result);
-                return model; 
+                return model;
             }
             throw new Exception(response.Content.ReadAsStringAsync().Result);
         }
@@ -41,12 +42,36 @@ namespace InternalServices
             {
                 var gesheft = ParseToDecimal(model.workModel.discounts.all);
                 decimal samurai = 0;
-                if(discountType == DiscountType.Samurai)
+                if (discountType == DiscountType.Samurai)
                     samurai = ParseToDecimal(model.workModel.discounts.samurai);
                 return gesheft > samurai ? gesheft : samurai;
             }
             return 0;
         }
+
+        public static bool WriteQR(string qr, string id, string name, string description, int numberOfUses, object model)
+        {
+            var client = new HttpClient();
+            var url = $"{URL}/qr/model/{qr}";
+            var data = new
+            {
+                id,
+                name,
+                description,
+                numberOfUses,
+                additionalData = model
+            };
+            var body = new
+            {
+                eventType = "createMerchandise",
+                data
+            };
+            var json = Serializer.ToJSON(body);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = client.PostAsync(url, content).Result;
+            return response.StatusCode == System.Net.HttpStatusCode.OK;
+        }
+
 
         private static decimal ParseToDecimal(string value)
         {

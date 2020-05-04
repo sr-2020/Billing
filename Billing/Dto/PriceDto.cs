@@ -13,7 +13,7 @@ namespace Billing.DTO
         {
             this.PriceId = price.Id;
             this.DateCreated = new DateTimeOffset(price.DateCreated).ToUnixTimeSeconds();
-            this.DateTill = new DateTimeOffset(price.DateCreated.AddMinutes(IocContainer.Get<ISettingsManager>().GetIntValue("price_minutes"))).ToUnixTimeSeconds();
+            this.DateTill = new DateTimeOffset(price.DateCreated.AddMinutes(IocContainer.Get<ISettingsManager>().GetIntValue(Core.Primitives.SystemSettingsEnum.price_minutes))).ToUnixTimeSeconds();
             this.FinalPrice = price.FinalPrice;
             this.ShopComission = price.ShopComission;
             this.ShopName = price.Shop.Name;

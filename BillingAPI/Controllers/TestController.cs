@@ -23,7 +23,7 @@ namespace BillingAPI.Controllers
         [HttpGet("")]
         public ActionResult<string> Get()
         {
-            return IocContainer.Get<ISettingsManager>().GetValue("eversion");
+            return IocContainer.Get<ISettingsManager>().GetValue(Core.Primitives.SystemSettingsEnum.eversion);
         }
         [HttpGet("testaction")]
         public ActionResult Test(int id)

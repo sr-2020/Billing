@@ -38,16 +38,16 @@ namespace Jobs
         private void Start()
         {
             Console.WriteLine("RentaJob processing start");
-            var processing = _settingManager.GetBoolValue("block");
+            var processing = _settingManager.GetBoolValue(Core.Primitives.SystemSettingsEnum.block);
             if (processing)
                 return;
-            _settingManager.SetValue("block", "true");
+            _settingManager.SetValue(Core.Primitives.SystemSettingsEnum.block, "true");
         }
 
         private void Finish()
         {
             Console.WriteLine("RentaJob processing finish");
-            _settingManager.SetValue("block", "false");
+            _settingManager.SetValue(Core.Primitives.SystemSettingsEnum.block, "false");
             var version = _settingManager.GetIntValue(Core.Primitives.SystemSettingsEnum.eversion);
             version++;
             _settingManager.SetValue(Core.Primitives.SystemSettingsEnum.eversion, version.ToString());

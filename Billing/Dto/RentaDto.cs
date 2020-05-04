@@ -13,5 +13,7 @@ namespace Billing.DTO
         public string SkuName { get; set; }
         public string Corporation { get; set; }
         public string Shop { get; set; }
+        public bool HasQRWrite { get; set; }
+        public int OfferId { get; set; }
     }
 }

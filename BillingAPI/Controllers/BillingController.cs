@@ -264,12 +264,21 @@ namespace BillingAPI.Controllers
         /// <param name="priceId"></param>
         /// <returns></returns>
         [HttpPost("renta/createrenta")]
-        public DataResult<Renta> ConfirmRenta(int character, int priceId)
+        public DataResult<RentaDto> CreateRenta(int character, int priceId)
         {
             var manager = IocContainer.Get<IBillingManager>();
             var result = RunAction(() => manager.ConfirmRenta(character, priceId), $"createrenta {character}:{priceId}");
             return result;
         }
+
+        [HttpPost("renta/writeoffer2qr")]
+        public Result WriteOffer(int offerId, string qr)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.WriteOffer(offerId, qr), $"writeoffer2qr {offerId}:{qr}");
+            return result;
+        }
+
         #endregion
 
         #region info

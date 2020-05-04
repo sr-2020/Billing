@@ -28,6 +28,11 @@ namespace Core.Model
         public decimal Discount { get; set; }
         [Column("shop_comission")]
         public decimal ShopComission { get; set; }
-
+        [Column("has_qr_write")]
+        public bool HasQRWrite { get; set; }
+        [ForeignKey("price")]
+        [Column("price")]
+        public int PriceId { get; set; }
+        public virtual Price Price { get; set; }
     }
 }
