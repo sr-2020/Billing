@@ -12,7 +12,6 @@ using Core;
 using FileHelper;
 using IoC;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BillingAPI.Controllers
@@ -55,7 +54,7 @@ namespace BillingAPI.Controllers
             var result = $"количество удаленных записей {count}, ошибок {errors}";
             return Content(result);
         }
-        public IActionResult UploadPProductTypeList(IFormFile formFile)
+        public IActionResult UploadPProductTypeList(Microsoft.AspNetCore.Http.IFormFile formFile)
         {
             if (formFile == null)
             {
@@ -82,7 +81,7 @@ namespace BillingAPI.Controllers
             return Content(result);
         }
 
-        [System.Web.Http.HttpGet]
+        [Microsoft.AspNetCore.Mvc.HttpGet]
         public IActionResult Editpt(int id)
         {
             var manager = IocContainer.Get<IBillingManager>();
@@ -92,7 +91,7 @@ namespace BillingAPI.Controllers
             return View(dto);
 
         }
-        [System.Web.Http.HttpPost]
+        [Microsoft.AspNetCore.Mvc.HttpPost]
         public IActionResult Editpt(ProductTypeDto dto)
         {
             var manager = IocContainer.Get<IBillingManager>();

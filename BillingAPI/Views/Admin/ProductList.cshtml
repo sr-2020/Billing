@@ -2,14 +2,18 @@
 
 @{
     ViewData["Title"] = "ProductList";
-     Layout = "_Layout";
+    Layout = "_Layout";
 }
 
 <h2>ProductList</h2>
 
 <p>
     @Html.ActionLink("Назад", "Index", "admin")
+
     @Html.ActionLink("Новый", "Editpt", "admin")
+    @*<div class="form-group">
+            <a href="Editpt" type="submit" value="Новый" class="btn btn-default" />
+        </div>*@
     <div class="form-group">
         <input type="submit" id="deleteallpt" value="Удалить все" class="btn btn-default" />
     </div>
@@ -61,8 +65,8 @@
 </table>
 
 @section Scripts
-{ 
-    <script src="~/Scripts/productlist.js" asp-append-version="true"></script>
-  
+{
+    <script src="~/js/productlist.js" asp-append-version="true"></script>
+
 
 }

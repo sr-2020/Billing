@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\Scripts\productlist.js" />
+    <None Include="wwwroot\lib\productlist.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,6 +37,10 @@
     <ProjectReference Include="..\IoC.Init\IoC.Init.csproj" />
     <ProjectReference Include="..\Jobs\Jobs.csproj" />
     <ProjectReference Include="..\Settings\Settings.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\lib\jquery\dist\" />
   </ItemGroup>
 
 </Project>
