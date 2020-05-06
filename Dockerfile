@@ -13,6 +13,8 @@ COPY ["IoC.Container/IoC.Container.csproj", "IoC.Container/"]
 COPY ["IoC.Init/IoC.Init.csproj", "IoC.Container/"]
 COPY ["InternalServices/InternalServices.csproj", "InternalServices/"]
 COPY ["Serialization/Serialization.csproj", "Serialization/"]
+COPY ["FileHelper/FileHelper.csproj", "FileHelper/"]
+
 
 RUN dotnet restore "BillingAPI/BillingAPI.csproj"
 
@@ -20,9 +22,7 @@ RUN dotnet restore "BillingAPI/BillingAPI.csproj"
 COPY . .
 WORKDIR /src
 RUN dotnet build "BillingAPI/BillingAPI.csproj" -c Release -o /app
-#RUN dotnet build "Jobs/Jobs.csproj" -c Release -o /app
-#RUN dotnet build "Core/Core.csproj" -c Release -o /app
-#RUN dotnet build "Settings/Settings.csproj" -c Release -o /app
+
 
 
 FROM build AS publish
