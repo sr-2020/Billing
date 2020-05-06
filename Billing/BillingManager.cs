@@ -13,7 +13,7 @@ using System.Text;
 
 namespace Billing
 {
-    public interface IBillingManager
+    public interface IBillingManager : IBaseRepository
     {
         #region application
         Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment);
@@ -42,7 +42,7 @@ namespace Billing
         PriceShopDto GetPrice(int character, int shop, int sku);
         List<ShopDto> GetShops();
         List<CorporationDto> GetCorps();
-        List<ProductTypeDto> GetProductTypes();
+        List<ProductTypeDto> GetProductTypes(int id = -1);
         List<NomenklaturaDto> GetNomenklaturas(int producttype, int lifestyle);
         List<Contract> GetContrats(int shopid, int corporationId);
         void WriteOffer(int offerId, string qr);
@@ -59,6 +59,7 @@ namespace Billing
         Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description, string pictureurl);
         SIN CreateOrUpdatePhysicalWallet(int character, decimal balance);
         ProductType CreateOrUpdateProductType(int id, string name, int discounttype);
+        void DeleteProductType(int id);
         CorporationWallet CreateOrUpdateCorporationWallet(int id, decimal amount, string name, string logoUrl);
         ShopWallet CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle);
         void DeleteCorporation(int corpid);
@@ -184,9 +185,9 @@ namespace Billing
             return list;
         }
 
-        public List<ProductTypeDto> GetProductTypes()
+        public List<ProductTypeDto> GetProductTypes(int id = -1)
         {
-            return GetList<ProductType>(p => true).Select(p =>
+            return GetList<ProductType>(p => p.Id == id || id == -1).Select(p =>
                 new ProductTypeDto(p)).ToList();
         }
 
@@ -471,13 +472,26 @@ namespace Billing
             }
             if (discounttype != 0)
                 type.DiscountType = discounttype;
+            if (!Enum.IsDefined(typeof(DiscountType), type.DiscountType))
+            {
+                type.DiscountType = (int)DiscountType.Gesheftmaher;
+            }    
             if (!string.IsNullOrEmpty(name))
                 type.Name = name;
             Add(type);
             Context.SaveChanges();
             return type;
         }
-
+        public void DeleteProductType(int id)
+        {
+            var type = Get<ProductType>(p => p.Id == id);
+            if (type == null)
+            {
+                throw new Exception("producttype not found");
+            }
+            Remove(type);
+            Context.SaveChanges();
+        }
         public Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttypeid, int lifestyle, decimal baseprice, string description, string pictureurl)
         {
             Nomenklatura nomenklatura = null;

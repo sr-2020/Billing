@@ -33,8 +33,11 @@ namespace BillingAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc(options =>
+            {
+                options.Filters.Add(new HttpResponseExceptionFilter());
+            })
+            .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             #region swagger
             services.AddEvaSwaggerGen();
@@ -57,7 +60,6 @@ namespace BillingAPI
                 });
             });
             #endregion
-
             //services.AddAuthentication().AddCookie();
         }
 
@@ -94,7 +96,7 @@ namespace BillingAPI
             {
                 routes
                     .MapRoute(name: "default", template: "{controller}/{action=Index}/");
-            }); 
+            }).UseStaticFiles(); 
         }
     }
 }

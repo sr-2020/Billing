@@ -28,7 +28,8 @@
       "commandName": "Docker",
       "launchBrowser": true,
       "stdoutLogEnabled": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:32769/swagger/v1/index.html",
+      //"launchUrl": "{Scheme}://{ServiceHost}:32769/swagger/v1/index.html",
+      "launchUrl": "{Scheme}://{ServiceHost}:32769/admin",
       "environmentVariables": {
         "Key": "Value",
         "ASPNETCORE_ENVIRONMENT": "Development"

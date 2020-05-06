@@ -1,0 +1,68 @@
+﻿@model IEnumerable<Billing.DTO.ProductTypeDto>
+
+@{
+    ViewData["Title"] = "ProductList";
+     Layout = "_Layout";
+}
+
+<h2>ProductList</h2>
+
+<p>
+    @Html.ActionLink("Назад", "Index", "admin")
+    @Html.ActionLink("Новый", "Editpt", "admin")
+    <div class="form-group">
+        <input type="submit" id="deleteallpt" value="Удалить все" class="btn btn-default" />
+    </div>
+    <div class="form-group">
+        <input type="file" id="dataFile" name="formFile" />
+    </div>
+    <div class="form-group">
+        <input type="submit" id="uploadpt" value="upload" class="btn btn-default" />
+    </div>
+    <div id="resulttext">
+    </div>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ProductTypeId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ProductTypeName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DiscountType)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductTypeId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductTypeName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DiscountType)
+                </td>
+                <td>
+
+                    @Html.ActionLink("Править", "Editpt", new { id = item.ProductTypeId }) |
+                    @Html.ActionLink("Удалить", "Deletept", new { id = item.ProductTypeId })
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts
+{ 
+    <script src="~/Scripts/productlist.js" asp-append-version="true"></script>
+  
+
+}

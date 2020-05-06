@@ -22,14 +22,20 @@ namespace Core
         void Remove<T>(T entity) where T : class;
         void AddRange<T>(IEnumerable<T> entities) where T : BaseEntity;
         void Add<T>(T entity) where T : BaseEntity;
+        void RefreshContext();
     }
 
 
     public class BaseEntityRepository : IBaseRepository
     {
-        protected readonly BillingContext Context;
+        protected BillingContext Context;
 
         public BaseEntityRepository()
+        {
+            Context = new BillingContext();
+        }
+
+        public void RefreshContext()
         {
             Context = new BillingContext();
         }

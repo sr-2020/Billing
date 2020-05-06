@@ -29,7 +29,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InternalServices", "Interna
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Help", "Help", "{E59985C4-0C4E-4636-A76B-25A1A89F14E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serialization", "Serialization\Serialization.csproj", "{672373CD-B093-4441-A6AF-E6E12D3D1C50}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serialization", "Serialization\Serialization.csproj", "{672373CD-B093-4441-A6AF-E6E12D3D1C50}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileHelper", "FileHelper\FileHelper.csproj", "{6D9A10E8-71D8-43BB-9942-F1E362F535A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,6 +79,10 @@ Global
 		{672373CD-B093-4441-A6AF-E6E12D3D1C50}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{672373CD-B093-4441-A6AF-E6E12D3D1C50}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{672373CD-B093-4441-A6AF-E6E12D3D1C50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D9A10E8-71D8-43BB-9942-F1E362F535A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D9A10E8-71D8-43BB-9942-F1E362F535A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D9A10E8-71D8-43BB-9942-F1E362F535A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D9A10E8-71D8-43BB-9942-F1E362F535A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -91,6 +97,7 @@ Global
 		{B3246CB4-2C4F-4FF0-894D-A7994EE706BA} = {132F70CB-9F27-407B-AD3A-79AF4771D9A1}
 		{989B1201-5BDD-4DB3-B7E2-3C00864E9913} = {132F70CB-9F27-407B-AD3A-79AF4771D9A1}
 		{672373CD-B093-4441-A6AF-E6E12D3D1C50} = {E59985C4-0C4E-4636-A76B-25A1A89F14E5}
+		{6D9A10E8-71D8-43BB-9942-F1E362F535A5} = {E59985C4-0C4E-4636-A76B-25A1A89F14E5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8551D21C-2AD9-4DC5-AC75-475819009E59}
