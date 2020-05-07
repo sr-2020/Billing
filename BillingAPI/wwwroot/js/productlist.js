@@ -5,7 +5,7 @@
         fd.append('formFile', $input.prop('files')[0]);
         $.ajax({
             type: "POST",
-            url: '@Url.Action("UploadPProductTypeList")',
+            url: 'UploadPProductTypeList',
             data: fd,
             dataType: "json",
             processData: false,
@@ -25,7 +25,7 @@
     $("#deleteallpt").click(function () {
         $.ajax({
             type: "GET",
-            url: '@Url.Action("deleteallpt")',
+            url: 'deleteallpt',
             processData: false,
             contentType: false,
             success: function (data) {
