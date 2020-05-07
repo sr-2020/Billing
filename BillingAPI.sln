@@ -31,7 +31,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Help", "Help", "{E59985C4-0
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serialization", "Serialization\Serialization.csproj", "{672373CD-B093-4441-A6AF-E6E12D3D1C50}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileHelper", "FileHelper\FileHelper.csproj", "{6D9A10E8-71D8-43BB-9942-F1E362F535A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileHelper", "FileHelper\FileHelper.csproj", "{6D9A10E8-71D8-43BB-9942-F1E362F535A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

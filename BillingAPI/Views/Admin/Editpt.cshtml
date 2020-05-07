@@ -11,7 +11,7 @@
         <form asp-action="Editpt" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <input asp-for="ProductTypeId" class="form-control" hidden />
+                @Html.HiddenFor(model => model.ProductTypeId)
             </div>
             <p>
                 @Html.DisplayNameFor(model => model.ProductTypeName)
