@@ -35,6 +35,7 @@
             error: function (data) {
                 console.log(data);
                 alert(data.responseText);
+                location.reload();
             }
         });
         return false;
