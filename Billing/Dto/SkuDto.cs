@@ -15,10 +15,14 @@ namespace Billing.DTO
             this.CorporationName = sku.Corporation?.Name;
             this.Enabled = sku.Enabled;
             this.CorporationLogo = sku.Corporation?.CorporationLogoUrl;
+            this.CorporationId = sku.CorporationId;
         }
+        public SkuDto() : base() { }
+
         public int SkuId { get; set; }
         public string SkuName { get; set; }
         public int Count { get; set; }
+        public int CorporationId { get; set; }
         public string CorporationName { get; set; }
         public bool Enabled { get; set; }
         public string CorporationLogo { get; set; }

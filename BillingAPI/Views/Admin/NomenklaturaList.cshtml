@@ -1,0 +1,72 @@
+﻿@model Billing.Dto.NomenklaturaPage
+
+@{
+    Layout = "_Layout";
+}
+
+
+    <p>
+        @Html.ActionLink("Назад", "ProductList", "admin")
+        @Html.ActionLink("Новый", "Editnm", "admin", new { productid = Model.ProductTypeId })
+    </p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().NomenklaturaId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().NomenklaturaName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().Code)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().LifeStyle)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().BasePrice)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().UrlPicture)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Items) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.NomenklaturaId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NomenklaturaName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Code)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LifeStyle)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.BasePrice)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UrlPicture)
+            </td>
+            <td>
+                @Html.ActionLink("Править", "Editnm", new { id = item.NomenklaturaId, productid = Model.ProductTypeId }) |
+                @Html.ActionLink("Удалить", "Deletenm", new { id = item.NomenklaturaId, productid = Model.ProductTypeId }) |
+                @Html.ActionLink("Ску", "skulist", new { nomenklaturaid = item.NomenklaturaId, productid = Model.ProductTypeId  }) |
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+

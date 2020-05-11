@@ -23,6 +23,7 @@ namespace Core
         void AddRange<T>(IEnumerable<T> entities) where T : BaseEntity;
         void Add<T>(T entity) where T : BaseEntity;
         void RefreshContext();
+        void Delete<T>(int id) where T : BaseEntity;
     }
 
 
@@ -61,6 +62,15 @@ namespace Core
                 Add(entity);
 
             }
+        }
+
+        public void Delete<T>(int id) where T : BaseEntity
+        {
+            var db = Get<T>(n => n.Id == id);
+            if (db == null)
+                throw new Exception("id not found");
+            Remove(db);
+            Context.SaveChanges();
         }
 
         public virtual void Remove<T>(T entity) where T : class

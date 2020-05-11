@@ -1,0 +1,68 @@
+﻿@model Billing.Dto.SkuPage
+
+@{
+    ViewData["Title"] = "SkuList";
+}
+
+<p>
+    @Html.ActionLink("Назад", "NomenklaturaList", "admin", new { productid = Model.ProductTypeId })
+    @Html.ActionLink("Новый", "Editsku", "admin", new { nomenklaturaid = Model.NomenklaturaId, productid = Model.ProductTypeId })
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().SkuId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().SkuName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().Count)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().Enabled)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().CorporationId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().CorporationName)
+            </th>
+
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.SkuId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SkuName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Count)
+            </td>
+
+            <td>
+                @Html.DisplayFor(modelItem => item.Enabled)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CorporationId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CorporationName)
+            </td>
+            <td>
+                @Html.ActionLink("Править", "Editsku", new { id = item.SkuId, nomenklaturaid = Model.NomenklaturaId, productid = Model.ProductTypeId }) |
+                @Html.ActionLink("Удалить", "Deletesku", new { id = item.SkuId, nomenklaturaid = Model.NomenklaturaId, productid = Model.ProductTypeId })
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>

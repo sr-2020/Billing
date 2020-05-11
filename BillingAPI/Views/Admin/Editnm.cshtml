@@ -1,0 +1,69 @@
+﻿@model Billing.DTO.NomenklaturaDto
+
+@{
+    ViewData["Title"] = "Editnm";
+}
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Editnm" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                @Html.HiddenFor(model => model.NomenklaturaId)
+            </div>
+            <p>
+                @Html.DisplayNameFor(model => model.NomenklaturaName)
+            </p>
+            <div class="form-group">
+                @Html.EditorFor(model => model.NomenklaturaName)
+                <span asp-validation-for="NomenklaturaName" class="text-danger"></span>
+            </div>
+            <p>
+                @Html.DisplayNameFor(model => model.Code)
+            </p>
+            <div class="form-group">
+                @Html.EditorFor(model => model.Code)
+                <span asp-validation-for="Code" class="text-danger"></span>
+            </div>
+            <p>
+                @Html.DisplayNameFor(model => model.LifeStyleId)
+            </p>
+            <div class="form-group">
+                @Html.EditorFor(model => model.LifeStyleId)
+                <span asp-validation-for="LifeStyleId" class="text-danger"></span>
+            </div>
+            <p>
+                @Html.DisplayNameFor(model => model.BasePrice)
+            </p>
+            <div class="form-group">
+                @Html.EditorFor(model => model.BasePrice)
+                <span asp-validation-for="BasePrice" class="text-danger"></span>
+            </div>
+            <p>
+                @Html.DisplayNameFor(model => model.Description)
+            </p>
+            <div class="form-group">
+                @Html.EditorFor(model => model.Description)
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <p>
+                @Html.DisplayNameFor(model => model.UrlPicture)
+            </p>
+            <div class="form-group">
+                @Html.EditorFor(model => model.UrlPicture)
+                <span asp-validation-for="UrlPicture" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                @Html.HiddenFor(model => model.ProductTypeId)
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-default" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    @Html.ActionLink("Назад", "NomenklaturaList", "admin", new { productid = Model.ProductTypeId })
+</div>
+

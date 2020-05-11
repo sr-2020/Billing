@@ -16,9 +16,7 @@ namespace Billing.DTO
             this.DiscountType = productType.DiscountType;
         }
         public ProductTypeDto() { }
-        [DisplayName("pt_id")]
         public int ProductTypeId { get; set; }
-        [DisplayName("название типа")]
         [Column(0, false)]
         public string ProductTypeName { get; set; }
         [DisplayName("тип скидки(1 или 2)")]

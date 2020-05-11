@@ -13,14 +13,17 @@ namespace Billing.DTO
             this.NomenklaturaId = nomenklatura.Id;
             this.NomenklaturaName = nomenklatura.Name;
             this.LifeStyle = BillingHelper.GetLifestyle(nomenklatura.Lifestyle).ToString();
+            this.LifeStyleId = nomenklatura.Lifestyle;
             this.Code = nomenklatura.Code;
             this.Description = nomenklatura.Description;
             this.UrlPicture = nomenklatura.PictureUrl;
         }
+        public NomenklaturaDto() : base() { }
         public int NomenklaturaId { get; set; }
         public string NomenklaturaName { get; set; }
         public string Code { get; set; }
         public string LifeStyle { get; set; }
+        public int LifeStyleId { get; set; }
         public decimal BasePrice { get; set; }
         public string Description { get; set; }
         public string UrlPicture { get; set; }

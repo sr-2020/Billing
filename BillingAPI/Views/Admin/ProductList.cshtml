@@ -57,7 +57,8 @@
                 <td>
 
                     @Html.ActionLink("Править", "Editpt", new { id = item.ProductTypeId }) |
-                    @Html.ActionLink("Удалить", "Deletept", new { id = item.ProductTypeId })
+                    @Html.ActionLink("Удалить", "Deletept", new { id = item.ProductTypeId }) |
+                    @Html.ActionLink("Номенклатура", "NomenklaturaList", new { productid = item.ProductTypeId })
                 </td>
             </tr>
         }
