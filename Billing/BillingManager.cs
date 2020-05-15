@@ -28,6 +28,9 @@ namespace Billing
         #endregion
 
         #region web
+        List<PriceShopDto> GetOffersForQR(int characterId);
+        PriceShopDto GetPriceByQR(int character, int qr);
+        PriceShopDto GetPrice(int character, int shop, int sku);
         Specialisation SetSpecialisation(int productType, int shop);
         void DropSpecialisation(int productType, int shop);
         ShopQR WriteQR(int qr, int shop, int sku);
@@ -38,8 +41,6 @@ namespace Billing
         RentaDto ConfirmRenta(int character, int priceId);
         List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1);
         List<SkuDto> GetSkusForShop(int shop);
-        PriceShopDto GetPriceByQR(int character, int qr);
-        PriceShopDto GetPrice(int character, int shop, int sku);
         List<ShopDto> GetShops();
         List<CorporationDto> GetCorps();
         List<ProductTypeDto> GetProductTypes(int id = -1);
@@ -83,6 +84,8 @@ namespace Billing
                 ProcessBulk(rentas.Skip(i * bulkCount).Take(bulkCount).ToList());
             }
         }
+
+
 
         public Specialisation SetSpecialisation(int productTypeid, int shopid)
         {
@@ -303,6 +306,15 @@ namespace Billing
             };
             return dto;
         }
+        public List<PriceShopDto> GetOffersForQR(int characterId)
+        {
+            var rentas = GetList<Renta>(r => r.CharacterId == characterId && r.HasQRWrite, r => r.Price.Sku.Nomenklatura.ProductType, r=>r.Price.Sku.Corporation, r=>r.Price.Shop);
+            var list = rentas.Select(r =>
+                        new PriceShopDto(new PriceDto(r.Price))
+            );
+            return list.ToList();
+        }
+
         public PriceShopDto GetPriceByQR(int character, int qrid)
         {
             var qr = Get<ShopQR>(q => q.Id == qrid);

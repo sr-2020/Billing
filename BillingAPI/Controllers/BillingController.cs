@@ -432,6 +432,19 @@ namespace BillingAPI.Controllers
             return result;
         }
 
+        /// <summary>
+        /// Get all transfers(income and outcome) for current character
+        /// </summary>
+        /// <param name="characterId"></param>
+        /// <returns></returns>
+        [HttpGet("info/getoffersforqr")]
+        public DataResult<List<PriceShopDto>> GetOffersForQR(int characterId)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetOffersForQR(characterId), $"getoffersforqr for {characterId}");
+            return result;
+        }
+
         #endregion
     }
 }
