@@ -40,7 +40,7 @@ namespace Billing
 
         public static decimal GetFinalPrice(decimal basePrice, decimal discount, decimal scoring)
         {
-            return (basePrice - (basePrice * (discount / 100))) * scoring;
+            return (basePrice - (basePrice * (discount / 100))) / scoring;
         }
 
         public static int GetComission(int shopLifestyle)
