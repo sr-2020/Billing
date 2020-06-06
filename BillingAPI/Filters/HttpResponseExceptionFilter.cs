@@ -19,7 +19,7 @@ namespace BillingAPI.Filters
         {
             if (context.Exception is Exception exception)
             {
-                context.Result = new ObjectResult(exception.Message)
+                context.Result = new ObjectResult(exception.ToString())
                 {
                     StatusCode = (int)HttpStatusCode.BadRequest
                 };

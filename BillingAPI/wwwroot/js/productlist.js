@@ -23,6 +23,9 @@
     });
 
     $("#deleteallpt").click(function () {
+        if (!confirm("Точно удалить все?!?!")) {
+            return false;
+        }
         $.ajax({
             type: "GET",
             url: 'deleteallpt',

@@ -91,7 +91,6 @@ namespace BillingAPI
             #region cors
             app.UseCors("FullAccessPolicy");
             #endregion
-
             app.UseMvc(routes =>
             {
                 routes

@@ -8,6 +8,7 @@ namespace Billing.Dto
     public class NomenklaturaPage
     {
         public int ProductTypeId { get; set; }
+        public string ProductName { get; set; }
         public List<NomenklaturaDto> Items { get; set; }
     }
 }

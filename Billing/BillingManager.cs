@@ -58,7 +58,6 @@ namespace Billing
         #endregion
 
         #region admin
-
         Sku CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled, int externalId = 0);
         Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description, string pictureurl, int externalId = 0);
         SIN CreateOrUpdatePhysicalWallet(int character, decimal balance);
@@ -67,6 +66,8 @@ namespace Billing
         ShopWallet CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle);
         void DeleteCorporation(int corpid);
         void DeleteShop(int shopid);
+        void DeleteProductType(int id, bool force);
+        void DeleteNomenklatura(int id, bool force);
         #endregion
     }
 
@@ -426,6 +427,45 @@ namespace Billing
             Remove(shop);
             Remove(wallet);
             Context.SaveChanges();
+        }
+        public void DeleteProductType(int id, bool force)
+        {
+            var nomenklaturas = GetList<Nomenklatura>(n => n.ProductTypeId == id);
+            if(nomenklaturas != null && nomenklaturas.Count > 0)
+            {
+                if (force)
+                {
+                    foreach (var nomenklatura in nomenklaturas)
+                    {
+                        DeleteNomenklatura(nomenklatura.Id, true);
+                    }
+                }
+                else
+                {
+                    throw new Exception($"Сперва необходимо удалить номенклатуры ссылающиеся на этот тип товара");
+                }
+            }
+            Delete<ProductType>(id);
+        }
+
+        public void DeleteNomenklatura(int id, bool force)
+        {
+            var skus = GetList<Sku>(s => s.NomenklaturaId == id);
+            if(skus != null && skus.Count > 0)
+            {
+                if(force)
+                {
+                    foreach (var sku in skus)
+                    {
+                        Delete<Sku>(sku.Id);
+                    }
+                }
+                else
+                {
+                    throw new Exception("Сперва необходимо удалить ску ссылающиеся на эту номенклатуру");
+                }
+            }
+            Delete<Nomenklatura>(id);
         }
 
         public BalanceDto GetBalance(int characterId)

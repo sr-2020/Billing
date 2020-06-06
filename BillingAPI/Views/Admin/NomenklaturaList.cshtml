@@ -9,6 +9,10 @@
         @Html.ActionLink("Назад", "ProductList", "admin")
         @Html.ActionLink("Новый", "Editnm", "admin", new { productid = Model.ProductTypeId })
     </p>
+<h1>
+    @Model.ProductName
+</h1>
+
 <table class="table">
     <thead>
         <tr>

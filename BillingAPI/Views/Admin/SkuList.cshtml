@@ -8,7 +8,12 @@
     @Html.ActionLink("Назад", "NomenklaturaList", "admin", new { productid = Model.ProductTypeId })
     @Html.ActionLink("Новый", "Editsku", "admin", new { nomenklaturaid = Model.NomenklaturaId, productid = Model.ProductTypeId })
 </p>
-
+<h1>
+    @Model.ProductTypeName
+</h1>
+<h2>
+    @Model.NomenklaturaName
+</h2>
 <table class="table">
     <thead>
         <tr>

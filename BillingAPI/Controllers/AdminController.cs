@@ -46,7 +46,7 @@ namespace BillingAPI.Controllers
             {
                 try
                 {
-                    manager.Delete<ProductType>(item.ProductTypeId);
+                    manager.DeleteProductType(item.ProductTypeId, true);
                     count++;
                 }
                 catch (Exception e)
@@ -117,7 +117,7 @@ namespace BillingAPI.Controllers
         public IActionResult Deletept(int id)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            manager.Delete<ProductType>(id);
+            manager.DeleteProductType(id, false);
             return RedirectToAction("ProductList");
         }
 
@@ -127,11 +127,14 @@ namespace BillingAPI.Controllers
         public IActionResult NomenklaturaList(int productid)
         {
             var manager = IocContainer.Get<IBillingManager>();
+            var producttype = manager.Get<ProductType>(p => p.Id == productid);
+            if (producttype == null)
+                throw new BillingException("producttype not found");
             var list = manager.GetNomenklaturas(productid, 0);
             var model = new NomenklaturaPage();
             model.ProductTypeId = productid;
+            model.ProductName = producttype.Name;
             model.Items = list;
-
             return View(model);
         }
         [Microsoft.AspNetCore.Mvc.HttpGet]
@@ -158,7 +161,7 @@ namespace BillingAPI.Controllers
         public IActionResult Deletenm(int id, int productid)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            manager.Delete<Nomenklatura>(id);
+            manager.DeleteNomenklatura(id, false);
             return RedirectToAction("NomenklaturaList", new { productid });
         }
 
@@ -167,10 +170,16 @@ namespace BillingAPI.Controllers
         public IActionResult SkuList(int nomenklaturaid, int productid)
         {
             var manager = IocContainer.Get<IBillingManager>();
+            var producttype = manager.Get<ProductType>(p => p.Id == productid);
+            var nomenklatura = manager.Get<Nomenklatura>(n => n.Id == nomenklaturaid);
+            if (producttype == null || nomenklatura == null)
+                throw new Exception("Номенклатура или продут не найдены");
             var list = manager.GetSkus(0, nomenklaturaid, null);
             var model = new SkuPage();
             model.NomenklaturaId = nomenklaturaid;
+            model.NomenklaturaName = nomenklatura.Name;
             model.ProductTypeId = productid;
+            model.ProductTypeName = producttype.Name;
             model.Items = list;
             return View(model);
         }
@@ -194,7 +203,7 @@ namespace BillingAPI.Controllers
         {
             var manager = IocContainer.Get<IBillingManager>();
             manager.CreateOrUpdateSku(dto.SkuId, dto.NomenklaturaId, dto.Count, dto.CorporationId, dto.SkuName, dto.Enabled);
-            return RedirectToAction("SkuList", new { productid = dto.ProductTypeId, nomenklaturaid = dto.NomenklaturaId});
+            return RedirectToAction("SkuList", new { productid = dto.ProductTypeId, nomenklaturaid = dto.NomenklaturaId });
         }
         public IActionResult Deletesku(int id, int nomenklaturaid, int productid)
         {
