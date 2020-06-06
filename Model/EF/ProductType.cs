@@ -12,7 +12,5 @@ namespace Core.Model
         public string Name { get; set; }
         [Column("discount_type")]
         public int DiscountType { get; set; }
-        [Column("external_id")]
-        public int ExternalId { get; set; }
     }
 }

@@ -44,6 +44,9 @@ namespace Billing
         List<ShopDto> GetShops();
         List<CorporationDto> GetCorps();
         List<ProductTypeDto> GetProductTypes(int id = -1);
+        ProductType GetExtProductType(int externalId);
+        Nomenklatura GetExtNomenklatura(int externalId);
+        Sku GetExtSku(int externalId);
         List<NomenklaturaDto> GetNomenklaturas(int producttype, int lifestyle, int id = -1);
         List<Contract> GetContrats(int shopid, int corporationId);
         void WriteOffer(int offerId, string qr);
@@ -56,10 +59,10 @@ namespace Billing
 
         #region admin
 
-        Sku CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled);
-        Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description, string pictureurl);
+        Sku CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled, int externalId = 0);
+        Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description, string pictureurl, int externalId = 0);
         SIN CreateOrUpdatePhysicalWallet(int character, decimal balance);
-        ProductType CreateOrUpdateProductType(int id, string name, int discounttype);
+        ProductType CreateOrUpdateProductType(int id, string name, int discounttype = 1, int externalId = 0);
         CorporationWallet CreateOrUpdateCorporationWallet(int id, decimal amount, string name, string logoUrl);
         ShopWallet CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle);
         void DeleteCorporation(int corpid);
@@ -196,6 +199,21 @@ namespace Billing
                 new ProductTypeDto(p)).ToList();
         }
 
+        public ProductType GetExtProductType(int externalId)
+        {
+            return Get<ProductType>(p => p.ExternalId == externalId);
+        }
+
+        public Nomenklatura GetExtNomenklatura(int externalId)
+        {
+            return Get<Nomenklatura>(p => p.ExternalId == externalId);
+        }
+
+        public Sku GetExtSku(int externalId)
+        {
+            return Get<Sku>(p => p.ExternalId == externalId);
+        }
+
         public List<CorporationDto> GetCorps()
         {
             return GetList<CorporationWallet>(c => true, c => c.Wallet).Select(c =>
@@ -308,7 +326,7 @@ namespace Billing
         }
         public List<PriceShopDto> GetOffersForQR(int characterId)
         {
-            var rentas = GetList<Renta>(r => r.CharacterId == characterId && r.HasQRWrite, r => r.Price.Sku.Nomenklatura.ProductType, r=>r.Price.Sku.Corporation, r=>r.Price.Shop);
+            var rentas = GetList<Renta>(r => r.CharacterId == characterId && r.HasQRWrite, r => r.Price.Sku.Nomenklatura.ProductType, r => r.Price.Sku.Corporation, r => r.Price.Shop);
             var list = rentas.Select(r =>
                         new PriceShopDto(new PriceDto(r.Price))
             );
@@ -479,7 +497,7 @@ namespace Billing
             return sin.CharacterId;
         }
 
-        public ProductType CreateOrUpdateProductType(int id, string name, int discounttype = 1)
+        public ProductType CreateOrUpdateProductType(int id, string name, int discounttype = 1, int externalId = 0)
         {
             ProductType type = null;
             if (id > 0)
@@ -494,6 +512,10 @@ namespace Billing
             {
                 type.DiscountType = (int)DiscountType.Gesheftmaher;
             }
+            if (externalId != 0)
+            {
+                type.ExternalId = externalId;
+            }
             if (!string.IsNullOrEmpty(name))
                 type.Name = name;
             Add(type);
@@ -501,7 +523,7 @@ namespace Billing
             return type;
         }
 
-        public Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttypeid, int lifestyle, decimal baseprice, string description, string pictureurl)
+        public Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttypeid, int lifestyle, decimal baseprice, string description, string pictureurl, int externalId = 0)
         {
             Nomenklatura nomenklatura = null;
             if (id > 0)
@@ -510,6 +532,7 @@ namespace Billing
             {
                 nomenklatura = new Nomenklatura();
                 nomenklatura.PictureUrl = UrlNotFound;
+                nomenklatura.Code = string.Empty;
             }
             if (!string.IsNullOrEmpty(name))
                 nomenklatura.Name = name;
@@ -521,6 +544,10 @@ namespace Billing
                 nomenklatura.Description = description;
             if (!string.IsNullOrEmpty(pictureurl))
                 nomenklatura.PictureUrl = pictureurl;
+            if (externalId != 0)
+            {
+                nomenklatura.ExternalId = externalId;
+            }
             ProductType producttype = null;
             if (producttypeid > 0)
                 producttype = Get<ProductType>(p => p.Id == producttypeid);
@@ -529,9 +556,7 @@ namespace Billing
             if (producttype == null)
             {
                 throw new BillingException("ProductType not found");
-                //producttype = CreateOrUpdateProductType(producttypeid, "unknown producttype");
             }
-                
             nomenklatura.ProductTypeId = producttype.Id;
             if (lifestyle > 0)
                 nomenklatura.Lifestyle = lifestyle;
@@ -541,7 +566,7 @@ namespace Billing
             return nomenklatura;
         }
 
-        public Sku CreateOrUpdateSku(int id, int nomenklaturaid, int count, int corporationid, string name, bool enabled)
+        public Sku CreateOrUpdateSku(int id, int nomenklaturaid, int count, int corporationid, string name, bool enabled, int externalId = 0)
         {
             Sku sku = null;
             if (id > 0)
@@ -565,8 +590,12 @@ namespace Billing
                 throw new BillingException("Corporation not found");
                 //corporation = CreateOrUpdateCorporationWallet(corporationid);
             }
-                
+
             sku.CorporationId = corporation.Id;
+            if (externalId != 0)
+            {
+                sku.ExternalId = externalId;
+            }
             Nomenklatura nomenklatura = null;
             if (nomenklaturaid > 0)
                 nomenklatura = Get<Nomenklatura>(n => n.Id == nomenklaturaid);
@@ -577,7 +606,6 @@ namespace Billing
                 throw new BillingException("Nomenklatura not found");
                 //nomenklatura = CreateOrUpdateNomenklatura(nomenklaturaid, "unknown nomenklatura", string.Empty, 0, 1, 0, "unknown nomenklatura", string.Empty);
             }
-
             sku.NomenklaturaId = nomenklatura.Id;
             Add(sku);
             Context.SaveChanges();

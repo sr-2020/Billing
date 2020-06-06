@@ -14,7 +14,7 @@ COPY ["IoC.Init/IoC.Init.csproj", "IoC.Container/"]
 COPY ["InternalServices/InternalServices.csproj", "InternalServices/"]
 COPY ["Serialization/Serialization.csproj", "Serialization/"]
 COPY ["FileHelper/FileHelper.csproj", "FileHelper/"]
-
+COPY ["CommonExcel/CommonExcel.csproj", "CommonExcel/"]
 
 RUN dotnet restore "BillingAPI/BillingAPI.csproj"
 

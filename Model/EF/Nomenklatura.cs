@@ -24,7 +24,5 @@ namespace Core.Model
         public virtual ProductType ProductType { get; set; }
         [Column("picture_url")]
         public string PictureUrl { get; set; }
-        [Column("external_id")]
-        public int ExternalId { get; set; }
     }
 }

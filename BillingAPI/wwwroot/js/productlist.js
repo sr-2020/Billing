@@ -5,7 +5,7 @@
         fd.append('formFile', $input.prop('files')[0]);
         $.ajax({
             type: "POST",
-            url: 'UploadPProductTypeList',
+            url: 'UploadProductsList',
             data: fd,
             dataType: "json",
             processData: false,

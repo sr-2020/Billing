@@ -9,6 +9,7 @@ using System.Web.Http;
 using Billing;
 using Billing.Dto;
 using Billing.DTO;
+using CommonExcel;
 using Core;
 using Core.Model;
 using Core.Primitives;
@@ -57,6 +58,18 @@ namespace BillingAPI.Controllers
             var result = $"количество удаленных записей {count}, ошибок {errors}";
             return Content(result);
         }
+
+        public IActionResult UploadProductsList(Microsoft.AspNetCore.Http.IFormFile formFile)
+        {
+            if (formFile == null)
+            {
+                throw new Exception("file not found");
+            }
+            var manager = new ExcelManager();
+            var errors = manager.UploadProductTypes(formFile.OpenReadStream(), formFile.FileName);
+            return new JsonResult(errors);
+        }
+
         public IActionResult UploadPProductTypeList(Microsoft.AspNetCore.Http.IFormFile formFile)
         {
             if (formFile == null)

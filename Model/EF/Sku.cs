@@ -21,7 +21,5 @@ namespace Core.Model
         public bool Enabled { get; set; }
         [Column("name")]
         public string Name { get; set; }
-        [Column("external_id")]
-        public int ExternalId { get; set; }
     }
 }

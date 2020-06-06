@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serialization", "Serializat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileHelper", "FileHelper\FileHelper.csproj", "{6D9A10E8-71D8-43BB-9942-F1E362F535A5}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonExcel", "CommonExcel\CommonExcel.csproj", "{4C69B515-A797-4E91-AA96-3DCCF7E8AB04}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,10 @@ Global
 		{6D9A10E8-71D8-43BB-9942-F1E362F535A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D9A10E8-71D8-43BB-9942-F1E362F535A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D9A10E8-71D8-43BB-9942-F1E362F535A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C69B515-A797-4E91-AA96-3DCCF7E8AB04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C69B515-A797-4E91-AA96-3DCCF7E8AB04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C69B515-A797-4E91-AA96-3DCCF7E8AB04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C69B515-A797-4E91-AA96-3DCCF7E8AB04}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -98,6 +104,7 @@ Global
 		{989B1201-5BDD-4DB3-B7E2-3C00864E9913} = {132F70CB-9F27-407B-AD3A-79AF4771D9A1}
 		{672373CD-B093-4441-A6AF-E6E12D3D1C50} = {E59985C4-0C4E-4636-A76B-25A1A89F14E5}
 		{6D9A10E8-71D8-43BB-9942-F1E362F535A5} = {E59985C4-0C4E-4636-A76B-25A1A89F14E5}
+		{4C69B515-A797-4E91-AA96-3DCCF7E8AB04} = {49A8F787-41E8-47C5-9CD9-AE343F7842F5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8551D21C-2AD9-4DC5-AC75-475819009E59}
