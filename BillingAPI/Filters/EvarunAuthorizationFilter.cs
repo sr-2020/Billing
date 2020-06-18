@@ -13,17 +13,32 @@ namespace BillingAPI.Filters
         {
 
         }
+        private void AddCharacter(ActionExecutingContext context, string value)
+        {
+            int character;
+            if (int.TryParse(value, out character))
+            {
+                if(context.ActionArguments.ContainsKey("character"))
+                {
+                    context.ActionArguments["character"] = character;
+                }
+                else
+                {
+                    context.ActionArguments.Add("character", character);
+                }
+            }
+        }
 
         public void OnActionExecuting(ActionExecutingContext context)
         {
             if(context.HttpContext.Request.Headers.ContainsKey("X-User-Id"))
             {
-                context.ActionArguments.Add("character", context.HttpContext.Request.Headers["X-User-Id"]);
+                AddCharacter(context, context.HttpContext.Request.Headers["X-User-Id"]);
             }
             else
             {
+                AddCharacter(context, "0");
                 //TODO redirect
-                context.ActionArguments.Add("character", 0);
             }
             
         }
