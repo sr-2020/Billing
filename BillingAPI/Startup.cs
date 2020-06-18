@@ -36,6 +36,7 @@ namespace BillingAPI
             services.AddMvc(options =>
             {
                 options.Filters.Add(new HttpResponseExceptionFilter());
+                options.Filters.Add(new EvarunAuthorizationFilter());
             })
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 

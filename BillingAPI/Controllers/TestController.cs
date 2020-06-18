@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using BillingAPI.Filters;
 using Hangfire;
 using InternalServices;
 using IoC;
 using Jobs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Settings;
 
@@ -25,12 +27,16 @@ namespace BillingAPI.Controllers
         {
             return IocContainer.Get<ISettingsManager>().GetValue(Core.Primitives.SystemSettingsEnum.eversion);
         }
-        [HttpGet("testaction")]
-        public ActionResult Test(int id)
+        [HttpGet("getcharacter")]
+        public ActionResult Test(int character)
         {
-            var test = EreminService.GetCharacter(id);
-            return new JsonResult("ok");
+            var test = EreminService.GetCharacter(character);
+            return new JsonResult(test);
         }
-
+        [HttpGet("testid")]
+        public ActionResult TestId(int character)
+        {
+            return new JsonResult(character);
+        }
     }
 }

@@ -72,7 +72,6 @@ namespace InternalServices
             return response.StatusCode == System.Net.HttpStatusCode.OK;
         }
 
-
         private static decimal ParseToDecimal(string value)
         {
             decimal dec = 0;
