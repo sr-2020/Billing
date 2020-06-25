@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -37,7 +38,9 @@ namespace BillingAPI.Filters
             }
             else
             {
-                AddCharacter(context, "0");
+#if (DEBUG)
+                AddCharacter(context, "10312");
+#endif
                 //TODO redirect
             }
             
