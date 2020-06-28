@@ -43,11 +43,11 @@ namespace BillingAPI.Filters
                 AddCharacter(context, "10312");
 
 #else
-                context.Result = new RedirectResult(@"https://rc-web.evarun.ru/login");
+                //context.Result = new RedirectResult(@"https://rc-web.evarun.ru/login?externalUrl=");
 #endif
                 //TODO redirect
             }
-            
+
         }
     }
 }
