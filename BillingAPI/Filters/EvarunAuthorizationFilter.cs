@@ -40,6 +40,9 @@ namespace BillingAPI.Filters
             {
 #if (DEBUG)
                 AddCharacter(context, "10312");
+#else
+
+                AddCharacter(context, "10312");
 #endif
                 //TODO redirect
             }
