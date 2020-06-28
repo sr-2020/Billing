@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BillingAPI.Controllers
 {
     [ApiExplorerSettings(IgnoreApi = true)]
-    [Route("shop")]
+    [Route("api/shop")]
     public class ShopManagerController : Controller
     {
         [Route("Details")]

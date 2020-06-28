@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.Collections.Generic;
@@ -40,9 +41,9 @@ namespace BillingAPI.Filters
             {
 #if (DEBUG)
                 AddCharacter(context, "10312");
-#else
 
-                AddCharacter(context, "10312");
+#else
+                context.Result = new RedirectResult(@"https://rc-web.evarun.ru/login");
 #endif
                 //TODO redirect
             }
