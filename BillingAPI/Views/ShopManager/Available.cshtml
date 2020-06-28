@@ -1,0 +1,38 @@
+﻿@model Billing.Dto.Shop.ShopAvailableViewModel 
+
+@{
+    ViewData["Title"] = "Available";
+    Layout = "~/Views/Shared/_Shop.cshtml";
+}
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().QRID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().QR)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Items.FirstOrDefault().Sku.SkuName)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Items) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.QRID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.QR)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Sku.SkuName)
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

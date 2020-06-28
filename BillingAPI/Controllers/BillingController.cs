@@ -363,8 +363,8 @@ namespace BillingAPI.Controllers
         [HttpGet("info/getshops")]
         public DataResult<List<ShopDto>> GetShops()
         {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetShops(), "getshops");
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.GetShops(s => true), "getshops");
             return result;
         }
         /// <summary>

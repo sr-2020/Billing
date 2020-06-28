@@ -16,6 +16,10 @@ namespace Core.Model
         public string Name { get; set; }
         [Column("lifestyle")]
         public int LifeStyle { get; set; }
+        [Column("owner")]
+        public int Owner { get; set; }
+        [Column("commission")]
+        public decimal Commission { get; set; }
         public virtual List<Specialisation> Specialisations { get; set; }
     }
 }

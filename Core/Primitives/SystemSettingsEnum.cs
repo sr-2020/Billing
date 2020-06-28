@@ -22,6 +22,7 @@ namespace Core.Primitives
         shopiridium,
         price_minutes,
         defaultbalance,
-        eversion
+        eversion,
+        admin_id
     }
 }

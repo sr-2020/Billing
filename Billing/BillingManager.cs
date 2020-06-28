@@ -41,7 +41,7 @@ namespace Billing
         RentaDto ConfirmRenta(int character, int priceId);
         List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1);
         List<SkuDto> GetSkusForShop(int shop);
-        List<ShopDto> GetShops();
+
         List<CorporationDto> GetCorps();
         List<ProductTypeDto> GetProductTypes(int id = -1);
         ProductType GetExtProductType(int externalId);
@@ -76,8 +76,6 @@ namespace Billing
         ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
         public static string UrlNotFound = "https://www.clickon.ru/preview/original/pic/8781_logo.png";
 
-
-
         public void ProcessRentas()
         {
             var rentas = GetList<Renta>(r => true, r => r.Shop.Wallet, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation.Wallet);
@@ -88,8 +86,6 @@ namespace Billing
                 ProcessBulk(rentas.Skip(i * bulkCount).Take(bulkCount).ToList());
             }
         }
-
-
 
         public Specialisation SetSpecialisation(int productTypeid, int shopid)
         {
@@ -227,19 +223,7 @@ namespace Billing
                   }).ToList();
         }
 
-        public List<ShopDto> GetShops()
-        {
-            return GetList<ShopWallet>(c => true, new string[] { "Wallet", "Specialisations", "Specialisations.ProductType" }).Select(s =>
-                     new ShopDto
-                     {
-                         Id = s.Id,
-                         Name = s.Name,
-                         Comission = BillingHelper.GetComission(s.LifeStyle),
-                         Lifestyle = s.LifeStyle,
-                         Balance = s.Wallet.Balance,
-                         Specialisations = CreateSpecialisationDto(s)
-                     }).ToList();
-        }
+
 
         public List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1)
         {
@@ -765,20 +749,7 @@ namespace Billing
                 MakeNewTransfer(mir, renta.Shop.Wallet, finalPrice, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} с {sin.Sin}", false, false);
             }
         }
-        private List<SpecialisationDto> CreateSpecialisationDto(ShopWallet shop)
-        {
-            var list = new List<SpecialisationDto>();
-            if (shop.Specialisations == null)
-                return list;
-            list.AddRange(shop.Specialisations.Select(s => new SpecialisationDto
-            {
-                ProductTypeId = s.ProductTypeId,
-                ProductTypeName = s.ProductType?.Name,
-                ShopId = s.ShopId,
-                ShopName = shop.Name
-            }));
-            return list;
-        }
+
         private Sku SkuAllowed(int shop, int sku)
         {
             var skuList = GetSkuList(shop);
@@ -959,7 +930,7 @@ namespace Billing
                 DateCreated = DateTime.Now,
                 Discount = discount,
                 CharacterId = sin.CharacterId,
-                ShopComission = BillingHelper.GetComission(shop.LifeStyle),
+                ShopComission = shop.Commission,
                 FinalPrice = BillingHelper.GetFinalPrice(sku.Nomenklatura.BasePrice, discount, sin.Scoring.CurrentScoring)
             };
             Add(price);

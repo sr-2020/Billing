@@ -24,7 +24,6 @@ namespace Core
         public DbSet<ScoringFactor> ScoringFactor { get; set; }
         public DbSet<ScoringFactor> ScoringFactorCalculate { get; set; }
         public DbSet<ScoringFactor> ScoringCategoryCalculate { get; set; }
-        public DbSet<Character> Character { get; set; }
         public DbSet<SystemSettings> SystemSettings { get; set; }
         public DbSet<ProductType> ProductTypes { get; set; }
         public DbSet<ShopWallet> ShopWallet { get; set; }

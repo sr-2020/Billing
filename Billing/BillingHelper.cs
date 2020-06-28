@@ -4,6 +4,7 @@ using IoC;
 using Settings;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Billing
@@ -43,11 +44,11 @@ namespace Billing
             return (basePrice - (basePrice * (discount / 100))) / scoring;
         }
 
-        public static int GetComission(int shopLifestyle)
-        {
-            var manager = IocContainer.Get<ISettingsManager>();
-            return manager.GetIntValue($"shop{((Lifestyles)shopLifestyle).ToString().ToLower()}");
-        }
+        //public static int GetComission(int shopLifestyle)
+        //{
+        //    var manager = IocContainer.Get<ISettingsManager>();
+        //    return manager.GetIntValue($"shop{((Lifestyles)shopLifestyle).ToString().ToLower()}");
+        //}
 
         public static decimal CalculateComission(decimal basePrice, decimal comission)
         {
@@ -57,6 +58,25 @@ namespace Billing
         public static bool HasQrWrite(string code)
         {
             return !string.IsNullOrEmpty(code);
+        }
+
+        public static bool IsAdmin(int character)
+        {
+            var manager = IocContainer.Get<ISettingsManager>();
+            try
+            {
+                var list = manager.GetValue(SystemSettingsEnum.admin_id).Split(';').ToList();
+                if (list.Contains(character.ToString()))
+                {
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception e)
+            {
+
+                return false;
+            }
         }
 
     }

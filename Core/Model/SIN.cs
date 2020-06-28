@@ -9,9 +9,7 @@ namespace Core.Model
     public class SIN : BaseEntity
     {
         [Column("character")]
-        [ForeignKey("character")]
         public int CharacterId { get; set; }
-        public virtual Character Character { get; set; }
         [Column("sin_text")]
         public string Sin { get; set; }
         [Column("person_name")]
