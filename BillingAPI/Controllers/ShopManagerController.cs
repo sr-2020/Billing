@@ -16,7 +16,7 @@ namespace BillingAPI.Controllers
     public class ShopManagerController : Controller
     {
         [Route("Details")]
-        [ShopAuthorization]
+        //[ShopAuthorization]
         public IActionResult Details(int shop)
         {
             var manager = IocContainer.Get<IShopManager>();
@@ -24,7 +24,7 @@ namespace BillingAPI.Controllers
             return View(dto);
         }
         [Route("Available")]
-        [ShopAuthorization]
+        //[ShopAuthorization]
         public IActionResult Available(int shop)
         {
             var manager = IocContainer.Get<IShopManager>();
