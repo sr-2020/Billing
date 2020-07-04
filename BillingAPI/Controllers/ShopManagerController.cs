@@ -28,7 +28,7 @@ namespace BillingAPI.Controllers
         public IActionResult Available(int shop)
         {
             var manager = IocContainer.Get<IShopManager>();
-            var list = manager.GetAvailableSkus(shop);
+            var list = manager.GetAvailableQR(shop);
             var name = manager.GetShopName(shop);
             var model = new ShopAvailableViewModel(list, shop, name);
             return View(model);

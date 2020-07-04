@@ -3,6 +3,7 @@ using Billing.DTO;
 using Core;
 using Core.Model;
 using Core.Primitives;
+using InternalServices;
 using IoC;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace Billing
         bool HasAccessToShop(int character, int shop);
         List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate);
         ShopDto GetShop(int id);
-        List<QRDto> GetAvailableSkus(int shop);
+        List<QRDto> GetAvailableQR(int shop);
         string GetShopName(int shopId);
     }
 
@@ -50,7 +51,7 @@ namespace Billing
         public ShopDto GetShop(int id)
         {
             var shop = GetShops(s => s.Id == id).FirstOrDefault();
-            if(shop == null)
+            if (shop == null)
             {
                 throw new BillingException("Магазин не найден");
             }
@@ -69,14 +70,42 @@ namespace Billing
                      }).ToList();
         }
 
-        public List<QRDto> GetAvailableSkus(int shop)
+        public List<QRDto> GetAvailableQR(int shop)
         {
             var billing = IocContainer.Get<IBillingManager>();
-            var qr = billing.GetSkusForShop(shop).Select(s=>new QRDto(s, shop));
-            return qr.ToList();
+            var skus = billing.GetSkusForShop(shop);
+            var qrs = new List<QRDto>();
+            foreach (var sku in skus)
+            {
+                var qr = CreateQRDto(shop, sku);
+                qrs.Add(qr);
+            }
+            return qrs;
         }
 
         #region private
+
+        private QRDto CreateQRDto(int shop, SkuDto sku)
+        {
+            var qr = new QRDto();
+            qr.Shop = shop;
+            qr.Sku = sku;
+            qr.QRID = QRHelper.Concatenate(sku.SkuId, shop);
+            var cache = Get<CacheQRContent>(q => q.QRID == qr.QRID);
+            if (cache == null)
+            {
+                cache = new CacheQRContent
+                {
+                    QRID = qr.QRID,
+                    Encoded = EreminQrService.GetQRUrl(qr.QRID)
+                };
+                Add(cache);
+                Context.SaveChanges();
+            }
+            qr.QR = cache.Encoded;
+            return qr;
+        }
+
         private List<SpecialisationDto> CreateSpecialisationDto(ShopWallet shop)
         {
             var list = new List<SpecialisationDto>();
