@@ -95,7 +95,7 @@ namespace BillingAPI
             app.UseMvc(routes =>
             {
                 routes
-                    .MapRoute(name: "default", template: "{controller}/{action=Index}/");
+                    .MapRoute(name: "default", template: "api/v1/billing/{controller}/{action=Index}/");
             }).UseStaticFiles(); 
         }
     }
