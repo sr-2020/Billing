@@ -18,11 +18,11 @@ namespace BillingAPI.Filters
             var shop = 0;
             if (filterContext.ActionArguments.ContainsKey("character"))
             {
-                character = int.Parse(filterContext.ActionArguments["character"].ToString());
+                int.TryParse(filterContext.ActionArguments["character"].ToString(), out character);
             }
             if (filterContext.ActionArguments.ContainsKey("shop"))
             {
-                shop = int.Parse(filterContext.ActionArguments["shop"].ToString());
+                int.TryParse(filterContext.ActionArguments["shop"].ToString(), out shop);
             }
             if (!BillingHelper.IsAdmin(character) && !manager.HasAccessToShop(character, shop))
             {
