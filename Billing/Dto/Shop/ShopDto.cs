@@ -6,12 +6,14 @@ using System.Text;
 
 namespace Billing.DTO
 {
-    public class ShopDto : ShopViewModel
+    public class ShopDto
     {
-        public ShopDto(int id, string name) : base(id, name) { }
+        public int Id { get; set; }
+        public string Name { get; set; }
         public decimal Comission { get; set; }
         public string Lifestyle { get; set; }
         public decimal Balance { get; set; }
+        public int OwnerId { get; set; }
         public List<SpecialisationDto> Specialisations { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Billing;
+using Billing.Dto.Shop;
 using Billing.DTO;
 using BillingAPI.Model;
 using Core.Model;
@@ -167,14 +168,14 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.MakeTransferSINLeg(sin, leg, amount, comment));
             return result;
         }
-        [HttpGet("transfer/maketransferlegsin")]
+        [HttpPost("transfer/maketransferlegsin")]
         public DataResult<Transfer> MakeTransferLegSIN(int leg, int sin, decimal amount, string comment)
         {
             var manager = IocContainer.Get<IBillingManager>();
             var result = RunAction(() => manager.MakeTransferSINLeg(leg, sin, amount, comment));
             return result;
         }
-        [HttpGet("transfer/maketransferlegleg")]
+        [HttpPost("transfer/maketransferlegleg")]
         public DataResult<Transfer> MakeTransferLegLeg(int leg1, int leg2, decimal amount, string comment)
         {
             var manager = IocContainer.Get<IBillingManager>();
@@ -282,6 +283,14 @@ namespace BillingAPI.Controllers
         #endregion
 
         #region info
+
+        [HttpGet("info/getmyshops")]
+        public DataResult<ShopViewModel> GetMyShops(int character)
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.GetAvailableShops(character), "getmyshops");
+            return result;
+        }
 
         [HttpGet("info/getcontracts")]
         public DataResult<List<Contract>> GetContrats(int shopid, int corporationId)

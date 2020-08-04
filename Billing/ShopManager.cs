@@ -20,10 +20,31 @@ namespace Billing
         ShopDto GetShop(int id);
         List<QRDto> GetAvailableQR(int shop);
         string GetShopName(int shopId);
+        ShopViewModel GetAvailableShops(int character);
+        string GetCharacterName(int character);
+
+
     }
 
     public class ShopManager : BaseEntityRepository, IShopManager
     {
+        public ShopViewModel GetAvailableShops(int character)
+        {
+            var model = new ShopViewModel
+            {
+                CurrentCharacterId = character,
+                CurrentCharacterName = GetCharacterName(character)
+            };
+            model.Shops = GetShops(s => s.Owner == character);
+            return model;
+        }
+
+        public string GetCharacterName(int character)
+        {
+            var currentCharacterName = Get<JoinCharacter>(j => j.Character.Model == character, c => c.Character);
+            return currentCharacterName?.Name;
+        }
+
         public string GetShopName(int shopId)
         {
             var shop = Get<ShopWallet>(s => s.Id == shopId);
@@ -61,8 +82,11 @@ namespace Billing
         public List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate)
         {
             return GetList(predicate, new string[] { "Wallet", "Specialisations", "Specialisations.ProductType" }).Select(s =>
-                     new ShopDto(s.Id, s.Name)
+                     new ShopDto()
                      {
+                         Id = s.Id,
+                         Name = s.Name,
+                         OwnerId = s.Owner,
                          Comission = s.Commission,
                          Lifestyle = ((Lifestyles)s.LifeStyle).ToString(),
                          Balance = s.Wallet.Balance,

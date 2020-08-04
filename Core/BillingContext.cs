@@ -35,5 +35,7 @@ namespace Core
         public DbSet<Contract> Contract { get; set; }
         public DbSet<ShopQR> ShopQR { get; set; }
         public DbSet<CacheQRContent> CacheQR { get; set; }
+        public DbSet<JoinCharacter> JoinCharacter { get; set; }
+        public DbSet<Character> Character { get; set; }
     }
 }
