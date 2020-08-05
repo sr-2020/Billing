@@ -22,8 +22,6 @@ namespace Billing
         string GetShopName(int shopId);
         ShopViewModel GetAvailableShops(int character);
         string GetCharacterName(int character);
-
-
     }
 
     public class ShopManager : BaseEntityRepository, IShopManager
