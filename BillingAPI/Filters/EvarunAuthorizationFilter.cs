@@ -39,7 +39,8 @@ namespace BillingAPI.Filters
             }
             else
             {
-                AddCharacter(context, "41714");
+                //TODO disable it on prod
+                AddCharacter(context, "9570");
 #if (DEBUG)
 
 #else

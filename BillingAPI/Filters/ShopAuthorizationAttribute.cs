@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace BillingAPI.Filters
 {
@@ -26,8 +28,9 @@ namespace BillingAPI.Filters
             }
             if (!BillingHelper.IsAdmin(character) && !manager.HasAccessToShop(character, shop))
             {
-                throw new BillingAuthException("character не имеет доступа к управлению магазином");
+                throw new HttpResponseException(new HttpResponseMessage(System.Net.HttpStatusCode.Unauthorized));
             }
+            base.OnActionExecuting(filterContext);
         }
     }
 }
