@@ -11,6 +11,7 @@ namespace Billing
 {
     public class BillingHelper
     {
+
         public static DiscountType GetDiscountType(int discountType)
         {
             if (Enum.IsDefined(typeof(DiscountType), discountType))

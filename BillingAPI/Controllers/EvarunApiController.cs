@@ -36,6 +36,10 @@ namespace BillingAPI.Controllers
             {
                 return HandleException(418, se, guid, result);
             }
+            catch(HttpResponseException re)
+            {
+                return HandleException((int)re.Response.StatusCode, re, guid, result);
+            }
             catch (Exception exc)
             {
                 return HandleException(500, exc, guid, result);
@@ -65,6 +69,10 @@ namespace BillingAPI.Controllers
             catch (ShopException se)
             {
                 return HandleException(418, se, guid, result);
+            }
+            catch (HttpResponseException re)
+            {
+                return HandleException((int)re.Response.StatusCode, re, guid, result);
             }
             catch (Exception exc)
             {

@@ -1,6 +1,7 @@
 ﻿using Billing;
 using Core;
 using IoC;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,8 @@ namespace BillingAPI.Filters
             }
             if (!BillingHelper.IsAdmin(character) && !manager.HasAccessToShop(character, shop))
             {
-                throw new HttpResponseException(new HttpResponseMessage(System.Net.HttpStatusCode.Unauthorized));
+                filterContext.Result = new StatusCodeResult(403);
+                return;
             }
             base.OnActionExecuting(filterContext);
         }

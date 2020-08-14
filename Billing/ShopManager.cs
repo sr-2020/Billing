@@ -19,13 +19,33 @@ namespace Billing
         List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate);
         ShopDto GetShop(int id);
         List<QRDto> GetAvailableQR(int shop);
-        string GetShopName(int shopId);
         ShopViewModel GetAvailableShops(int character);
         string GetCharacterName(int character);
+        List<TransferDto> GetTransfers(int shop);
+
     }
 
-    public class ShopManager : BaseEntityRepository, IShopManager
+    public class ShopManager : BaseBillingRepository, IShopManager
     {
+        public List<TransferDto> GetTransfers(int shop)
+        {
+            var shopWallet = Get<ShopWallet>(s => s.Id == shop, s => s.Wallet);
+            var listFrom = GetList<Transfer>(t => t.WalletFromId == shopWallet.WalletId, t => t.WalletFrom, t => t.WalletTo);
+            
+            var allList = new List<TransferDto>();
+            var owner = GetWalletName(shopWallet.Wallet);
+            if (listFrom != null)
+                allList.AddRange(listFrom
+                    .Select(s => CreateTransferDto(s, TransferType.Outcoming))
+                    .ToList());
+            var listTo = GetList<Transfer>(t => t.WalletToId == shopWallet.WalletId, t => t.WalletFrom, t => t.WalletTo);
+            if (listTo != null)
+                allList.AddRange(listTo
+                    .Select(s => CreateTransferDto(s, TransferType.Incoming))
+                    .ToList());
+            return allList.OrderBy(t => t.OperationTime).ToList();
+        }
+
         public ShopViewModel GetAvailableShops(int character)
         {
             var model = new ShopViewModel
@@ -41,16 +61,6 @@ namespace Billing
         {
             var currentCharacterName = Get<JoinCharacter>(j => j.Character.Model == character, c => c.Character);
             return currentCharacterName?.Name;
-        }
-
-        public string GetShopName(int shopId)
-        {
-            var shop = Get<ShopWallet>(s => s.Id == shopId);
-            if (shop == null)
-            {
-                throw new BillingException("магазин не найден");
-            }
-            return shop.Name;
         }
 
         public bool HasAccessToShop(int character, int shopId)

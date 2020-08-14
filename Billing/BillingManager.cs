@@ -71,9 +71,8 @@ namespace Billing
         #endregion
     }
 
-    public class BillingManager : BaseEntityRepository, IBillingManager
+    public class BillingManager : BaseBillingRepository, IBillingManager
     {
-        ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
         public static string UrlNotFound = "https://www.clickon.ru/preview/original/pic/8781_logo.png";
 
         public void ProcessRentas()
@@ -107,6 +106,7 @@ namespace Billing
             Context.SaveChanges();
             return specialisation;
         }
+        
         public void DropSpecialisation(int productType, int shop)
         {
             var specialisation = Get<Specialisation>(s => s.ProductTypeId == productType && s.ShopId == shop);
@@ -131,6 +131,7 @@ namespace Billing
             Context.SaveChanges();
             return qr;
         }
+        
         public ShopQR WriteFreeQR(int shop, int sku)
         {
             var qr = Get<ShopQR>(q => q.ShopId == null);
@@ -138,6 +139,7 @@ namespace Billing
                 throw new BillingException("не найдено свободных QR");
             return WriteQR(qr.Id, shop, sku);
         }
+        
         public ShopQR CleanQR(int qrid)
         {
             var qr = Get<ShopQR>(q => q.Id == qrid);
@@ -149,6 +151,7 @@ namespace Billing
             Context.SaveChanges();
             return qr;
         }
+        
         public void BreakContract(int corporation, int shop)
         {
             var contract = Get<Contract>(c => c.CorporationId == corporation && c.ShopId == shop);
@@ -222,9 +225,7 @@ namespace Billing
                       CorporationUrl = c.CorporationLogoUrl
                   }).ToList();
         }
-
-
-
+        
         public List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1)
         {
             var list = GetList<Sku>(s => (s.CorporationId == corporationId || corporationId == 0)
@@ -309,6 +310,7 @@ namespace Billing
             };
             return dto;
         }
+        
         public List<PriceShopDto> GetOffersForQR(int characterId)
         {
             var rentas = GetList<Renta>(r => r.CharacterId == characterId && r.HasQRWrite, r => r.Price.Sku.Nomenklatura.ProductType, r => r.Price.Sku.Corporation, r => r.Price.Shop);
@@ -327,6 +329,7 @@ namespace Billing
                 throw new BillingException("пустой qr");
             return GetPrice(character, qr.ShopId.Value, qr.SkuId.Value);
         }
+        
         public PriceShopDto GetPrice(int character, int shopid, int skuid)
         {
             var block = _settings.GetBoolValue(SystemSettingsEnum.block);
@@ -343,6 +346,7 @@ namespace Billing
             var dto = new PriceShopDto(new PriceDto(price));
             return dto;
         }
+        
         public CorporationWallet CreateOrUpdateCorporationWallet(int corpId = 0, decimal amount = 0, string name = "unknown corporation", string logoUrl = "")
         {
             CorporationWallet corporation = null;
@@ -412,6 +416,7 @@ namespace Billing
             Remove(wallet);
             Context.SaveChanges();
         }
+        
         public void DeleteProductType(int id, bool force)
         {
             var nomenklaturas = GetList<Nomenklatura>(n => n.ProductTypeId == id);
@@ -493,14 +498,15 @@ namespace Billing
                 throw new BillingException("sin not found");
             var listFrom = GetList<Transfer>(t => t.WalletFromId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
             var allList = new List<TransferDto>();
+            var owner = GetWalletName(sin.Wallet);
             if (listFrom != null)
                 allList.AddRange(listFrom
-                    .Select(s => CreateTransferDto(s, TransferType.Outcoming))
+                    .Select(s => CreateTransferDto(s, TransferType.Outcoming, owner))
                     .ToList());
             var listTo = GetList<Transfer>(t => t.WalletToId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
             if (listTo != null)
                 allList.AddRange(listTo
-                    .Select(s => CreateTransferDto(s, TransferType.Incoming))
+                    .Select(s => CreateTransferDto(s, TransferType.Incoming, owner))
                     .ToList());
             return allList.OrderBy(t => t.OperationTime).ToList();
         }
@@ -672,26 +678,42 @@ namespace Billing
             return sin;
         }
 
-        public Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment)
+        [BillingBlock]
+        public Transfer MakeTransferLegLeg(int shopFrom, int shopTo, decimal amount, string comment)
         {
-            throw new NotImplementedException();
+            var shopWalletFrom = Get<ShopWallet>(s => s.Id == shopFrom, s => s.Wallet);
+            var shopWalletTo = Get<ShopWallet>(s => s.Id == shopTo, s => s.Wallet);
+            var transfer = MakeNewTransfer(shopWalletFrom.Wallet, shopWalletTo.Wallet, amount, comment);
+            return transfer;
         }
 
-        public Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment)
+        [BillingBlock]
+        public Transfer MakeTransferLegSIN(int shop, int character, decimal amount, string comment)
         {
-            throw new NotImplementedException();
+            var sin = GetSIN(character, s => s.Wallet);
+            var anon = false;
+            try
+            {
+                anon = EreminService.GetAnonimous(character);
+            }
+            catch (Exception e)
+            {
+
+            }
+            var shopWallet = Get<ShopWallet>(s => s.Id == shop, s => s.Wallet);
+            var transfer = MakeNewTransfer(shopWallet.Wallet, sin.Wallet, amount, comment, anon);
+            return transfer;
         }
 
+        [BillingBlock]
         public Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment)
         {
             throw new NotImplementedException();
         }
 
+        [BillingBlock]
         public Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment)
         {
-            var block = _settings.GetBoolValue(SystemSettingsEnum.block);
-            if (block)
-                throw new BillingException("В данный момент ведется пересчет рентных платежей, попробуйте сделать перевод чуть позже");
             var d1 = GetSIN(characterFrom, s => s.Wallet);
             var d2 = GetSIN(characterTo, s => s.Wallet);
             var anon = false;
@@ -714,8 +736,6 @@ namespace Billing
         }
 
         #region private
-
-        private string _ownerName = "Владелец кошелька";
 
         private void ProcessBulk(List<Renta> rentas)
         {
@@ -805,49 +825,6 @@ namespace Billing
             return _settings.GetIntValue(SystemSettingsEnum.MIR_ID);
         }
 
-        private TransferDto CreateTransferDto(Transfer transfer, TransferType type)
-        {
-            return new TransferDto
-            {
-                Comment = transfer.Comment,
-                TransferType = type.ToString(),
-                Amount = transfer.Amount,
-                NewBalance = type == TransferType.Incoming ? transfer.NewBalanceTo : transfer.NewBalanceFrom,
-                OperationTime = transfer.OperationTime,
-                From = type == TransferType.Incoming ? GetWalletName(transfer.WalletFrom) : _ownerName,
-                To = type == TransferType.Incoming ? _ownerName : GetWalletName(transfer.WalletTo),
-                Anonimous = transfer.Anonymous
-            };
-        }
-
-        private string GetWalletName(Wallet wallet)
-        {
-            if (wallet == null)
-                return string.Empty;
-            switch (wallet.WalletType)
-            {
-                case (int)WalletTypes.Character:
-                    var sin = Get<SIN>(s => s.WalletId == wallet.Id);
-                    if (sin == null)
-                        return string.Empty;
-                    return $"Character {sin.CharacterId} {sin.PersonName} {sin.Sin}";
-                case (int)WalletTypes.Corporation:
-                    var corp = Get<CorporationWallet>(c => c.WalletId == wallet.Id);
-                    if (corp == null)
-                        return string.Empty;
-                    return $"Corporation {corp.Id}";
-                case (int)WalletTypes.Shop:
-                    var shop = Get<ShopWallet>(c => c.WalletId == wallet.Id);
-                    if (shop == null)
-                        return string.Empty;
-                    return $"Shop {shop.Id}";
-                case (int)WalletTypes.MIR:
-                    return "MIR";
-                default:
-                    return string.Empty;
-            }
-        }
-
         private SIN GetSIN(int characterId, params Expression<Func<SIN, object>>[] includes)
         {
             var sin = Get(s => s.CharacterId == characterId, includes);
@@ -858,6 +835,7 @@ namespace Billing
             }
             return sin;
         }
+
         private Transfer MakeNewTransfer(Wallet walletFrom, Wallet walletTo, decimal amount, string comment, bool anonymous = false, bool save = true)
         {
             if (walletFrom == null)
