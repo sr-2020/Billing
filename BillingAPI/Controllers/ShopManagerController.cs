@@ -31,15 +31,24 @@ namespace BillingAPI.Controllers
         public DataResult<Transfer> MakeTransferLegSIN(int shop, int sin, decimal amount, string comment)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.MakeTransferSINLeg(shop, sin, amount, comment));
+            var result = RunAction(() => manager.MakeTransferSINLeg(shop, sin, amount, comment), "maketransfertosin");
             return result;
         }
         [HttpPost("maketransfertoleg")]
         [ShopAuthorization]
-        public DataResult<Transfer> MakeTransferLegLeg(int shop, int leg2, decimal amount, string comment)
+        public DataResult<Transfer> MakeTransferLegLeg(int shop, int shopTo, decimal amount, string comment)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.MakeTransferSINLeg(shop, leg2, amount, comment));
+            var result = RunAction(() => manager.MakeTransferSINLeg(shop, shopTo, amount, comment), "maketransfertoleg");
+            return result;
+        }
+
+        [HttpPost("gettransfers")]
+        [ShopAuthorization]
+        public DataResult<List<TransferDto>> GetTranfers(int shop)
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.GetTransfers(shop), "gettransfers");
             return result;
         }
 
