@@ -34,6 +34,7 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.MakeTransferSINLeg(shop, sin, amount, comment), "maketransfertosin");
             return result;
         }
+
         [HttpPost("maketransfertoleg")]
         [ShopAuthorization]
         public DataResult<Transfer> MakeTransferLegLeg(int shop, int shopTo, decimal amount, string comment)
@@ -43,21 +44,21 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        [HttpPost("gettransfers")]
+        [HttpGet("gettransfers")]
         [ShopAuthorization]
         public DataResult<List<TransferDto>> GetTranfers(int shop)
         {
             var manager = IocContainer.Get<IShopManager>();
-            var result = RunAction(() => manager.GetTransfers(shop), "gettransfers");
+            var result = RunAction(() => manager.GetTransfers(shop), $"gettransfers {shop}");
             return result;
         }
 
-        [HttpPost("getproducts")]
+        [HttpGet("getproducts")]
         [ShopAuthorization]
         public DataResult<List<SkuDto>> GetProducts(int shop)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetSkusForShop(shop), $"getskuforshop {shop}");
+            var result = RunAction(() => manager.GetSkusForShop(shop), $"getproducts {shop}");
             return result;
         }
 
