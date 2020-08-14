@@ -30,8 +30,8 @@ namespace BillingAPI.Controllers
         [ShopAuthorization]
         public DataResult<Transfer> MakeTransferLegSIN(int shop, int sin, decimal amount, string comment)
         {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.MakeTransferSINLeg(shop, sin, amount, comment), "maketransfertosin");
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.MakeTransferLegSIN(shop, sin, amount, comment), "maketransfertosin");
             return result;
         }
 
@@ -39,8 +39,8 @@ namespace BillingAPI.Controllers
         [ShopAuthorization]
         public DataResult<Transfer> MakeTransferLegLeg(int shop, int shopTo, decimal amount, string comment)
         {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.MakeTransferSINLeg(shop, shopTo, amount, comment), "maketransfertoleg");
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.MakeTransferLegLeg(shop, shopTo, amount, comment), "maketransfertoleg");
             return result;
         }
 
@@ -55,13 +55,29 @@ namespace BillingAPI.Controllers
 
         [HttpGet("getproducts")]
         [ShopAuthorization]
-        public DataResult<List<SkuDto>> GetProducts(int shop)
+        public DataResult<List<QRDto>> GetProducts(int shop)
         {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetSkusForShop(shop), $"getproducts {shop}");
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.GetAvailableQR(shop), $"getproducts {shop}");
             return result;
         }
 
+        [HttpGet("getrentas")]
+        [ShopAuthorization]
+        public DataResult<List<RentaDto>> GetRentas(int shop)
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.GetRentas(shop), $"getrentas {shop}");
+            return result;
+        }
+
+        [HttpPost("writerenta2qr")]
+        public Result WriteOffer(int rentaId, string qr)
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.WriteRenta(rentaId, qr), $"writerenta2qr {rentaId}:{qr}");
+            return result;
+        }
     }
 
 }

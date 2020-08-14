@@ -202,30 +202,6 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        [HttpPost("renta/writeqr")]
-        public DataResult<ShopQR> WriteQR(int qr, int shop, int sku)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.WriteQR(qr, shop, sku), $"writeqr {qr}:{shop}:{sku}");
-            return result;
-        }
-
-        [HttpPost("renta/writefreeqr")]
-        public DataResult<ShopQR> WriteFreeQR(int shop, int sku)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.WriteFreeQR(shop, sku), $"writefreeqr {shop} {sku}");
-            return result;
-        }
-
-        [HttpDelete("renta/dropqr")]
-        public DataResult<ShopQR> CleanQR(int qr)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CleanQR(qr), $"dropqr {qr}");
-            return result;
-        }
-
         [HttpPost("renta/createcontract")]
         public DataResult<Contract> CreateContract(int corporation, int shop)
         {
@@ -272,13 +248,7 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        [HttpPost("renta/writeoffer2qr")]
-        public Result WriteOffer(int offerId, string qr)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.WriteOffer(offerId, qr), $"writeoffer2qr {offerId}:{qr}");
-            return result;
-        }
+
 
         #endregion
 
@@ -314,18 +284,6 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        /// <summary>
-        /// Get all allowed sku for current shop
-        /// </summary>
-        /// <param name="shop"></param>
-        /// <returns></returns>
-        [HttpGet("info/getskuforshop")]
-        public DataResult<List<SkuDto>> GetSkusForShop(int shop)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetSkusForShop(shop), $"getskuforshop {shop}");
-            return result;
-        }
         /// <summary>
         /// 
         /// </summary>

@@ -7,6 +7,7 @@ namespace Billing.DTO
 {
     public class RentaDto
     {
+        public int RentaId { get; set; }
         public decimal FinalPrice { get; set; }
         public string ProductType { get; set; }
         public string NomenklaturaName { get; set; }
@@ -14,6 +15,8 @@ namespace Billing.DTO
         public string Corporation { get; set; }
         public string Shop { get; set; }
         public bool HasQRWrite { get; set; }
-        public int OfferId { get; set; }
+        public string QRRecorded { get; set; }
+        public int PriceId { get; set; }
+        public int CharacterId { get; set; }
     }
 }

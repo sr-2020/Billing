@@ -30,6 +30,8 @@ namespace Core.Model
         public decimal ShopComission { get; set; }
         [Column("has_qr_write")]
         public bool HasQRWrite { get; set; }
+        [Column("qr_recorded")]
+        public string QRRecorded { get; set; }
         [ForeignKey("price")]
         [Column("price")]
         public int PriceId { get; set; }

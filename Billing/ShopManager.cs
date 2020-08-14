@@ -17,16 +17,85 @@ namespace Billing
     {
         bool HasAccessToShop(int character, int shop);
         List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate);
-        ShopDto GetShop(int id);
         List<QRDto> GetAvailableQR(int shop);
         ShopViewModel GetAvailableShops(int character);
         string GetCharacterName(int character);
         List<TransferDto> GetTransfers(int shop);
-
+        Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
+        Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
+        List<RentaDto> GetRentas(int shop);
+        void WriteRenta(int rentaId, string qr);
     }
 
     public class ShopManager : BaseBillingRepository, IShopManager
     {
+        public void WriteRenta(int rentaId, string qr)
+        {
+            var renta = Get<Renta>(p => p.Id == rentaId && p.HasQRWrite && string.IsNullOrEmpty(p.QRRecorded), r => r.Sku.Nomenklatura);
+            if (renta == null)
+                throw new ShopException($"offer {rentaId} записать на qr невозможно");
+            var code = renta.Sku.Nomenklatura.Code;
+            var name = renta.Sku.Name;
+            var description = renta.Sku.Nomenklatura.Description;
+            //TODO
+            var count = 1;
+            if (!EreminService.WriteQR(qr, code, name, description, count, new { rentaId }))
+            {
+                throw new ShopException("запись на qr не получилось");
+            }
+            renta.QRRecorded = qr;
+            Add(renta);
+            Context.SaveChanges();
+        }
+
+        public List<RentaDto> GetRentas(int shop)
+        {
+            var list = GetList<Renta>(r => r.ShopId == shop, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation, r => r.Shop);
+            return list
+                    .Select(r =>
+                    new RentaDto
+                    {
+                        FinalPrice = BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring),
+                        ProductType = r.Sku.Nomenklatura.ProductType.Name,
+                        Shop = r.Shop.Name,
+                        NomenklaturaName = r.Sku.Nomenklatura.Name,
+                        SkuName = r.Sku.Name,
+                        Corporation = r.Sku.Corporation.Name,
+                        HasQRWrite = r.HasQRWrite,
+                        QRRecorded = r.QRRecorded,
+                        PriceId = r.PriceId,
+                        RentaId = r.Id,
+                        CharacterId = r.CharacterId
+                    }).ToList();
+        }
+
+        [BillingBlock]
+        public Transfer MakeTransferLegLeg(int shopFrom, int shopTo, decimal amount, string comment)
+        {
+            var shopWalletFrom = Get<ShopWallet>(s => s.Id == shopFrom, s => s.Wallet);
+            var shopWalletTo = Get<ShopWallet>(s => s.Id == shopTo, s => s.Wallet);
+            var transfer = MakeNewTransfer(shopWalletFrom.Wallet, shopWalletTo.Wallet, amount, comment);
+            return transfer;
+        }
+
+        [BillingBlock]
+        public Transfer MakeTransferLegSIN(int shop, int character, decimal amount, string comment)
+        {
+            var sin = GetSIN(character, s => s.Wallet);
+            var anon = false;
+            try
+            {
+                anon = EreminService.GetAnonimous(character);
+            }
+            catch (Exception e)
+            {
+
+            }
+            var shopWallet = Get<ShopWallet>(s => s.Id == shop, s => s.Wallet);
+            var transfer = MakeNewTransfer(shopWallet.Wallet, sin.Wallet, amount, comment, anon);
+            return transfer;
+        }
+
         public List<TransferDto> GetTransfers(int shop)
         {
             var shopWallet = Get<ShopWallet>(s => s.Id == shop, s => s.Wallet);
@@ -77,16 +146,6 @@ namespace Billing
             return shop.Owner == character;
         }
 
-        public ShopDto GetShop(int id)
-        {
-            var shop = GetShops(s => s.Id == id).FirstOrDefault();
-            if (shop == null)
-            {
-                throw new BillingException("Магазин не найден");
-            }
-            return shop;
-        }
-
         public List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate)
         {
             return GetList(predicate, new string[] { "Wallet", "Specialisations", "Specialisations.ProductType" }).Select(s =>
@@ -104,8 +163,7 @@ namespace Billing
 
         public List<QRDto> GetAvailableQR(int shop)
         {
-            var billing = IocContainer.Get<IBillingManager>();
-            var skus = billing.GetSkusForShop(shop);
+            var skus = GetSkusForShop(shop);
             var qrs = new List<QRDto>();
             foreach (var sku in skus)
             {
@@ -151,6 +209,10 @@ namespace Billing
                 ShopName = shop.Name
             }));
             return list;
+        }
+        private List<SkuDto> GetSkusForShop(int shop)
+        {
+            return GetSkuList(shop).Select(s => new SkuDto(s)).ToList();
         }
         #endregion
     }
