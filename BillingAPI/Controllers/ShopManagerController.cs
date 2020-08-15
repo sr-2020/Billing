@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BillingAPI.Controllers
 {
-    [Route("shop")]
+    [Route("api/[controller]")]
     [ApiController]
     public class ShopManagerController : EvarunApiController
     {
