@@ -44,7 +44,7 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        [HttpGet("gettransfers")]
+        [HttpPost("gettransfers")]
         [ShopAuthorization]
         public DataResult<List<TransferDto>> GetTranfers(int shop)
         {
@@ -53,7 +53,7 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        [HttpGet("getproducts")]
+        [HttpPost("getproducts")]
         [ShopAuthorization]
         public DataResult<List<QRDto>> GetProducts(int shop)
         {
@@ -62,7 +62,7 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        [HttpGet("getrentas")]
+        [HttpPost("getrentas")]
         [ShopAuthorization]
         public DataResult<List<RentaDto>> GetRentas(int shop)
         {

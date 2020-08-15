@@ -257,7 +257,7 @@ namespace Billing
             var dto = new RentaDto
             {
                 HasQRWrite = renta.HasQRWrite,
-                OfferId = priceId
+                PriceId = priceId
             };
             return dto;
         }
