@@ -98,7 +98,7 @@ namespace Billing
             Context.SaveChanges();
             return specialisation;
         }
-        
+
         public void DropSpecialisation(int productType, int shop)
         {
             var specialisation = Get<Specialisation>(s => s.ProductTypeId == productType && s.ShopId == shop);
@@ -181,7 +181,7 @@ namespace Billing
                       CorporationUrl = c.CorporationLogoUrl
                   }).ToList();
         }
-        
+
         public List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1)
         {
             var list = GetList<Sku>(s => (s.CorporationId == corporationId || corporationId == 0)
@@ -261,7 +261,7 @@ namespace Billing
             };
             return dto;
         }
-        
+
         public List<PriceShopDto> GetOffersForQR(int characterId)
         {
             var rentas = GetList<Renta>(r => r.CharacterId == characterId && r.HasQRWrite, r => r.Price.Sku.Nomenklatura.ProductType, r => r.Price.Sku.Corporation, r => r.Price.Shop);
@@ -280,7 +280,7 @@ namespace Billing
                 throw new BillingException("пустой qr");
             return GetPrice(character, qr.ShopId.Value, qr.SkuId.Value);
         }
-        
+
         public PriceShopDto GetPrice(int character, int shopid, int skuid)
         {
             var block = _settings.GetBoolValue(SystemSettingsEnum.block);
@@ -297,7 +297,7 @@ namespace Billing
             var dto = new PriceShopDto(new PriceDto(price));
             return dto;
         }
-        
+
         public CorporationWallet CreateOrUpdateCorporationWallet(int corpId = 0, decimal amount = 0, string name = "unknown corporation", string logoUrl = "")
         {
             CorporationWallet corporation = null;
@@ -367,11 +367,11 @@ namespace Billing
             Remove(wallet);
             Context.SaveChanges();
         }
-        
+
         public void DeleteProductType(int id, bool force)
         {
             var nomenklaturas = GetList<Nomenklatura>(n => n.ProductTypeId == id);
-            if(nomenklaturas != null && nomenklaturas.Count > 0)
+            if (nomenklaturas != null && nomenklaturas.Count > 0)
             {
                 if (force)
                 {
@@ -391,9 +391,9 @@ namespace Billing
         public void DeleteNomenklatura(int id, bool force)
         {
             var skus = GetList<Sku>(s => s.NomenklaturaId == id);
-            if(skus != null && skus.Count > 0)
+            if (skus != null && skus.Count > 0)
             {
-                if(force)
+                if (force)
                 {
                     foreach (var sku in skus)
                     {
@@ -639,7 +639,7 @@ namespace Billing
                 MakeNewTransfer(mir, renta.Shop.Wallet, finalPrice, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} с {sin.Sin}", false, false);
             }
         }
-        
+
         private DiscountType GetDiscountTypeForSku(Sku sku)
         {
             if (sku == null)
@@ -657,7 +657,7 @@ namespace Billing
             return BillingHelper.GetDiscountType(producttype.DiscountType);
 
         }
-        
+
         private Price CreateNewPrice(Sku sku, ShopWallet shop, SIN sin)
         {
             decimal discount;

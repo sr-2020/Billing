@@ -106,7 +106,7 @@ namespace Billing
             //баланса хватает, или один из кошельков MIR
             if (walletFrom.Balance < amount && walletFrom.WalletType != (int)WalletTypes.MIR && walletTo.WalletType != (int)WalletTypes.MIR)
                 throw new BillingException($"Денег нет, но вы держитесь");
-            if (amount <= 0)
+            if (amount < 0)
                 throw new BillingException($"Нельзя перевести отрицательное значение");
             walletFrom.Balance -= amount;
             Add(walletFrom);
