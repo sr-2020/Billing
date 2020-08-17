@@ -54,7 +54,7 @@ namespace BillingAPI
             {
                 options.AddPolicy("FullAccessPolicy", builder =>
                 {
-                    builder.WithOrigins("http://localhost:4200", "https://marketplace.evarun.ru", "https://rc-web.evarun.ru/")
+                    builder.AllowAnyOrigin()
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials();
