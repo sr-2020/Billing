@@ -1,8 +1,10 @@
 ﻿using Billing;
+using BillingAPI.Model;
 using Core;
 using IoC;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +28,14 @@ namespace BillingAPI.Filters
             if (filterContext.ActionArguments.ContainsKey("shop"))
             {
                 int.TryParse(filterContext.ActionArguments["shop"].ToString(), out shop);
+            }
+            else
+            {
+                object model;
+                if (filterContext.ActionArguments.TryGetValue("request", out model) && model is ShopBasedRequest)
+                {
+                    shop = ((ShopBasedRequest)model).Shop;
+                }
             }
             if (!BillingHelper.IsAdmin(character) && !manager.HasAccessToShop(character, shop))
             {

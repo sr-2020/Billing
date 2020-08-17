@@ -28,54 +28,54 @@ namespace BillingAPI.Controllers
 
         [HttpPost("maketransfertosin")]
         [ShopAuthorization]
-        public DataResult<Transfer> MakeTransferLegSIN([FromBody]  int shop, int sin, decimal amount, string comment)
+        public DataResult<Transfer> MakeTransferLegSIN([FromBody] MakeTransferLegSINRequest request)
         {
             var manager = IocContainer.Get<IShopManager>();
-            var result = RunAction(() => manager.MakeTransferLegSIN(shop, sin, amount, comment), "maketransfertosin");
+            var result = RunAction(() => manager.MakeTransferLegSIN(request.Shop, request.Sin, request.Amount, request.Comment), "maketransfertosin");
             return result;
         }
 
         [HttpPost("maketransfertoleg")]
         [ShopAuthorization]
-        public DataResult<Transfer> MakeTransferLegLeg([FromBody]  int shop, int shopTo, decimal amount, string comment)
+        public DataResult<Transfer> MakeTransferLegLeg([FromBody] MakeTransferLegLegRequest request)
         {
             var manager = IocContainer.Get<IShopManager>();
-            var result = RunAction(() => manager.MakeTransferLegLeg(shop, shopTo, amount, comment), "maketransfertoleg");
+            var result = RunAction(() => manager.MakeTransferLegLeg(request.Shop, request.ShopTo, request.Amount, request.Comment), "maketransfertoleg");
             return result;
         }
 
         [HttpPost("gettransfers")]
         [ShopAuthorization]
-        public DataResult<List<TransferDto>> GetTranfers([FromBody] int shop)
+        public DataResult<List<TransferDto>> GetTranfers([FromBody] GetTranfersRequest request)
         {
             var manager = IocContainer.Get<IShopManager>();
-            var result = RunAction(() => manager.GetTransfers(shop), $"gettransfers {shop}");
+            var result = RunAction(() => manager.GetTransfers(request.Shop), $"gettransfers {request.Shop}");
             return result;
         }
 
         [HttpPost("getproducts")]
         [ShopAuthorization]
-        public DataResult<List<QRDto>> GetProducts([FromBody] int shop)
+        public DataResult<List<QRDto>> GetProducts([FromBody] GetProductsRequest request)
         {
             var manager = IocContainer.Get<IShopManager>();
-            var result = RunAction(() => manager.GetAvailableQR(shop), $"getproducts {shop}");
+            var result = RunAction(() => manager.GetAvailableQR(request.Shop), $"getproducts {request.Shop}");
             return result;
         }
 
         [HttpPost("getrentas")]
         [ShopAuthorization]
-        public DataResult<List<RentaDto>> GetRentas([FromBody] int shop)
+        public DataResult<List<RentaDto>> GetRentas([FromBody] GetRentasRequest request)
         {
             var manager = IocContainer.Get<IShopManager>();
-            var result = RunAction(() => manager.GetRentas(shop), $"getrentas {shop}");
+            var result = RunAction(() => manager.GetRentas(request.Shop), $"getrentas {request.Shop}");
             return result;
         }
 
         [HttpPost("writerenta2qr")]
-        public Result WriteOffer([FromBody] int rentaId, string qr)
+        public Result WriteOffer([FromBody] WriteOfferRequest request)
         {
             var manager = IocContainer.Get<IShopManager>();
-            var result = RunAction(() => manager.WriteRenta(rentaId, qr), $"writerenta2qr {rentaId}:{qr}");
+            var result = RunAction(() => manager.WriteRenta(request.RentaId, request.Qr), $"writerenta2qr {request.RentaId}:{request.Qr}");
             return result;
         }
     }
