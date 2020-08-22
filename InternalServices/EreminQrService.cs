@@ -10,7 +10,7 @@ namespace InternalServices
     public class EreminQrService
     {
         const string URL1 = @"https://qr.aerem.in";
-        const string URL2 = @"http://api.qrserver.com/v1/create-qr-code";
+        const string URL2 = @"https://decodeit.ru/image.php?type=qr&value=";
 
         public static string GetQRUrl(long payload)
         {
@@ -33,7 +33,7 @@ namespace InternalServices
 
         public static string GetQRUrl(string content)
         {
-            return $"{URL2}?color=000000&bgcolor=FFFFFF&data={content}& qzone=10&margin=0&size=300x300&ecc=L&format=svg";
+            return $"{URL2}{content}";
         }
 
     }
