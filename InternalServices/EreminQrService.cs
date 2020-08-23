@@ -13,6 +13,8 @@ namespace InternalServices
         //const string URL2 = @"https://decodeit.ru/image.php?type=qr&value=";
         const string URL2 = @"http://api.qrserver.com/v1/create-qr-code";
         const int TYPE = 4;
+        const long DEFAULTVALIDUNTIL = 1893456000;
+
 
         public static string GetQRUrl(long payload)
         {
@@ -20,10 +22,10 @@ namespace InternalServices
             return GetQRUrl(content);
         }
 
-        public static string GetQrContent (long payload)
+        public static string GetQrContent (long payload, long validUntil = DEFAULTVALIDUNTIL)
         {
             var client = new HttpClient();
-            var url = $"{URL1}/encode?type={TYPE}&kin=0&validUntil=0&payload={payload}";
+            var url = $"{URL1}/encode?type={TYPE}&kin=0&validUntil={validUntil}&payload={payload}";
             var response = client.GetAsync(url).Result;
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
