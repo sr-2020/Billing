@@ -12,7 +12,7 @@ namespace InternalServices
         const string URL1 = @"https://qr.aerem.in";
         //const string URL2 = @"https://decodeit.ru/image.php?type=qr&value=";
         const string URL2 = @"http://api.qrserver.com/v1/create-qr-code";
-        const int TYPE = 5;
+        const int TYPE = 4;
 
         public static string GetQRUrl(long payload)
         {
