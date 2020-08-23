@@ -23,7 +23,6 @@ namespace InternalServices
         {
             var client = new HttpClient();
             var url = $"{URL1}/encode?type=200&kin=0&validUntil=0&payload={payload}";
-            return payload.ToString();
             var response = client.GetAsync(url).Result;
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
