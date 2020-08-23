@@ -112,7 +112,7 @@ namespace Billing
                 allList.AddRange(listTo
                     .Select(s => CreateTransferDto(s, TransferType.Incoming))
                     .ToList());
-            return allList.OrderBy(t => t.OperationTime).ToList();
+            return allList.OrderByDescending(t => t.OperationTime).ToList();
         }
 
         public ShopViewModel GetAvailableShops(int character)
