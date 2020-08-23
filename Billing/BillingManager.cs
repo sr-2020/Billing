@@ -28,7 +28,7 @@ namespace Billing
 
         #region web
         List<PriceShopDto> GetOffersForQR(int characterId);
-        PriceShopDto GetPriceByQR(int character, int qr);
+        PriceShopDto GetPriceByQR(int character, long qr);
         PriceShopDto GetPrice(int character, int shop, int sku);
         Specialisation SetSpecialisation(int productType, int shop);
         void DropSpecialisation(int productType, int shop);
@@ -271,14 +271,14 @@ namespace Billing
             return list.ToList();
         }
 
-        public PriceShopDto GetPriceByQR(int character, int qrid)
+        public PriceShopDto GetPriceByQR(int character, long qrid)
         {
-            var qr = Get<ShopQR>(q => q.Id == qrid);
-            if (qr == null)
-                throw new BillingException($"qr {qrid} not found");
-            if (qr.ShopId == null || qr.SkuId == null)
-                throw new BillingException("пустой qr");
-            return GetPrice(character, qr.ShopId.Value, qr.SkuId.Value);
+            QRHelper.Parse(qrid, out int skuId, out int shopId);
+            if (skuId == 0 || shopId == 0)
+            {
+                throw new BillingException($"Ошибка распознования qr");
+            }
+            return GetPrice(character, shopId, skuId);
         }
 
         public PriceShopDto GetPrice(int character, int shopid, int skuid)
