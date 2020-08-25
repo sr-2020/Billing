@@ -78,6 +78,22 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.WriteRenta(request.RentaId, request.Qr), $"writerenta2qr {request.RentaId}:{request.Qr}");
             return result;
         }
+
+        [HttpPost("createpricebyqr")]
+        public DataResult<PriceShopDto> GetPriceByQR([FromBody] GetPriceByQRRequest request) 
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetPriceByQR(request.Character, request.Qr), $"createpricebyqr {request.Character}:{request.Qr}");
+            return result;
+        }
+
+        [HttpPost("createrenta")]
+        public DataResult<RentaDto> CreateRenta([FromBody] CreateRentaRequest request)  
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.ConfirmRenta(request.Character, request.PriceId), $"createrenta {request.Character}:{request.PriceId}");
+            return result;
+        }
     }
 
 }
