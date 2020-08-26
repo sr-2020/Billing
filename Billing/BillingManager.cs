@@ -65,7 +65,7 @@ namespace Billing
 
     public class BillingManager : BaseBillingRepository, IBillingManager
     {
-        public static string UrlNotFound = "https://www.clickon.ru/preview/original/pic/8781_logo.png";
+        public static string UrlNotFound = "";
 
         public void ProcessRentas()
         {
@@ -208,11 +208,9 @@ namespace Billing
                     }).ToList();
         }
 
+        [BillingBlock]
         public RentaDto ConfirmRenta(int character, int priceId)
         {
-            var block = _settings.GetBoolValue(SystemSettingsEnum.block);
-            if (block)
-                throw new ShopException("В данный момент ведется пересчет рентных платежей, попробуйте купить чуть позже");
             var price = Get<Price>(p => p.Id == priceId, p => p.Sku, s => s.Shop, s => s.Shop.Wallet);
             if (price == null)
                 throw new BillingException("Персональное предложение не найдено");
@@ -254,6 +252,7 @@ namespace Billing
             price.Confirmed = true;
             Add(price);
             Context.SaveChanges();
+            EreminPushAdapter.SendNotification(character, "Покупка совершена", $"Вы купили {price.Sku.Name}");
             var dto = new RentaDto
             {
                 HasQRWrite = renta.HasQRWrite,

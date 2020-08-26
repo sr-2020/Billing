@@ -16,7 +16,7 @@ namespace Billing
             var block = _settings.GetBoolValue(SystemSettingsEnum.block);
             if (block)
             {
-                throw new BillingException("В данный момент ведется пересчет рентных платежей, попробуйте сделать перевод чуть позже");
+                throw new BillingException("В данный момент ведется пересчет рентных платежей, попробуйте повторить чуть позже");
             }
         }
     }
