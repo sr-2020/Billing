@@ -10,6 +10,7 @@ namespace Core.Model
     {
         [Column("character")]
         public int CharacterId { get; set; }
+        public Character Character { get; set; }
         [Column("sin_text")]
         public string Sin { get; set; }
         [Column("person_name")]

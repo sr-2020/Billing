@@ -50,7 +50,7 @@ namespace Billing
 
         public List<RentaDto> GetRentas(int shop)
         {
-            var list = GetList<Renta>(r => r.ShopId == shop, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation, r => r.Shop);
+            var list = GetList<Renta>(r => r.ShopId == shop, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation, r => r.Shop, r => r.Sin);
             return list
                     .Select(r =>
                     new RentaDto
@@ -65,7 +65,9 @@ namespace Billing
                         QRRecorded = r.QRRecorded,
                         PriceId = r.PriceId,
                         RentaId = r.Id,
-                        CharacterId = r.CharacterId
+                        CharacterId = r.CharacterId,
+                        DateCreated = r.DateCreated,
+                        CharacterName = r.Sin.PersonName
                     }).ToList();
         }
 
@@ -100,7 +102,7 @@ namespace Billing
         {
             var shopWallet = Get<ShopWallet>(s => s.Id == shop, s => s.Wallet);
             var listFrom = GetList<Transfer>(t => t.WalletFromId == shopWallet.WalletId, t => t.WalletFrom, t => t.WalletTo);
-            
+
             var allList = new List<TransferDto>();
             var owner = GetWalletName(shopWallet.Wallet);
             if (listFrom != null)
@@ -126,10 +128,10 @@ namespace Billing
             return model;
         }
 
-        public string GetCharacterName(int character)
+        public string GetCharacterName(int modelId)
         {
-            var currentCharacterName = Get<JoinCharacter>(j => j.Character.Model == character, c => c.Character);
-            return currentCharacterName?.Name;
+            var character = Get<SIN>(s => s.Character.Model == modelId);
+            return character?.PersonName;
         }
 
         public bool HasAccessToShop(int character, int shopId)

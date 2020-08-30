@@ -14,16 +14,20 @@ namespace Billing
 {
     public class BaseBillingRepository : BaseEntityRepository
     {
-        public SIN CreateOrUpdatePhysicalWallet(int character = 0, decimal balance = 50)
+        public SIN CreateOrUpdatePhysicalWallet(int modelId = 0, decimal balance = 50)
         {
-            if (character == 0)
-                throw new BillingAuthException($"character {character} not found");
-            var sin = Get<SIN>(s => s.CharacterId == character);
+            if (modelId == 0)
+                throw new BillingAuthException($"character {modelId} not found");
+            var character = Get<Character>(c => c.Model == modelId);
+            if(character == null)
+                throw new BillingAuthException($"character {modelId} not found");
+            var sin = Get<SIN>(s => s.Character.Model == modelId);
             if (sin == null)
             {
                 sin = new SIN
                 {
-                    CharacterId = character
+                    Character = character,
+                    PersonName = GetJoinCharacterName(modelId)
                 };
             }
             Add(sin);
@@ -62,7 +66,7 @@ namespace Billing
                     var sin = Get<SIN>(s => s.WalletId == wallet.Id);
                     if (sin == null)
                         return string.Empty;
-                    return $"{sin.CharacterId} {sin.PersonName} {sin.Sin}";
+                    return $"{sin.Character.Model} {sin.PersonName} {sin.Sin}";
                 case (int)WalletTypes.Corporation:
                     var corp = Get<CorporationWallet>(c => c.WalletId == wallet.Id);
                     if (corp == null)
@@ -167,13 +171,13 @@ namespace Billing
             return mir;
         }
 
-        protected SIN GetSIN(int characterId, params Expression<Func<SIN, object>>[] includes)
+        protected SIN GetSIN(int modelId, params Expression<Func<SIN, object>>[] includes)
         {
-            var sin = Get(s => s.CharacterId == characterId, includes);
+            var sin = Get(s => s.Character.Model == modelId, includes);
             if (sin == null)
             {
                 var defaultBalance = _settings.GetIntValue(SystemSettingsEnum.defaultbalance);
-                sin = CreateOrUpdatePhysicalWallet(characterId, defaultBalance);
+                sin = CreateOrUpdatePhysicalWallet(modelId, defaultBalance);
             }
             return sin;
         }
@@ -189,6 +193,12 @@ namespace Billing
             var result = GetList<Sku>(s => skuids.Contains(s.Id), s => s.Corporation.Wallet, s => s.Nomenklatura.ProductType);
             //TODO filter by contractlimit
             return result;
+        }
+
+        protected string GetJoinCharacterName(int modelId)
+        {
+            var currentCharacterName = Get<JoinCharacter>(j => j.Character.Model == modelId, c => c.Character);
+            return currentCharacterName?.Name;
         }
 
         private int GetMIRId()

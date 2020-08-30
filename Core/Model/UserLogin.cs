@@ -5,11 +5,11 @@ using System.Text;
 
 namespace Core.Model
 {
-    [Table("character")]
-    public class Character : BaseEntity
+    [Table("user_login")]
+    public class UserLogin : BaseEntity
     {
-        [Column("model_id")]
-        public int Model { get; set; } //main!!! Its real Character
+        [Column("login")]
+        public string Login { get; set; }
         [Column("player")]
         public int PlayerId { get; set; }
         public Player Player { get; set; }

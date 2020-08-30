@@ -20,7 +20,7 @@ namespace Billing
         Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
 
         string GetSinStringByCharacter(int characterId);
-        int GetCharacterIdBySin(string sinString);
+        int GetModelIdBySinString(string sinString);
         List<TransferDto> GetTransfers(int characterId);
         BalanceDto GetBalance(int characterId);
         List<RentaDto> GetRentas(int characterId);
@@ -224,21 +224,21 @@ namespace Billing
             var sku = SkuAllowed(price.ShopId, price.SkuId);
             if (sku == null)
                 throw new BillingException("Sku недоступно для продажи в данный момент");
-            var sin = GetSIN(price.CharacterId, s => s.Wallet);
+            var sin = GetSIN(price.CharacterId, s => s.Wallet, s => s.Character);
             if (sin.Wallet.Balance - price.FinalPrice < 0)
             {
                 throw new BillingException("Недостаточно средств");
             }
             var mir = GetMIR();
             MakeNewTransfer(sin.Wallet, mir, price.FinalPrice, $"Первый платеж за: {price.Sku.Name}, место покупки: {price.Shop.Name}");
-            MakeNewTransfer(mir, price.Shop.Wallet, price.ShopComission, $"Комиссия за: {price.Sku.Name} с син {sin.CharacterId}");
-            MakeNewTransfer(mir, sku.Corporation.Wallet, price.BasePrice, $"Покупка предмета: {price.Sku.Name} пользователем: {sin.CharacterId}");
+            MakeNewTransfer(mir, price.Shop.Wallet, price.ShopComission, $"Комиссия за: {price.Sku.Name} с син {sin.Character.Model}");
+            MakeNewTransfer(mir, sku.Corporation.Wallet, price.BasePrice, $"Покупка предмета: {price.Sku.Name} пользователем: {sin.Character.Model}");
             sku.Count--;
             Add(sku);
             var renta = new Renta
             {
                 BasePrice = price.BasePrice,
-                CharacterId = sin.CharacterId,
+                CharacterId = sin.Character.Model,
                 CurrentScoring = price.CurrentScoring,
                 SkuId = price.SkuId,
                 DateCreated = DateTime.Now,
@@ -290,7 +290,7 @@ namespace Billing
             if (sku == null)
                 throw new BillingException("sku недоступен для продажи");
             var shop = Get<ShopWallet>(s => s.Id == shopid);
-            var sin = GetSIN(character, s => s.Scoring);
+            var sin = GetSIN(character, s => s.Scoring, s => s.Character);
             if (shop == null || sin == null)
                 throw new Exception("some went wrong");
             var price = CreateNewPrice(sku, shop, sin);
@@ -408,12 +408,12 @@ namespace Billing
             Delete<Nomenklatura>(id);
         }
 
-        public BalanceDto GetBalance(int characterId)
+        public BalanceDto GetBalance(int modelId)
         {
-            var sin = GetSIN(characterId, s => s.Wallet, s => s.Scoring);
+            var sin = GetSIN(modelId, s => s.Wallet, s => s.Scoring);
             var balance = new BalanceDto
             {
-                CharacterId = characterId,
+                CharacterId = modelId,
                 CurrentBalance = sin.Wallet.Balance,
                 CurrentScoring = sin.Scoring.CurrentScoring,
                 SIN = sin.Sin,
@@ -423,9 +423,9 @@ namespace Billing
             return balance;
         }
 
-        public List<TransferDto> GetTransfers(int characterId)
+        public List<TransferDto> GetTransfers(int modelId)
         {
-            var sin = GetSIN(characterId);
+            var sin = GetSIN(modelId, s=>s.Wallet);
             if (sin == null)
                 throw new BillingException("sin not found");
             var listFrom = GetList<Transfer>(t => t.WalletFromId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
@@ -451,12 +451,12 @@ namespace Billing
             return sin.Sin;
         }
 
-        public int GetCharacterIdBySin(string sinString)
+        public int GetModelIdBySinString(string sinString)
         {
             var sin = Get<SIN>(s => s.Sin == sinString);
             if (sin == null)
                 throw new Exception("sin not found");
-            return sin.CharacterId;
+            return sin.Character.Model;
         }
 
         public ProductType CreateOrUpdateProductType(int id, string name, int discounttype = 1, int externalId = 0)
@@ -631,7 +631,7 @@ namespace Billing
             var comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
             //с кошелька списываем всегда
             MakeNewTransfer(sin.Wallet, mir, finalPrice, $"Рентный платеж: {renta.Sku.Name} в {renta.Shop.Name}", false, false);
-            EreminPushAdapter.SendNotification(sin.CharacterId, "Кошелек", $"Списание {finalPrice} по рентному договору");
+            EreminPushAdapter.SendNotification(sin.Character.Model, "Кошелек", $"Списание {finalPrice} по рентному договору");
             //если баланс положительный
             if (sin.Wallet.Balance > 0)
             {
@@ -663,7 +663,7 @@ namespace Billing
             decimal discount;
             try
             {
-                discount = EreminService.GetDiscount(sin.CharacterId, GetDiscountTypeForSku(sku));
+                discount = EreminService.GetDiscount(sin.Character.Model, GetDiscountTypeForSku(sku));
             }
             catch (Exception e)
             {
@@ -678,7 +678,7 @@ namespace Billing
                 CurrentScoring = sin.Scoring.CurrentScoring,
                 DateCreated = DateTime.Now,
                 Discount = discount,
-                CharacterId = sin.CharacterId,
+                CharacterId = sin.Character.Model,
                 ShopComission = shop.Commission,
                 FinalPrice = BillingHelper.GetFinalPrice(sku.Nomenklatura.BasePrice, discount, sin.Scoring.CurrentScoring)
             };

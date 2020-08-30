@@ -374,7 +374,7 @@ namespace BillingAPI.Controllers
         public DataResult<int> GetCharacterIdBySin(string sinString)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetCharacterIdBySin(sinString));
+            var result = RunAction(() => manager.GetModelIdBySinString(sinString));
             return result;
         }
 

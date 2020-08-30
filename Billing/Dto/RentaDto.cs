@@ -18,5 +18,7 @@ namespace Billing.DTO
         public string QRRecorded { get; set; }
         public int PriceId { get; set; }
         public int CharacterId { get; set; }
+        public string CharacterName { get; set; }
+        public DateTime DateCreated { get; set; }
     }
 }
