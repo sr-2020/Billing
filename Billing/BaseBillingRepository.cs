@@ -19,7 +19,7 @@ namespace Billing
             if (modelId == 0)
                 throw new BillingAuthException($"character {modelId} not found");
             var character = Get<Character>(c => c.Model == modelId);
-            if(character == null)
+            if (character == null)
                 throw new BillingAuthException($"character {modelId} not found");
             var sin = Get<SIN>(s => s.Character.Model == modelId);
             if (sin == null)
@@ -63,7 +63,7 @@ namespace Billing
             switch (wallet.WalletType)
             {
                 case (int)WalletTypes.Character:
-                    var sin = Get<SIN>(s => s.WalletId == wallet.Id);
+                    var sin = Get<SIN>(s => s.WalletId == wallet.Id, s => s.Sin);
                     if (sin == null)
                         return string.Empty;
                     return $"{sin.Character.Model} {sin.PersonName} {sin.Sin}";

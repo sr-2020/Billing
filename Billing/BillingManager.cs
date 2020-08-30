@@ -21,8 +21,8 @@ namespace Billing
 
         string GetSinStringByCharacter(int characterId);
         int GetModelIdBySinString(string sinString);
-        List<TransferDto> GetTransfers(int characterId);
-        BalanceDto GetBalance(int characterId);
+        List<TransferDto> GetTransfers(int modelId);
+        BalanceDto GetBalance(int modelId);
         List<RentaDto> GetRentas(int characterId);
         #endregion
 
