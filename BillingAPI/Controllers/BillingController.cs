@@ -227,7 +227,7 @@ namespace BillingAPI.Controllers
         }
 
         [HttpPost("renta/createpricebyqr")]
-        public DataResult<PriceShopDto> GetPriceByQR(int character, long qr)
+        public DataResult<PriceShopDto> GetPriceByQR(int character, string qr)
         {
             var manager = IocContainer.Get<IBillingManager>();
             var result = RunAction(() => manager.GetPriceByQR(character, qr), $"createpricebyqr {character}:{qr}");

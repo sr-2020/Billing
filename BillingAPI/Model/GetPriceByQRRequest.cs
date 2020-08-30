@@ -8,6 +8,6 @@ namespace BillingAPI.Model
     public class GetPriceByQRRequest: CharacterBasedRequest
     {
 
-        public long Qr { get; set; }
+        public string Qr { get; set; }
     }
 }
