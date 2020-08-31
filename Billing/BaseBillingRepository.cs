@@ -63,7 +63,7 @@ namespace Billing
             switch (wallet.WalletType)
             {
                 case (int)WalletTypes.Character:
-                    var sin = Get<SIN>(s => s.WalletId == wallet.Id, s => s.Sin);
+                    var sin = Get<SIN>(s => s.WalletId == wallet.Id, s => s.Character);
                     if (sin == null)
                         return string.Empty;
                     return $"{sin.Character.Model} {sin.PersonName} {sin.Sin}";
