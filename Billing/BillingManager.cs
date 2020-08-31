@@ -425,7 +425,7 @@ namespace Billing
 
         public List<TransferDto> GetTransfers(int modelId)
         {
-            var sin = GetSIN(modelId, s => s.Wallet, s => s.Sin);
+            var sin = GetSIN(modelId, s => s.Wallet, s => s.Character);
             if (sin == null)
                 throw new BillingException("sin not found");
             var listFrom = GetList<Transfer>(t => t.WalletFromId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
