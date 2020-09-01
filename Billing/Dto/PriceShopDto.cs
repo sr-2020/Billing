@@ -6,7 +6,7 @@ namespace Billing.DTO
 {
     public class PriceShopDto 
     {
-        public int IdOffer { get; set; }
+        public int PriceId { get; set; }
         public long DateCreated { get; set; }
         public string ShopName { get; set; }
         public long DateTill { get; set; }
@@ -23,7 +23,7 @@ namespace Billing.DTO
         public string ProductTypeName { get; set; }
         public PriceShopDto(PriceDto dto)
         {
-            this.IdOffer = dto.PriceId;
+            this.PriceId = dto.PriceId;
             this.DateCreated = dto.DateCreated;
             this.ShopName = dto.ShopName;
             this.ShopComission = dto.ShopComission;

@@ -26,6 +26,15 @@ namespace BillingAPI.Controllers
             return result;
         }
 
+        [HttpGet("getmyorganisations")]
+        public DataResult<ShopViewModel> GetMyOrganisations(int character)
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.GetAvailableShops(character), "getmyshops");
+            return result;
+        }
+
+
         [HttpPost("maketransfertosin")]
         [ShopAuthorization]
         public DataResult<Transfer> MakeTransferLegSIN([FromBody] MakeTransferLegSINRequest request)
