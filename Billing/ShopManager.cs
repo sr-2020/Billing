@@ -18,7 +18,7 @@ namespace Billing
         bool HasAccessToShop(int character, int shop);
         List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate);
         List<QRDto> GetAvailableQR(int shop);
-        ShopViewModel GetAvailableShops(int character);
+        ShopViewModel GetAvailableOrganisations(int character);
         string GetCharacterName(int character);
         List<TransferDto> GetTransfers(int shop);
         Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
@@ -65,7 +65,6 @@ namespace Billing
                         QRRecorded = r.QRRecorded,
                         PriceId = r.PriceId,
                         RentaId = r.Id,
-                        CharacterId = r.CharacterId,
                         DateCreated = r.DateCreated,
                         CharacterName = r.Sin.PersonName
                     }).ToList();
@@ -117,7 +116,7 @@ namespace Billing
             return allList.OrderByDescending(t => t.OperationTime).ToList();
         }
 
-        public ShopViewModel GetAvailableShops(int character)
+        public ShopViewModel GetAvailableOrganisations(int character)
         {
             var model = new ShopViewModel
             {

@@ -217,50 +217,9 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.BreakContract(corporation, shop), $"BreakContract {corporation} {shop}");
             return result;
         }
-
-        [HttpPost("renta/createprice")]
-        public DataResult<PriceShopDto> GetPriceByShop(int character, int shop, int sku)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetPrice(shop, character, sku), $"createprice {character}:{shop}:{sku}");
-            return result;
-        }
-
-        [HttpPost("renta/createpricebyqr")]
-        public DataResult<PriceShopDto> GetPriceByQR(int character, string qr)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetPriceByQR(character, qr), $"createpricebyqr {character}:{qr}");
-            return result;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="character"></param>
-        /// <param name="priceId"></param>
-        /// <returns></returns>
-        [HttpPost("renta/createrenta")]
-        public DataResult<RentaDto> CreateRenta(int character, int priceId)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.ConfirmRenta(character, priceId), $"createrenta {character}:{priceId}");
-            return result;
-        }
-
-
-
         #endregion
 
         #region info
-
-        [HttpGet("info/getmyshops")]
-        public DataResult<ShopViewModel> GetMyShops(int character)
-        {
-            var manager = IocContainer.Get<IShopManager>();
-            var result = RunAction(() => manager.GetAvailableShops(character), "getmyshops");
-            return result;
-        }
 
         [HttpGet("info/getcontracts")]
         public DataResult<List<Contract>> GetContrats(int shopid, int corporationId)
@@ -396,19 +355,6 @@ namespace BillingAPI.Controllers
         {
             var manager = IocContainer.Get<IBillingManager>();
             var result = RunAction(() => manager.GetTransfers(characterId), $"gettransfers for {characterId}");
-            return result;
-        }
-
-        /// <summary>
-        /// Get all transfers(income and outcome) for current character
-        /// </summary>
-        /// <param name="characterId"></param>
-        /// <returns></returns>
-        [HttpGet("info/getoffersforqr")]
-        public DataResult<List<PriceShopDto>> GetOffersForQR(int characterId)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetOffersForQR(characterId), $"getoffersforqr for {characterId}");
             return result;
         }
 

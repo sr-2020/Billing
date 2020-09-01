@@ -1,4 +1,5 @@
-﻿using Billing.DTO;
+﻿using Billing.Dto.Shop;
+using Billing.DTO;
 using Core;
 using Core.Model;
 using Core.Primitives;
@@ -19,22 +20,21 @@ namespace Billing
         Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment);
         Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
 
-        string GetSinStringByCharacter(int characterId);
+        string GetSinStringByCharacter(int modelId);
         int GetModelIdBySinString(string sinString);
         List<TransferDto> GetTransfers(int modelId);
         BalanceDto GetBalance(int modelId);
-        List<RentaDto> GetRentas(int characterId);
+        List<RentaDto> GetRentas(int modelId);
         #endregion
 
         #region web
-        List<PriceShopDto> GetOffersForQR(int characterId);
         PriceShopDto GetPriceByQR(int character, string qrid);
         PriceShopDto GetPrice(int character, int shop, int sku);
         Specialisation SetSpecialisation(int productType, int shop);
         void DropSpecialisation(int productType, int shop);
         void BreakContract(int corporation, int shop);
         Contract CreateContract(int corporation, int shop);
-        RentaDto ConfirmRenta(int character, int priceId);
+        RentaDto ConfirmRenta(int modelId, int priceId);
         List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1);
         List<CorporationDto> GetCorps();
         List<ProductTypeDto> GetProductTypes(int id = -1);
@@ -177,7 +177,6 @@ namespace Billing
                   {
                       Id = c.Id,
                       Name = c.Name,
-                      Balance = c.Wallet.Balance,
                       CorporationUrl = c.CorporationLogoUrl
                   }).ToList();
         }
@@ -192,9 +191,9 @@ namespace Billing
             return list.Select(s => new SkuDto(s)).ToList();
         }
 
-        public List<RentaDto> GetRentas(int characterId)
+        public List<RentaDto> GetRentas(int modelId)
         {
-            var list = GetList<Renta>(r => r.CharacterId == characterId, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation, r => r.Shop);
+            var list = GetList<Renta>(r => r.Sin.Character.Model == modelId, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation, r => r.Shop);
             return list
                     .Select(r =>
                     new RentaDto
@@ -209,14 +208,14 @@ namespace Billing
         }
 
         [BillingBlock]
-        public RentaDto ConfirmRenta(int character, int priceId)
+        public RentaDto ConfirmRenta(int modelId, int priceId)
         {
             var price = Get<Price>(p => p.Id == priceId, p => p.Sku, s => s.Shop, s => s.Shop.Wallet);
             if (price == null)
                 throw new BillingException("Персональное предложение не найдено");
             if (price.Confirmed)
                 throw new Exception("Персональным предложением уже воспользовались");
-            if (price.CharacterId != character)
+            if (price.Sin.Character.Model != modelId)
                 throw new Exception("Персональное предложение заведено на другого персонажа");
             var dateTill = price.DateCreated.AddMinutes(_settings.GetIntValue(SystemSettingsEnum.price_minutes));
             if (dateTill < DateTime.Now)
@@ -224,7 +223,7 @@ namespace Billing
             var sku = SkuAllowed(price.ShopId, price.SkuId);
             if (sku == null)
                 throw new BillingException("Sku недоступно для продажи в данный момент");
-            var sin = GetSIN(price.CharacterId, s => s.Wallet, s => s.Character);
+            var sin = GetSIN(price.SinId, s => s.Wallet, s => s.Character);
             if (sin.Wallet.Balance - price.FinalPrice < 0)
             {
                 throw new BillingException("Недостаточно средств");
@@ -238,7 +237,7 @@ namespace Billing
             var renta = new Renta
             {
                 BasePrice = price.BasePrice,
-                CharacterId = sin.Character.Model,
+                Sin = sin,
                 CurrentScoring = price.CurrentScoring,
                 SkuId = price.SkuId,
                 DateCreated = DateTime.Now,
@@ -252,7 +251,7 @@ namespace Billing
             price.Confirmed = true;
             Add(price);
             Context.SaveChanges();
-            EreminPushAdapter.SendNotification(character, "Покупка совершена", $"Вы купили {price.Sku.Name}");
+            EreminPushAdapter.SendNotification(modelId, "Покупка совершена", $"Вы купили {price.Sku.Name}");
             var dto = new RentaDto
             {
                 HasQRWrite = renta.HasQRWrite,
@@ -261,16 +260,7 @@ namespace Billing
             return dto;
         }
 
-        public List<PriceShopDto> GetOffersForQR(int characterId)
-        {
-            var rentas = GetList<Renta>(r => r.CharacterId == characterId && r.HasQRWrite, r => r.Price.Sku.Nomenklatura.ProductType, r => r.Price.Sku.Corporation, r => r.Price.Shop);
-            var list = rentas.Select(r =>
-                        new PriceShopDto(new PriceDto(r.Price))
-            );
-            return list.ToList();
-        }
-
-        public PriceShopDto GetPriceByQR(int character, string qrid)
+        public PriceShopDto GetPriceByQR(int modelId, string qrid)
         {
             var qr = long.Parse(qrid);
             QRHelper.Parse(qr, out int skuId, out int shopId);
@@ -278,10 +268,10 @@ namespace Billing
             {
                 throw new BillingException($"Ошибка распознования qr");
             }
-            return GetPrice(character, shopId, skuId);
+            return GetPrice(modelId, shopId, skuId);
         }
 
-        public PriceShopDto GetPrice(int character, int shopid, int skuid)
+        public PriceShopDto GetPrice(int modelId, int shopid, int skuid)
         {
             var block = _settings.GetBoolValue(SystemSettingsEnum.block);
             if (block)
@@ -290,7 +280,7 @@ namespace Billing
             if (sku == null)
                 throw new BillingException("sku недоступен для продажи");
             var shop = Get<ShopWallet>(s => s.Id == shopid);
-            var sin = GetSIN(character, s => s.Scoring, s => s.Character);
+            var sin = GetSIN(modelId, s => s.Scoring, s => s.Character);
             if (shop == null || sin == null)
                 throw new Exception("some went wrong");
             var price = CreateNewPrice(sku, shop, sin);
@@ -443,9 +433,9 @@ namespace Billing
             return allList.OrderBy(t => t.OperationTime).ToList();
         }
 
-        public string GetSinStringByCharacter(int characterId)
+        public string GetSinStringByCharacter(int modelId)
         {
-            var sin = GetSIN(characterId);
+            var sin = GetSIN(modelId);
             if (sin == null)
                 throw new Exception("sin not found");
             return sin.Sin;
@@ -626,7 +616,7 @@ namespace Billing
 
         private void ProcessRenta(Renta renta, Wallet mir)
         {
-            var sin = GetSIN(renta.CharacterId, s => s.Wallet);
+            var sin = GetSIN(renta.SinId, s => s.Wallet, s => s.Character);
             var finalPrice = BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
             var comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
             //с кошелька списываем всегда
@@ -678,7 +668,7 @@ namespace Billing
                 CurrentScoring = sin.Scoring.CurrentScoring,
                 DateCreated = DateTime.Now,
                 Discount = discount,
-                CharacterId = sin.Character.Model,
+                Sin = sin,
                 ShopComission = shop.Commission,
                 FinalPrice = BillingHelper.GetFinalPrice(sku.Nomenklatura.BasePrice, discount, sin.Scoring.CurrentScoring)
             };

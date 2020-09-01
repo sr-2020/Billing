@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Billing.DTO
+namespace Billing.Dto.Shop
 {
-    public class CorporationDto
+    public class OrganisationBase
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public decimal Balance { get; set; }
-        public string CorporationUrl { get; set; }
+        public int OwnerId { get; set; }
+        public int OwnerName { get; set; }
     }
 }

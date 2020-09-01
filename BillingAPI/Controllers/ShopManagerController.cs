@@ -19,10 +19,11 @@ namespace BillingAPI.Controllers
     public class ShopManagerController : EvarunApiController
     {
         [HttpGet("getmyshops")]
+        [Obsolete]
         public DataResult<ShopViewModel> GetMyShops(int character)
         {
             var manager = IocContainer.Get<IShopManager>();
-            var result = RunAction(() => manager.GetAvailableShops(character), "getmyshops");
+            var result = RunAction(() => manager.GetAvailableOrganisations(character), "getmyshops");
             return result;
         }
 
@@ -30,7 +31,7 @@ namespace BillingAPI.Controllers
         public DataResult<ShopViewModel> GetMyOrganisations(int character)
         {
             var manager = IocContainer.Get<IShopManager>();
-            var result = RunAction(() => manager.GetAvailableShops(character), "getmyshops");
+            var result = RunAction(() => manager.GetAvailableOrganisations(character), "getmyorganisations");
             return result;
         }
 

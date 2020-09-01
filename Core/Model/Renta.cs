@@ -16,8 +16,8 @@ namespace Core.Model
         [Column("shop")]
         public int ShopId { get; set; }
         public virtual ShopWallet Shop { get; set; }
-        [Column("character")]
-        public int CharacterId { get; set; }
+        //[Column("character")]
+        //public int CharacterId { get; set; }
         [ForeignKey("sin")]
         [Column("sin")]
         public int SinId { get; set; }

@@ -10,6 +10,6 @@ namespace Billing.Dto.Shop
         public int CurrentCharacterId { get; set; }
         public string CurrentCharacterName { get; set; }
         public List<ShopDto> Shops { get; set; }
-
+        public List<CorporationDto> Corporations { get; set; }
     }
 }
