@@ -12,7 +12,12 @@ using System.Text;
 
 namespace Billing
 {
-    public class BaseBillingRepository : BaseEntityRepository
+    public interface IBaseBillingRepository : IBaseRepository
+    {
+        SIN CreateOrUpdatePhysicalWallet(int modelId = 0, decimal balance = 50);
+    }
+
+    public class BaseBillingRepository : BaseEntityRepository, IBaseBillingRepository
     {
         public SIN CreateOrUpdatePhysicalWallet(int modelId = 0, decimal balance = 50)
         {
@@ -171,7 +176,8 @@ namespace Billing
             return mir;
         }
 
-        protected SIN GetSIN(int modelId, params Expression<Func<SIN, object>>[] includes)
+
+        protected SIN GetSINByModelId(int modelId, params Expression<Func<SIN, object>>[] includes)
         {
             var sin = Get(s => s.Character.Model == modelId, includes);
             if (sin == null)

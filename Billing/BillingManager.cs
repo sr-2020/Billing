@@ -14,7 +14,7 @@ using System.Text;
 
 namespace Billing
 {
-    public interface IBillingManager : IBaseRepository
+    public interface IBillingManager : IBaseBillingRepository
     {
         #region application
         Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment);
@@ -46,13 +46,12 @@ namespace Billing
         #endregion
 
         #region jobs
-        void ProcessRentas();
+        void ProcessRentas(int modelId = 0);
         #endregion
 
         #region admin
         Sku CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled, int externalId = 0);
         Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description, string pictureurl, int externalId = 0);
-        SIN CreateOrUpdatePhysicalWallet(int character, decimal balance);
         ProductType CreateOrUpdateProductType(int id, string name, int discounttype = 1, int externalId = 0);
         CorporationWallet CreateOrUpdateCorporationWallet(int id, decimal amount, string name, string logoUrl);
         ShopWallet CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle);
@@ -67,9 +66,9 @@ namespace Billing
     {
         public static string UrlNotFound = "";
 
-        public void ProcessRentas()
+        public void ProcessRentas(int modelId = 0)
         {
-            var rentas = GetList<Renta>(r => true, r => r.Shop.Wallet, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation.Wallet);
+            var rentas = GetList<Renta>((r => modelId == 0 || r.Sin.Character.Model == modelId), r => r.Shop.Wallet, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation.Wallet);
             var bulkCount = 500;
             var pageCount = (rentas.Count + bulkCount - 1) / bulkCount;
             for (int i = 0; i < pageCount; i++)
@@ -223,7 +222,7 @@ namespace Billing
             var sku = SkuAllowed(price.ShopId, price.SkuId);
             if (sku == null)
                 throw new BillingException("Sku недоступно для продажи в данный момент");
-            var sin = GetSIN(price.SinId, s => s.Wallet, s => s.Character);
+            var sin = Get<SIN>(s => s.Id == price.SinId, s => s.Wallet, s => s.Character);
             if (sin.Wallet.Balance - price.FinalPrice < 0)
             {
                 throw new BillingException("Недостаточно средств");
@@ -280,7 +279,7 @@ namespace Billing
             if (sku == null)
                 throw new BillingException("sku недоступен для продажи");
             var shop = Get<ShopWallet>(s => s.Id == shopid);
-            var sin = GetSIN(modelId, s => s.Scoring, s => s.Character);
+            var sin = GetSINByModelId(modelId, s => s.Scoring, s => s.Character);
             if (shop == null || sin == null)
                 throw new Exception("some went wrong");
             var price = CreateNewPrice(sku, shop, sin);
@@ -400,7 +399,7 @@ namespace Billing
 
         public BalanceDto GetBalance(int modelId)
         {
-            var sin = GetSIN(modelId, s => s.Wallet, s => s.Scoring);
+            var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring);
             var balance = new BalanceDto
             {
                 CharacterId = modelId,
@@ -415,7 +414,7 @@ namespace Billing
 
         public List<TransferDto> GetTransfers(int modelId)
         {
-            var sin = GetSIN(modelId, s => s.Wallet, s => s.Character);
+            var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Character);
             if (sin == null)
                 throw new BillingException("sin not found");
             var listFrom = GetList<Transfer>(t => t.WalletFromId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
@@ -435,7 +434,7 @@ namespace Billing
 
         public string GetSinStringByCharacter(int modelId)
         {
-            var sin = GetSIN(modelId);
+            var sin = GetSINByModelId(modelId);
             if (sin == null)
                 throw new Exception("sin not found");
             return sin.Sin;
@@ -573,8 +572,8 @@ namespace Billing
         [BillingBlock]
         public Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment)
         {
-            var d1 = GetSIN(characterFrom, s => s.Wallet);
-            var d2 = GetSIN(characterTo, s => s.Wallet);
+            var d1 = GetSINByModelId(characterFrom, s => s.Wallet);
+            var d2 = GetSINByModelId(characterTo, s => s.Wallet);
             var anon = false;
             try
             {
@@ -610,13 +609,15 @@ namespace Billing
 
                     Console.Error.WriteLine(e.Message);
                 }
+                RefreshContext();
             }
-            Context.SaveChanges();
+
         }
 
         private void ProcessRenta(Renta renta, Wallet mir)
         {
-            var sin = GetSIN(renta.SinId, s => s.Wallet, s => s.Character);
+
+            var sin = Get<SIN>(s => s.Id == renta.SinId, s => s.Wallet, s => s.Character);
             var finalPrice = BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
             var comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
             //с кошелька списываем всегда
@@ -628,6 +629,7 @@ namespace Billing
                 MakeNewTransfer(mir, renta.Sku.Corporation.Wallet, renta.BasePrice, $"Рентное начисление: {renta.Sku.Name} с {sin.Sin} ", false, false);
                 MakeNewTransfer(mir, renta.Shop.Wallet, finalPrice, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} с {sin.Sin}", false, false);
             }
+            Context.SaveChanges();
         }
 
         private DiscountType GetDiscountTypeForSku(Sku sku)

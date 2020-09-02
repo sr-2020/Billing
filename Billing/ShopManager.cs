@@ -82,7 +82,7 @@ namespace Billing
         [BillingBlock]
         public Transfer MakeTransferLegSIN(int shop, int character, decimal amount, string comment)
         {
-            var sin = GetSIN(character, s => s.Wallet);
+            var sin = GetSINByModelId(character, s => s.Wallet);
             var anon = false;
             try
             {

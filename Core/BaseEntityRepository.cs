@@ -27,7 +27,7 @@ namespace Core
     }
 
 
-    public class BaseEntityRepository : IBaseRepository
+    public class BaseEntityRepository : IBaseRepository, IDisposable
     {
         protected BillingContext Context;
 
@@ -38,6 +38,7 @@ namespace Core
 
         public void RefreshContext()
         {
+            Dispose();
             Context = new BillingContext();
         }
 
@@ -156,6 +157,14 @@ namespace Core
                 }
             }
             return query;
+        }
+
+        public void Dispose()
+        {
+            if(Context != null)
+            {
+                Context.Dispose();
+            }
         }
 
         #endregion

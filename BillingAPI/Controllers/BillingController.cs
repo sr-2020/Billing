@@ -257,17 +257,6 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("test/processrentas")]
-        public Result ProcessRentas()
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.ProcessRentas(), $"processrentas");
-            return result;
-        }
 
         /// <summary>
         /// Get all rentas for current character
@@ -358,6 +347,21 @@ namespace BillingAPI.Controllers
             return result;
         }
 
+        #endregion
+
+        #region test
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("test/processrentas")]
+        public Result ProcessRentas(int modelId = 0)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.ProcessRentas(modelId), $"processrentas");
+            return result;
+        }
         #endregion
     }
 }
