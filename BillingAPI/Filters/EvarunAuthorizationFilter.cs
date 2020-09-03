@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BillingAPI.Model;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
@@ -20,14 +21,21 @@ namespace BillingAPI.Filters
             int character;
             if (int.TryParse(value, out character))
             {
-                if(context.ActionArguments.ContainsKey("character"))
+                object model;
+                if (context.ActionArguments.ContainsKey("character"))
                 {
                     context.ActionArguments["character"] = character;
+                }
+                else if(context.ActionArguments.TryGetValue("request", out model) && model is CharacterBasedRequest)
+                {
+                    int.TryParse(value, out int characterId);
+                    ((CharacterBasedRequest)model).Character = characterId;
                 }
                 else
                 {
                     context.ActionArguments.Add("character", character);
                 }
+
             }
         }
 
