@@ -51,7 +51,7 @@ namespace Billing
         public List<RentaDto> GetRentas(int shop)
         {
             var list = GetList<Renta>(r => r.ShopId == shop, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation, r => r.Shop, r => r.Sin);
-            return list
+            return list.OrderByDescending(r => r.DateCreated)
                     .Select(r =>
                     new RentaDto
                     {
