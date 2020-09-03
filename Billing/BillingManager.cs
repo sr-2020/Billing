@@ -209,7 +209,7 @@ namespace Billing
         [BillingBlock]
         public RentaDto ConfirmRenta(int modelId, int priceId)
         {
-            var price = Get<Price>(p => p.Id == priceId, p => p.Sku, s => s.Shop, s => s.Shop.Wallet);
+            var price = Get<Price>(p => p.Id == priceId, p => p.Sku, s => s.Shop, s => s.Shop.Wallet, s => s.Sin.Character);
             if (price == null)
                 throw new BillingException("Персональное предложение не найдено");
             if (price.Confirmed)
