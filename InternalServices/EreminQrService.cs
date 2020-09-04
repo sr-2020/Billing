@@ -1,4 +1,5 @@
-﻿using InternalServices.EreminModel;
+﻿using Core;
+using InternalServices.EreminModel;
 using Serialization;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,29 @@ namespace InternalServices
         {
             var content = GetQrContent(payload);
             return GetQRUrl(content);
+        }
+
+        public static string GetPayload(string qrEncoded)
+        {
+            var model = Decode(qrEncoded);
+            if(model.Type == 1)
+            {
+                return model.Payload;
+            }
+            throw new BillingException("qr код не перезаписываемый");
+        }
+
+        public static QRDecodedModel Decode(string qrEncoded)
+        {
+            var client = new HttpClient();
+            var url = $"{URL1}/decode?content={qrEncoded}";
+            var response = client.GetAsync(url).Result;
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                var model = Serializer.Deserialize<QRDecodedModel>(response.Content.ReadAsStringAsync().Result);
+                return model;
+            }
+            throw new Exception(response.Content.ReadAsStringAsync().Result);
         }
 
         public static string GetQrContent (long payload, long validUntil = DEFAULTVALIDUNTIL)

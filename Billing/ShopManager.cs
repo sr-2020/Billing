@@ -24,13 +24,14 @@ namespace Billing
         Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
         Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
         List<RentaDto> GetRentas(int shop);
-        void WriteRenta(int rentaId, string qr);
+        void WriteRenta(int rentaId, string qrEncoded);
     }
 
     public class ShopManager : BaseBillingRepository, IShopManager
     {
-        public void WriteRenta(int rentaId, string qr)
+        public void WriteRenta(int rentaId, string qrEncoded)
         {
+            var qr = EreminQrService.GetPayload(qrEncoded);
             var renta = Get<Renta>(p => p.Id == rentaId && p.HasQRWrite && string.IsNullOrEmpty(p.QRRecorded), r => r.Sku.Nomenklatura);
             if (renta == null)
                 throw new ShopException($"offer {rentaId} записать на qr невозможно");
