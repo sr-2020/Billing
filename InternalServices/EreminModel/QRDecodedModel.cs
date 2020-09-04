@@ -8,7 +8,7 @@ namespace InternalServices.EreminModel
     {
         public int Type { get; set; }
         public int Kind { get; set; }
-        public TimeSpan ValidUntil { get; set; }
+        public long ValidUntil { get; set; }
         public string Payload { get; set; }
     }
 }
