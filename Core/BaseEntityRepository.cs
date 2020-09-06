@@ -22,24 +22,32 @@ namespace Core
         void Remove<T>(T entity) where T : class;
         void AddRange<T>(IEnumerable<T> entities) where T : BaseEntity;
         void Add<T>(T entity) where T : BaseEntity;
-        void RefreshContext();
         void Delete<T>(int id) where T : BaseEntity;
     }
 
 
     public class BaseEntityRepository : IBaseRepository, IDisposable
     {
-        protected BillingContext Context;
+        public Dictionary<Guid, BillingContext> Contexts { get; set; }
+        public Guid CurrentContext { get; set; }
+
+        protected BillingContext Context
+        {
+            get
+            {
+                if(CurrentContext == null)
+                {
+                    CurrentContext = Guid.NewGuid();
+                    Contexts.Add(CurrentContext, new BillingContext());
+                }
+                Contexts.TryGetValue(CurrentContext, out BillingContext result);
+                return result;
+            }
+        }
 
         public BaseEntityRepository()
         {
-            Context = new BillingContext();
-        }
-
-        public void RefreshContext()
-        {
-            Dispose();
-            Context = new BillingContext();
+            Contexts = new Dictionary<Guid, BillingContext>();
         }
 
         public List<T> ExecuteQuery<T>(string query)
@@ -161,9 +169,12 @@ namespace Core
 
         public void Dispose()
         {
-            if(Context != null)
+            if(Contexts != null)
             {
-                Context.Dispose();
+                foreach (var context in Contexts)
+                {
+                    context.Value?.Dispose();
+                }
             }
         }
 

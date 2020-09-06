@@ -51,7 +51,6 @@ namespace BillingAPI.Controllers
                 }
                 catch (Exception e)
                 {
-                    manager.RefreshContext();
                     errors++;
                 }
             }

@@ -609,7 +609,6 @@ namespace Billing
 
                     Console.Error.WriteLine(e.Message);
                 }
-                RefreshContext();
             }
 
         }
