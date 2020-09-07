@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using System.Web;
 
 namespace InternalServices
 {
@@ -37,7 +38,7 @@ namespace InternalServices
         {
             var client = new HttpClient();
             var url = $"{URL1}/decode?content={qrEncoded}";
-            var response = client.GetAsync(url).Result;
+            var response = client.GetAsync(HttpUtility.UrlEncode(url)).Result;
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
                 var model = Serializer.Deserialize<QRDecodedModel>(response.Content.ReadAsStringAsync().Result);
