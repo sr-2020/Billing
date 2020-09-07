@@ -35,7 +35,7 @@ namespace Core
         {
             get
             {
-                if(CurrentContext == null)
+                if(CurrentContext == Guid.Empty)
                 {
                     CurrentContext = Guid.NewGuid();
                     Contexts.Add(CurrentContext, new BillingContext());
