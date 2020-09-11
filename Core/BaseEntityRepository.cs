@@ -23,6 +23,8 @@ namespace Core
         void AddRange<T>(IEnumerable<T> entities) where T : BaseEntity;
         void Add<T>(T entity) where T : BaseEntity;
         void Delete<T>(int id) where T : BaseEntity;
+        Dictionary<Guid, BillingContext> Contexts { get; set; }
+        Guid CurrentContext { get; set; }
     }
 
 
@@ -56,23 +58,30 @@ namespace Core
             return connection.Query<T>(query).ToList();
         }
 
+        [UsingNewContext]
         public virtual void Add<T>(T entity) where T : BaseEntity
         {
             if (entity.Id > 0)
-                Context.Entry(entity).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                Context.Entry(entity).State = EntityState.Modified;
             else
-                Context.Entry(entity).State = Microsoft.EntityFrameworkCore.EntityState.Added;
+                Context.Entry(entity).State = EntityState.Added;
+            Context.SaveChanges();
         }
 
+        [UsingNewContext]
         public virtual void AddRange<T>(IEnumerable<T> entities) where T : BaseEntity
         {
             foreach (var entity in entities)
             {
-                Add(entity);
-
+                if (entity.Id > 0)
+                    Context.Entry(entity).State = EntityState.Modified;
+                else
+                    Context.Entry(entity).State = EntityState.Added;
             }
+            Context.SaveChanges();
         }
 
+        [UsingNewContext]
         public void Delete<T>(int id) where T : BaseEntity
         {
             var db = Get<T>(n => n.Id == id);
@@ -82,14 +91,17 @@ namespace Core
             Context.SaveChanges();
         }
 
+        [UsingNewContext]
         public virtual void Remove<T>(T entity) where T : class
         {
             Context.Set<T>().Remove(entity);
+            Context.SaveChanges();
         }
 
         public virtual void RemoveRange<T>(IEnumerable<T> entities) where T : class
         {
             Context.Set<T>().RemoveRange(entities);
+            Context.SaveChanges();
         }
 
         public virtual List<T> GetList<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class

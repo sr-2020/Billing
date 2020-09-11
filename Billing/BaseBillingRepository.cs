@@ -121,7 +121,6 @@ namespace Billing
             Add(walletFrom);
             walletTo.Balance += amount;
             Add(walletTo);
-            Context.SaveChanges();
             var transfer = new Transfer
             {
                 Amount = amount,
@@ -134,8 +133,6 @@ namespace Billing
                 Anonymous = anonymous
             };
             Add(transfer);
-            if (save)
-                Context.SaveChanges();
             return transfer;
         }
 
@@ -175,7 +172,6 @@ namespace Billing
                 throw new Exception("MIR not found");
             return mir;
         }
-
 
         protected SIN GetSINByModelId(int modelId, params Expression<Func<SIN, object>>[] includes)
         {

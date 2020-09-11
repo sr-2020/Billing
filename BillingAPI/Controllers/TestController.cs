@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Billing;
 using BillingAPI.Filters;
+using Core;
 using Hangfire;
 using InternalServices;
 using IoC;
@@ -14,7 +16,7 @@ using Settings;
 
 namespace BillingAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class TestController : ControllerBase
     {
@@ -37,6 +39,18 @@ namespace BillingAPI.Controllers
         public ActionResult TestId(int character)
         {
             return new JsonResult(character);
+        }
+
+        /// <summary>
+        /// Пересчитать ренты
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("processrentas")]
+        public ActionResult ProcessRentas(int modelId = 0)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            manager.ProcessRentas(modelId);
+            return new JsonResult("success");
         }
     }
 }

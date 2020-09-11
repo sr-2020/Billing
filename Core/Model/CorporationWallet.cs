@@ -16,5 +16,7 @@ namespace Core.Model
         public string Name { get; set; }
         [Column("logo_url")]
         public string CorporationLogoUrl { get; set; }
+        [Column("owner")]
+        public int Owner { get; set; }
     }
 }

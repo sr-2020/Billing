@@ -289,8 +289,8 @@ namespace BillingAPI.Controllers
         [HttpGet("info/getcorps")]
         public DataResult<List<CorporationDto>> GetCorps()
         {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetCorps(), "getcorps");
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.GetCorporations(s => true), "getcorps");
             return result;
         }
         /// <summary>
@@ -351,17 +351,7 @@ namespace BillingAPI.Controllers
 
         #region test
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("test/processrentas")]
-        public Result ProcessRentas(int modelId = 0)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.ProcessRentas(modelId), $"processrentas");
-            return result;
-        }
+
         #endregion
     }
 }

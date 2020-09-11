@@ -20,7 +20,7 @@ namespace BillingAPI.Controllers
     {
         [HttpGet("getmyshops")]
         [Obsolete]
-        public DataResult<ShopViewModel> GetMyShops(int character)
+        public DataResult<OrganisationViewModel> GetMyShops(int character)
         {
             var manager = IocContainer.Get<IShopManager>();
             var result = RunAction(() => manager.GetAvailableOrganisations(character), "getmyshops");
@@ -28,7 +28,7 @@ namespace BillingAPI.Controllers
         }
 
         [HttpGet("getmyorganisations")]
-        public DataResult<ShopViewModel> GetMyOrganisations(int character)
+        public DataResult<OrganisationViewModel> GetMyOrganisations(int character)
         {
             var manager = IocContainer.Get<IShopManager>();
             var result = RunAction(() => manager.GetAvailableOrganisations(character), "getmyorganisations");

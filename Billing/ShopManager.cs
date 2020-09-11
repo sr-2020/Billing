@@ -17,9 +17,10 @@ namespace Billing
     {
         bool HasAccessToShop(int character, int shop);
         List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate);
+        List<CorporationDto> GetCorporations(Expression<Func<CorporationWallet, bool>> predicate);
         List<QRDto> GetAvailableQR(int shop);
-        ShopViewModel GetAvailableOrganisations(int character);
-        string GetCharacterName(int character);
+        OrganisationViewModel GetAvailableOrganisations(int modelId);
+        string GetCharacterName(int modelId);
         List<TransferDto> GetTransfers(int shop);
         Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
         Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
@@ -117,14 +118,16 @@ namespace Billing
             return allList.OrderByDescending(t => t.OperationTime).ToList();
         }
 
-        public ShopViewModel GetAvailableOrganisations(int character)
+        public OrganisationViewModel GetAvailableOrganisations(int modelId)
         {
-            var model = new ShopViewModel
+            var isAdmin = BillingHelper.IsAdmin(modelId);
+            var model = new OrganisationViewModel
             {
-                CurrentCharacterId = character,
-                CurrentCharacterName = GetCharacterName(character)
+                CurrentModelId = modelId,
+                CurrentCharacterName = GetCharacterName(modelId)
             };
-            model.Shops = GetShops(s => s.Owner == character);
+            model.Shops = GetShops(s => s.Owner == modelId || isAdmin);
+            model.Corporations = GetCorporations(s => s.Owner == modelId || isAdmin);
             return model;
         }
 
@@ -161,6 +164,18 @@ namespace Billing
                          Balance = s.Wallet.Balance,
                          Specialisations = CreateSpecialisationDto(s)
                      }).ToList();
+        }
+
+        public List<CorporationDto> GetCorporations(Expression<Func<CorporationWallet, bool>> predicate)
+        {
+            return GetList(predicate, c => c.Wallet).Select(c =>
+                  new CorporationDto
+                  {
+                      Id = c.Id,
+                      Name = c.Name,
+                      OwnerId = c.Owner,
+                      CorporationUrl = c.CorporationLogoUrl
+                  }).ToList();
         }
 
         public List<QRDto> GetAvailableQR(int shop)

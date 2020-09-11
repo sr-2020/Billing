@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Billing.Dto.Shop
 {
-    public class ShopViewModel
+    public class OrganisationViewModel
     {
-        public int CurrentCharacterId { get; set; }
+        public int CurrentModelId { get; set; }
         public string CurrentCharacterName { get; set; }
         public List<ShopDto> Shops { get; set; }
         public List<CorporationDto> Corporations { get; set; }

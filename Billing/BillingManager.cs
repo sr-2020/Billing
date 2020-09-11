@@ -36,7 +36,7 @@ namespace Billing
         Contract CreateContract(int corporation, int shop);
         RentaDto ConfirmRenta(int modelId, int priceId);
         List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1);
-        List<CorporationDto> GetCorps();
+
         List<ProductTypeDto> GetProductTypes(int id = -1);
         ProductType GetExtProductType(int externalId);
         Nomenklatura GetExtNomenklatura(int externalId);
@@ -167,17 +167,6 @@ namespace Billing
         public Sku GetExtSku(int externalId)
         {
             return Get<Sku>(p => p.ExternalId == externalId);
-        }
-
-        public List<CorporationDto> GetCorps()
-        {
-            return GetList<CorporationWallet>(c => true, c => c.Wallet).Select(c =>
-                  new CorporationDto
-                  {
-                      Id = c.Id,
-                      Name = c.Name,
-                      CorporationUrl = c.CorporationLogoUrl
-                  }).ToList();
         }
 
         public List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1)
@@ -610,12 +599,10 @@ namespace Billing
                     Console.Error.WriteLine(e.Message);
                 }
             }
-
         }
-
+        
         private void ProcessRenta(Renta renta, Wallet mir)
         {
-
             var sin = Get<SIN>(s => s.Id == renta.SinId, s => s.Wallet, s => s.Character);
             var finalPrice = BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
             var comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
@@ -646,7 +633,6 @@ namespace Billing
             if (producttype == null)
                 throw new Exception("ProductType not found");
             return BillingHelper.GetDiscountType(producttype.DiscountType);
-
         }
 
         private Price CreateNewPrice(Sku sku, ShopWallet shop, SIN sin)
@@ -660,7 +646,6 @@ namespace Billing
             {
                 discount = 0;
             }
-
             var price = new Price
             {
                 Sku = sku,
