@@ -261,13 +261,13 @@ namespace BillingAPI.Controllers
         /// <summary>
         /// Get all rentas for current character
         /// </summary>
-        /// <param name="characterId"></param>
+        /// <param name="character"></param>
         /// <returns></returns>
         [HttpGet("info/getrentas")]
-        public DataResult<List<RentaDto>> GetRentas(int characterId)
+        public DataResult<List<RentaDto>> GetRentas(int character)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetRentas(characterId), $"getrentas {characterId}");
+            var result = RunAction(() => manager.GetRentas(character), $"getrentas {character}");
             return result;
         }
 

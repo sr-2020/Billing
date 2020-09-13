@@ -16,7 +16,7 @@ using Settings;
 
 namespace BillingAPI.Controllers
 {
-    [Route("test/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class TestController : ControllerBase
     {

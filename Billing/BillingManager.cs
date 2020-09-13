@@ -191,7 +191,8 @@ namespace Billing
                         Shop = r.Shop.Name,
                         NomenklaturaName = r.Sku.Nomenklatura.Name,
                         SkuName = r.Sku.Name,
-                        Corporation = r.Sku.Corporation.Name
+                        Corporation = r.Sku.Corporation.Name,
+                        RentaId = r.Id
                     }).ToList();
         }
 
