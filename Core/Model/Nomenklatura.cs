@@ -26,5 +26,7 @@ namespace Core.Model
         public string PictureUrl { get; set; }
         [Column("external_id")]
         public int ExternalId { get; set; }
+        [Column("secret")]
+        public string Secret { get; set; }
     }
 }

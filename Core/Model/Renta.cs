@@ -40,5 +40,9 @@ namespace Core.Model
         [Column("price")]
         public int PriceId { get; set; }
         public virtual Price Price { get; set; }
+        [Column("secret")]
+        public string Secret { get; set; }
+        [Column("lifestyle")]
+        public int LifeStyle { get; set; }
     }
 }

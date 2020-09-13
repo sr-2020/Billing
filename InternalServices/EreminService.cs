@@ -49,7 +49,7 @@ namespace InternalServices
             return 0;
         }
 
-        public static bool WriteQR(string qr, string id, string name, string description, int numberOfUses, object model)
+        public static bool WriteQR(string qr, string id, string name, string description, int numberOfUses, decimal basePrice, decimal rentPrice, string gmDescription, int rentaId, Lifestyles lifestyle)
         {
             var client = new HttpClient();
             var url = $"{URL}/qr/model/{qr}";
@@ -59,7 +59,11 @@ namespace InternalServices
                 name,
                 description,
                 numberOfUses,
-                additionalData = model
+                basePrice,
+                rentPrice,
+                gmDescription,
+                dealId = rentaId.ToString(),
+                lifestyle = lifestyle.ToString()
             };
             var body = new
             {

@@ -22,6 +22,7 @@ namespace IoC.Init
             For<IJobManager>().Use<JobManager>().SetLifecycleTo(Lifecycles.Transient);
             For<IBillingManager>().Use<BillingManager>().SetLifecycleTo(Lifecycles.Transient);
             For<IShopManager>().Use<ShopManager>().SetLifecycleTo(Lifecycles.Transient);
+            For<IInsuranceManager>().Use<InsuranceManager>().SetLifecycleTo(Lifecycles.Transient);
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Billing
             var description = renta.Sku.Nomenklatura.Description;
             //TODO
             var count = 1;
-            if (!EreminService.WriteQR(qr, code, name, description, count, new { rentaId }))
+            if (!EreminService.WriteQR(qr, code, name, description, count, renta.BasePrice, BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring), renta.Secret, rentaId, (Lifestyles)renta.LifeStyle))
             {
                 throw new ShopException("запись на qr не получилось");
             }

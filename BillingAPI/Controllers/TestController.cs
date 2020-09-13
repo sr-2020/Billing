@@ -16,7 +16,7 @@ using Settings;
 
 namespace BillingAPI.Controllers
 {
-    [Route("[controller]")]
+    [Route("test/[controller]")]
     [ApiController]
     public class TestController : ControllerBase
     {
@@ -52,5 +52,18 @@ namespace BillingAPI.Controllers
             manager.ProcessRentas(modelId);
             return new JsonResult("success");
         }
+
+        /// <summary>
+        /// Пересчитать ренты
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("addinsurances")]
+        public ActionResult AddInsurances()
+        {
+            var manager = IocContainer.Get<IInsuranceManager>();
+            manager.AddInsurances();
+            return new JsonResult("success");
+        }
+
     }
 }

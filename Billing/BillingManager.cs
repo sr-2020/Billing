@@ -29,7 +29,7 @@ namespace Billing
 
         #region web
         PriceShopDto GetPriceByQR(int character, string qrid);
-        PriceShopDto GetPrice(int character, int shop, int sku);
+        PriceShopDto GetPrice(int modelId, int shop, int sku);
         Specialisation SetSpecialisation(int productType, int shop);
         void DropSpecialisation(int productType, int shop);
         void BreakContract(int corporation, int shop);
@@ -233,17 +233,20 @@ namespace Billing
                 ShopComission = price.ShopComission,
                 ShopId = price.ShopId,
                 HasQRWrite = BillingHelper.HasQrWrite(sku.Nomenklatura.Code),
-                PriceId = priceId
+                PriceId = priceId,
+                Secret = sku.Nomenklatura.Secret,
+                LifeStyle = sku.Nomenklatura.Lifestyle
             };
             Add(renta);
             price.Confirmed = true;
             Add(price);
-            Context.SaveChanges();
             EreminPushAdapter.SendNotification(modelId, "Покупка совершена", $"Вы купили {price.Sku.Name}");
             var dto = new RentaDto
             {
                 HasQRWrite = renta.HasQRWrite,
-                PriceId = priceId
+                PriceId = priceId,
+                RentaId = renta.Id, 
+                FinalPrice = price.FinalPrice
             };
             return dto;
         }
@@ -259,11 +262,9 @@ namespace Billing
             return GetPrice(modelId, shopId, skuId);
         }
 
+        [BillingBlock]
         public PriceShopDto GetPrice(int modelId, int shopid, int skuid)
         {
-            var block = _settings.GetBoolValue(SystemSettingsEnum.block);
-            if (block)
-                throw new ShopException("В данный момент ведется пересчет рентных платежей, попробуйте получить цену чуть позже");
             var sku = SkuAllowed(shopid, skuid);
             if (sku == null)
                 throw new BillingException("sku недоступен для продажи");
@@ -396,7 +397,8 @@ namespace Billing
                 CurrentScoring = sin.Scoring.CurrentScoring,
                 SIN = sin.Sin,
                 ForecastLifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
-                LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString()
+                LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
+                PersonName = sin.PersonName
             };
             return balance;
         }
