@@ -192,7 +192,10 @@ namespace Billing
                         NomenklaturaName = r.Sku.Nomenklatura.Name,
                         SkuName = r.Sku.Name,
                         Corporation = r.Sku.Corporation.Name,
-                        RentaId = r.Id
+                        RentaId = r.Id,
+                        HasQRWrite = r.HasQRWrite,
+                        QRRecorded = r.QRRecorded,
+                        DateCreated = r.DateCreated
                     }).ToList();
         }
 
