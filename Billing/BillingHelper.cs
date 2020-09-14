@@ -20,6 +20,10 @@ namespace Billing
                 return DiscountType.Gesheftmaher;
         }
 
+        public static decimal RoundDown(decimal value)
+        {
+            return Math.Floor(value * 2) / 2;
+        }
 
         public static Lifestyles GetLifeStyleByBalance(decimal balance)
         {

@@ -95,7 +95,7 @@ namespace Billing
             {
                 Comment = transfer.Comment,
                 TransferType = type.ToString(),
-                Amount = transfer.Amount,
+                Amount = BillingHelper.RoundDown(transfer.Amount),
                 NewBalance = type == TransferType.Incoming ? transfer.NewBalanceTo : transfer.NewBalanceFrom,
                 OperationTime = transfer.OperationTime,
                 From = type == TransferType.Incoming ? GetWalletName(transfer.WalletFrom) : owner,
