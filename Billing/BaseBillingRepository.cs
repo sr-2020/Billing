@@ -104,7 +104,7 @@ namespace Billing
             };
         }
 
-        protected Transfer MakeNewTransfer(Wallet walletFrom, Wallet walletTo, decimal amount, string comment, bool anonymous = false, bool save = true)
+        protected Transfer MakeNewTransfer(Wallet walletFrom, Wallet walletTo, decimal amount, string comment, bool anonymous = false, int? rentaId = null)
         {
             if (walletFrom == null)
                 throw new BillingException($"Нет кошелька отправителя");
@@ -130,7 +130,8 @@ namespace Billing
                 NewBalanceFrom = walletFrom.Balance,
                 NewBalanceTo = walletTo.Balance,
                 OperationTime = DateTime.Now,
-                Anonymous = anonymous
+                Anonymous = anonymous,
+                Renta = rentaId
             };
             Add(transfer);
             return transfer;

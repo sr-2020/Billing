@@ -108,12 +108,12 @@ namespace Billing
             var owner = GetWalletName(shopWallet.Wallet);
             if (listFrom != null)
                 allList.AddRange(listFrom
-                    .Select(s => CreateTransferDto(s, TransferType.Outcoming))
+                    .Select(s => CreateTransferDto(s, TransferType.Outcoming, owner))
                     .ToList());
             var listTo = GetList<Transfer>(t => t.WalletToId == shopWallet.WalletId, t => t.WalletFrom, t => t.WalletTo);
             if (listTo != null)
                 allList.AddRange(listTo
-                    .Select(s => CreateTransferDto(s, TransferType.Incoming))
+                    .Select(s => CreateTransferDto(s, TransferType.Incoming, owner))
                     .ToList());
             return allList.OrderByDescending(t => t.OperationTime).ToList();
         }

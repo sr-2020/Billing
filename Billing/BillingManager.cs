@@ -222,8 +222,8 @@ namespace Billing
             }
             var mir = GetMIR();
             MakeNewTransfer(sin.Wallet, mir, price.FinalPrice, $"Первый платеж за: {price.Sku.Name}, место покупки: {price.Shop.Name}");
-            MakeNewTransfer(mir, price.Shop.Wallet, price.ShopComission, $"Комиссия за: {price.Sku.Name} с син {sin.Character.Model}");
-            MakeNewTransfer(mir, sku.Corporation.Wallet, price.BasePrice, $"Покупка предмета: {price.Sku.Name} пользователем: {sin.Character.Model}");
+            MakeNewTransfer(mir, price.Shop.Wallet, price.ShopComission, $"Первый платеж за: {price.Sku.Name} с {sin.PersonName}");
+            MakeNewTransfer(mir, sku.Corporation.Wallet, price.BasePrice, $"Покупка предмета: {price.Sku.Name} пользователем: {sin.PersonName}");
             sku.Count--;
             Add(sku);
             var renta = new Renta
@@ -601,7 +601,6 @@ namespace Billing
                 }
                 catch (Exception e)
                 {
-
                     Console.Error.WriteLine(e.Message);
                 }
             }
@@ -613,13 +612,13 @@ namespace Billing
             var finalPrice = BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
             var comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
             //с кошелька списываем всегда
-            MakeNewTransfer(sin.Wallet, mir, finalPrice, $"Рентный платеж: {renta.Sku.Name} в {renta.Shop.Name}", false, false);
+            MakeNewTransfer(sin.Wallet, mir, finalPrice, $"Рентный платеж: {renta.Sku.Name} в {renta.Shop.Name}", false, renta.Id);
             EreminPushAdapter.SendNotification(sin.Character.Model, "Кошелек", $"Списание {finalPrice} по рентному договору");
             //если баланс положительный
             if (sin.Wallet.Balance > 0)
             {
-                MakeNewTransfer(mir, renta.Sku.Corporation.Wallet, renta.BasePrice, $"Рентное начисление: {renta.Sku.Name} с {sin.Sin} ", false, false);
-                MakeNewTransfer(mir, renta.Shop.Wallet, finalPrice, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} с {sin.Sin}", false, false);
+                MakeNewTransfer(mir, renta.Sku.Corporation.Wallet, renta.BasePrice, $"Рентное начисление: {renta.Sku.Name} от {sin.PersonName} ({sin.Sin}) ", false, renta.Id);
+                MakeNewTransfer(mir, renta.Shop.Wallet, comission, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} от {sin.PersonName} ({sin.Sin})", false, renta.Id);
             }
             Context.SaveChanges();
         }
