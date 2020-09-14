@@ -397,7 +397,7 @@ namespace Billing
             var balance = new BalanceDto
             {
                 CharacterId = modelId,
-                CurrentBalance = sin.Wallet.Balance,
+                CurrentBalance = BillingHelper.RoundDown(sin.Wallet.Balance),
                 CurrentScoring = sin.Scoring.CurrentScoring,
                 SIN = sin.Sin,
                 ForecastLifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),

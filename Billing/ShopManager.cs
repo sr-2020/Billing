@@ -161,7 +161,7 @@ namespace Billing
                          OwnerId = s.Owner,
                          Comission = s.Commission,
                          Lifestyle = ((Lifestyles)s.LifeStyle).ToString(),
-                         Balance = s.Wallet.Balance,
+                         Balance = BillingHelper.RoundDown(s.Wallet.Balance),
                          Specialisations = CreateSpecialisationDto(s)
                      }).ToList();
         }
