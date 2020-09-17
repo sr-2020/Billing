@@ -10,6 +10,8 @@ namespace Core.Model
     {
         [Column("name")]
         public string Name { get; set; }
+        [Column("cat_type")]
+        public int CategoryType { get; set; }
         [Column("weight")]
         public decimal Weight { get; set; }
     }

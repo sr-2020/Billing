@@ -10,6 +10,5 @@ namespace Core.Model
     {
         [Column("current_scoring")]
         public decimal CurrentScoring { get; set; }
-        public virtual List<ScoringCategoryCalculate> CategoryCalculates { get; set; }
     }
 }

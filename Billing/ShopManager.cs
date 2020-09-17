@@ -57,7 +57,7 @@ namespace Billing
                     .Select(r =>
                     new RentaDto
                     {
-                        FinalPrice = BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring),
+                        FinalPrice = BillingHelper.RoundDown(BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring)),
                         ProductType = r.Sku.Nomenklatura.ProductType.Name,
                         Shop = r.Shop.Name,
                         NomenklaturaName = r.Sku.Nomenklatura.Name,

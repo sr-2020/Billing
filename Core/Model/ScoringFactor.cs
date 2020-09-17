@@ -10,11 +10,10 @@ namespace Core.Model
     {
         [Column("name")]
         public string Name { get; set; }
-        [Column("algorythm")]
-        public int Algorythm { get; set; }
-        [ForeignKey("category")]
-        [Column("category")]
+        [ForeignKey("scoring_category")]
+        [Column("scoring_category")]
         public int CategoryId { get; set; }
         public virtual ScoringCategory Category { get; set; }
+        public string Code { get; set; }
     }
 }

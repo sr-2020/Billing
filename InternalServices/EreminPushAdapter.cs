@@ -8,7 +8,7 @@ namespace InternalServices
 {
     public class EreminPushAdapter
     {
-        const string URL = "http://push.evarun.ru";
+        const string URL = "https://push.evarun.ru";
 
         public async static void SendNotification(int characterId, string title, string body)
         {
