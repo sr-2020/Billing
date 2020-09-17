@@ -3,6 +3,7 @@ using Core;
 using Core.Model;
 using Core.Primitives;
 using IoC;
+using Scoringspace;
 using Settings;
 using System;
 using System.Collections.Generic;
@@ -45,7 +46,9 @@ namespace Billing
             {
                 scoring = new Scoring
                 {
-                    CurrentScoring = 1
+                    CurrentScoring = 1,
+                    CurrentFix = 0,
+                    CurerentRelative = 0
                 };
                 sin.Scoring = scoring;
             }
@@ -53,7 +56,6 @@ namespace Billing
             Context.SaveChanges();
 
             //TODO
-            var categoryCalculates = GetList<ScoringCategoryCalculate>(c => c.ScoringId == scoring.Id);
 
             Context.SaveChanges();
             return sin;
@@ -207,6 +209,32 @@ namespace Billing
         private int GetMIRId()
         {
             return _settings.GetIntValue(SystemSettingsEnum.MIR_ID);
+        }
+
+        private void CheckLifestyle(Wallet wallet)
+        {
+            if(wallet.WalletType != (int)WalletTypes.Character)
+            {
+                return;
+            }
+            var newlifestyle = BillingHelper.GetLifeStyleByBalance(wallet.Balance);
+            if(wallet.LifeStyle == null)
+            {
+                wallet.LifeStyle = (int)newlifestyle;
+                Add(wallet);
+            }
+            if(wallet.LifeStyle == (int)newlifestyle)
+            {
+                return;
+            }
+            var oldlifestyle = wallet.LifeStyle.Value;
+            wallet.LifeStyle = (int)newlifestyle;
+            Add(wallet);
+            var scoring = IocContainer.Get<ScoringManager>();
+            var sin = Get<SIN>(s => s.WalletId == wallet.Id);
+            if (sin == null)
+                throw new BillingException("sin not found");
+            scoring.OnLifeStyleChanged(sin.Id, BillingHelper.GetLifestyle(oldlifestyle), newlifestyle);
         }
 
     }

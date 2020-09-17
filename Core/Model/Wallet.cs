@@ -12,5 +12,7 @@ namespace Core.Model
         public decimal Balance { get; set; }
         [Column("wallet_type")]
         public int WalletType { get; set; }
+        [Column("current_lifestyle")]
+        public int? LifeStyle { get; set; }
     }
 }

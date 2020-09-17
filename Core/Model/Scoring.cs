@@ -10,5 +10,9 @@ namespace Core.Model
     {
         [Column("current_scoring")]
         public decimal CurrentScoring { get; set; }
+        [Column("current_scoring_fix")]
+        public decimal CurrentFix { get; set; }
+        [Column("current_scoring_relative")]
+        public decimal CurerentRelative { get; set; }
     }
 }
