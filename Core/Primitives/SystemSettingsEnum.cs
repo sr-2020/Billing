@@ -23,6 +23,9 @@ namespace Core.Primitives
         price_minutes,
         defaultbalance,
         eversion,
-        admin_id
+        admin_id,
+        fixK,
+        relativeK,
+        factor_
     }
 }

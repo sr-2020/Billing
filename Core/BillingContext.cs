@@ -29,6 +29,7 @@ namespace Core
         public DbSet<Renta> Renta { get; set; }
         public DbSet<Scoring> Scoring { get; set; }
         public DbSet<ScoringCategory> ScoringCategory { get; set; }
+        public DbSet<ScoringEvent> ScoringEvent { get; set; }
         public DbSet<ScoringFactor> ScoringFactor { get; set; }
         public DbSet<ShopQR> ShopQR { get; set; }
         public DbSet<ShopWallet> ShopWallet { get; set; }
@@ -38,6 +39,5 @@ namespace Core
         public DbSet<SystemSettings> SystemSettings { get; set; }
         public DbSet<Transfer> Transfer { get; set; }
         public DbSet<Wallet> Wallet { get; set; }
-
     }
 }

@@ -18,5 +18,6 @@ namespace Core.Model
         public Scoring Scoring { get; set; }
         [Column("current_value")]
         public decimal Value { get; set; }
+
     }
 }

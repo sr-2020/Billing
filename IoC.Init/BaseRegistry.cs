@@ -1,6 +1,7 @@
 ﻿using Billing;
 using Core;
 using Jobs;
+using Scoringspace;
 using Settings;
 using StructureMap;
 using StructureMap.Pipeline;
@@ -23,6 +24,7 @@ namespace IoC.Init
             For<IBillingManager>().Use<BillingManager>().SetLifecycleTo(Lifecycles.Transient);
             For<IShopManager>().Use<ShopManager>().SetLifecycleTo(Lifecycles.Transient);
             For<IInsuranceManager>().Use<InsuranceManager>().SetLifecycleTo(Lifecycles.Transient);
+            For<IScoringManager>().Use<ScoringManager>().SetLifecycleTo(Lifecycles.Transient);
         }
     }
 }

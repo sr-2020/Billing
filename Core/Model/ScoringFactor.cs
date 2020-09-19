@@ -14,6 +14,7 @@ namespace Core.Model
         [Column("scoring_category")]
         public int CategoryId { get; set; }
         public virtual ScoringCategory Category { get; set; }
+        [Column("code")]
         public string Code { get; set; }
     }
 }
