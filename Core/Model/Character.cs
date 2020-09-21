@@ -10,8 +10,6 @@ namespace Core.Model
     {
         [Column("model_id")]
         public int Model { get; set; } //main!!! Its real Character
-        [Column("player")]
-        public int PlayerId { get; set; }
-        public Player Player { get; set; }
+
     }
 }

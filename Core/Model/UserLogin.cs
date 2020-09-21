@@ -10,8 +10,6 @@ namespace Core.Model
     {
         [Column("login")]
         public string Login { get; set; }
-        [Column("player")]
-        public int PlayerId { get; set; }
-        public Player Player { get; set; }
+
     }
 }
