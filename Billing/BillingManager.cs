@@ -67,13 +67,20 @@ namespace Billing
 
         public void ProcessRentas(int modelId = 0)
         {
+            var cycle = new BillingCycle
+            {
+                StartTime = DateTime.Now
+            };
             var rentas = GetList<Renta>((r => modelId == 0 || r.Sin.Character.Model == modelId), r => r.Shop.Wallet, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation.Wallet).OrderBy(r => r.Id).ToList();
+            cycle.Rents = rentas.Count;
             var bulkCount = 500;
             var pageCount = (rentas.Count + bulkCount - 1) / bulkCount;
             for (int i = 0; i < pageCount; i++)
             {
                 ProcessBulk(rentas.Skip(i * bulkCount).Take(bulkCount).ToList());
             }
+            cycle.FinishTime = DateTime.Now;
+            Add(cycle);
         }
 
         public Specialisation SetSpecialisation(int productTypeid, int shopid)

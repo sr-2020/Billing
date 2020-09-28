@@ -49,8 +49,10 @@ namespace BillingAPI.Controllers
         [HttpGet("processrentas")]
         public ActionResult ProcessRentas(int modelId = 0)
         {
+            Console.WriteLine("processrentas started");
             var manager = IocContainer.Get<IBillingManager>();
             manager.ProcessRentas(modelId);
+            Console.WriteLine("processrentas finished");
             return new JsonResult("success");
         }
 
