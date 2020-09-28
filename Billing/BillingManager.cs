@@ -71,8 +71,10 @@ namespace Billing
             {
                 StartTime = DateTime.Now
             };
+            Add(cycle);
             var rentas = GetList<Renta>((r => modelId == 0 || r.Sin.Character.Model == modelId), r => r.Shop.Wallet, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation.Wallet).OrderBy(r => r.Id).ToList();
             cycle.Rents = rentas.Count;
+            Add(cycle);
             var bulkCount = 500;
             var pageCount = (rentas.Count + bulkCount - 1) / bulkCount;
             for (int i = 0; i < pageCount; i++)
