@@ -46,12 +46,13 @@ namespace BillingAPI.Controllers
         /// Пересчитать ренты
         /// </summary>
         /// <returns></returns>
-        [HttpGet("processrentas")]
+        [HttpPost("processrentas")]
         public ActionResult ProcessRentas(int modelId = 0)
         {
             Console.WriteLine("processrentas started");
             var manager = IocContainer.Get<IBillingManager>();
-            Task.Run(() => manager.ProcessRentas(modelId));
+            manager.ProcessRentas(modelId);
+            //Task.Run(() => );
             Console.WriteLine("processrentas finished");
             return new JsonResult("success");
         }
