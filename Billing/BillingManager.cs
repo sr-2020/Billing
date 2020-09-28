@@ -67,7 +67,7 @@ namespace Billing
 
         public void ProcessRentas(int modelId = 0)
         {
-            var rentas = GetList<Renta>((r => modelId == 0 || r.Sin.Character.Model == modelId), r => r.Shop.Wallet, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation.Wallet);
+            var rentas = GetList<Renta>((r => modelId == 0 || r.Sin.Character.Model == modelId), r => r.Shop.Wallet, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation.Wallet).OrderBy(r => r.Id).ToList();
             var bulkCount = 500;
             var pageCount = (rentas.Count + bulkCount - 1) / bulkCount;
             for (int i = 0; i < pageCount; i++)
@@ -245,7 +245,7 @@ namespace Billing
             {
                 HasQRWrite = renta.HasQRWrite,
                 PriceId = priceId,
-                RentaId = renta.Id, 
+                RentaId = renta.Id,
                 FinalPrice = price.FinalPrice
             };
             return dto;
@@ -601,7 +601,7 @@ namespace Billing
                 }
             }
         }
-        
+
         private void ProcessRenta(Renta renta, Wallet mir)
         {
             var sin = Get<SIN>(s => s.Id == renta.SinId, s => s.Wallet, s => s.Character);
