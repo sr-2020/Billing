@@ -51,7 +51,7 @@ namespace BillingAPI.Controllers
         {
             Console.WriteLine("processrentas started");
             var manager = IocContainer.Get<IBillingManager>();
-            manager.ProcessRentas(modelId);
+            Task.Run(() => manager.ProcessRentas(modelId));
             Console.WriteLine("processrentas finished");
             return new JsonResult("success");
         }
@@ -78,7 +78,7 @@ namespace BillingAPI.Controllers
             var manager = IocContainer.Get<ScoringManager>();
             var random = new Random();
             var rnd = random.Next(1, 3);
-            if(rnd == 1)
+            if (rnd == 1)
                 manager.OnTest(1677);
             else
             {
