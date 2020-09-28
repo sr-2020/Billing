@@ -57,7 +57,7 @@ namespace Billing
 
         public static decimal CalculateComission(decimal basePrice, decimal comission)
         {
-            return basePrice * comission;
+            return basePrice * (comission/100);
         }
 
         public static bool HasQrWrite(string code)

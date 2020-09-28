@@ -36,7 +36,6 @@ namespace Billing
         Contract CreateContract(int corporation, int shop);
         RentaDto ConfirmRenta(int modelId, int priceId);
         List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1);
-
         List<ProductTypeDto> GetProductTypes(int id = -1);
         ProductType GetExtProductType(int externalId);
         Nomenklatura GetExtNomenklatura(int externalId);
