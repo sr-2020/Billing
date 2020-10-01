@@ -21,7 +21,7 @@ namespace Jobs
             Start();
             try
             {
-                _billingManager.ProcessRentas();
+                _billingManager.ProcessCycle();
             }
             catch (Exception e)
             {

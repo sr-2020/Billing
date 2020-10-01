@@ -45,7 +45,7 @@ namespace Billing
         #endregion
 
         #region jobs
-        void ProcessRentas(int modelId = 0);
+        void ProcessCycle(int modelId = 0);
         #endregion
 
         #region admin
@@ -65,25 +65,26 @@ namespace Billing
     {
         public static string UrlNotFound = "";
 
-        public void ProcessRentas(int modelId = 0)
+        public void ProcessCycle(int modelId = 0)
         {
             var cycle = new BillingCycle
             {
                 StartTime = DateTime.Now
             };
             Add(cycle);
+            var sins = GetList<SIN>((r => modelId == 0 || r.Character.Model == modelId), s => s.Wallet, s => s.Character);
             var rentas = GetList<Renta>((r => modelId == 0 || r.Sin.Character.Model == modelId), r => r.Shop.Wallet, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation.Wallet).OrderBy(r => r.Id).ToList();
             cycle.Rents = rentas.Count;
             Add(cycle);
-            var bulkCount = 500;
-            var pageCount = (rentas.Count + bulkCount - 1) / bulkCount;
-            for (int i = 0; i < pageCount; i++)
+            var mir = GetMIR();
+            foreach (var sin in sins)
             {
-                ProcessBulk(rentas.Skip(i * bulkCount).Take(bulkCount).ToList());
+                ProcessCharacter(sin, rentas.Where(r => r.SinId == sin.Id).ToList(), mir);
             }
             cycle.FinishTime = DateTime.Now;
             Add(cycle);
         }
+
 
         public Specialisation SetSpecialisation(int productTypeid, int shopid)
         {
@@ -595,26 +596,44 @@ namespace Billing
 
         #region private
 
-        private void ProcessBulk(List<Renta> rentas)
+        private void ProcessCharacter(SIN sin, List<Renta> rentas, Wallet mir)
         {
-            var mir = GetMIR();
             foreach (var renta in rentas)
             {
                 try
                 {
-                    ProcessRenta(renta, mir);
+                    ProcessRenta(renta, mir, sin);
                 }
                 catch (Exception e)
                 {
                     Console.Error.WriteLine(e.Message);
                 }
             }
+            var outcome = rentas.Sum(renta => BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring));
+            decimal income = 0;
+            try
+            {
+                income = GetMoney(sin);
+            }
+            catch (Exception e)
+            {
+
+                Console.WriteLine(e.Message);
+            }
+            if (income > 0)
+            {
+                MakeNewTransfer(mir, sin.Wallet, income, "Начисление денег за экономический цикл", false);
+            }
+            sin.LastIncome = income;
+            sin.LastOutcome = outcome;
+            Add(sin);
         }
 
-        private void ProcessRenta(Renta renta, Wallet mir)
+        private decimal GetMoney(SIN sin)
         {
-            var sin = Get<SIN>(s => s.Id == renta.SinId, s => s.Wallet, s => s.Character);
-            ProcessRenta(renta, mir, sin);
+            var model = EreminService.GetCharacter(sin.Character.Model);
+            return 10;
+            return model?.workModel?.karma?.available ?? 0;
         }
 
         private void ProcessRenta(Renta renta, SIN sin)

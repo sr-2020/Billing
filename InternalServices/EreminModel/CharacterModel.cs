@@ -30,6 +30,13 @@ namespace InternalServices.EreminModel
         public string modelId { get; set; }
         public Discounts discounts { get; set; }
         public Billing billing { get; set; }
+        public Karma karma { get; set; }
     }
+    public class Karma
+    {
+        public decimal available { get; set; }
+        public decimal spent { get; set; }
+    }
+
 
 }

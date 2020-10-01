@@ -32,6 +32,10 @@ namespace Core.Model
         public int? IKAR { get; set; }
         [Column("eversion")]
         public string EVersion { get; set; }
+        [Column("last_income")]
+        public decimal LastIncome { get; set; }
+        [Column("last_outcome")]
+        public decimal LastOutcome { get; set; }
 
     }
 }
