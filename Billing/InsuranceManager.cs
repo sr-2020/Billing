@@ -23,17 +23,24 @@ namespace Billing
             var sin = GetSINByModelId(modelId);
             if (sin == null)
                 throw new Exception("sin not found");
+            var insurance = new InsuranceDto
+            {
+                BuyTime = DateTime.MinValue,
+                SkuName = "Страховка отсутствует",
+                LifeStyle = BillingHelper.GetLifestyle(-1).ToString(),
+                ShopName = "Страховка отсутствует",
+                PersonName = sin.PersonName
+            };
             var lastIns = GetList<Renta>(r => r.Sku.Nomenklatura.ProductTypeId == insuranceId && r.SinId == sin.Id, r => r.Shop, r => r.Sku.Nomenklatura)
                                 .OrderByDescending(r => r.DateCreated)
                                 .FirstOrDefault();
-            var insurance = new InsuranceDto
+            if (lastIns != null)
             {
-                BuyTime = lastIns.DateCreated,
-                SkuName = lastIns.Sku.Name,
-                LifeStyle = BillingHelper.GetLifestyle(lastIns.Sku.Nomenklatura.Lifestyle).ToString(),
-                ShopName = lastIns.Shop.Name,
-                PersonName = sin.PersonName
-            };
+                insurance.BuyTime = lastIns.DateCreated;
+                insurance.SkuName = lastIns.Sku.Name;
+                insurance.LifeStyle = BillingHelper.GetLifestyle(lastIns.Sku.Nomenklatura.Lifestyle).ToString();
+                insurance.ShopName = lastIns.Shop.Name;
+            }
             return insurance;
         }
 
