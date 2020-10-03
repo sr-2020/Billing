@@ -26,6 +26,7 @@ namespace Core.Primitives
         admin_id,
         fixK,
         relativeK,
-        factor_
+        factor_,
+        insuranceid
     }
 }

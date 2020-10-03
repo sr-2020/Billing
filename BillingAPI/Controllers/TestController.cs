@@ -51,8 +51,7 @@ namespace BillingAPI.Controllers
         {
             Console.WriteLine("processrentas started");
             var manager = IocContainer.Get<IBillingManager>();
-            manager.ProcessCycle(modelId);
-            //Task.Run(() => );
+            Task.Run(() => manager.ProcessCycle(modelId));
             Console.WriteLine("processrentas finished");
             return new JsonResult("success");
         }

@@ -1,6 +1,9 @@
-﻿using Core.Model;
+﻿using Billing.Dto;
+using Core.Model;
+using Core.Primitives;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Billing
@@ -9,10 +12,31 @@ namespace Billing
     {
         void AddInsurances();
         bool AddInsurance(int modelId, int skuId, int shopId);
+        InsuranceDto GetInsurance(int modelId);
     }
 
     public class InsuranceManager : BillingManager, IInsuranceManager
     {
+        public InsuranceDto GetInsurance(int modelId)
+        {
+            var insuranceId = _settings.GetIntValue(Core.Primitives.SystemSettingsEnum.insuranceid);
+            var sin = GetSINByModelId(modelId);
+            if (sin == null)
+                throw new Exception("sin not found");
+            var lastIns = GetList<Renta>(r => r.Sku.Nomenklatura.ProductTypeId == insuranceId && r.SinId == sin.Id, r => r.Shop, r => r.Sku.Nomenklatura)
+                                .OrderByDescending(r => r.DateCreated)
+                                .FirstOrDefault();
+            var insurance = new InsuranceDto
+            {
+                BuyTime = lastIns.DateCreated,
+                SkuName = lastIns.Sku.Name,
+                LifeStyle = BillingHelper.GetLifestyle(lastIns.Sku.Nomenklatura.Lifestyle).ToString(),
+                ShopName = lastIns.Shop.Name,
+                PersonName = sin.PersonName
+            };
+            return insurance;
+        }
+
         public void AddInsurances()
         {
             var shopId = 3;
