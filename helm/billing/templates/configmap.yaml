@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  DBHOST: {{ .Values.app.postgres.dbHost | quote }}
+  POSTGRESQLHANGFIRE_DBNAME: {{ .Values.app.postgres.dbnameHangfire | quote }}
+  POSTGRESQLBILLING_DBNAME: {{ .Values.app.postgres.dbnameBilling | quote }}
