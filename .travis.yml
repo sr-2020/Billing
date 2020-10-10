@@ -14,14 +14,15 @@ install:
   - gcloud auth activate-service-account $SERVICE_ACCOUNT --key-file=${HOME}/service-account-key.json
   - gcloud container clusters get-credentials prod --project $PROJECT --zone $ZONE
   - kubectl config set-context --current --namespace=production
-
+  - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+  - helm version
 script:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker build . -t sr2020/billingapi:$IMAGE_TAG -t sr2020/billingapi:latest
   - docker push sr2020/billingapi
-  - kubectl set image deployment/billing billing=sr2020/billingapi:$IMAGE_TAG --record
-  - kubectl rollout status deployment/billing
+  - helm upgrade billing helm/billing/ --wait --set image.tag=$IMAGE_TAG
 
 branches:
   only:
   - master
+  - dev
