@@ -40,7 +40,6 @@ namespace Billing
             sin.EVersion = _settings.GetValue(SystemSettingsEnum.eversion);
             var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId, balance);
             sin.Wallet = wallet;
-            Context.SaveChanges();
             var scoring = Get<Scoring>(s => s.Id == sin.ScoringId);
             if (scoring == null)
             {
@@ -53,11 +52,6 @@ namespace Billing
                 sin.Scoring = scoring;
             }
             Add(scoring);
-            Context.SaveChanges();
-
-            //TODO
-
-            Context.SaveChanges();
             return sin;
         }
 

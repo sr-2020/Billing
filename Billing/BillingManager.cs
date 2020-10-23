@@ -644,15 +644,22 @@ namespace Billing
 
         private void ProcessRenta(Renta renta, Wallet mir, SIN sin)
         {
+            var shop = renta.Shop;
+            if (shop == null)
+                shop = Get<ShopWallet>(s => s.Id == renta.ShopId, s => s.Wallet);
+            if (shop == null)
+            {
+                throw new Exception("Shop not found");
+            }
             var finalPrice = BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
             var comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
             //с кошелька списываем всегда
-            MakeNewTransfer(sin.Wallet, mir, finalPrice, $"Рентный платеж: {renta.Sku.Name} в {renta.Shop.Name}", false, renta.Id);
+            MakeNewTransfer(sin.Wallet, mir, finalPrice, $"Рентный платеж: {renta.Sku.Name} в {shop.Name}", false, renta.Id);
             //если баланс положительный
             if (sin.Wallet.Balance > 0)
             {
                 MakeNewTransfer(mir, renta.Sku.Corporation.Wallet, finalPrice - comission, $"Рентное начисление: {renta.Sku.Name} от {sin.PersonName} ({sin.Sin}) ", false, renta.Id);
-                MakeNewTransfer(mir, renta.Shop.Wallet, comission, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} от {sin.PersonName} ({sin.Sin})", false, renta.Id);
+                MakeNewTransfer(mir, shop.Wallet, comission, $"Рентное начисление: {renta.Sku.Name} в {shop.Name} от {sin.PersonName} ({sin.Sin})", false, renta.Id);
             }
             EreminPushAdapter.SendNotification(sin.Character.Model, "Кошелек", $"Списание по рентному договору");
         }
