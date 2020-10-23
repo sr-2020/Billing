@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      run: {{ .Release.Name }}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        run: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 80
+          livenessProbe:
+            httpGet:
+              path: /swagger/v1/index.html
+              port: 80
+          readinessProbe:
+            httpGet:
+              path: /swagger/v1/index.html
+              port: 80
+          env:
+            - name: DBHOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-configmap
+                  key: DBHOST
+            - name: POSTGRESQLHANGFIRE_DBNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-configmap
+                  key: POSTGRESQLHANGFIRE_DBNAME
+            - name: POSTGRESQLHANGFIRE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: userHangfire
+            - name: POSTGRESQLHANGFIRE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: passwordHangfire
+            - name: POSTGRESQLBILLING_DBNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-configmap
+                  key: POSTGRESQLBILLING_DBNAME
+            - name: POSTGRESQLBILLING_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: userBackend
+            - name: POSTGRESQLBILLING_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: passwordBackend

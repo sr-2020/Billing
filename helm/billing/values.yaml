@@ -1,0 +1,28 @@
+# Default values for billing2.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+app:
+  postgres:
+    dbHost: postgres
+    dbnameHangfire: Hangfire
+    dbnameBilling: rc_sr2020
+
+image:
+  repository: sr2020/billingapi
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 80
+
+resources:
+  limits:
+    cpu: 50m
+    memory: 512Mi
+  requests:
+    cpu: 50m
+    memory: 512Mi
