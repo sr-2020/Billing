@@ -36,6 +36,7 @@ namespace Billing
                                 .FirstOrDefault();
             if (lastIns != null)
             {
+                insurance.SkuId = lastIns.SkuId;
                 insurance.BuyTime = lastIns.DateCreated;
                 insurance.SkuName = lastIns.Sku.Name;
                 insurance.LifeStyle = BillingHelper.GetLifestyle(lastIns.Sku.Nomenklatura.Lifestyle).ToString();
