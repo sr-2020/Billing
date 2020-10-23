@@ -646,10 +646,17 @@ namespace Billing
         {
             var shop = renta.Shop;
             if (shop == null)
-                shop = Get<ShopWallet>(s => s.Id == renta.ShopId, s => s.Wallet);
-            if (shop == null)
             {
-                throw new Exception("Shop not found");
+                shop = Get<ShopWallet>(s => s.Id == renta.ShopId, s => s.Wallet);
+                if (shop == null)
+                    throw new Exception("Shop not found");
+            }
+            var character = sin.Character;
+            if(character == null)
+            {
+                character = Get<Character>(c => c.Id == sin.CharacterId);
+                if(character == null)
+                    throw new Exception("character not found");
             }
             var finalPrice = BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
             var comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
