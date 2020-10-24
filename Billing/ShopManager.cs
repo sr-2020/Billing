@@ -126,8 +126,8 @@ namespace Billing
                 CurrentModelId = modelId,
                 CurrentCharacterName = GetCharacterName(modelId)
             };
-            model.Shops = GetShops(s => s.Owner == modelId || isAdmin);
-            model.Corporations = GetCorporations(s => s.Owner == modelId || isAdmin);
+            model.Shops = GetShops(s => s.Owner.Model == modelId || isAdmin);
+            model.Corporations = GetCorporations(s => s.Owner.Model == modelId || isAdmin);
             return model;
         }
 
@@ -137,45 +137,45 @@ namespace Billing
             return character?.PersonName;
         }
 
-        public bool HasAccessToShop(int character, int shopId)
+        public bool HasAccessToShop(int modelId, int shopId)
         {
-            if (character == 0)
+            if (modelId == 0)
             {
                 throw new BillingAuthException("Character not authorized");
             }
-            var shop = Get<ShopWallet>(s => s.Id == shopId);
+            var shop = Get<ShopWallet>(s => s.Id == shopId, s => s.Owner);
             if (shop == null)
             {
                 throw new BillingException("shop not found");
             }
-            return shop.Owner == character;
+            return shop.Owner.Model == modelId;
         }
 
         public List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate)
         {
-            return GetList(predicate, new string[] { "Wallet", "Specialisations", "Specialisations.ProductType" }).Select(s =>
-                     new ShopDto()
-                     {
-                         Id = s.Id,
-                         Name = s.Name,
-                         OwnerId = s.Owner,
-                         Comission = s.Commission,
-                         Lifestyle = ((Lifestyles)s.LifeStyle).ToString(),
-                         Balance = BillingHelper.RoundDown(s.Wallet.Balance),
-                         Specialisations = CreateSpecialisationDto(s)
-                     }).ToList();
+            return GetList(predicate, new string[] { "Owner", "Wallet", "Specialisations", "Specialisations.ProductType" }).Select(s =>
+                      new ShopDto()
+                      {
+                          Id = s.Id,
+                          Name = s.Name,
+                          OwnerId = s.Owner?.Model ?? 0,
+                          Comission = s.Commission,
+                          Lifestyle = ((Lifestyles)s.LifeStyle).ToString(),
+                          Balance = BillingHelper.RoundDown(s.Wallet.Balance),
+                          Specialisations = CreateSpecialisationDto(s)
+                      }).ToList();
         }
 
         public List<CorporationDto> GetCorporations(Expression<Func<CorporationWallet, bool>> predicate)
         {
-            return GetList(predicate, c => c.Wallet).Select(c =>
-                  new CorporationDto
-                  {
-                      Id = c.Id,
-                      Name = c.Name,
-                      OwnerId = c.Owner,
-                      CorporationUrl = c.CorporationLogoUrl
-                  }).ToList();
+            return GetList(predicate, c => c.Wallet, c => c.Owner).Select(c =>
+                    new CorporationDto
+                    {
+                        Id = c.Id,
+                        Name = c.Name,
+                        OwnerId = c.Owner?.Model ?? 0,
+                        CorporationUrl = c.CorporationLogoUrl
+                    }).ToList();
         }
 
         public List<QRDto> GetAvailableQR(int shop)

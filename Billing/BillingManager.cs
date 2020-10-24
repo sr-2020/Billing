@@ -47,7 +47,7 @@ namespace Billing
         #region jobs
         void ProcessCycle(int modelId = 0);
         #endregion
-
+        
         #region admin
         Sku CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled, int externalId = 0);
         Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description, string pictureurl, int externalId = 0);
@@ -67,31 +67,41 @@ namespace Billing
 
         public void ProcessCycle(int modelId = 0)
         {
-            var cycle = new BillingCycle
-            {
-                StartTime = DateTime.Now
-            };
-            Add(cycle);
-            var sins = GetList<SIN>((r => modelId == 0 || r.Character.Model == modelId), s => s.Wallet, s => s.Character);
-            var rentas = GetList<Renta>((r => modelId == 0 || r.Sin.Character.Model == modelId), r => r.Shop.Wallet, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation.Wallet).OrderBy(r => r.Id).ToList();
-            cycle.Rents = rentas.Count;
-            Add(cycle);
-            var mir = GetMIR();
-            foreach (var sin in sins)
-            {
-                ProcessCharacter(sin, rentas.Where(r => r.SinId == sin.Id).ToList(), mir);
-            }
-            cycle.FinishTime = DateTime.Now;
-            Add(cycle);
+
         }
 
+        public void ProcessPeriod()
+        {
+
+
+        }
+        [Obsolete]
+        public void ProcessCycleOld(int modelId = 0)
+        {
+            //var cycle = new BillingCycle
+            //{
+            //    StartTime = DateTime.Now
+            //};
+            //Add(cycle);
+            //var sins = GetList<SIN>((r => modelId == 0 || r.Character.Model == modelId), s => s.Wallet, s => s.Character);
+            //var rentas = GetList<Renta>((r => modelId == 0 || r.Sin.Character.Model == modelId), r => r.Shop.Wallet, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation.Wallet).OrderBy(r => r.Id).ToList();
+            //cycle.Rents = rentas.Count;
+            //Add(cycle);
+            //var mir = GetMIR();
+            //foreach (var sin in sins)
+            //{
+            //    ProcessCharacter(sin, rentas.Where(r => r.SinId == sin.Id).ToList(), mir);
+            //}
+            //cycle.FinishTime = DateTime.Now;
+            //Add(cycle);
+        }
 
         public Specialisation SetSpecialisation(int productTypeid, int shopid)
         {
-            var specialisation = Get<Specialisation>(s => s.ProductTypeId == productTypeid && s.ShopId == shopid);
+            var specialisation = GetAsNoTracking<Specialisation>(s => s.ProductTypeId == productTypeid && s.ShopId == shopid);
             if (specialisation != null)
                 throw new BillingException("У магазина уже есть эта специализация");
-            var producttype = Get<ProductType>(p => p.Id == productTypeid);
+            var producttype = GetAsNoTracking<ProductType>(p => p.Id == productTypeid);
             if (producttype == null)
                 throw new BillingException("ProductType не найден");
             var shop = Get<ShopWallet>(s => s.Id == shopid);
@@ -127,7 +137,7 @@ namespace Billing
 
         public Contract CreateContract(int corporation, int shop)
         {
-            var contract = Get<Contract>(c => c.CorporationId == corporation && c.ShopId == shop);
+            var contract = GetAsNoTracking<Contract>(c => c.CorporationId == corporation && c.ShopId == shop);
             if (contract != null)
                 throw new BillingException("Контракт уже заключен");
             //TODO CONTRACT LIMIT
@@ -143,7 +153,7 @@ namespace Billing
 
         public List<NomenklaturaDto> GetNomenklaturas(int producttype, int lifestyle, int id = -1)
         {
-            var list = GetList<Nomenklatura>(n =>
+            var list = GetListAsNoTracking<Nomenklatura>(n =>
                 (n.ProductTypeId == producttype || producttype == 0)
                 && (n.Lifestyle == lifestyle || lifestyle == 0)
                 && (n.Id == id || id == -1)
@@ -153,34 +163,34 @@ namespace Billing
 
         public List<Contract> GetContrats(int shopid, int corporationId)
         {
-            var list = GetList<Contract>(c => (c.ShopId == shopid || shopid == 0) && (c.CorporationId == corporationId || corporationId == 0));
+            var list = GetListAsNoTracking<Contract>(c => (c.ShopId == shopid || shopid == 0) && (c.CorporationId == corporationId || corporationId == 0));
             return list;
         }
 
         public List<ProductTypeDto> GetProductTypes(int id = -1)
         {
-            return GetList<ProductType>(p => p.Id == id || id == -1).Select(p =>
+            return GetListAsNoTracking<ProductType>(p => p.Id == id || id == -1).Select(p =>
                 new ProductTypeDto(p)).ToList();
         }
 
         public ProductType GetExtProductType(int externalId)
         {
-            return Get<ProductType>(p => p.ExternalId == externalId);
+            return GetAsNoTracking<ProductType>(p => p.ExternalId == externalId);
         }
 
         public Nomenklatura GetExtNomenklatura(int externalId)
         {
-            return Get<Nomenklatura>(p => p.ExternalId == externalId);
+            return GetAsNoTracking<Nomenklatura>(p => p.ExternalId == externalId);
         }
 
         public Sku GetExtSku(int externalId)
         {
-            return Get<Sku>(p => p.ExternalId == externalId);
+            return GetAsNoTracking<Sku>(p => p.ExternalId == externalId);
         }
 
         public List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1)
         {
-            var list = GetList<Sku>(s => (s.CorporationId == corporationId || corporationId == 0)
+            var list = GetListAsNoTracking<Sku>(s => (s.CorporationId == corporationId || corporationId == 0)
                 && (s.NomenklaturaId == nomenklaturaId || nomenklaturaId == 0)
                 && (s.Enabled == enabled || !enabled.HasValue)
                 && (s.Id == id || id == -1)
@@ -190,7 +200,7 @@ namespace Billing
 
         public List<RentaDto> GetRentas(int modelId)
         {
-            var list = GetList<Renta>(r => r.Sin.Character.Model == modelId, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation, r => r.Shop);
+            var list = GetListAsNoTracking<Renta>(r => r.Sin.Character.Model == modelId, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation, r => r.Shop);
             return list
                     .Select(r =>
                     new RentaDto
@@ -248,7 +258,7 @@ namespace Billing
             };
             Add(renta);
             price.Confirmed = true;
-            Add(price);
+            Context.SaveChanges();
             ProcessRenta(renta, sin);
             EreminPushAdapter.SendNotification(modelId, "Покупка совершена", $"Вы купили {price.Sku.Name}");
             var dto = new RentaDto
@@ -278,7 +288,7 @@ namespace Billing
             var sku = SkuAllowed(shopid, skuid);
             if (sku == null)
                 throw new BillingException("sku недоступен для продажи");
-            var shop = Get<ShopWallet>(s => s.Id == shopid);
+            var shop = GetAsNoTracking<ShopWallet>(s => s.Id == shopid);
             var sin = GetSINByModelId(modelId, s => s.Scoring, s => s.Character);
             if (shop == null || sin == null)
                 throw new Exception("some went wrong");
@@ -301,6 +311,7 @@ namespace Billing
                     Id = corpId,
                     CorporationLogoUrl = UrlNotFound
                 };
+                Add(corporation);
             }
             if (!string.IsNullOrEmpty(logoUrl))
                 corporation.CorporationLogoUrl = logoUrl;
@@ -308,7 +319,6 @@ namespace Billing
                 corporation.Name = name;
             if (amount > 0)
                 corporation.Wallet.Balance = amount;
-            Add(corporation);
             Context.SaveChanges();
             return corporation;
         }
@@ -326,11 +336,11 @@ namespace Billing
                     Wallet = newWallet,
                     Id = shopId
                 };
+                Add(shop);
             }
             shop.Name = name;
             shop.Wallet.Balance = amount;
             shop.LifeStyle = (int)BillingHelper.GetLifestyle(lifestyle);
-            Add(shop);
             Context.SaveChanges();
             return shop;
         }
@@ -457,6 +467,7 @@ namespace Billing
             if (type == null)
             {
                 type = new ProductType();
+                Add(type);
             }
             if (discounttype != 0)
                 type.DiscountType = discounttype;
@@ -470,7 +481,6 @@ namespace Billing
             }
             if (!string.IsNullOrEmpty(name))
                 type.Name = name;
-            Add(type);
             Context.SaveChanges();
             return type;
         }
@@ -485,6 +495,7 @@ namespace Billing
                 nomenklatura = new Nomenklatura();
                 nomenklatura.PictureUrl = UrlNotFound;
                 nomenklatura.Code = string.Empty;
+                Add(nomenklatura);
             }
             if (!string.IsNullOrEmpty(name))
                 nomenklatura.Name = name;
@@ -513,7 +524,6 @@ namespace Billing
             if (lifestyle > 0)
                 nomenklatura.Lifestyle = lifestyle;
             nomenklatura.Lifestyle = (int)BillingHelper.GetLifestyle(nomenklatura.Lifestyle);
-            Add(nomenklatura);
             Context.SaveChanges();
             return nomenklatura;
         }
@@ -526,6 +536,7 @@ namespace Billing
             if (sku == null)
             {
                 sku = new Sku();
+                Add(sku);
             }
             sku.Enabled = enabled;
             if (count > 0)
@@ -559,7 +570,6 @@ namespace Billing
                 //nomenklatura = CreateOrUpdateNomenklatura(nomenklaturaid, "unknown nomenklatura", string.Empty, 0, 1, 0, "unknown nomenklatura", string.Empty);
             }
             sku.NomenklaturaId = nomenklatura.Id;
-            Add(sku);
             Context.SaveChanges();
             return sku;
         }
@@ -595,46 +605,6 @@ namespace Billing
         }
 
         #region private
-
-        private void ProcessCharacter(SIN sin, List<Renta> rentas, Wallet mir)
-        {
-            foreach (var renta in rentas)
-            {
-                try
-                {
-                    ProcessRenta(renta, mir, sin);
-                }
-                catch (Exception e)
-                {
-                    Console.Error.WriteLine(e.Message);
-                }
-            }
-            var outcome = rentas.Sum(renta => BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring));
-            decimal income = 0;
-            try
-            {
-                income = GetMoney(sin);
-            }
-            catch (Exception e)
-            {
-
-                Console.WriteLine(e.Message);
-            }
-            if (income > 0)
-            {
-                MakeNewTransfer(mir, sin.Wallet, income, "Начисление денег за экономический цикл", false);
-            }
-            sin.LastIncome = income;
-            sin.LastOutcome = outcome;
-            Add(sin);
-        }
-
-        private decimal GetMoney(SIN sin)
-        {
-            var model = EreminService.GetCharacter(sin.Character.Model);
-            return 10;
-            return model?.workModel?.karma?.available ?? 0;
-        }
 
         private void ProcessRenta(Renta renta, SIN sin)
         {

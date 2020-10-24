@@ -121,7 +121,6 @@ namespace Scoringspace
                             Add(scoringEvent, context);
                             dbContextTransaction.Commit();
                         }
-
                     }
                 }
                 catch (Exception e)

@@ -16,7 +16,9 @@ namespace Core.Model
         public string Name { get; set; }
         [Column("logo_url")]
         public string CorporationLogoUrl { get; set; }
+        [ForeignKey("owner")]
         [Column("owner")]
-        public int Owner { get; set; }
+        public Character Owner { get; set; }
+        public Character OwnerId { get; set; }
     }
 }

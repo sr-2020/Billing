@@ -20,11 +20,12 @@ namespace Billing
 
     public class BaseBillingRepository : BaseEntityRepository, IBaseBillingRepository
     {
+
         public SIN CreateOrUpdatePhysicalWallet(int modelId = 0, decimal balance = 50)
         {
             if (modelId == 0)
                 throw new BillingAuthException($"character {modelId} not found");
-            var character = Get<Character>(c => c.Model == modelId);
+            var character = GetAsNoTracking<Character>(c => c.Model == modelId);
             if (character == null)
                 throw new BillingAuthException($"character {modelId} not found");
             var sin = Get<SIN>(s => s.Character.Model == modelId);
@@ -35,8 +36,8 @@ namespace Billing
                     Character = character,
                     PersonName = GetJoinCharacterName(modelId)
                 };
+                Add(sin);
             }
-            Add(sin);
             sin.EVersion = _settings.GetValue(SystemSettingsEnum.eversion);
             var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId, balance);
             sin.Wallet = wallet;
@@ -50,8 +51,9 @@ namespace Billing
                     CurerentRelative = 1
                 };
                 sin.Scoring = scoring;
+                Add(scoring);
             }
-            Add(scoring);
+            Context.SaveChanges();
             return sin;
         }
 
@@ -64,17 +66,17 @@ namespace Billing
             switch (wallet.WalletType)
             {
                 case (int)WalletTypes.Character:
-                    var sin = Get<SIN>(s => s.WalletId == wallet.Id, s => s.Character);
+                    var sin = GetAsNoTracking<SIN>(s => s.WalletId == wallet.Id, s => s.Character);
                     if (sin == null)
                         return string.Empty;
                     return $"{sin.Character.Model} {sin.PersonName} {sin.Sin}";
                 case (int)WalletTypes.Corporation:
-                    var corp = Get<CorporationWallet>(c => c.WalletId == wallet.Id);
+                    var corp = GetAsNoTracking<CorporationWallet>(c => c.WalletId == wallet.Id);
                     if (corp == null)
                         return string.Empty;
                     return $"{corp.Id}";
                 case (int)WalletTypes.Shop:
-                    var shop = Get<ShopWallet>(c => c.WalletId == wallet.Id);
+                    var shop = GetAsNoTracking<ShopWallet>(c => c.WalletId == wallet.Id);
                     if (shop == null)
                         return string.Empty;
                     return $"{shop.Id} {shop.Name}";
@@ -114,10 +116,8 @@ namespace Billing
             if (amount < 0)
                 throw new BillingException($"Нельзя перевести отрицательное значение");
             walletFrom.Balance -= amount;
-            Add(walletFrom);
             CheckLifestyle(walletFrom);
             walletTo.Balance += amount;
-            Add(walletTo);
             CheckLifestyle(walletTo);
             var transfer = new Transfer
             {
@@ -132,6 +132,7 @@ namespace Billing
                 Renta = rentaId
             };
             Add(transfer);
+            Context.SaveChanges();
             return transfer;
         }
 
@@ -150,8 +151,8 @@ namespace Billing
                 wallet = new Wallet();
                 wallet.WalletType = (int)type;
                 wallet.Balance = 0;
+                Add(wallet);
             }
-            Add(wallet);
             Context.SaveChanges();
             if (amount > 0)
             {
@@ -191,14 +192,14 @@ namespace Billing
         protected List<Sku> GetSkuList(int shopId)
         {
             var skuids = ExecuteQuery<int>($"SELECT * FROM get_sku({shopId})");
-            var result = GetList<Sku>(s => skuids.Contains(s.Id), s => s.Corporation.Wallet, s => s.Nomenklatura.ProductType);
+            var result = GetListAsNoTracking<Sku>(s => skuids.Contains(s.Id), s => s.Corporation.Wallet, s => s.Nomenklatura.ProductType);
             //TODO filter by contractlimit
             return result;
         }
 
         protected string GetJoinCharacterName(int modelId)
         {
-            var currentCharacterName = Get<JoinCharacter>(j => j.Character.Model == modelId, c => c.Character);
+            var currentCharacterName = GetAsNoTracking<JoinCharacter>(j => j.Character.Model == modelId, c => c.Character);
             return currentCharacterName?.Name;
         }
 
@@ -217,7 +218,6 @@ namespace Billing
             if (wallet.LifeStyle == null)
             {
                 wallet.LifeStyle = (int)newlifestyle;
-                Add(wallet);
             }
             if (wallet.LifeStyle == (int)newlifestyle)
             {
@@ -225,9 +225,8 @@ namespace Billing
             }
             var oldlifestyle = wallet.LifeStyle.Value;
             wallet.LifeStyle = (int)newlifestyle;
-            Add(wallet);
             var scoring = IocContainer.Get<ScoringManager>();
-            var sin = Get<SIN>(s => s.WalletId == wallet.Id, s => s.Scoring);
+            var sin = GetAsNoTracking<SIN>(s => s.WalletId == wallet.Id, s => s.Scoring);
             if (sin == null)
                 throw new BillingException("sin not found");
             scoring.OnLifeStyleChanged(sin.Scoring, BillingHelper.GetLifestyle(oldlifestyle), newlifestyle);

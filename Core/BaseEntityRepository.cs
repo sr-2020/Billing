@@ -14,8 +14,12 @@ namespace Core
 {
     public interface IBaseRepository
     {
+        T GetAsNoTracking<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class;
+        T GetAsNoTracking<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class;
         T Get<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class;
         T Get<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class;
+        List<T> GetListAsNoTracking<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class;
+        List<T> GetListAsNoTracking<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class;
         List<T> GetList<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class;
         List<T> GetList<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class;
         void RemoveRange<T>(IEnumerable<T> entities) where T : class;
@@ -23,33 +27,17 @@ namespace Core
         void AddRange<T>(IEnumerable<T> entities) where T : BaseEntity;
         void Add<T>(T entity) where T : BaseEntity;
         void Delete<T>(int id) where T : BaseEntity;
-        Dictionary<Guid, BillingContext> Contexts { get; set; }
-        Guid CurrentContext { get; set; }
     }
 
 
     public class BaseEntityRepository : IBaseRepository, IDisposable
     {
-        public Dictionary<Guid, BillingContext> Contexts { get; set; }
-        public Guid CurrentContext { get; set; }
+        protected BillingContext Context { get; set; }
 
-        protected BillingContext Context
-        {
-            get
-            {
-                if(CurrentContext == Guid.Empty)
-                {
-                    CurrentContext = Guid.NewGuid();
-                    Contexts.Add(CurrentContext, new BillingContext());
-                }
-                Contexts.TryGetValue(CurrentContext, out BillingContext result);
-                return result;
-            }
-        }
 
         public BaseEntityRepository()
         {
-            Contexts = new Dictionary<Guid, BillingContext>();
+            Context = new BillingContext();
         }
 
         public List<T> ExecuteQuery<T>(string query)
@@ -58,17 +46,46 @@ namespace Core
             return connection.Query<T>(query).ToList();
         }
 
-        [UsingNewContext]
+        public T GetAsNoTracking<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class
+        {
+            var res = AddIncludes(QueryAsNoTracking<T>(), includes);
+            if (res != null)
+                return res.FirstOrDefault(predicate);
+            return null;
+        }
+
+        public T GetAsNoTracking<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class
+        {
+            var res = AddIncludes(QueryAsNoTracking<T>(), includes);
+            if (res != null)
+                return res.FirstOrDefault(predicate);
+            return null;
+        }
+
+        public List<T> GetListAsNoTracking<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class
+        {
+            var res = AddIncludes(QueryAsNoTracking<T>(), includes)
+                .Where(predicate)
+                .ToList();
+            return res;
+        }
+
+        public List<T> GetListAsNoTracking<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class
+        {
+            var res = AddIncludes(QueryAsNoTracking<T>(), includes)
+                .Where(predicate)
+                .ToList();
+            return res;
+        }
+
         public virtual void Add<T>(T entity) where T : BaseEntity
         {
             if (entity.Id > 0)
                 Context.Entry(entity).State = EntityState.Modified;
             else
                 Context.Entry(entity).State = EntityState.Added;
-            Context.SaveChanges();
         }
 
-        [UsingNewContext]
         public virtual void AddRange<T>(IEnumerable<T> entities) where T : BaseEntity
         {
             foreach (var entity in entities)
@@ -78,30 +95,24 @@ namespace Core
                 else
                     Context.Entry(entity).State = EntityState.Added;
             }
-            Context.SaveChanges();
         }
 
-        [UsingNewContext]
         public void Delete<T>(int id) where T : BaseEntity
         {
             var db = Get<T>(n => n.Id == id);
             if (db == null)
                 throw new Exception("id not found");
             Remove(db);
-            Context.SaveChanges();
         }
 
-        [UsingNewContext]
         public virtual void Remove<T>(T entity) where T : class
         {
             Context.Set<T>().Remove(entity);
-            Context.SaveChanges();
         }
 
         public virtual void RemoveRange<T>(IEnumerable<T> entities) where T : class
         {
             Context.Set<T>().RemoveRange(entities);
-            Context.SaveChanges();
         }
 
         public virtual List<T> GetList<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class
@@ -139,6 +150,11 @@ namespace Core
         #region protected
 
         protected virtual IQueryable<T> Query<T>() where T : class
+        {
+            return Context.Set<T>();
+        }
+
+        protected virtual IQueryable<T> QueryAsNoTracking<T>() where T : class
         {
             return Context.Set<T>().AsNoTracking();
         }
@@ -181,13 +197,7 @@ namespace Core
 
         public void Dispose()
         {
-            if(Contexts != null)
-            {
-                foreach (var context in Contexts)
-                {
-                    context.Value?.Dispose();
-                }
-            }
+            Context?.Dispose();
         }
 
         #endregion

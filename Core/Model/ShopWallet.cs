@@ -17,7 +17,9 @@ namespace Core.Model
         [Column("lifestyle")]
         public int LifeStyle { get; set; }
         [Column("owner")]
-        public int Owner { get; set; }
+        [ForeignKey("owner")]
+        public int? OwnerId { get; set; }
+        public virtual Character Owner { get; set; }
         [Column("commission")]
         public decimal Commission { get; set; }
         public virtual List<Specialisation> Specialisations { get; set; }
