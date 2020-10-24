@@ -43,6 +43,56 @@ namespace NillingTests
             }
         }
 
+        [Test]
+        public void GetTransfersTest()
+        {
+            var billing = IocContainer.Get<IBillingManager>();
+            try
+            {
+                var update = 10312;
+                var transfers = billing.GetTransfers(update);
+                Assert.NotNull(transfers);
+            }
+            catch (Exception e)
+            {
+                Assert.Fail();
+            }
+        }
+
+        [Test]
+        public void GetBalanceTest()
+        {
+            var billing = IocContainer.Get<IBillingManager>();
+            try
+            {
+                var update = 10312;
+                var balance = billing.GetBalance(update);
+                Assert.NotNull(balance);
+
+            }
+            catch (Exception e)
+            {
+                Assert.Fail();
+            }
+        }
+        [Test]
+        public void GetRentasTest()
+        {
+            var billing = IocContainer.Get<IBillingManager>();
+            try
+            {
+                var update = 10312;
+                var rentas = billing.GetRentas(update);
+                Assert.NotNull(rentas);
+
+            }
+            catch (Exception e)
+            {
+                Assert.Fail();
+            }
+        }
+
+
         private void SetVariable(string variableName, string value)
         {
             Environment.SetEnvironmentVariable(variableName, value);
