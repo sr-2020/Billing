@@ -23,8 +23,7 @@ namespace Billing
     {
         public SIN InitCharacter(int modelId, string name, string metarace)
         {
-            //var race = GetAsNoTracking<Metatype>(m => m.Alias == metarace);
-            var race = GetAsNoTracking<Metatype>(m => m.Name == metarace);
+            var race = GetAsNoTracking<Metatype>(m => m.Alias == metarace);
             return CreateOrUpdatePhysicalWallet(modelId, name, race?.Id);
         }
 

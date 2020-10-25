@@ -12,8 +12,8 @@ namespace Core.Model
         public string Name { get; set; }
         [Column("description")]
         public string Description { get; set; }
-        //[Column("alias")]
-        //public string Alias { get; set; }
+        [Column("alias")]
+        public string Alias { get; set; }
         [Column("cost")]
         public int Cost { get; set; }
         [Column("hidden")]
