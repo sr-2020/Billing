@@ -26,13 +26,31 @@ namespace NillingTests
         }
 
         [Test]
+        public void InitCharacterTest()
+        {
+            var billing = IocContainer.Get<IBillingManager>();
+            try
+            {
+                var test = 10312;
+                var wallet = billing.InitCharacter(test, "Случай", "meta-norm");
+                Assert.NotNull(wallet);
+                Assert.NotNull(wallet?.Scoring);
+                Assert.NotNull(wallet?.Wallet);
+            }
+            catch (Exception e)
+            {
+                Assert.Fail();
+            }
+        }
+
+        [Test]
         public void CreateOrUpdateWalletTest()
         {
             var billing = IocContainer.Get<IBillingManager>();
             try
             {
-                var update = 10312;
-                var wallet = billing.CreateOrUpdatePhysicalWallet(update, 1000);
+                var test = 10312;
+                var wallet = billing.CreateOrUpdatePhysicalWallet(test, "Случай", 1, 1000);
                 Assert.NotNull(wallet);
                 Assert.NotNull(wallet?.Scoring);
                 Assert.NotNull(wallet?.Wallet);
@@ -49,8 +67,8 @@ namespace NillingTests
             var billing = IocContainer.Get<IBillingManager>();
             try
             {
-                var update = 10312;
-                var transfers = billing.GetTransfers(update);
+                var test = 10312;
+                var transfers = billing.GetTransfers(test);
                 Assert.NotNull(transfers);
             }
             catch (Exception e)
@@ -65,8 +83,8 @@ namespace NillingTests
             var billing = IocContainer.Get<IBillingManager>();
             try
             {
-                var update = 10312;
-                var balance = billing.GetBalance(update);
+                var test = 10312;
+                var balance = billing.GetBalance(test);
                 Assert.NotNull(balance);
 
             }
@@ -75,14 +93,15 @@ namespace NillingTests
                 Assert.Fail();
             }
         }
+        
         [Test]
         public void GetRentasTest()
         {
             var billing = IocContainer.Get<IBillingManager>();
             try
             {
-                var update = 10312;
-                var rentas = billing.GetRentas(update);
+                var test = 10312;
+                var rentas = billing.GetRentas(test);
                 Assert.NotNull(rentas);
 
             }
@@ -92,6 +111,60 @@ namespace NillingTests
             }
         }
 
+        [Test]
+        public void ProcessCycleTest()
+        {
+            var billing = IocContainer.Get<IBillingManager>();
+            try
+            {
+
+                Assert.NotNull(null);
+
+            }
+            catch (Exception e)
+            {
+                Assert.Fail();
+            }
+        }
+
+        [Test]
+        public void ProcessPeriodTest()
+        {
+            var billing = IocContainer.Get<IBillingManager>();
+            try
+            {
+                var test = 10312;
+                billing.ProcessPeriod(test);
+                
+            }
+            catch (Exception e)
+            {
+                Assert.Fail();
+            }
+        }
+
+        [Test]
+        public void ConfirmRentaTest()
+        {
+            var billing = IocContainer.Get<IBillingManager>();
+            try
+            {
+                var sku = 199;
+                var shop = 3;
+                var character = 10312;
+                var price = billing.GetPrice(character, shop, sku);
+                Assert.AreNotEqual(0, price.PriceId);
+                var renta = billing.ConfirmRenta(10312, price.PriceId);
+                Assert.AreNotEqual(0, renta.RentaId);
+                var transfers = billing.GetTransfersByRenta(renta.RentaId);
+                Assert.NotNull(transfers);
+                Assert.AreEqual(3, transfers.Count);
+            }
+            catch (Exception e)
+            {
+                Assert.Fail();
+            }
+        }
 
         private void SetVariable(string variableName, string value)
         {

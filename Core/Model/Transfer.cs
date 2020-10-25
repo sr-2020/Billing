@@ -21,7 +21,7 @@ namespace Core.Model
         [Column("comment")]
         public string Comment { get; set; }
         [Column("renta")]
-        public int? Renta { get; set; }
+        public int? RentaId { get; set; }
         [Column("newbalance_from")]
         public decimal NewBalanceFrom { get; set; }
         [Column("newbalance_to")]

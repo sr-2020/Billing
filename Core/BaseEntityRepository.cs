@@ -27,6 +27,7 @@ namespace Core
         void AddRange<T>(IEnumerable<T> entities) where T : BaseEntity;
         void Add<T>(T entity) where T : BaseEntity;
         void Delete<T>(int id) where T : BaseEntity;
+        void RefreshContext();
     }
 
 
@@ -37,6 +38,12 @@ namespace Core
 
         public BaseEntityRepository()
         {
+            Context = new BillingContext();
+        }
+
+        public void RefreshContext()
+        {
+            Context?.Dispose();
             Context = new BillingContext();
         }
 

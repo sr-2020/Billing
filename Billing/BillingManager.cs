@@ -46,9 +46,11 @@ namespace Billing
 
         #region jobs
         void ProcessCycle(int modelId = 0);
+        void ProcessPeriod(int modelId = 0);
         #endregion
-        
+
         #region admin
+        List<TransferDto> GetTransfersByRenta(int rentaID);
         Sku CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled, int externalId = 0);
         Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description, string pictureurl, int externalId = 0);
         ProductType CreateOrUpdateProductType(int id, string name, int discounttype = 1, int externalId = 0);
@@ -70,10 +72,46 @@ namespace Billing
 
         }
 
-        public void ProcessPeriod()
+        public void ProcessPeriod(int modelId = 0)
         {
+            var cycle = new BillingCycle
+            {
+                StartTime = DateTime.Now
+            };
+            Add(cycle);
+            Context.SaveChanges();
+            var bulkCount = 100;
+            var sins = GetList<SIN>(s => s.Character.Model == modelId || modelId == 0, s => s.Character);
+            var pageCount = (sins.Count + bulkCount - 1) / bulkCount;
+            for (int i = 0; i < pageCount; i++)
+            {
+                var mir = GetMIR();
+                foreach (var sin in sins.Skip(i * bulkCount).Take(bulkCount).ToList())
+                {
+                    ProcessPeriod(sin, mir);
+                    Context.SaveChanges();
+                    RefreshContext();
+                }
+            }
+            cycle.FinishTime = DateTime.Now;
+            Context.SaveChanges();
+        }
 
+        private void ProcessPeriod(SIN sin, Wallet mir)
+        {
+            var rentas = GetList<Renta>(r => r.SinId == sin.Id, r => r.Shop, r => r.Sku.Corporation);
+            foreach (var renta in rentas)
+            {
+                try
+                {
+                    ProcessRenta(renta, mir, sin);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
 
+            }
         }
 
         [Obsolete]
@@ -93,8 +131,7 @@ namespace Billing
             //{
             //    ProcessCharacter(sin, rentas.Where(r => r.SinId == sin.Id).ToList(), mir);
             //}
-            //cycle.FinishTime = DateTime.Now;
-            //Add(cycle);
+
         }
 
         public Specialisation SetSpecialisation(int productTypeid, int shopid)
@@ -241,7 +278,6 @@ namespace Billing
                 throw new BillingException("Недостаточно средств");
             }
             sku.Count--;
-            Add(sku);
             var renta = new Renta
             {
                 BasePrice = price.BasePrice,
@@ -598,6 +634,7 @@ namespace Billing
 
             }
             var transfer = MakeNewTransfer(d1.Wallet, d2.Wallet, amount, comment, anon);
+            Context.SaveChanges();
             if (transfer != null)
             {
                 EreminPushAdapter.SendNotification(characterTo, "Кошелек", $"Вам переведено денег {amount}");
@@ -605,12 +642,20 @@ namespace Billing
             return transfer;
         }
 
+        public List<TransferDto> GetTransfersByRenta(int rentaID)
+        {
+            var tranfers = GetListAsNoTracking<Transfer>(t => t.RentaId == rentaID).Select(s => CreateTransferDto(s, TransferType.Outcoming)).ToList();
+            return tranfers;
+        }
+
+
         #region private
 
         private void ProcessRenta(Renta renta, SIN sin)
         {
             var mir = GetMIR();
             ProcessRenta(renta, mir, sin);
+            Context.SaveChanges();
         }
 
         private void ProcessRenta(Renta renta, Wallet mir, SIN sin)
@@ -638,17 +683,27 @@ namespace Billing
                 if (corporation == null)
                     throw new Exception("corporation not found");
             }
+            var character = sin.Character;
+            if (character == null)
+            {
+                character = Get<Character>(c => c.Id == sin.CharacterId);
+            }
+            var walletFrom = sin.Wallet;
+            if (walletFrom == null)
+            {
+                walletFrom = Get<Wallet>(w => w.Id == sin.WalletId);
+            }
             var finalPrice = BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
             var comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
             //с кошелька списываем всегда
-            MakeNewTransfer(sin.Wallet, mir, finalPrice, $"Рентный платеж: {sku.Name} в {shop.Name}", false, renta.Id);
+            MakeNewTransfer(walletFrom, mir, finalPrice, $"Рентный платеж: {sku.Name} в {shop.Name}", false, renta.Id);
             //если баланс положительный
-            if (sin.Wallet.Balance > 0)
+            if (walletFrom.Balance > 0)
             {
                 MakeNewTransfer(mir, corporation.Wallet, finalPrice - comission, $"Рентное начисление: {sku.Name} от {sin.PersonName} ({sin.Sin}) ", false, renta.Id);
                 MakeNewTransfer(mir, shop.Wallet, comission, $"Рентное начисление: {sku.Name} в {shop.Name} от {sin.PersonName} ({sin.Sin})", false, renta.Id);
             }
-            EreminPushAdapter.SendNotification(sin.Character.Model, "Кошелек", $"Списание по рентному договору");
+            EreminPushAdapter.SendNotification(character.Model, "Кошелек", $"Списание по рентному договору");
         }
 
         private DiscountType GetDiscountTypeForSku(Sku sku)

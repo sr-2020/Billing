@@ -15,13 +15,21 @@ namespace Billing
 {
     public interface IBaseBillingRepository : IBaseRepository
     {
-        SIN CreateOrUpdatePhysicalWallet(int modelId = 0, decimal balance = 50);
+        SIN CreateOrUpdatePhysicalWallet(int modelId, string name, int? metarace, decimal balance = 50);
+        SIN InitCharacter(int modelId, string name, string metarace);
     }
 
     public class BaseBillingRepository : BaseEntityRepository, IBaseBillingRepository
     {
+        public SIN InitCharacter(int modelId, string name, string metarace)
+        {
+            //var race = GetAsNoTracking<Metatype>(m => m.Alias == metarace);
+            var race = GetAsNoTracking<Metatype>(m => m.Name == metarace);
+            return CreateOrUpdatePhysicalWallet(modelId, name, race?.Id);
+        }
 
-        public SIN CreateOrUpdatePhysicalWallet(int modelId = 0, decimal balance = 50)
+
+        public SIN CreateOrUpdatePhysicalWallet(int modelId, string name, int? metarace, decimal balance = 50)
         {
             if (modelId == 0)
                 throw new BillingAuthException($"character {modelId} not found");
@@ -33,11 +41,12 @@ namespace Billing
             {
                 sin = new SIN
                 {
-                    Character = character,
-                    PersonName = GetJoinCharacterName(modelId)
+                    CharacterId = modelId
                 };
                 Add(sin);
             }
+            sin.PersonName = name;
+            sin.MetatypeId = metarace;
             sin.EVersion = _settings.GetValue(SystemSettingsEnum.eversion);
             var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId, balance);
             sin.Wallet = wallet;
@@ -102,6 +111,16 @@ namespace Billing
             };
         }
 
+        /// <summary>
+        /// Create transfer from walletFrom to walletTo. NOTE: No context saved in method. Need to attach wallets to context manually, and call Context.SaveChanges()
+        /// </summary>
+        /// <param name="walletFrom"></param>
+        /// <param name="walletTo"></param>
+        /// <param name="amount"></param>
+        /// <param name="comment"></param>
+        /// <param name="anonymous"></param>
+        /// <param name="rentaId"></param>
+        /// <returns></returns>
         protected Transfer MakeNewTransfer(Wallet walletFrom, Wallet walletTo, decimal amount, string comment, bool anonymous = false, int? rentaId = null)
         {
             if (walletFrom == null)
@@ -129,7 +148,7 @@ namespace Billing
                 NewBalanceTo = walletTo.Balance,
                 OperationTime = DateTime.Now,
                 Anonymous = anonymous,
-                Renta = rentaId
+                RentaId = rentaId
             };
             Add(transfer);
             Context.SaveChanges();
@@ -153,6 +172,7 @@ namespace Billing
                 wallet.Balance = 0;
                 Add(wallet);
             }
+            //need to call to get id
             Context.SaveChanges();
             if (amount > 0)
             {
@@ -162,6 +182,7 @@ namespace Billing
                 wallet.Balance = 0;
                 MakeNewTransfer(mir, wallet, amount, "Заведение кошелька");
             }
+            Context.SaveChanges();
             return wallet;
         }
 
@@ -179,7 +200,7 @@ namespace Billing
             if (sin == null)
             {
                 var defaultBalance = _settings.GetIntValue(SystemSettingsEnum.defaultbalance);
-                sin = CreateOrUpdatePhysicalWallet(modelId, defaultBalance);
+                sin = CreateOrUpdatePhysicalWallet(modelId, "", null, defaultBalance);
             }
             return sin;
         }
@@ -192,7 +213,7 @@ namespace Billing
         protected List<Sku> GetSkuList(int shopId)
         {
             var skuids = ExecuteQuery<int>($"SELECT * FROM get_sku({shopId})");
-            var result = GetListAsNoTracking<Sku>(s => skuids.Contains(s.Id), s => s.Corporation.Wallet, s => s.Nomenklatura.ProductType);
+            var result = GetList<Sku>(s => skuids.Contains(s.Id), s => s.Corporation.Wallet, s => s.Nomenklatura.ProductType);
             //TODO filter by contractlimit
             return result;
         }

@@ -15,8 +15,10 @@ namespace Core.Model
         public string Sin { get; set; }
         [Column("person_name")]
         public string PersonName { get; set; }
-        [Column("race")]
-        public int? Race { get; set; }
+        [Column("metatype")]
+        [ForeignKey("metatype")]
+        public int? MetatypeId { get; set; }
+        public Metatype Metatype { get; set; }
         [Column("citizenship")]
         public int? Citizenship { get; set; }
         [ForeignKey("wallet")]

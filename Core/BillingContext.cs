@@ -25,6 +25,7 @@ namespace Core
         public DbSet<EventLifestyle> EventLifestyle { get; set; }
         public DbSet<HangfireJob> Job { get; set; }
         public DbSet<JoinCharacter> JoinCharacter { get; set; }
+        public DbSet<Metatype> Metatype { get; set; }
         public DbSet<Price> Price { get; set; }
         public DbSet<ProductType> ProductTypes { get; set; }
         public DbSet<Renta> Renta { get; set; }

@@ -78,6 +78,7 @@ namespace Billing
             var shopWalletFrom = Get<ShopWallet>(s => s.Id == shopFrom, s => s.Wallet);
             var shopWalletTo = Get<ShopWallet>(s => s.Id == shopTo, s => s.Wallet);
             var transfer = MakeNewTransfer(shopWalletFrom.Wallet, shopWalletTo.Wallet, amount, comment);
+            Context.SaveChanges();
             return transfer;
         }
 
@@ -96,6 +97,7 @@ namespace Billing
             }
             var shopWallet = Get<ShopWallet>(s => s.Id == shop, s => s.Wallet);
             var transfer = MakeNewTransfer(shopWallet.Wallet, sin.Wallet, amount, comment, anon);
+            Context.SaveChanges();
             return transfer;
         }
 

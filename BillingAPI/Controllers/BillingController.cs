@@ -29,9 +29,24 @@ namespace BillingAPI.Controllers
         public DataResult<SIN> CreatePhysicalWallet(int character, decimal balance)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdatePhysicalWallet(character, balance), $"createphysicalwallet {character} {balance}");
+            var result = RunAction(() => manager.CreateOrUpdatePhysicalWallet(character, "", null, balance), $"createphysicalwallet {character} {balance}");
             return result;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="modelid"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("admin/initcharacter/{modelid}")]
+        public DataResult<SIN> InitCharacter(int modelid, [FromBody] InitCharacterRequest request)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.InitCharacter(modelid, request.Name, request.Metarace), $"InitCharacter");
+            return result;
+        }
+
 
         /// <summary>
         /// Create or update allowed product type
