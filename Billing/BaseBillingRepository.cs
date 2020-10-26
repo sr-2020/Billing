@@ -26,7 +26,7 @@ namespace Billing
             var race = GetAsNoTracking<Metatype>(m => m.Alias == metarace);
             return CreateOrUpdatePhysicalWallet(modelId, name, race?.Id);
         }
-
+        
 
         public SIN CreateOrUpdatePhysicalWallet(int modelId, string name, int? metarace, decimal balance = 50)
         {
@@ -145,7 +145,7 @@ namespace Billing
                 WalletToId = walletTo.Id,
                 NewBalanceFrom = walletFrom.Balance,
                 NewBalanceTo = walletTo.Balance,
-                OperationTime = DateTime.Now,
+                OperationTime = DateTime.Now.ToUniversalTime(),
                 Anonymous = anonymous,
                 RentaId = rentaId
             };

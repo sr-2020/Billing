@@ -44,13 +44,31 @@ namespace NillingTests
         }
 
         [Test]
+        public void MakeTransferSINSINTest()
+        {
+            var billing = IocContainer.Get<IBillingManager>();
+            try
+            {
+                var from = 10312;
+                var to = 10206;
+                var transfer = billing.MakeTransferSINSIN(from, to, 1, "тест");
+                Assert.NotNull(transfer);
+
+            }
+            catch (Exception e)
+            {
+                Assert.Fail();
+            }
+        }
+
+        [Test]
         public void CreateOrUpdateWalletTest()
         {
             var billing = IocContainer.Get<IBillingManager>();
             try
             {
                 var test = 10312;
-                var wallet = billing.CreateOrUpdatePhysicalWallet(test, "Случай", 1, 1000);
+                var wallet = billing.CreateOrUpdatePhysicalWallet(test, "Случай", 1, 100000);
                 Assert.NotNull(wallet);
                 Assert.NotNull(wallet?.Scoring);
                 Assert.NotNull(wallet?.Wallet);
