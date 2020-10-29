@@ -40,7 +40,7 @@ namespace Billing
             {
                 sin = new SIN
                 {
-                    CharacterId = modelId
+                    CharacterId = character.Id
                 };
                 Add(sin);
             }
