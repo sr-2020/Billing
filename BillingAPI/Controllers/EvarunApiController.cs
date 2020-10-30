@@ -94,7 +94,7 @@ namespace BillingAPI.Controllers
         {
             Response.StatusCode = code;
             Console.Error.WriteLine($"ERROR for {guid}: {message}: {code}");
-            result.Message = e.Message;
+            result.Message = message;
             result.Status = false;
             return result;
         }
