@@ -15,6 +15,7 @@ COPY ["InternalServices/InternalServices.csproj", "InternalServices/"]
 COPY ["Serialization/Serialization.csproj", "Serialization/"]
 COPY ["FileHelper/FileHelper.csproj", "FileHelper/"]
 COPY ["CommonExcel/CommonExcel.csproj", "CommonExcel/"]
+COPY ["PubSubService/PubSubService.csproj", "PubSubService/"]
 
 RUN dotnet restore "BillingAPI/BillingAPI.csproj"
 

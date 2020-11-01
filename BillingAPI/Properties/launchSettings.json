@@ -17,6 +17,12 @@
       },
       "applicationUrl": "http://localhost:32769"
     },
+    "PubSubTest": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "E:\\elixirkey.json"
+      }
+    },
     "Kestrel - Test": {
       "commandName": "Project",
       "environmentVariables": {
@@ -29,10 +35,11 @@
       "launchBrowser": true,
       "stdoutLogEnabled": true,
       //"launchUrl": "{Scheme}://{ServiceHost}:32769/swagger/v1/index.html",
-      "launchUrl": "{Scheme}://{ServiceHost}:32769/admin",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/admin",
       "environmentVariables": {
         "Key": "Value",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GOOGLE_APPLICATION_CREDENTIALS": "elixirkey.json"
       }
     }
   }

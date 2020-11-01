@@ -36,3 +36,4 @@ bld/
 *.csproj.*
 \.idea/
 BillingAPI/Dockerfile
+elixirkey.json
