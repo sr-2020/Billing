@@ -50,7 +50,7 @@ namespace NillingTests
             try
             {
                 var from = 10312;
-                var to = 10206;
+                var to = 55817;
                 var transfer = billing.MakeTransferSINSIN(from, to, 1, "тест");
                 Assert.NotNull(transfer);
 

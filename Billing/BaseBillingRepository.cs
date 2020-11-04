@@ -67,8 +67,12 @@ namespace Billing
 
         protected ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
 
-        protected string GetWalletName(Wallet wallet)
+        protected string GetWalletName(Wallet wallet, bool anon)
         {
+            if(anon)
+            {
+                return "Anonymous";
+            }
             if (wallet == null)
                 return string.Empty;
             switch (wallet.WalletType)
@@ -97,6 +101,7 @@ namespace Billing
 
         protected TransferDto CreateTransferDto(Transfer transfer, TransferType type, string owner = "владелец кошелька")
         {
+            bool anon = transfer.Anonymous;
             return new TransferDto
             {
                 Comment = transfer.Comment,
@@ -104,8 +109,8 @@ namespace Billing
                 Amount = BillingHelper.RoundDown(transfer.Amount),
                 NewBalance = type == TransferType.Incoming ? transfer.NewBalanceTo : transfer.NewBalanceFrom,
                 OperationTime = transfer.OperationTime,
-                From = type == TransferType.Incoming ? GetWalletName(transfer.WalletFrom) : owner,
-                To = type == TransferType.Incoming ? owner : GetWalletName(transfer.WalletTo),
+                From = type == TransferType.Incoming ? GetWalletName(transfer.WalletFrom, anon) : owner,
+                To = type == TransferType.Incoming ? owner : GetWalletName(transfer.WalletTo, anon),
                 Anonimous = transfer.Anonymous
             };
         }

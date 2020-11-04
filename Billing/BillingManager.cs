@@ -467,7 +467,7 @@ namespace Billing
                 throw new BillingException("sin not found");
             var listFrom = GetList<Transfer>(t => t.WalletFromId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
             var allList = new List<TransferDto>();
-            var owner = GetWalletName(sin.Wallet);
+            var owner = GetWalletName(sin.Wallet, false);
             if (listFrom != null)
                 allList.AddRange(listFrom
                     .Select(s => CreateTransferDto(s, TransferType.Outcoming, owner))

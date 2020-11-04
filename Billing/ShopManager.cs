@@ -107,7 +107,7 @@ namespace Billing
             var listFrom = GetList<Transfer>(t => t.WalletFromId == shopWallet.WalletId, t => t.WalletFrom, t => t.WalletTo);
 
             var allList = new List<TransferDto>();
-            var owner = GetWalletName(shopWallet.Wallet);
+            var owner = GetWalletName(shopWallet.Wallet, false);
             if (listFrom != null)
                 allList.AddRange(listFrom
                     .Select(s => CreateTransferDto(s, TransferType.Outcoming, owner))
