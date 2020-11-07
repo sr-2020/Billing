@@ -4,10 +4,10 @@ using System.Text;
 
 namespace PubSubService.Model
 {
-    public class BaseLocationBasedModel : BasePubSubModel
+    public class BaseLocationModel : BasePubSubModel
     {
+        public string CharacterId { get; set; }
         public Location Location { get; set; }
-
     }
 
     public class Location

@@ -49,7 +49,7 @@ namespace NillingTests
             var billing = IocContainer.Get<IBillingManager>();
             try
             {
-                var from = 10312;
+                var from = 44043;
                 var to = 55817;
                 var transfer = billing.MakeTransferSINSIN(from, to, 1, "тест");
                 Assert.NotNull(transfer);
@@ -85,7 +85,7 @@ namespace NillingTests
             var billing = IocContainer.Get<IBillingManager>();
             try
             {
-                var test = 10312;
+                var test = 44043;
                 var transfers = billing.GetTransfers(test);
                 Assert.NotNull(transfers);
             }
@@ -101,7 +101,7 @@ namespace NillingTests
             var billing = IocContainer.Get<IBillingManager>();
             try
             {
-                var test = 10312;
+                var test = 44043;
                 var balance = billing.GetBalance(test);
                 Assert.NotNull(balance);
 

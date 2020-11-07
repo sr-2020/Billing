@@ -4,8 +4,10 @@ using System.Text;
 
 namespace PubSubService.Model
 {
-    public class AbilityModel : BaseLocationBasedModel
+    public class AbilityModel : BaseLocationModel
     {
+        public string Id { get; set; }
+        public string Name { get; set; }
         public QrCodeModel QrCode { get; set; }
     }
 

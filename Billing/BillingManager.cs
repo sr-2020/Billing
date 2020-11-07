@@ -18,6 +18,7 @@ namespace Billing
     {
         #region application
         Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment);
+        Transfer CreateTransferSINSIN(string modelId, string characterTo, decimal amount, string comment);
         Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
 
         string GetSinStringByCharacter(int modelId);
@@ -97,42 +98,7 @@ namespace Billing
             Context.SaveChanges();
         }
 
-        private void ProcessPeriod(SIN sin, Wallet mir)
-        {
-            var rentas = GetList<Renta>(r => r.SinId == sin.Id, r => r.Shop, r => r.Sku.Corporation);
-            foreach (var renta in rentas)
-            {
-                try
-                {
-                    ProcessRenta(renta, mir, sin);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.ToString());
-                }
 
-            }
-        }
-
-        [Obsolete]
-        public void ProcessCycleOld(int modelId = 0)
-        {
-            //var cycle = new BillingCycle
-            //{
-            //    StartTime = DateTime.Now
-            //};
-            //Add(cycle);
-            //var sins = GetList<SIN>((r => modelId == 0 || r.Character.Model == modelId), s => s.Wallet, s => s.Character);
-            //var rentas = GetList<Renta>((r => modelId == 0 || r.Sin.Character.Model == modelId), r => r.Shop.Wallet, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation.Wallet).OrderBy(r => r.Id).ToList();
-            //cycle.Rents = rentas.Count;
-            //Add(cycle);
-            //var mir = GetMIR();
-            //foreach (var sin in sins)
-            //{
-            //    ProcessCharacter(sin, rentas.Where(r => r.SinId == sin.Id).ToList(), mir);
-            //}
-
-        }
 
         public Specialisation SetSpecialisation(int productTypeid, int shopid)
         {
@@ -618,6 +584,22 @@ namespace Billing
         }
 
         [BillingBlock]
+        public Transfer CreateTransferSINSIN(string modelid, string characterTo, decimal amount, string comment)
+        {
+            int imodelId;
+            int icharacterTo;
+            if (!int.TryParse(modelid, out imodelId) || imodelId == 0)
+            {
+                throw new BillingAuthException($"Ошибка авторизации {modelid}");
+            }
+            if (!int.TryParse(characterTo, out icharacterTo) || icharacterTo == 0)
+            {
+                throw new BillingAuthException($"Ошибка проверки получателя, должен быть инт");
+            }
+            return MakeTransferSINSIN(imodelId, icharacterTo, amount, comment);
+        }
+
+        [BillingBlock]
         public Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment)
         {
             var d1 = GetSINByModelId(characterFrom, s => s.Wallet);
@@ -749,6 +731,23 @@ namespace Billing
             Add(price);
             Context.SaveChanges();
             return price;
+        }
+
+        private void ProcessPeriod(SIN sin, Wallet mir)
+        {
+            var rentas = GetList<Renta>(r => r.SinId == sin.Id, r => r.Shop, r => r.Sku.Corporation);
+            foreach (var renta in rentas)
+            {
+                try
+                {
+                    ProcessRenta(renta, mir, sin);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
+
+            }
         }
         #endregion
     }

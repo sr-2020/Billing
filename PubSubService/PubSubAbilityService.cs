@@ -14,29 +14,18 @@ namespace PubSubService
     }
 
 
-    public class PubSubAbilityService : PubSubService, IPubSubAbilityService
+    public class PubSubAbilityService : PubSubService<AbilityModel>, IPubSubAbilityService
     {
         public PubSubAbilityService() : base("billing_ability_used_subscription")
         {
 
         }
-        public override void Handle(string message)
+        public override void Handle(AbilityModel model)
         {
-            base.Handle(message);
-            AbilityModel json;
-            try
+            base.Handle(model);
+            if (ModelPrimitives.Abilities.ContainsKey(model.Id))
             {
-                json = Serializer.Deserialize<AbilityModel>(message);
-                if (ModelPrimitives.Abilities.ContainsKey(json.Id))
-                {
-                    var manager = IocContainer.Get<ISubscribeManager>();
-                    manager.AbilityLog(json.Id, message);
-                    HandleAbility(json);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
+                HandleAbility(model);
             }
         }
 

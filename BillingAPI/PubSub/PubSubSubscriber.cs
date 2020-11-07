@@ -11,20 +11,30 @@ namespace BillingAPI
 {
     public class PubSubSubscriber : IHostedService
     {
-        IPubSubAbilityService _service;
-        public PubSubSubscriber(IPubSubAbilityService service)
+        List<IPubSubService> _services;
+
+        public PubSubSubscriber(IPubSubAbilityService ability, IPubSubFoodService food, IPubSubHealthService health)
         {
-            _service = service;
+            _services = new List<IPubSubService>();
+            _services.Add(ability);
+            _services.Add(food);
+            _services.Add(health);
         }
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _service.Run();
+            foreach (var service in _services)
+            {
+                service.Run();
+            }
             return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _service.Stop();
+            foreach (var service in _services)
+            {
+                service.Stop();
+            }
             return Task.CompletedTask;
         }
     }

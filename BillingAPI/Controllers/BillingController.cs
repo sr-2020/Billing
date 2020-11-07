@@ -161,6 +161,19 @@ namespace BillingAPI.Controllers
         #endregion
 
         #region transfer
+
+        /// <summary>
+        /// Create transfer from Character1 to Character2 using sins
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("transfer/createtransfersinsin")]
+        public DataResult<Transfer> CreateTransferSINSIN(int character, [FromBody] CreateTransferSinSinRequest request)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.CreateTransferSINSIN(character.ToString() , request.CharacterTo, request.Amount, request.Comment));
+            return result;
+        }
+
         /// <summary>
         /// Create transfer from Character1 to Character2 using sins
         /// </summary>
@@ -169,6 +182,7 @@ namespace BillingAPI.Controllers
         /// <param name="amount"></param>
         /// <param name="comment"></param>
         /// <returns></returns>
+        [Obsolete]
         [HttpGet("transfer/maketransfersinsin")]
         public DataResult<Transfer> MakeTransferSINSIN(int character1, int character2, decimal amount, string comment)
         {

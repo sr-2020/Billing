@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Serialization;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -9,11 +10,11 @@ namespace PubSubService
     public interface IPubSubService
     {
         void Run();
-        void Handle(string message);
+        void Read(string message);
         void Stop();
     }
 
-    public class PubSubService: IPubSubService
+    public class PubSubService<T>: IPubSubService
     {
         public PubSubService(string id)
         {
@@ -33,8 +34,7 @@ namespace PubSubService
                 {
                     while (IsRunning)
                     {
-                        _adapter.PullMessages(SubscriptionId, Handle);
-                        Console.WriteLine("sleep");
+                        _adapter.PullMessages(SubscriptionId, Read);
                         Thread.Sleep(10000);
                     }
                 }
@@ -45,9 +45,24 @@ namespace PubSubService
             });
         }
 
-        public virtual void Handle(string message)
+        public virtual void Handle(T model)
         {
-            Console.WriteLine($"message {message} handled");
+
+        }
+
+        public virtual void Read(string message)
+        {
+            Console.WriteLine($"message {message} readed");
+            T model;
+            try
+            {
+                model = Serializer.Deserialize<T>(message);
+                Handle(model);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
         }
 
         public virtual void Stop()

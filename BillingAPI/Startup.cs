@@ -46,8 +46,8 @@ namespace BillingAPI
             #endregion
 
             #region hangfire
-            var hfConnectionString = SystemHelper.GetConnectionString("Hangfire");
-            services.AddHangfire(config => config.UsePostgreSqlStorage(hfConnectionString));
+            //var hfConnectionString = SystemHelper.GetConnectionString("Hangfire");
+            //services.AddHangfire(config => config.UsePostgreSqlStorage(hfConnectionString));
             #endregion
 
             #region cors
@@ -62,10 +62,15 @@ namespace BillingAPI
                 });
             });
             #endregion
+
+            #region pubsub
+
+            services.AddSingleton<IPubSubFoodService, PubSubFoodService>();
+            services.AddSingleton<IPubSubHealthService, PubSubHealthService>();
             services.AddSingleton<IPubSubAbilityService, PubSubAbilityService>();
             services.AddHostedService<PubSubSubscriber>();
 
-            //services.AddAuthentication().AddCookie();
+            #endregion
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -82,11 +87,11 @@ namespace BillingAPI
             }
 
             #region hangfire
-            app.UseHangfireServer();
-            app.UseHangfireDashboard("/hangfire", new DashboardOptions
-            {
-                Authorization = new[] { new HangfireAuthorizationFilter() }
-            });
+            //app.UseHangfireServer();
+            //app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            //{
+            //    Authorization = new[] { new HangfireAuthorizationFilter() }
+            //});
             #endregion
 
             #region swagger
