@@ -24,9 +24,10 @@ namespace Billing
         public SIN InitCharacter(int modelId, string name, string metarace)
         {
             var race = GetAsNoTracking<Metatype>(m => m.Alias == metarace);
+            var settings = IoC.IocContainer.Get<ISettingsManager>();
+            var defaultbalance = settings.GetDecimalValue(SystemSettingsEnum.defaultbalance);
             return CreateOrUpdatePhysicalWallet(modelId, name, race?.Id);
         }
-        
 
         public SIN CreateOrUpdatePhysicalWallet(int modelId, string name, int? metarace, decimal balance = 50)
         {
@@ -65,7 +66,6 @@ namespace Billing
             Context.SaveChanges();
             return sin;
         }
-
         protected ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
 
         protected string GetWalletName(Wallet wallet, bool anon)
