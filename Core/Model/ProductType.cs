@@ -14,5 +14,7 @@ namespace Core.Model
         public int DiscountType { get; set; }
         [Column("external_id")]
         public int ExternalId { get; set; }
+        [Column("external_table")]
+        public string ExternalTable { get; set; }
     }
 }

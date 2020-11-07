@@ -29,7 +29,7 @@ namespace Billing
                 SkuName = "Страховка отсутствует",
                 LifeStyle = BillingHelper.GetLifestyle(-1).ToString(),
                 ShopName = "Страховка отсутствует",
-                PersonName = sin.PersonName
+                PersonName = $"Error(Страховка отсутствует)_{sin.PersonName}"
             };
             var lastIns = GetList<Renta>(r => r.Sku.Nomenklatura.ProductTypeId == insuranceId && r.SinId == sin.Id, r => r.Shop, r => r.Sku.Nomenklatura)
                                 .OrderByDescending(r => r.DateCreated)
