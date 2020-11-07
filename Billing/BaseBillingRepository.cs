@@ -40,7 +40,8 @@ namespace Billing
             {
                 sin = new SIN
                 {
-                    CharacterId = character.Id
+                    CharacterId = character.Id,
+                    InGame = true
                 };
                 Add(sin);
             }

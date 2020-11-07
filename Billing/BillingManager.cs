@@ -1,4 +1,5 @@
-﻿using Billing.Dto.Shop;
+﻿using Billing.Dto;
+using Billing.Dto.Shop;
 using Billing.DTO;
 using Core;
 using Core.Model;
@@ -19,6 +20,7 @@ namespace Billing
         #region application
         Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment);
         Transfer CreateTransferSINSIN(string modelId, string characterTo, decimal amount, string comment);
+        Transfer CreateTransferMIRSIN(string characterTo, decimal amount, string comment);
         Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
 
         string GetSinStringByCharacter(int modelId);
@@ -51,6 +53,8 @@ namespace Billing
         #endregion
 
         #region admin
+
+        List<CharacterDto> GetCharacters();
         List<TransferDto> GetTransfersByRenta(int rentaID);
         Sku CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled, int externalId = 0);
         Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description, string pictureurl, int externalId = 0);
@@ -599,6 +603,22 @@ namespace Billing
             return MakeTransferSINSIN(imodelId, icharacterTo, amount, comment);
         }
 
+        public Transfer CreateTransferMIRSIN(string characterTo, decimal amount, string comment)
+        {
+            var from = GetMIR();
+            int icharacterTo;
+            if (!int.TryParse(characterTo, out icharacterTo) || icharacterTo == 0)
+            {
+                throw new BillingAuthException($"Ошибка проверки получателя, должен быть инт");
+            }
+            var to = GetSINByModelId(icharacterTo, s => s.Wallet);
+            if(to == null)
+            {
+                throw new BillingException($"Не найден получатель");
+            }
+            return MakeNewTransfer(from, to.Wallet, amount, comment);
+        }
+
         [BillingBlock]
         public Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment)
         {
@@ -624,12 +644,17 @@ namespace Billing
             return transfer;
         }
 
+        public List<CharacterDto> GetCharacters()
+        {
+            var result = GetList<SIN>(s => s.InGame ?? false, s => s.Character).Select(s => new CharacterDto { PersonName = s.PersonName, ModelId = s.Character.Model.ToString() }).ToList();
+            return result;
+        }
+
         public List<TransferDto> GetTransfersByRenta(int rentaID)
         {
             var tranfers = GetListAsNoTracking<Transfer>(t => t.RentaId == rentaID).Select(s => CreateTransferDto(s, TransferType.Outcoming)).ToList();
             return tranfers;
         }
-
 
         #region private
 

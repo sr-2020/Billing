@@ -38,6 +38,8 @@ namespace Core.Model
         public decimal LastIncome { get; set; }
         [Column("last_outcome")]
         public decimal LastOutcome { get; set; }
+        [Column("in_game")]
+        public bool? InGame { get; set; }
 
     }
 }
