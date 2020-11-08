@@ -6,6 +6,7 @@ using Core.Model;
 using Core.Primitives;
 using InternalServices;
 using IoC;
+using Scoringspace;
 using Settings;
 using System;
 using System.Collections.Generic;
@@ -266,7 +267,9 @@ namespace Billing
             Add(renta);
             price.Confirmed = true;
             Context.SaveChanges();
+            ProcessByuScoring(sin, sku);
             ProcessRenta(renta, sin);
+            
             EreminPushAdapter.SendNotification(modelId, "Покупка совершена", $"Вы купили {price.Sku.Name}");
             var dto = new RentaDto
             {
@@ -276,6 +279,42 @@ namespace Billing
                 FinalPrice = price.FinalPrice
             };
             return dto;
+        }
+
+        private void ProcessByuScoring(SIN sin, Sku sku)
+        {
+            var type = sku.Nomenklatura.ProductType;
+            if (type == null)
+                throw new Exception("type not found");
+            IScoringManager manager;
+            switch (type.Alias)
+            {
+                case "Implant":
+                    manager = IoC.IocContainer.Get<IScoringManager>();
+                    manager.OnImplantBuy(sin, sku.Nomenklatura.Lifestyle);
+                    break;
+                case "Food":
+                    manager = IoC.IocContainer.Get<IScoringManager>();
+                    manager.OnFoodBuy(sin, sku.Nomenklatura.Lifestyle);
+                    break;
+                case "Weapon":
+                    manager = IoC.IocContainer.Get<IScoringManager>();
+                    manager.OnWeaponBuy(sin, sku.Nomenklatura.Lifestyle);
+                    break;
+                case "Pill":
+                    manager = IoC.IocContainer.Get<IScoringManager>();
+                    manager.OnPillBuy(sin, sku.Nomenklatura.Lifestyle);
+                    break;
+
+                case "Magic":
+                    manager = IoC.IocContainer.Get<IScoringManager>();
+                    manager.OnMagicBuy(sin, sku.Nomenklatura.Lifestyle);
+                    break;
+                default:
+                    manager = IoC.IocContainer.Get<IScoringManager>();
+                    manager.OnOtherBuy(sin, sku.Nomenklatura.Lifestyle);
+                    break;
+            }
         }
 
         public PriceShopDto GetPriceByQR(int modelId, string qrid)

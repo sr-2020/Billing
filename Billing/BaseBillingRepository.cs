@@ -26,7 +26,7 @@ namespace Billing
             var race = GetAsNoTracking<Metatype>(m => m.Alias == metarace);
             var settings = IoC.IocContainer.Get<ISettingsManager>();
             var defaultbalance = settings.GetDecimalValue(SystemSettingsEnum.defaultbalance);
-            return CreateOrUpdatePhysicalWallet(modelId, name, race?.Id);
+            return CreateOrUpdatePhysicalWallet(modelId, name, race?.Id, defaultbalance);
         }
 
         public SIN CreateOrUpdatePhysicalWallet(int modelId, string name, int? metarace, decimal balance = 50)

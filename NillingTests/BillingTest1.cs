@@ -17,21 +17,21 @@ namespace NillingTests
             SetVariable("POSTGRESQLHANGFIRE_DBNAME", "Hangfire");
             SetVariable("POSTGRESQLHANGFIRE_USER", "hangfire");
             SetVariable("POSTGRESQLHANGFIRE_PASSWORD", "8XrdkzCQuFaSREeZlfnQo1");
-            SetVariable("POSTGRESQLBILLING_DBNAME", "rc_sr2020");
+            SetVariable("POSTGRESQLBILLING_DBNAME", "sr2020");
             SetVariable("POSTGRESQLBILLING_USER", "backend");
             SetVariable("POSTGRESQLBILLING_PASSWORD", "kz1x21YB1zYJx");
             IocInitializer.Init();
             var configuration = GetIConfigurationRoot(TestContext.CurrentContext.TestDirectory);
             SystemHelper.Init(configuration);
         }
-
+        public int TestId = 44043;
         [Test]
         public void InitCharacterTest()
         {
             var billing = IocContainer.Get<IBillingManager>();
             try
             {
-                var test = 44043;
+                var test = TestId;
                 var wallet = billing.InitCharacter(test, "Случай", "meta-norm");
                 Assert.NotNull(wallet);
                 Assert.NotNull(wallet?.Scoring);
@@ -49,7 +49,7 @@ namespace NillingTests
             var billing = IocContainer.Get<IBillingManager>();
             try
             {
-                var from = 44043;
+                var from = TestId;
                 var to = 55817;
                 var transfer = billing.MakeTransferSINSIN(from, to, 1, "тест");
                 Assert.NotNull(transfer);
@@ -67,7 +67,7 @@ namespace NillingTests
             var billing = IocContainer.Get<IBillingManager>();
             try
             {
-                var test = 10312;
+                var test = TestId;
                 var wallet = billing.CreateOrUpdatePhysicalWallet(test, "Случай", 1, 100000);
                 Assert.NotNull(wallet);
                 Assert.NotNull(wallet?.Scoring);
@@ -85,7 +85,7 @@ namespace NillingTests
             var billing = IocContainer.Get<IBillingManager>();
             try
             {
-                var test = 44043;
+                var test = TestId;
                 var transfers = billing.GetTransfers(test);
                 Assert.NotNull(transfers);
             }
@@ -101,7 +101,7 @@ namespace NillingTests
             var billing = IocContainer.Get<IBillingManager>();
             try
             {
-                var test = 44043;
+                var test = TestId;
                 var balance = billing.GetBalance(test);
                 Assert.NotNull(balance);
 
@@ -118,7 +118,7 @@ namespace NillingTests
             var billing = IocContainer.Get<IBillingManager>();
             try
             {
-                var test = 10312;
+                var test = TestId;
                 var rentas = billing.GetRentas(test);
                 Assert.NotNull(rentas);
 
@@ -151,7 +151,7 @@ namespace NillingTests
             var billing = IocContainer.Get<IBillingManager>();
             try
             {
-                var test = 10312;
+                var test = TestId;
                 billing.ProcessPeriod(test);
                 
             }
@@ -169,7 +169,7 @@ namespace NillingTests
             {
                 var sku = 199;
                 var shop = 3;
-                var character = 10312;
+                var character = TestId;
                 var price = billing.GetPrice(character, shop, sku);
                 Assert.AreNotEqual(0, price.PriceId);
                 var renta = billing.ConfirmRenta(10312, price.PriceId);

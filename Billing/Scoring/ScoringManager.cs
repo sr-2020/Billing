@@ -24,10 +24,103 @@ namespace Scoringspace
         void OnClinicalDeath(string model);
         void OnDumpshock(string model);
         void OnFoodConsume(string model, string foodLifeStyle);
+        void OnOtherBuy(SIN sin, int lifestyle);
+        void OnPillBuy(SIN sin, int lifestyle);
+        void OnWeaponBuy(SIN sin, int lifestyle);
+        void OnMagicBuy(SIN sin, int lifestyle);
+        void OnFoodBuy(SIN sin, int lifestyle);
+        void OnImplantBuy(SIN sin, int lifestyle);
+        void OnImplantInstalled(string model, string implantlifestyle, string autodoclifestyle);
     }
 
     public class ScoringManager : BaseEntityRepository, IScoringManager
     {
+        #region implementation
+
+        public void OnImplantInstalled(string model, string implantlifestyle, string autodoclifestyle)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.implant_install);
+            var scoring = GetScoringByModelId(model);
+            if (!BillingHelper.LifestyleIsDefined(implantlifestyle) || !BillingHelper.LifestyleIsDefined(autodoclifestyle))
+            {
+                return;
+            }
+            var lifestyle = BillingHelper.GetLifestyle(implantlifestyle);
+            ScoringEvent(scoring.Id, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == (int)lifestyle);
+                return value?.Value ?? 1;
+            });
+            factorId = GetFactorId(ScoringFactorEnum.where_implant_install);
+            lifestyle = BillingHelper.GetLifestyle(autodoclifestyle);
+            ScoringEvent(scoring.Id, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == (int)lifestyle);
+                return value?.Value ?? 1;
+            });
+
+        }
+
+        public void OnImplantBuy(SIN sin, int lifestyle)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.buy_implant);
+            ScoringEvent(sin.ScoringId, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
+                return value?.Value ?? 1;
+            });
+        }
+
+        public void OnOtherBuy(SIN sin, int lifestyle)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.buy_other);
+            ScoringEvent(sin.ScoringId, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
+                return value?.Value ?? 1;
+            });
+        }
+
+        public void OnPillBuy(SIN sin, int lifestyle)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.buy_pill);
+            ScoringEvent(sin.ScoringId, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
+                return value?.Value ?? 1;
+            });
+        }
+
+        public void OnWeaponBuy(SIN sin, int lifestyle)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.buy_weapon);
+            ScoringEvent(sin.ScoringId, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
+                return value?.Value ?? 1;
+            });
+        }
+
+        public void OnMagicBuy(SIN sin, int lifestyle)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.buy_magic);
+            ScoringEvent(sin.ScoringId, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
+                return value?.Value ?? 1;
+            });
+        }
+
+        public void OnFoodBuy(SIN sin, int lifestyle)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.buy_food);
+            ScoringEvent(sin.ScoringId, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
+                return value?.Value ?? 1;
+            });
+        }
+
         public void OnFoodConsume(string model, string foodLifeStyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.food_consume);
@@ -102,7 +195,7 @@ namespace Scoringspace
                  return value?.Value ?? 1;
              });
         }
-
+        #endregion
         public void OnTest(int scoringId)
         {
             var factorId = GetFactorId(ScoringFactorEnum.test);
@@ -112,15 +205,7 @@ namespace Scoringspace
                 return 0;
             });
         }
-
-        private int GetFactorId(ScoringFactorEnum factorName)
-        {
-            using (var context = new BillingContext())
-            {
-                var factor = context.Set<ScoringFactor>().AsNoTracking().FirstOrDefault(f => f.Code == factorName.ToString());
-                return factor.Id;
-            }
-        }
+        #region mathematic
 
         private void ScoringEvent(int scoringId, int factorId, Func<BillingContext, decimal> action)
         {
@@ -212,6 +297,17 @@ namespace Scoringspace
             return (decimal)result;
         }
 
+        #endregion
+
+        #region private
+        private int GetFactorId(ScoringFactorEnum factorName)
+        {
+            using (var context = new BillingContext())
+            {
+                var factor = context.Set<ScoringFactor>().AsNoTracking().FirstOrDefault(f => f.Code == factorName.ToString());
+                return factor.Id;
+            }
+        }
         private void Add<T>(T entity, BillingContext context) where T : BaseEntity
         {
             if (entity.Id > 0)
@@ -226,10 +322,7 @@ namespace Scoringspace
             int modelId;
             if (!int.TryParse(model, out modelId))
                 throw new Exception("model must be int");
-            var sin = Get<SIN>(s => s.Character.Model == modelId, s => s.Scoring);
-            if (sin.Scoring == null)
-                throw new Exception("scoring not found");
-            return sin.Scoring;
+            return GetScoringByModelId(modelId);
         }
 
         private Scoring GetScoringByModelId(int modelId)
@@ -240,5 +333,6 @@ namespace Scoringspace
             return sin.Scoring;
         }
 
+        #endregion
     }
 }

@@ -15,6 +15,7 @@ namespace Core.Primitives
         buy_magic,
         buy_food,
         buy_pill,
+        buy_implant,
         metatype,
         insurance,
         pill_use,
