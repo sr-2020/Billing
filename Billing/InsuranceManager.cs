@@ -19,7 +19,9 @@ namespace Billing
     {
         public InsuranceDto GetInsurance(int modelId)
         {
-            var insuranceId = _settings.GetIntValue(Core.Primitives.SystemSettingsEnum.insuranceid);
+            var dbinsurance = Get<ProductType>(p => p.Alias == ProductTypeEnum.Insurance.ToString());
+            if (dbinsurance == null)
+                throw new Exception("insurance type not found");
             var sin = GetSINByModelId(modelId);
             if (sin == null)
                 throw new Exception("sin not found");
@@ -29,9 +31,9 @@ namespace Billing
                 SkuName = "Страховка отсутствует",
                 LifeStyle = BillingHelper.GetLifestyle(-1).ToString(),
                 ShopName = "Страховка отсутствует",
-                PersonName = $"Error(Страховка отсутствует)_{sin.PersonName}"
+                PersonName = $"{sin.PersonName} !!!(Без страховки)!!!"
             };
-            var lastIns = GetList<Renta>(r => r.Sku.Nomenklatura.ProductTypeId == insuranceId && r.SinId == sin.Id, r => r.Shop, r => r.Sku.Nomenklatura)
+            var lastIns = GetList<Renta>(r => r.Sku.Nomenklatura.ProductTypeId == dbinsurance.Id && r.SinId == sin.Id, r => r.Shop, r => r.Sku.Nomenklatura)
                                 .OrderByDescending(r => r.DateCreated)
                                 .FirstOrDefault();
             if (lastIns != null)

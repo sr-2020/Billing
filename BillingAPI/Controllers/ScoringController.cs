@@ -32,8 +32,8 @@ namespace BillingAPI.Controllers
             //return result;
         }
 
-        [HttpGet("info/getscoring")]
-        public DataResult<Scoring> GetScoring(int characterId)
+        [HttpGet("info/getmyscoring")]
+        public DataResult<Scoring> GetScoring(int character)
         {
             var orc = new Scoring();
             orc.CurrentScoring = 0;

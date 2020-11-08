@@ -31,7 +31,7 @@ namespace NillingTests
             var billing = IocContainer.Get<IBillingManager>();
             try
             {
-                var test = 10312;
+                var test = 44043;
                 var wallet = billing.InitCharacter(test, "Случай", "meta-norm");
                 Assert.NotNull(wallet);
                 Assert.NotNull(wallet?.Scoring);

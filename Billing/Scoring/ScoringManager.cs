@@ -22,10 +22,10 @@ namespace Scoringspace
 
     public class ScoringManager : IScoringManager
     {
-        
+
         public void OnLifeStyleChanged(Scoring scoring, Lifestyles from, Lifestyles to)
         {
-            var factorId = GetFactorIdFromSystemSettings($"{SystemSettingsEnum.factor_}lschange");
+            var factorId = GetFactorId($"lschange");
             ScoringEvent(scoring.Id, factorId, (context) =>
              {
                  var value = context.Set<EventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == ScoringHelper.GetEventNumberLifestyle(from, to));
@@ -35,7 +35,7 @@ namespace Scoringspace
 
         public void OnTest(int scoringId)
         {
-            var factorId = GetFactorIdFromSystemSettings("test");
+            var factorId = GetFactorId("test");
             ScoringEvent(scoringId, 1, (context) =>
             {
                 Thread.Sleep(10000);
@@ -43,11 +43,13 @@ namespace Scoringspace
             });
         }
 
-        private int GetFactorIdFromSystemSettings(string factorName)
+        private int GetFactorId(string factorName)
         {
-            var systemsettings = IocContainer.Get<ISettingsManager>();
-            var factorId = systemsettings.GetIntValue(factorName);
-            return factorId;
+            using (var context = new BillingContext())
+            {
+                var factor = context.Set<ScoringFactor>().AsNoTracking().FirstOrDefault(f => f.Code == factorName);
+                return factor.Id;
+            }
         }
 
         private void ScoringEvent(int scoringId, int factorId, Func<BillingContext, decimal> action)
@@ -98,7 +100,7 @@ namespace Scoringspace
                             var curCategories = context.Set<CurrentCategory>().AsNoTracking().Include(f => f.Category).Where(c => c.Category.CategoryType == category.CategoryType && c.ScoringId == scoringId);
                             var scoring = context.Set<Scoring>().AsTracking().FirstOrDefault(s => s.Id == scoringId);
                             var systemsettings = IocContainer.Get<ISettingsManager>();
-                            
+
                             if (category.CategoryType == (int)ScoringCategoryType.Fix)
                             {
                                 var k = systemsettings.GetDecimalValue(SystemSettingsEnum.fixK);
@@ -133,6 +135,10 @@ namespace Scoringspace
         private decimal CalculateFactor(double lifestyle, double current)
         {
             var result = Math.Sqrt(Math.Abs(lifestyle)) * (lifestyle + Math.Abs(lifestyle)) * (current + Math.Sqrt(1 / (3 * current))) / (2 * lifestyle) + Math.Sqrt(1 / Math.Abs(lifestyle)) * (Math.Sqrt(current + 1 / 4) - 1 / 2) / (2 * lifestyle);
+            if (result > 3)
+                result = 3;
+            if (result < 0.3)
+                result = 0.3;
             return (decimal)result;
         }
 
