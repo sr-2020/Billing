@@ -8,7 +8,7 @@ app:
   postgres:
     dbHost: postgres
     dbnameHangfire: Hangfire
-    dbnameBilling: rc_sr2020
+    dbnameBilling: sr2020
 
 image:
   repository: sr2020/billingapi
