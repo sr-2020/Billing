@@ -23,7 +23,7 @@ namespace Core
         public DbSet<CorporationWallet> CorporationWallet { get; set; }
         public DbSet<CurrentCategory> CurrentCategory { get; set; }
         public DbSet<CurrentFactor> CurrentFactor { get; set; }
-        public DbSet<EventLifestyle> EventLifestyle { get; set; }
+        public DbSet<ScoringEventLifestyle> EventLifestyle { get; set; }
         public DbSet<HangfireJob> Job { get; set; }
         public DbSet<JoinCharacter> JoinCharacter { get; set; }
         public DbSet<Metatype> Metatype { get; set; }

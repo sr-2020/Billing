@@ -1,4 +1,5 @@
-﻿using Core;
+﻿using Billing;
+using Core;
 using Core.Model;
 using Core.Primitives;
 using Dapper;
@@ -18,24 +19,93 @@ namespace Scoringspace
     public interface IScoringManager
     {
         void OnLifeStyleChanged(Scoring scoring, Lifestyles from, Lifestyles to);
+        void OnPillConsumed(string model, string pillLifestyle);
+        void OnWounded(string model);
+        void OnClinicalDeath(string model);
+        void OnDumpshock(string model);
+        void OnFoodConsume(string model, string foodLifeStyle);
     }
 
-    public class ScoringManager : IScoringManager
+    public class ScoringManager : BaseEntityRepository, IScoringManager
     {
+        public void OnFoodConsume(string model, string foodLifeStyle)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.food_consume);
+            if (!BillingHelper.LifestyleIsDefined(foodLifeStyle))
+            {
+                return;
+            }
+            var lifestyle = BillingHelper.GetLifestyle(foodLifeStyle);
+            var scoring = GetScoringByModelId(model);
+            ScoringEvent(scoring.Id, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == (int)lifestyle);
+                return value?.Value ?? 1;
+            });
+        }
+
+        public void OnPillConsumed(string model, string pillLifestyle)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.pill_use);
+            if (!BillingHelper.LifestyleIsDefined(pillLifestyle))
+            {
+                return;
+            }
+            var lifestyle = BillingHelper.GetLifestyle(pillLifestyle);
+            var scoring = GetScoringByModelId(model);
+            ScoringEvent(scoring.Id, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == (int)lifestyle);
+                return value?.Value ?? 1;
+            });
+        }
+
+        public void OnWounded(string model)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.worse);
+            var scoring = GetScoringByModelId(model);
+            ScoringEvent(scoring.Id, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == 1);
+                return value?.Value ?? 1;
+            });
+        }
+
+        public void OnClinicalDeath(string model)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.clinical_death);
+            var scoring = GetScoringByModelId(model);
+            ScoringEvent(scoring.Id, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == 1);
+                return value?.Value ?? 1;
+            });
+        }
+
+        public void OnDumpshock(string model)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.dumpshock);
+            var scoring = GetScoringByModelId(model);
+            ScoringEvent(scoring.Id, factorId, (context) =>
+            {
+                    var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == 1);
+                    return value?.Value ?? 1;
+            });
+        }
 
         public void OnLifeStyleChanged(Scoring scoring, Lifestyles from, Lifestyles to)
         {
-            var factorId = GetFactorId($"lschange");
+            var factorId = GetFactorId(ScoringFactorEnum.ls_change);
             ScoringEvent(scoring.Id, factorId, (context) =>
              {
-                 var value = context.Set<EventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == ScoringHelper.GetEventNumberLifestyle(from, to));
+                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == ScoringHelper.GetEventNumberLifestyle(from, to));
                  return value?.Value ?? 1;
              });
         }
 
         public void OnTest(int scoringId)
         {
-            var factorId = GetFactorId("test");
+            var factorId = GetFactorId(ScoringFactorEnum.test);
             ScoringEvent(scoringId, 1, (context) =>
             {
                 Thread.Sleep(10000);
@@ -43,11 +113,11 @@ namespace Scoringspace
             });
         }
 
-        private int GetFactorId(string factorName)
+        private int GetFactorId(ScoringFactorEnum factorName)
         {
             using (var context = new BillingContext())
             {
-                var factor = context.Set<ScoringFactor>().AsNoTracking().FirstOrDefault(f => f.Code == factorName);
+                var factor = context.Set<ScoringFactor>().AsNoTracking().FirstOrDefault(f => f.Code == factorName.ToString());
                 return factor.Id;
             }
         }
@@ -150,5 +220,25 @@ namespace Scoringspace
                 context.Entry(entity).State = EntityState.Added;
             context.SaveChanges();
         }
+
+        private Scoring GetScoringByModelId(string model)
+        {
+            int modelId;
+            if (!int.TryParse(model, out modelId))
+                throw new Exception("model must be int");
+            var sin = Get<SIN>(s => s.Character.Model == modelId, s => s.Scoring);
+            if (sin.Scoring == null)
+                throw new Exception("scoring not found");
+            return sin.Scoring;
+        }
+
+        private Scoring GetScoringByModelId(int modelId)
+        {
+            var sin = Get<SIN>(s => s.Character.Model == modelId, s => s.Scoring);
+            if (sin.Scoring == null)
+                throw new Exception("scoring not found");
+            return sin.Scoring;
+        }
+
     }
 }

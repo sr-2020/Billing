@@ -11,6 +11,15 @@ namespace Billing
 {
     public class BillingHelper
     {
+        public static bool LifestyleIsDefined(string name)
+        {
+            return Enum.IsDefined(typeof(Lifestyles), name);
+        }
+
+        public static Lifestyles GetLifestyle(string name)
+        {
+            return (Lifestyles)Enum.Parse(typeof(Lifestyles), name);
+        }
 
         public static DiscountType GetDiscountType(int discountType)
         {

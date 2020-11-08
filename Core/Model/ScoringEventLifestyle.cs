@@ -5,8 +5,8 @@ using System.Text;
 
 namespace Core.Model
 {
-    [Table("event_lifestyle")]
-    public class EventLifestyle : BaseEntity
+    [Table("scoring_event_lifestyle")]
+    public class ScoringEventLifestyle : BaseEntity
     {
         [ForeignKey("scoring_factor")]
         [Column("scoring_factor")]
