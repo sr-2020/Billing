@@ -26,21 +26,21 @@ namespace BillingAPI.Controllers
         public DataResult<List<SystemSettings>> ShowAll()
         {
             var manager = IocContainer.Get<ISettingsManager>();
-            var result = RunAction(() => manager.GetAllSettings());
+            var result = RunAction(() => manager.GetAllSettings(), "settings/ShowAll");
             return result;
         }
         [HttpGet("GetValue")]
         public DataResult<string> GetValue(string key)
         {
             var manager = IocContainer.Get<ISettingsManager>();
-            var result = RunAction(() => manager.GetValue(key));
+            var result = RunAction(() => manager.GetValue(key), "settings/GetValue");
             return result;
         }
         [HttpGet("SetValue")]
         public DataResult<SystemSettings> SetValue(string key, string value)
         {
             var manager = IocContainer.Get<ISettingsManager>();
-            var result = RunAction(() => manager.SetValue(key, value));
+            var result = RunAction(() => manager.SetValue(key, value), "settings/SetValue");
             return result;
         }
 

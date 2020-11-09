@@ -23,7 +23,7 @@ namespace BillingAPI.Controllers
         public DataResult<Transfer> CreateTransferMIR([FromBody] CreateTransferSinSinRequest request)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateTransferMIRSIN(request.CharacterTo, request.Amount));
+            var result = RunAction(() => manager.CreateTransferMIRSIN(request.CharacterTo, request.Amount), "createtransfermir");
             return result;
         }
 
@@ -35,7 +35,7 @@ namespace BillingAPI.Controllers
         public DataResult<Transfer> CreateTransferSINSIN(int character, [FromBody] CreateTransferSinSinRequest request)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateTransferSINSIN(character.ToString(), request.CharacterTo, request.Amount, request.Comment));
+            var result = RunAction(() => manager.CreateTransferSINSIN(character.ToString(), request.CharacterTo, request.Amount, request.Comment), "createtransfer");
             return result;
         }
 
