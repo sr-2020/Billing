@@ -68,6 +68,9 @@ namespace BillingAPI
             services.AddSingleton<IPubSubFoodService, PubSubFoodService>();
             services.AddSingleton<IPubSubHealthService, PubSubHealthService>();
             services.AddSingleton<IPubSubAbilityService, PubSubAbilityService>();
+            services.AddSingleton<IPubSubDampshockService, PubSubDampshockService>();
+            services.AddSingleton<IPubSubImplantInstallService, PubSubImplantInstallService>();
+            services.AddSingleton<IPubSubPillConsumptionService, PubSubPillConsumptionService>();
             services.AddHostedService<PubSubSubscriber>();
 
             #endregion
