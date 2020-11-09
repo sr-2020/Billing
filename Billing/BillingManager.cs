@@ -21,7 +21,7 @@ namespace Billing
         #region application
         Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment);
         Transfer CreateTransferSINSIN(string modelId, string characterTo, decimal amount, string comment);
-        Transfer CreateTransferMIRSIN(string characterTo, decimal amount, string comment);
+        Transfer CreateTransferMIRSIN(string characterTo, decimal amount);
         Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
 
         string GetSinStringByCharacter(int modelId);
@@ -642,7 +642,7 @@ namespace Billing
             return MakeTransferSINSIN(imodelId, icharacterTo, amount, comment);
         }
 
-        public Transfer CreateTransferMIRSIN(string characterTo, decimal amount, string comment)
+        public Transfer CreateTransferMIRSIN(string characterTo, decimal amount)
         {
             var from = GetMIR();
             int icharacterTo;
@@ -655,6 +655,7 @@ namespace Billing
             {
                 throw new BillingException($"Не найден получатель");
             }
+            var comment = "Перевод от международного банка";
             return MakeNewTransfer(from, to.Wallet, amount, comment);
         }
 

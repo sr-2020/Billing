@@ -23,7 +23,7 @@ namespace BillingAPI.Controllers
         public DataResult<Transfer> CreateTransferMIR([FromBody] CreateTransferSinSinRequest request)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateTransferMIRSIN(request.CharacterTo, request.Amount, request.Comment));
+            var result = RunAction(() => manager.CreateTransferMIRSIN(request.CharacterTo, request.Amount));
             return result;
         }
 
@@ -42,13 +42,13 @@ namespace BillingAPI.Controllers
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="character"></param>
         /// <returns></returns>
         [HttpGet("getcharacters")]
-        public DataResult<List<CharacterDto>> GetCharacters(int character)
+        [AdminAuthorization]
+        public DataResult<List<CharacterDto>> GetCharacters()
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetCharacters(), $"getcharacters for {character}");
+            var result = RunAction(() => manager.GetCharacters(), $"getcharacters ");
             return result;
         }
 
