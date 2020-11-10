@@ -83,10 +83,6 @@ namespace BillingAPI.Controllers
 
         private void Start(string action, string message, Guid guid)
         {
-            if(string.IsNullOrEmpty(message))
-            {
-                return;
-            }
             Console.WriteLine($"Action {action}: {message} for {guid} started");
         }
 
