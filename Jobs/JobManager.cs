@@ -5,23 +5,25 @@ using Core.Primitives;
 using Hangfire;
 using IoC;
 using NCrontab;
+using Settings;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Jobs
 {
     public interface IJobManager : IBaseRepository
     {
-        void ProcessCycle(string modelId);
-
+        void ProcessPeriod();
         HangfireJob AddOrUpdateJob(int id, DateTimeOffset? start, DateTimeOffset? end, string cron, string jobname, int jobtype);
         List<HangfireJob> GetAllJobs(bool finished, int jobtype);
     }
 
     public class JobManager : BaseEntityRepository, IJobManager
     {
+        private ISettingsManager _settingManager = IocContainer.Get<ISettingsManager>();
         public HangfireJob AddOrUpdateJob(int id, DateTimeOffset? start, DateTimeOffset? end, string cron, string jobname, int jobtype)
         {
             HangfireJob job = null;
@@ -60,23 +62,46 @@ namespace Jobs
             return job;
         }
 
-        public async void ProcessCycle(string model)
+
+        public void ProcessPeriod()
         {
-            var cycle = new BillingCycle
+            Task.Run(() =>
             {
-                StartTime = DateTime.Now
-            };
-            Add(cycle);
-            Context.SaveChanges();
+                var processing = _settingManager.GetBoolValue(Core.Primitives.SystemSettingsEnum.block);
+                if (processing)
+                    return;
+                var cycle = new BillingCycle
+                {
+                    StartTime = DateTime.Now
+                };
+                Add(cycle);
+                Context.SaveChanges();
+                //lock
+                Console.WriteLine("PeriodJob processing start");
+                _settingManager.SetValue(Core.Primitives.SystemSettingsEnum.block, "true");
+                try
+                {
+                    var _billingManager = IocContainer.Get<IBillingManager>();
+                    _billingManager.ProcessPeriod();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("ошибка ProcessPeriod");
+                    Console.Error.WriteLine(e.Message);
+                }
+                finally
+                {
+                    //unlock
+                    Console.WriteLine("PeriodJob processing finish");
+                    _settingManager.SetValue(Core.Primitives.SystemSettingsEnum.block, "false");
+                    var version = _settingManager.GetIntValue(Core.Primitives.SystemSettingsEnum.eversion);
+                    version++;
+                    _settingManager.SetValue(Core.Primitives.SystemSettingsEnum.eversion, version.ToString());
+                }
+                cycle.FinishTime = DateTime.Now;
+                Context.SaveChanges();
+            });
 
-            cycle.FinishTime = DateTime.Now;
-            Context.SaveChanges();
-        }
-
-        public async void ProcessPeriod()
-        {
-            var job = new PeriodJob();
-            await job.DoJob();
         }
 
         #region hangfire(obsolete)
@@ -117,14 +142,6 @@ namespace Jobs
             var dbJob = Get<HangfireJob>(j => j.Id == dbJobId);
             switch ((JobType)dbJob.JobType)
             {
-                case JobType.Renta:
-                    job = new PeriodJob();
-                    dbJob = CreateOrUpdateRecurringJob(dbJob, job);
-                    break;
-                case JobType.Test:
-                    job = new TestJob();
-                    dbJob = CreateOrUpdateRecurringJob(dbJob, job);
-                    break;
                 default:
                     throw new Exception("jobtype not found");
             }

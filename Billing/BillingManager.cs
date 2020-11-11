@@ -76,7 +76,7 @@ namespace Billing
         {
             var modelId = BillingHelper.GetModelId(model);
             var bulkCount = 100;
-            var sins = GetList<SIN>(s => s.Character.Model == modelId || modelId == 0, s => s.Character);
+            var sins = GetList<SIN>(s => (s.Character.Model == modelId || modelId == 0) && (s.InGame ?? false), s => s.Character);
             var pageCount = (sins.Count + bulkCount - 1) / bulkCount;
             for (int i = 0; i < pageCount; i++)
             {
@@ -84,9 +84,10 @@ namespace Billing
                 foreach (var sin in sins.Skip(i * bulkCount).Take(bulkCount).ToList())
                 {
                     ProcessRentas(sin, mir);
-                    Context.SaveChanges();
-                    RefreshContext();
+
                 }
+                Context.SaveChanges();
+                RefreshContext();
             }
         }
 

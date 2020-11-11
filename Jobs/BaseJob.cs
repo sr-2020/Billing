@@ -14,28 +14,24 @@ namespace Jobs
     public abstract class BaseJob
     {
         public virtual string JobName { get; }
-        public Task DoJob()
+        public void DoJob()
         {
-            return Task.Run(() =>
+            try
             {
-                try
-                {
-                    var sw = new Stopwatch();
-                    sw.Start();
-                    Console.WriteLine($"handle {JobName} started");
-                    Handle();
-                    Console.WriteLine($"handle {JobName} finished, elapsed {sw.ElapsedMilliseconds} ms");
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.ToString());
-                }
-            });
-
+                var sw = new Stopwatch();
+                sw.Start();
+                Console.WriteLine($"handle {JobName} started");
+                Handle();
+                Console.WriteLine($"handle {JobName} finished, elapsed {sw.ElapsedMilliseconds} ms");
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e.ToString());
+            }
         }
         public virtual void Handle()
         {
-            
+
         }
 
     }

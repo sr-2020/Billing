@@ -20,10 +20,10 @@ namespace BillingAPI.Controllers
     {
         private readonly IJobManager Manager = IocContainer.Get<IJobManager>();
 
-        [HttpGet("cycle")]
-        public Result ProcessCycle(string modelId)
+        [HttpGet("period")]
+        public Result ProcessPeriod()
         {
-            var result = RunAction(() => Manager.ProcessCycle(modelId), $"cycle");
+            var result = RunAction(() => Manager.ProcessPeriod(), $"period");
             return result;
         }
 
