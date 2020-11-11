@@ -1,4 +1,5 @@
-﻿using Core.Model;
+﻿using Core;
+using Core.Model;
 using Core.Primitives;
 using IoC;
 using Settings;
@@ -11,6 +12,15 @@ namespace Billing
 {
     public class BillingHelper
     {
+
+        public static int GetModelId(string model)
+        {
+            int modelId;
+            if (!int.TryParse(model, out modelId))
+                throw new BillingException("modelId is invalid");
+            return modelId;
+        }
+
         public static bool LifestyleIsDefined(string name)
         {
             return Enum.IsDefined(typeof(Lifestyles), name);

@@ -47,11 +47,11 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("processrentas")]
-        public ActionResult ProcessRentas(int modelId = 0)
+        public ActionResult ProcessRentas(string modelId = "0")
         {
             Console.WriteLine("processrentas started");
             var manager = IocContainer.Get<IBillingManager>();
-            Task.Run(() => manager.ProcessCycle(modelId));
+            Task.Run(() => manager.ProcessPeriod(modelId));
             Console.WriteLine("processrentas finished");
             return new JsonResult("success");
         }

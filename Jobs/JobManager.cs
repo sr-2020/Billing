@@ -1,4 +1,5 @@
-﻿using Core;
+﻿using Billing;
+using Core;
 using Core.Model;
 using Core.Primitives;
 using Hangfire;
@@ -13,6 +14,8 @@ namespace Jobs
 {
     public interface IJobManager : IBaseRepository
     {
+        void ProcessCycle(string modelId);
+
         HangfireJob AddOrUpdateJob(int id, DateTimeOffset? start, DateTimeOffset? end, string cron, string jobname, int jobtype);
         List<HangfireJob> GetAllJobs(bool finished, int jobtype);
     }
@@ -57,6 +60,27 @@ namespace Jobs
             return job;
         }
 
+        public async void ProcessCycle(string model)
+        {
+            var cycle = new BillingCycle
+            {
+                StartTime = DateTime.Now
+            };
+            Add(cycle);
+            Context.SaveChanges();
+
+            cycle.FinishTime = DateTime.Now;
+            Context.SaveChanges();
+        }
+
+        public async void ProcessPeriod()
+        {
+            var job = new PeriodJob();
+            await job.DoJob();
+        }
+
+        #region hangfire(obsolete)
+
         public List<HangfireJob> GetAllJobs(bool finished, int jobtype)
         {
             var filter = DateTimeOffset.Now;
@@ -94,7 +118,7 @@ namespace Jobs
             switch ((JobType)dbJob.JobType)
             {
                 case JobType.Renta:
-                    job = new RentaJob();
+                    job = new PeriodJob();
                     dbJob = CreateOrUpdateRecurringJob(dbJob, job);
                     break;
                 case JobType.Test:
@@ -119,5 +143,7 @@ namespace Jobs
             RecurringJob.AddOrUpdate(dbJob.HangfireRecurringId, () => job.DoJob(), $"{dbJob.Cron}");
             return dbJob;
         }
+
+        #endregion
     }
 }

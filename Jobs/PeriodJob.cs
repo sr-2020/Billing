@@ -8,20 +8,23 @@ using System.Text;
 
 namespace Jobs
 {
-    public class RentaJob : BaseJob
+    public class PeriodJob : BaseJob
     {
-        public override string JobName { get => "RentaJob"; }
+        public override string JobName { get => "PeriodJob"; }
         private ISettingsManager _settingManager = IocContainer.Get<ISettingsManager>();
         private IBillingManager _billingManager = IocContainer.Get<IBillingManager>();
 
         public override void Handle()
         {
             base.Handle();
+            var processing = _settingManager.GetBoolValue(Core.Primitives.SystemSettingsEnum.block);
+            if (processing)
+                return;
             //lock
             Start();
             try
             {
-                _billingManager.ProcessCycle();
+                _billingManager.ProcessPeriod();
             }
             catch (Exception e)
             {
@@ -37,16 +40,13 @@ namespace Jobs
 
         private void Start()
         {
-            Console.WriteLine("RentaJob processing start");
-            var processing = _settingManager.GetBoolValue(Core.Primitives.SystemSettingsEnum.block);
-            if (processing)
-                return;
+            Console.WriteLine("PeriodJob processing start");
             _settingManager.SetValue(Core.Primitives.SystemSettingsEnum.block, "true");
         }
 
         private void Finish()
         {
-            Console.WriteLine("RentaJob processing finish");
+            Console.WriteLine("PeriodJob processing finish");
             _settingManager.SetValue(Core.Primitives.SystemSettingsEnum.block, "false");
             var version = _settingManager.GetIntValue(Core.Primitives.SystemSettingsEnum.eversion);
             version++;

@@ -49,8 +49,7 @@ namespace Billing
         #endregion
 
         #region jobs
-        void ProcessCycle(int modelId = 0);
-        void ProcessPeriod(int modelId = 0);
+        void ProcessPeriod(string model = "0");
         #endregion
 
         #region admin
@@ -73,19 +72,9 @@ namespace Billing
     {
         public static string UrlNotFound = "";
 
-        public void ProcessCycle(int modelId = 0)
+        public void ProcessPeriod(string model = "0")
         {
-
-        }
-
-        public void ProcessPeriod(int modelId = 0)
-        {
-            var cycle = new BillingCycle
-            {
-                StartTime = DateTime.Now
-            };
-            Add(cycle);
-            Context.SaveChanges();
+            var modelId = BillingHelper.GetModelId(model);
             var bulkCount = 100;
             var sins = GetList<SIN>(s => s.Character.Model == modelId || modelId == 0, s => s.Character);
             var pageCount = (sins.Count + bulkCount - 1) / bulkCount;
@@ -94,13 +83,11 @@ namespace Billing
                 var mir = GetMIR();
                 foreach (var sin in sins.Skip(i * bulkCount).Take(bulkCount).ToList())
                 {
-                    ProcessPeriod(sin, mir);
+                    ProcessRentas(sin, mir);
                     Context.SaveChanges();
                     RefreshContext();
                 }
             }
-            cycle.FinishTime = DateTime.Now;
-            Context.SaveChanges();
         }
 
 
@@ -803,7 +790,7 @@ namespace Billing
             return price;
         }
 
-        private void ProcessPeriod(SIN sin, Wallet mir)
+        private void ProcessRentas(SIN sin, Wallet mir)
         {
             var rentas = GetList<Renta>(r => r.SinId == sin.Id, r => r.Shop, r => r.Sku.Corporation);
             foreach (var renta in rentas)
