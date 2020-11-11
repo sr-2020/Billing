@@ -37,3 +37,4 @@ bld/
 \.idea/
 BillingAPI/Dockerfile
 elixirkey.json
+BillingTests/*

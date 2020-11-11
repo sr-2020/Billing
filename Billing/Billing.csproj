@@ -9,7 +9,6 @@
     <ProjectReference Include="..\FileHelper\FileHelper.csproj" />
     <ProjectReference Include="..\InternalServices\InternalServices.csproj" />
     <ProjectReference Include="..\IoC.Container\IoC.Container.csproj" />
-    <ProjectReference Include="..\Scoring\Scoring.csproj" />
     <ProjectReference Include="..\Settings\Settings.csproj" />
   </ItemGroup>
 

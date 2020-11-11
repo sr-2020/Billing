@@ -149,12 +149,13 @@ namespace BillingAPI.Controllers
         /// <param name="amount">if negative value then amount will no change or 0</param>
         /// <param name="name">Some name</param>
         /// <param name="lifestyle">lifestyle from 1 to 6</param>
+        /// <param name="owner">lifestyle from 1 to 6</param>
         /// <returns></returns>
         [HttpPut("admin/createorupdateshopwallet")]
-        public DataResult<ShopWallet> CreateOrUpdateShopWallet(int foreignId, decimal amount, string name, int lifestyle)
+        public DataResult<ShopWallet> CreateOrUpdateShopWallet(int foreignId, decimal amount, string name, int lifestyle, int owner)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdateShopWallet(foreignId, amount, name, lifestyle), $"createorupdateshopwallet {foreignId} {amount} {name} {lifestyle}");
+            var result = RunAction(() => manager.CreateOrUpdateShopWallet(foreignId, amount, name, lifestyle, owner), $"createorupdateshopwallet {foreignId} {amount} {name} {lifestyle}");
             return result;
         }
 

@@ -6,7 +6,6 @@ FROM microsoft/dotnet:2.1-sdk AS build
 WORKDIR /src
 COPY ["BillingAPI/BillingAPI.csproj", "BillingAPI/"]
 COPY ["Jobs/Jobs.csproj", "Jobs/"]
-COPY ["Scoring/Scoring.csproj", "Scoring/"]
 COPY ["Core/Core.csproj", "Core/"]
 COPY ["Settings/Settings.csproj", "Settings/"]
 COPY ["IoC.Container/IoC.Container.csproj", "IoC.Container/"]

@@ -61,7 +61,7 @@ namespace Billing
         Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description, string pictureurl, int externalId = 0);
         ProductType CreateOrUpdateProductType(int id, string name, int discounttype = 1, int externalId = 0);
         CorporationWallet CreateOrUpdateCorporationWallet(int id, decimal amount, string name, string logoUrl);
-        ShopWallet CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle);
+        ShopWallet CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle, int owner);
         void DeleteCorporation(int corpid);
         void DeleteShop(int shopid);
         void DeleteProductType(int id, bool force);
@@ -369,18 +369,23 @@ namespace Billing
             return corporation;
         }
 
-        public ShopWallet CreateOrUpdateShopWallet(int shopId = 0, decimal amount = 0, string name = "default shop", int lifestyle = 1)
+        public ShopWallet CreateOrUpdateShopWallet(int shopId = 0, decimal amount = 0, string name = "default shop", int lifestyle = 1, int ownerId = 0)
         {
             ShopWallet shop = null;
             if (shopId > 0)
                 shop = Get<ShopWallet>(w => w.Id == shopId, s => s.Wallet);
+            var owner = GetSINByModelId(ownerId);
+            if (owner == null)
+                throw new BillingException("owner not found");
+                
             if (shop == null)
             {
                 var newWallet = CreateOrUpdateWallet(WalletTypes.Shop);
                 shop = new ShopWallet
                 {
                     Wallet = newWallet,
-                    Id = shopId
+                    Id = shopId,
+                    OwnerId = ownerId
                 };
                 Add(shop);
             }
