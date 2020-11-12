@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Billing;
 using BillingAPI.Filters;
@@ -19,7 +20,7 @@ namespace BillingAPI.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class TestController : ControllerBase
+    public class TestController : EvarunApiController
     {
         /// <summary>
         /// Получить общую версию проекта
@@ -30,11 +31,20 @@ namespace BillingAPI.Controllers
         {
             return IocContainer.Get<ISettingsManager>().GetValue(Core.Primitives.SystemSettingsEnum.eversion);
         }
-        [HttpGet("getcharacter")]
-        public ActionResult Test(int character)
+        [HttpGet("test")]
+        public ActionResult Test()
         {
-            var test = EreminService.GetCharacter(character);
-            return new JsonResult(test);
+            Console.WriteLine("test started");
+            Task.Run(() =>
+            {
+                Console.WriteLine("task started");
+                var manager = IocContainer.Get<IJobManager>();
+                var result = RunAction(() => manager.ProcessPeriod(), $"period");
+                Thread.Sleep(1000);
+                Console.WriteLine("task ended");
+            });
+            Console.WriteLine("test ended");
+            return new JsonResult("sadasd");
         }
         [HttpGet("testid")]
         public ActionResult TestId(int character)

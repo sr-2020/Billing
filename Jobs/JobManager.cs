@@ -8,8 +8,10 @@ using NCrontab;
 using Settings;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Jobs
@@ -62,23 +64,33 @@ namespace Jobs
             return job;
         }
 
-
         public void ProcessPeriod()
         {
             Task.Run(() =>
             {
-                var processing = _settingManager.GetBoolValue(Core.Primitives.SystemSettingsEnum.block);
-                if (processing)
-                    return;
                 var cycle = new BillingCycle
                 {
                     StartTime = DateTime.Now
                 };
-                Add(cycle);
-                Context.SaveChanges();
-                //lock
-                Console.WriteLine("PeriodJob processing start");
-                _settingManager.SetValue(Core.Primitives.SystemSettingsEnum.block, "true");
+                try
+                {
+                    var processing = _settingManager.GetBoolValue(Core.Primitives.SystemSettingsEnum.block);
+                    if (processing)
+                    {
+                        Console.Error.WriteLine("Процесс пересчета уже запущен! Попытка повторного запуска");
+                        return;
+                    }
+                    Add(cycle);
+                    Context.SaveChanges();
+                    //lock
+                    _settingManager.SetValue(Core.Primitives.SystemSettingsEnum.block, "true");
+                    Console.WriteLine("Биллинг заблокирован");
+                }
+                catch (Exception e)
+                {
+                    Console.Error.WriteLine(e.ToString());
+                    return;
+                }
                 try
                 {
                     var _billingManager = IocContainer.Get<IBillingManager>();
@@ -86,6 +98,7 @@ namespace Jobs
                 }
                 catch (Exception e)
                 {
+                    
                     Console.WriteLine("ошибка ProcessPeriod");
                     Console.Error.WriteLine(e.Message);
                 }
@@ -94,6 +107,7 @@ namespace Jobs
                     //unlock
                     Console.WriteLine("PeriodJob processing finish");
                     _settingManager.SetValue(Core.Primitives.SystemSettingsEnum.block, "false");
+                    Console.WriteLine("Биллинг разблокирован");
                     var version = _settingManager.GetIntValue(Core.Primitives.SystemSettingsEnum.eversion);
                     version++;
                     _settingManager.SetValue(Core.Primitives.SystemSettingsEnum.eversion, version.ToString());
@@ -101,7 +115,6 @@ namespace Jobs
                 cycle.FinishTime = DateTime.Now;
                 Context.SaveChanges();
             });
-
         }
 
         #region hangfire(obsolete)

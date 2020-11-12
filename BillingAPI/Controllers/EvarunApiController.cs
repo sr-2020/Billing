@@ -88,7 +88,7 @@ namespace BillingAPI.Controllers
 
         private void Finish(Guid guid)
         {
-            Console.WriteLine($"Action for {guid} finished");
+            //Console.WriteLine($"Action for {guid} finished");
         }
         private T HandleException<T>(int code, string message, Guid guid, T result, string action) where T : Result 
         {
