@@ -80,6 +80,8 @@ namespace Jobs
                         Console.Error.WriteLine("Процесс пересчета уже запущен! Попытка повторного запуска");
                         return;
                     }
+                    var currentVersion = _settingManager.GetValue(Core.Primitives.SystemSettingsEnum.eversion);
+                    Console.WriteLine($"Запуск {currentVersion} периода");
                     Add(cycle);
                     Context.SaveChanges();
                     //lock

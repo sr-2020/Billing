@@ -18,7 +18,7 @@ namespace BillingAPI.Controllers
         public DataResult<InsuranceDto> GetInsurance(int characterId)
         {
             var manager = IocContainer.Get<IInsuranceManager>();
-            var result = RunAction(() => manager.GetInsurance(characterId), "GetInsurance");
+            var result = RunAction(() => manager.GetInsurance(characterId), $"GetInsurance({characterId})"); ;
             return result;
         }
     }
