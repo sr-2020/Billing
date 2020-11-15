@@ -34,16 +34,16 @@ namespace BillingAPI.Controllers
         [HttpGet("test")]
         public ActionResult Test()
         {
-            Console.WriteLine("test started");
-            Task.Run(() =>
-            {
-                Console.WriteLine("task started");
-                var manager = IocContainer.Get<IJobManager>();
-                var result = RunAction(() => manager.ProcessPeriod(), $"period");
-                Thread.Sleep(1000);
-                Console.WriteLine("task ended");
-            });
-            Console.WriteLine("test ended");
+            //Console.WriteLine("test started");
+            //Task.Run(() =>
+            //{
+            //    Console.WriteLine("task started");
+            //    var manager = IocContainer.Get<IJobManager>();
+            //    var result = RunAction(() => manager.(), $"period");
+            //    Thread.Sleep(1000);
+            //    Console.WriteLine("task ended");
+            //});
+            //Console.WriteLine("test ended");
             return new JsonResult("sadasd");
         }
         [HttpGet("testid")]
