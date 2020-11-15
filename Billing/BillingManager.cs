@@ -87,7 +87,6 @@ namespace Billing
 
                 }
                 Context.SaveChanges();
-                RefreshContext();
             }
         }
 

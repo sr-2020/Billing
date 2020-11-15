@@ -26,5 +26,8 @@ namespace Core.Primitives
         admin_id,
         fixK,
         relativeK,
+        period_count,
+        beat_period,
+        beat_cycle
     }
 }

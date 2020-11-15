@@ -16,7 +16,7 @@ namespace Core
             optionsBuilder.UseNpgsql(SystemHelper.GetConnectionString("billing"));
         }
         public DbSet<BillingAbilityLog> AbilityLogs { get; set; }
-        public DbSet<BillingCycle> BillingCycle { get; set; }
+        public DbSet<BillingBeat> BillingCycle { get; set; }
         public DbSet<CacheQRContent> CacheQR { get; set; }
         public DbSet<Character> Character { get; set; }
         public DbSet<Contract> Contract { get; set; }

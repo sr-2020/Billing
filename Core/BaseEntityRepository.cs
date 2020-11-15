@@ -26,8 +26,9 @@ namespace Core
         void Remove<T>(T entity) where T : class;
         void AddRange<T>(IEnumerable<T> entities) where T : BaseEntity;
         void Add<T>(T entity) where T : BaseEntity;
+        void AddAndSave<T>(T entity) where T : BaseEntity;
         void Delete<T>(int id) where T : BaseEntity;
-        void RefreshContext();
+        void SaveContext();
     }
 
 
@@ -35,16 +36,14 @@ namespace Core
     {
         protected BillingContext Context { get; set; }
 
-
         public BaseEntityRepository()
         {
             Context = new BillingContext();
         }
 
-        public void RefreshContext()
+        public void SaveContext()
         {
-            Context?.Dispose();
-            Context = new BillingContext();
+            Context?.SaveChanges();
         }
 
         public List<T> ExecuteQuery<T>(string query)
@@ -83,6 +82,12 @@ namespace Core
                 .Where(predicate)
                 .ToList();
             return res;
+        }
+
+        public virtual void AddAndSave<T>(T entity) where T : BaseEntity
+        {
+            Add(entity);
+            SaveContext();
         }
 
         public virtual void Add<T>(T entity) where T : BaseEntity

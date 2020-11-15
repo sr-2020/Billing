@@ -20,10 +20,24 @@ namespace BillingAPI.Controllers
     {
         private readonly IJobManager Manager = IocContainer.Get<IJobManager>();
 
+        private const string SECRET = "fee6f53e";
+
         [HttpGet("period")]
-        public Result ProcessPeriod()
+        public Result ProcessPeriod(string secret)
         {
-            var result = RunAction(() => Manager.ProcessPeriod(), $"period");
+            if (secret != SECRET)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    Console.Error.WriteLine("WARNING!! HACK DETECTED!!");
+                }
+                return RunAction(() => { throw new BillingException("Процесс пересчета уже запущен! Повторите позже"); });
+            }
+            var result = RunAction(() => 
+            {
+                var life = new JobLife();
+                life.Start();
+            }, $"period");
             return result;
         }
 

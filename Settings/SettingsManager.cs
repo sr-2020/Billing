@@ -37,7 +37,7 @@ namespace Settings
 
         public bool GetBoolValue(string key)
         {
-            var result = Get<SystemSettings>(s => s.Key == key);
+            var result = GetAsNoTracking<SystemSettings>(s => s.Key == key);
             if (result != null)
                 return bool.Parse(result.Value);
             throw new Exception($"SystemSetting {key} does not exists");
@@ -50,7 +50,7 @@ namespace Settings
 
         public int GetIntValue(string key)
         {
-            var result = Get<SystemSettings>(s => s.Key == key);
+            var result = GetAsNoTracking<SystemSettings>(s => s.Key == key);
             if (result != null)
                 return int.Parse(result.Value);
             throw new Exception($"SystemSetting {key} does not exists");
@@ -61,7 +61,7 @@ namespace Settings
         }
         public string GetValue(string key)
         {
-            var result = Get<SystemSettings>(s => s.Key == key);
+            var result = GetAsNoTracking<SystemSettings>(s => s.Key == key);
             if (result != null)
                 return result.Value;
             throw new Exception($"SystemSetting {key} does not exists");
@@ -73,7 +73,7 @@ namespace Settings
         }
         public decimal GetDecimalValue(string key)
         {
-            var result = Get<SystemSettings>(s => s.Key == key);
+            var result = GetAsNoTracking<SystemSettings>(s => s.Key == key);
             if (result != null)
                 return decimal.Parse(result.Value);
             throw new Exception($"SystemSetting {key} does not exists");
@@ -89,7 +89,6 @@ namespace Settings
             if (ss == null)
                 throw new Exception($"systemSetting {key} not found");
             ss.Value = value;
-            Add(ss);
             Context.SaveChanges();
             return ss;
         }
