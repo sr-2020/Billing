@@ -128,8 +128,9 @@ namespace Billing
                 CurrentModelId = modelId,
                 CurrentCharacterName = GetCharacterName(modelId)
             };
-            model.Shops = GetShops(s => s.Owner.Model == modelId || isAdmin);
-            model.Corporations = GetCorporations(s => s.Owner.Model == modelId || isAdmin);
+            var sin = GetSINByModelId(modelId);
+            model.Shops = GetShops(s => s.OwnerId == sin.Id || isAdmin);
+            model.Corporations = GetCorporations(s => s.OwnerId == sin.Id || isAdmin);
             return model;
         }
 
@@ -145,12 +146,13 @@ namespace Billing
             {
                 throw new BillingAuthException("Character not authorized");
             }
+            var sin = GetSINByModelId(modelId);
             var shop = Get<ShopWallet>(s => s.Id == shopId, s => s.Owner);
             if (shop == null)
             {
                 throw new BillingException("shop not found");
             }
-            return shop.Owner.Model == modelId;
+            return shop.OwnerId == sin.Id;
         }
 
         public List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate)
@@ -160,7 +162,6 @@ namespace Billing
                       {
                           Id = s.Id,
                           Name = s.Name,
-                          OwnerId = s.Owner?.Model ?? 0,
                           Comission = s.Commission,
                           Lifestyle = ((Lifestyles)s.LifeStyle).ToString(),
                           Balance = BillingHelper.RoundDown(s.Wallet.Balance),
@@ -175,8 +176,8 @@ namespace Billing
                     {
                         Id = c.Id,
                         Name = c.Name,
-                        OwnerId = c.Owner?.Model ?? 0,
-                        CorporationUrl = c.CorporationLogoUrl
+                        CorporationUrl = c.CorporationLogoUrl,
+                        OwnerName = c.Owner.PersonName
                     }).ToList();
         }
 

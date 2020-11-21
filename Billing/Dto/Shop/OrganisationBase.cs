@@ -8,7 +8,6 @@ namespace Billing.Dto.Shop
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public int OwnerId { get; set; }
-        public int OwnerName { get; set; }
+        public string OwnerName { get; set; }
     }
 }

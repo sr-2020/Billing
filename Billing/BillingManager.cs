@@ -41,9 +41,9 @@ namespace Billing
         RentaDto ConfirmRenta(int modelId, int priceId);
         List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1);
         List<ProductTypeDto> GetProductTypes(int id = -1);
-        ProductType GetExtProductType(int externalId);
-        Nomenklatura GetExtNomenklatura(int externalId);
-        Sku GetExtSku(int externalId);
+        ProductType GetExtProductType(string name);
+        Nomenklatura GetExtNomenklatura(string name);
+        Sku GetExtSku(string name);
         List<NomenklaturaDto> GetNomenklaturas(int producttype, int lifestyle, int id = -1);
         List<Contract> GetContrats(int shopid, int corporationId);
         #endregion
@@ -169,19 +169,19 @@ namespace Billing
                 new ProductTypeDto(p)).ToList();
         }
 
-        public ProductType GetExtProductType(int externalId)
+        public ProductType GetExtProductType(string name)
         {
-            return GetAsNoTracking<ProductType>(p => p.ExternalId == externalId);
+            return GetAsNoTracking<ProductType>(p => p.Name == name);
         }
 
-        public Nomenklatura GetExtNomenklatura(int externalId)
+        public Nomenklatura GetExtNomenklatura(string name)
         {
-            return GetAsNoTracking<Nomenklatura>(p => p.ExternalId == externalId);
+            return GetAsNoTracking<Nomenklatura>(p => p.Name == name);
         }
 
-        public Sku GetExtSku(int externalId)
+        public Sku GetExtSku(string name)
         {
-            return GetAsNoTracking<Sku>(p => p.ExternalId == externalId);
+            return GetAsNoTracking<Sku>(p => p.Name == name);
         }
 
         public List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1)
@@ -447,7 +447,7 @@ namespace Billing
 
         public BalanceDto GetBalance(int modelId)
         {
-            var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring);
+            var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring, s=>s.Metatype);
             var balance = new BalanceDto
             {
                 CharacterId = modelId,
@@ -456,7 +456,11 @@ namespace Billing
                 SIN = sin.Sin,
                 ForecastLifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
                 LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
-                PersonName = sin.PersonName
+                PersonName = sin.PersonName,
+                Metatype = sin.Metatype?.Name ?? "неизвестно",
+                Citizenship = "неизвестно",
+                Nationality = "неизвестно",
+                Status = "неизвестно"
             };
             return balance;
         }

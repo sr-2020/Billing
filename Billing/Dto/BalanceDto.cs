@@ -13,5 +13,9 @@ namespace Billing.DTO
         public decimal CurrentScoring { get; set; }
         public string LifeStyle { get; set; }
         public string ForecastLifeStyle { get; set; }
+        public string Metatype { get; set; }
+        public string Citizenship { get; set; }
+        public string Nationality { get; set; }
+        public string Status { get; set; }
     }
 }
