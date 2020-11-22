@@ -10,6 +10,8 @@ namespace Core.Model
     {
         [Column("model_id")]
         public int Model { get; set; } //main!!! Its real Character
+        [Column("game")]
+        public int Game { get; set; }
 
     }
 }

@@ -88,8 +88,15 @@ namespace Billing
                 {
                     continue;
                 }
-                MakeNewTransfer(mir, sin.Wallet, sin.IKAR.Value * k, "Начисления по ИКАР");
-                count++;
+                try
+                {
+                    MakeNewTransfer(mir, sin.Wallet, sin.IKAR.Value * k, "Начисления по ИКАР");
+                    count++;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
             }
             Context.SaveChanges();
             return count;
@@ -101,19 +108,27 @@ namespace Billing
             var mir = GetMIR();
             foreach (var sin in sins)
             {
-                var character = sin.Character;
-                if (character == null)
+                try
                 {
-                    character = GetAsNoTracking<Character>(c => c.Id == sin.CharacterId);
+                    var character = sin.Character;
+                    if (character == null)
+                    {
+                        character = GetAsNoTracking<Character>(c => c.Id == sin.CharacterId);
+                    }
+                    var model = EreminService.GetCharacter(character.Model);
+                    var karma = model.workModel.karma.spent;
+                    if (karma == 0)
+                    {
+                        continue;
+                    }
+                    MakeNewTransfer(mir, sin.Wallet, karma * k, "Рабочие начисления за экономический период");
+                    count++;
                 }
-                var model = EreminService.GetCharacter(character.Model);
-                var karma = model.workModel.karma.spent;
-                if (karma == 0)
+                catch (Exception e)
                 {
-                    continue;
+                    Console.WriteLine(e.ToString());
                 }
-                MakeNewTransfer(mir, sin.Wallet, karma * k, "Рабочие начисления за экономический период");
-                count++;
+
             }
             return count;
         }
@@ -144,7 +159,8 @@ namespace Billing
 
         public List<SIN> GetActiveSins()
         {
-            var sins = GetList<SIN>(s => s.InGame ?? false, s => s.Character, s => s.Wallet);
+            var currentGame = 2;
+            var sins = GetList<SIN>(s => s.InGame ?? false && s.Character.Game == currentGame, s => s.Character, s => s.Wallet);
             return sins;
         }
 
@@ -508,7 +524,7 @@ namespace Billing
             {
                 CharacterId = modelId,
                 CurrentBalance = BillingHelper.RoundDown(sin.Wallet.Balance),
-                CurrentScoring = sin.Scoring.CurrentScoring,
+                CurrentScoring = sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative,
                 SIN = sin.Sin,
                 ForecastLifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
                 LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
@@ -833,17 +849,18 @@ namespace Billing
             {
                 discount = 0;
             }
+            var currentScoring = sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative;
             var price = new Price
             {
                 Sku = sku,
                 Shop = shop,
                 BasePrice = sku.Nomenklatura.BasePrice,
-                CurrentScoring = sin.Scoring.CurrentScoring,
+                CurrentScoring = currentScoring,
                 DateCreated = DateTime.Now,
                 Discount = discount,
                 Sin = sin,
                 ShopComission = shop.Commission,
-                FinalPrice = BillingHelper.GetFinalPrice(sku.Nomenklatura.BasePrice, discount, sin.Scoring.CurrentScoring)
+                FinalPrice = BillingHelper.GetFinalPrice(sku.Nomenklatura.BasePrice, discount, currentScoring)
             };
             Add(price);
             Context.SaveChanges();

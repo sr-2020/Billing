@@ -277,7 +277,6 @@ namespace Scoringspace
                                 var k = systemsettings.GetDecimalValue(SystemSettingsEnum.relativeK);
                                 scoring.CurerentRelative = curCategories.Sum(c => c.Value * c.Category.Weight) * k;
                             }
-                            scoring.CurrentScoring = scoring.CurrentFix + scoring.CurerentRelative;
                             Add(scoring, context);
                             var end = DateTime.Now;
                             var scoringEvent = new ScoringEvent

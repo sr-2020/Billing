@@ -8,8 +8,6 @@ namespace Core.Model
     [Table("scoring")]
     public class Scoring : BaseEntity
     {
-        [Column("current_scoring")]
-        public decimal CurrentScoring { get; set; }
         [Column("current_scoring_fix")]
         public decimal CurrentFix { get; set; }
         [Column("current_scoring_relative")]

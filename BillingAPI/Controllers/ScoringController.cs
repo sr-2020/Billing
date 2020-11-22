@@ -35,18 +35,7 @@ namespace BillingAPI.Controllers
         [HttpGet("info/getmyscoring")]
         public DataResult<Scoring> GetScoring(int character)
         {
-            var orc = new Scoring();
-            orc.CurrentScoring = 0;
-            //orc.Calculates = new List<ScoringFactorCalculate>();
-            //foreach (var item in collection)
-            //{
-
-            //}
-
             throw new NotImplementedException();
-            //var manager = _manager.Value;
-            //var result = RunAction(() => manager.GetTransfers(characterId));
-            //return result;
         }
 
     }

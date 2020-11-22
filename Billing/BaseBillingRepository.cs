@@ -21,6 +21,8 @@ namespace Billing
 
     public class BaseBillingRepository : BaseEntityRepository, IBaseBillingRepository
     {
+        protected ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
+
         public SIN InitCharacter(int modelId, string name, string metarace)
         {
             var race = GetAsNoTracking<Metatype>(m => m.Alias == metarace);
@@ -46,27 +48,48 @@ namespace Billing
                 };
                 Add(sin);
             }
+            sin.OldMetaTypeId = null;
             sin.PersonName = name;
             sin.MetatypeId = metarace;
             sin.EVersion = _settings.GetValue(SystemSettingsEnum.eversion);
             var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId, balance);
             sin.Wallet = wallet;
             var scoring = Get<Scoring>(s => s.Id == sin.ScoringId);
+            var initScoring = GetInitScoring(modelId);
             if (scoring == null)
             {
-                scoring = new Scoring
-                {
-                    CurrentScoring = 1,
-                    CurrentFix = 1,
-                    CurerentRelative = 1
-                };
                 sin.Scoring = scoring;
                 Add(scoring);
             }
+            else
+            {
+                DeleteScoring(scoring);
+            }
+            scoring.CurrentFix = initScoring.CurrentFix;
+            scoring.CurerentRelative = initScoring.CurerentRelative;
             Context.SaveChanges();
             return sin;
         }
-        protected ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
+        
+        protected void DeleteScoring(Scoring scoring)
+        {
+            var currentFactors = GetList<CurrentFactor>(f => f.ScoringId == scoring.Id);
+            RemoveRange(currentFactors);
+            var currentCategories = GetList<CurrentCategory>(c => c.ScoringId == scoring.Id);
+            RemoveRange(currentCategories);
+            Context.SaveChanges();
+        }
+
+        protected Scoring GetInitScoring(int modelId)
+        {
+            //TODO get at start
+            var scoring = new Scoring
+            {
+                CurrentFix = 0.5m,
+                CurerentRelative = 0.5m
+            };
+            return scoring;
+        }
 
         protected string GetWalletName(Wallet wallet, bool anon)
         {
