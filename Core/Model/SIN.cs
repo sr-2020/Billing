@@ -19,8 +19,6 @@ namespace Core.Model
         [ForeignKey("metatype")]
         public int? MetatypeId { get; set; }
         public Metatype Metatype { get; set; }
-        [Column("citizenship")]
-        public int? Citizenship { get; set; }
         [ForeignKey("wallet")]
         [Column("wallet")]
         public int WalletId { get; set; }
@@ -40,6 +38,21 @@ namespace Core.Model
         public decimal LastOutcome { get; set; }
         [Column("in_game")]
         public bool? InGame { get; set; }
-
+        [Column("mt_old")]
+        [ForeignKey("metatype")]
+        public int? OldMetaTypeId { get; set; }
+        public Metatype OldMetaType { get; set; }
+        [Column("nation")]
+        public string Nation { get; set; }
+        [Column("nation_display")]
+        public string NationDisplay { get; set; }
+        [Column("citizenship")]
+        public string Citizenship { get; set; }
+        [Column("citizen_state")]
+        public string Citizen_state { get; set; }
+        [Column("viza")]
+        public string Viza { get; set; }
+        [Column("mortgagee")]
+        public string Mortgagee { get; set; }
     }
 }
