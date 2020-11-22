@@ -26,10 +26,25 @@ namespace Billing
         Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
         List<RentaDto> GetRentas(int shop);
         void WriteRenta(int rentaId, string qrEncoded);
+        int ProcessInflation(decimal k);
     }
 
     public class ShopManager : BaseBillingRepository, IShopManager
     {
+        public int ProcessInflation(decimal k)
+        {
+            var nomenklaturas = GetList<Nomenklatura>(n => true);
+            if (nomenklaturas == null)
+                throw new Exception("nomenklaturas is null");
+            foreach (var nomenklatura in nomenklaturas)
+            {
+                nomenklatura.BasePrice = nomenklatura.BasePrice * k;
+            }
+            SaveContext();
+            return nomenklaturas.Count;
+        }
+
+
         public void WriteRenta(int rentaId, string qrEncoded)
         {
             var qr = EreminQrService.GetPayload(qrEncoded);

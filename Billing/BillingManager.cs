@@ -50,6 +50,12 @@ namespace Billing
 
         #region jobs
         void ProcessPeriod(string model = "0");
+        int ProcessRentas(List<SIN> sins);
+        int ProcessKarma(List<SIN> sins, decimal k);
+        int ProcessIkar(List<SIN> sins, decimal k);
+
+        List<SIN> GetActiveSins();
+
         #endregion
 
         #region admin
@@ -72,25 +78,75 @@ namespace Billing
     {
         public static string UrlNotFound = "";
 
+        public int ProcessIkar(List<SIN> sins, decimal k)
+        {
+            var count = 0;
+            var mir = GetMIR();
+            foreach (var sin in sins)
+            {
+                if((sin.IKAR ?? 0) == 0)
+                {
+                    continue;
+                }
+                MakeNewTransfer(mir, sin.Wallet, sin.IKAR.Value * k, "Начисления по ИКАР");
+                count++;
+            }
+            Context.SaveChanges();
+            return count;
+        }
+
+        public int ProcessKarma(List<SIN> sins, decimal k)
+        {
+            var count = 0;
+            var mir = GetMIR();
+            foreach (var sin in sins)
+            {
+                var character = sin.Character;
+                if (character == null)
+                {
+                    character = GetAsNoTracking<Character>(c => c.Id == sin.CharacterId);
+                }
+                var model = EreminService.GetCharacter(character.Model);
+                var karma = model.workModel.karma.spent;
+                if (karma == 0)
+                {
+                    continue;
+                }
+                MakeNewTransfer(mir, sin.Wallet, karma * k, "Рабочие начисления за экономический период");
+                count++;
+            }
+            return count;
+        }
+
         public void ProcessPeriod(string model = "0")
         {
             var modelId = BillingHelper.GetModelId(model);
-            var bulkCount = 100;
             var sins = GetList<SIN>(s => (s.Character.Model == modelId || modelId == 0) && (s.InGame ?? false), s => s.Character);
+            ProcessRentas(sins);
+        }
+
+        public int ProcessRentas(List<SIN> sins)
+        {
+            var bulkCount = 100;
             var pageCount = (sins.Count + bulkCount - 1) / bulkCount;
+            var rentasCount = 0;
             for (int i = 0; i < pageCount; i++)
             {
                 var mir = GetMIR();
                 foreach (var sin in sins.Skip(i * bulkCount).Take(bulkCount).ToList())
                 {
-                    ProcessRentas(sin, mir);
-
+                    rentasCount += ProcessRentas(sin, mir);
                 }
                 Context.SaveChanges();
             }
+            return rentasCount;
         }
 
-
+        public List<SIN> GetActiveSins()
+        {
+            var sins = GetList<SIN>(s => s.InGame ?? false, s => s.Character, s => s.Wallet);
+            return sins;
+        }
 
         public Specialisation SetSpecialisation(int productTypeid, int shopid)
         {
@@ -256,7 +312,7 @@ namespace Billing
             Context.SaveChanges();
             ProcessByuScoring(sin, sku);
             ProcessRenta(renta, sin);
-            
+
             EreminPushAdapter.SendNotification(modelId, "Покупка совершена", $"Вы купили {price.Sku.Name}");
             var dto = new RentaDto
             {
@@ -364,7 +420,7 @@ namespace Billing
             var owner = GetSINByModelId(ownerId);
             if (owner == null)
                 throw new BillingException("owner not found");
-                
+
             if (shop == null)
             {
                 var newWallet = CreateOrUpdateWallet(WalletTypes.Shop);
@@ -447,7 +503,7 @@ namespace Billing
 
         public BalanceDto GetBalance(int modelId)
         {
-            var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring, s=>s.Metatype);
+            var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring, s => s.Metatype);
             var balance = new BalanceDto
             {
                 CharacterId = modelId,
@@ -647,7 +703,7 @@ namespace Billing
                 throw new BillingAuthException($"Ошибка проверки получателя, должен быть инт");
             }
             var to = GetSINByModelId(icharacterTo, s => s.Wallet);
-            if(to == null)
+            if (to == null)
             {
                 throw new BillingException($"Не найден получатель");
             }
@@ -746,7 +802,7 @@ namespace Billing
                 MakeNewTransfer(mir, corporation.Wallet, finalPrice - comission, $"Рентное начисление: {sku.Name} от {sin.PersonName} ({sin.Sin}) ", false, renta.Id);
                 MakeNewTransfer(mir, shop.Wallet, comission, $"Рентное начисление: {sku.Name} в {shop.Name} от {sin.PersonName} ({sin.Sin})", false, renta.Id);
             }
-            EreminPushAdapter.SendNotification(character.Model, "Кошелек", $"Списание по рентному договору");
+            //EreminPushAdapter.SendNotification(character.Model, "Кошелек", $"Списание по рентному договору");
         }
 
         private DiscountType GetDiscountTypeForSku(Sku sku)
@@ -794,7 +850,7 @@ namespace Billing
             return price;
         }
 
-        private void ProcessRentas(SIN sin, Wallet mir)
+        private int ProcessRentas(SIN sin, Wallet mir)
         {
             var rentas = GetList<Renta>(r => r.SinId == sin.Id, r => r.Shop, r => r.Sku.Corporation);
             foreach (var renta in rentas)
@@ -807,8 +863,8 @@ namespace Billing
                 {
                     Console.WriteLine(e.ToString());
                 }
-
             }
+            return rentas.Count;
         }
         #endregion
     }

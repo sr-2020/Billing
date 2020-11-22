@@ -31,11 +31,22 @@ namespace Scoringspace
         void OnFoodBuy(SIN sin, int lifestyle);
         void OnImplantBuy(SIN sin, int lifestyle);
         void OnImplantInstalled(string model, string implantlifestyle, string autodoclifestyle);
+        void OnMetatypeChanged(SIN sin);
     }
 
     public class ScoringManager : BaseEntityRepository, IScoringManager
     {
         #region implementation
+
+        public void OnMetatypeChanged(SIN sin)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.metatype);
+            ScoringEvent(sin.ScoringId, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == sin.MetatypeId);
+                return value?.Value ?? 1;
+            });
+        }
 
         public void OnImplantInstalled(string model, string implantlifestyle, string autodoclifestyle)
         {

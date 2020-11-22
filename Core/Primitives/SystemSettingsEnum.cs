@@ -28,6 +28,10 @@ namespace Core.Primitives
         relativeK,
         period_count,
         beat_period,
-        beat_cycle
+        beat_cycle,
+        pre_inflation,
+        post_inflation,
+        karma_k,
+        ikar_k
     }
 }

@@ -1,6 +1,8 @@
 ﻿using Billing;
 using Core.Model;
+using InternalServices;
 using IoC;
+using Scoringspace;
 using Settings;
 using System;
 using System.Collections.Generic;
@@ -16,9 +18,14 @@ namespace Jobs
         private ISettingsManager _settingManager = IocContainer.Get<ISettingsManager>();
         private Lazy<IJobManager> _lazyJob { get; set; } = new Lazy<IJobManager>(IocContainer.Get<IJobManager>);
         private Lazy<IBillingManager> _lazyBilling { get; set; } = new Lazy<IBillingManager>(IocContainer.Get<IBillingManager>);
+        private Lazy<IShopManager> _lazyShop { get; set; } = new Lazy<IShopManager>(IocContainer.Get<IShopManager>);
+        private Lazy<IScoringManager> _lazyScoring { get; set; } = new Lazy<IScoringManager>(IocContainer.Get<IScoringManager>);
         private BillingBeat CurrentBeat { get; set; }
         private IJobManager Job => _lazyJob.Value;
         private IBillingManager Billing => _lazyBilling.Value;
+        private IShopManager Shop => _lazyShop.Value;
+        private IScoringManager Scoring => _lazyScoring.Value;
+
         private bool _blocked;
         private bool _broken;
         private bool _beatCycle;
@@ -53,11 +60,10 @@ namespace Jobs
                     _blocked = true;
                     return;
                 }
-                newBeat.Period++;
-                Console.WriteLine($"Запуск {newBeat.Period} периода");
+
                 Job.AddAndSave(newBeat);
                 CurrentBeat = newBeat;
-                //lock
+                //block
                 _settingManager.SetValue(Core.Primitives.SystemSettingsEnum.block, "true");
                 Console.WriteLine("Биллинг заблокирован");
             }
@@ -72,9 +78,9 @@ namespace Jobs
         {
             _beatCycle = _settingManager.GetBoolValue(Core.Primitives.SystemSettingsEnum.beat_cycle);
             _beatPeriod = _settingManager.GetBoolValue(Core.Primitives.SystemSettingsEnum.beat_period);
-            if (_beatCycle)
+            Task.Run(() =>
             {
-                Task.Run(() =>
+                if (_beatCycle)
                 {
                     try
                     {
@@ -88,16 +94,9 @@ namespace Jobs
                     {
                         _beatCycle = false;
                     }
-                });
-            }
-            if(_beatPeriod)
-            {
-                Task.Run(async () =>
+                }
+                if (_beatPeriod)
                 {
-                    while (_beatCycle)
-                    {
-                        await Task.Delay(3000);
-                    }
                     try
                     {
                         DoPeriod();
@@ -110,13 +109,6 @@ namespace Jobs
                     {
                         _beatPeriod = false;
                     }
-                });
-            }
-            Task.Run(async ()=>
-            {
-                while(_beatCycle || _beatPeriod)
-                {
-                    await Task.Delay(3000);
                 }
                 Finish();
             });
@@ -129,15 +121,15 @@ namespace Jobs
                 return;
             }
             var periodCount = _settingManager.GetIntValue(Core.Primitives.SystemSettingsEnum.period_count);
-            if(periodCount == 0)
+            if (periodCount == 0)
             {
                 Console.WriteLine("period_count = 0, цикл не пересчитывается");
                 return;
-            }    
+            }
             var localPeriod = CurrentBeat.Period % periodCount;
             int localCycle = CurrentBeat.Period / periodCount;
-            Console.WriteLine($"{CurrentBeat.Period} пересчет, {localCycle} цикл, {localPeriod} период");
-            if(localPeriod != 0)
+            Console.WriteLine($"{CurrentBeat.Period} пересчет, {localCycle} цикл");
+            if (localPeriod != 0)
             {
                 Console.WriteLine($"Цикл пересчитывается на каждом {periodCount} пересчете, в данном пересчете цикл не пересчитывается");
                 return;
@@ -145,9 +137,9 @@ namespace Jobs
             try
             {
                 Console.WriteLine("Пересчет инфляции");
-                Thread.Sleep(10000);
-                //TODO инфляция
-                Console.WriteLine($"Умножение цены для 0 товаров на коэффициент 0");
+                var k = _settingManager.GetDecimalValue(Core.Primitives.SystemSettingsEnum.pre_inflation);
+                var count = Shop.ProcessInflation(k);
+                Console.WriteLine($"Умножение цены для {count} товаров на коэффициент {k}");
                 CurrentBeat.SuccessInflation = true;
             }
             catch (Exception e)
@@ -160,27 +152,105 @@ namespace Jobs
         {
             if (_broken || _blocked)
                 return;
+            CurrentBeat.Period++;
+            Console.WriteLine($"Запуск {CurrentBeat.Period} периода");
+            var sins = Billing.GetActiveSins();
+            Console.WriteLine($"Получено {sins.Count} персонажей");
             try
             {
-                //TODO пересчет по скорингу
-                Console.WriteLine("Пересчет скоринга");
-                Thread.Sleep(10000);
-                CurrentBeat.SuccessScoring = true;
-                //TODO ренты
-                Console.WriteLine("Пересчет рент");
-                Thread.Sleep(10000);
-                CurrentBeat.SuccessRent = true;
-                //TODO деньги за карму
-                Console.WriteLine("Пересчет кармы");
-                CurrentBeat.SuccessWork = true;
-                //TODO деньги за ИКАР
-                Console.WriteLine("Пересчет икар");
-                CurrentBeat.SuccessIkar = true;
+                DoScoring(sins);
             }
             catch (Exception e)
             {
+                Console.WriteLine("Ошибка DoScoring");
                 LogException(e);
             }
+            try
+            {
+                DoRentas(sins);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Ошибка DoRentas");
+                LogException(e);
+            }
+            try
+            {
+                DoKarma(sins);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Ошибка DoKarma");
+                LogException(e);
+            }
+            try
+            {
+                DoIkar(sins);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Ошибка DoIkar");
+                LogException(e);
+            }
+            try
+            {
+                DoPush(sins);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Ошибка DoPush");
+                LogException(e);
+            }
+
+        }
+
+        private void DoPush(List<SIN> sins)
+        {
+            foreach (var sin in sins)
+            {
+                EreminPushAdapter.SendNotification(sin.Character.Model, "Кошелек", "Пересчет экономического периода завершен");
+            }
+        }
+
+        private void DoKarma(List<SIN> sins)
+        {
+            var k = _settingManager.GetDecimalValue(Core.Primitives.SystemSettingsEnum.karma_k);
+            var count = Billing.ProcessKarma(sins, k);
+            Console.WriteLine($"Пересчет кармы завершен, начислено для {count} персонажей с коэффициентом {k}");
+            CurrentBeat.SuccessWork = true;
+        }
+
+        private void DoIkar(List<SIN> sins)
+        {
+            var k = _settingManager.GetDecimalValue(Core.Primitives.SystemSettingsEnum.ikar_k);
+
+            Console.WriteLine("Пересчет ИКАР завершен");
+            CurrentBeat.SuccessIkar = true;
+        }
+
+        private void DoScoring(List<SIN> sins)
+        {
+            var metatype_count = 0;
+            //TODO пересчет по скорингу
+            foreach (var sin in sins)
+            {
+                if (sin.OldMetaTypeId != sin.MetatypeId)
+                {
+                    Scoring.OnMetatypeChanged(sin);
+                    sin.OldMetaTypeId = sin.MetatypeId;
+                    metatype_count++;
+                }
+            }
+            Billing.SaveContext();
+            Console.WriteLine($"Пересчет скоринга успешен, метатип пересчитан для {metatype_count} синов");
+            CurrentBeat.SuccessScoring = true;
+        }
+
+        private void DoRentas(List<SIN> sins)
+        {
+            var rentasCount = Billing.ProcessRentas(sins);
+            Console.WriteLine($"Пересчет рент завершен, обработано {rentasCount} рент");
+            CurrentBeat.SuccessRent = true;
         }
 
         private void Finish()
