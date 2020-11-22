@@ -208,13 +208,23 @@ namespace Jobs
         {
             foreach (var sin in sins)
             {
-                EreminPushAdapter.SendNotification(sin.Character.Model, "Кошелек", "Пересчет экономического периода завершен");
+                try
+                {
+                    EreminPushAdapter.SendNotification(sin.Character.Model, "Кошелек", "Пересчет экономического периода завершен");
+                }
+                catch (Exception e)
+                {
+
+                    Console.WriteLine(e.ToString());
+                }
+                
             }
         }
 
         private void DoKarma(List<SIN> sins)
         {
             var k = _settingManager.GetDecimalValue(Core.Primitives.SystemSettingsEnum.karma_k);
+            Console.WriteLine("Пересчет кармы начался");
             var count = Billing.ProcessKarma(sins, k);
             Console.WriteLine($"Пересчет кармы завершен, начислено для {count} персонажей с коэффициентом {k}");
             CurrentBeat.SuccessWork = true;
@@ -223,8 +233,8 @@ namespace Jobs
         private void DoIkar(List<SIN> sins)
         {
             var k = _settingManager.GetDecimalValue(Core.Primitives.SystemSettingsEnum.ikar_k);
-
-            Console.WriteLine("Пересчет ИКАР завершен");
+            var count = Billing.ProcessIkar(sins, k);
+            Console.WriteLine($"Пересчет ИКАР завершен, начислено для {count} персонажей с коэффициентом {k}");
             CurrentBeat.SuccessIkar = true;
         }
 

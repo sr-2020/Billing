@@ -315,7 +315,7 @@ namespace Scoringspace
             using (var context = new BillingContext())
             {
                 var factor = context.Set<ScoringFactor>().AsNoTracking().FirstOrDefault(f => f.Code == factorName.ToString());
-                return factor.Id;
+                return factor?.Id ?? 0;
             }
         }
         private void Add<T>(T entity, BillingContext context) where T : BaseEntity
