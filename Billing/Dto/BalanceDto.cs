@@ -17,5 +17,8 @@ namespace Billing.DTO
         public string Citizenship { get; set; }
         public string Nationality { get; set; }
         public string Status { get; set; }
+        public string Nation { get; set; }
+        public string Viza { get; set; }
+        public string Pledgee { get; set; }
     }
 }

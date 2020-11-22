@@ -50,6 +50,7 @@ namespace Billing
             }
             sin.OldMetaTypeId = null;
             sin.PersonName = name;
+            sin.Sin = modelId.ToString();
             sin.MetatypeId = metarace;
             sin.EVersion = _settings.GetValue(SystemSettingsEnum.eversion);
             var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId, balance);

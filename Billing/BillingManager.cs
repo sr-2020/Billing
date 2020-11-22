@@ -530,9 +530,12 @@ namespace Billing
                 LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
                 PersonName = sin.PersonName,
                 Metatype = sin.Metatype?.Name ?? "неизвестно",
-                Citizenship = "неизвестно",
-                Nationality = "неизвестно",
-                Status = "неизвестно"
+                Citizenship = sin.Citizenship,
+                Nationality = sin.NationDisplay,
+                Status = sin.Citizen_state,
+                Nation = sin.Nation,
+                Viza = sin.Viza,
+                Pledgee = sin.Mortgagee
             };
             return balance;
         }
