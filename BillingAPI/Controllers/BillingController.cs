@@ -43,7 +43,7 @@ namespace BillingAPI.Controllers
         public DataResult<SIN> InitCharacter(int modelid, [FromBody] InitCharacterRequest request)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.InitCharacter(modelid, request.Name, request.Metarace), $"InitCharacter");
+            var result = RunAction(() => manager.InitCharacter(modelid, request.Name, request.Metarace), $"InitCharacter: {modelid};{request.Name};{request.Metarace};{request.Karma}");
             return result;
         }
 
