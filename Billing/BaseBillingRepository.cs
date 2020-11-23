@@ -59,6 +59,7 @@ namespace Billing
             var initScoring = GetInitScoring(modelId);
             if (scoring == null)
             {
+                scoring = new Scoring();
                 sin.Scoring = scoring;
                 Add(scoring);
             }
