@@ -83,7 +83,7 @@ namespace BillingAPI.Controllers
 
         private void Start(string action, string message, Guid guid)
         {
-            if(string.IsNullOrEmpty(action) && string.IsNullOrEmpty(message))
+            if(string.IsNullOrEmpty(message))
             {
                 return;
             }
