@@ -1,0 +1,34 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Build & Push to dockerhub
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          name: sr2020/billingapi
+          tags: ${{ github.sha }}
+          dockerfile: Dockerfile
+          username: sr2020
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+  deploy_production:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          service_account_email: ${{ secrets.SA_EMAIL }}
+          service_account_key: ${{ secrets.SA_KEY }}
+      - run: gcloud components install kubectl
+      - run: gcloud container clusters get-credentials prod --project imposing-elixir-249711 --zone europe-west3-b
+      - uses: actions/checkout@v1
+      - run: |
+          kubectl config set-context --current --namespace=production
+          curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+          helm version
+          helm upgrade billing helm/billing/ --wait --set image.tag=$GITHUB_SHA
