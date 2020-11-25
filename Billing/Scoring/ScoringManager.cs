@@ -308,7 +308,8 @@ namespace Scoringspace
 
         private decimal CalculateFactor(double lifestyle, double current)
         {
-            var result = Math.Sqrt(Math.Abs(lifestyle)) * (lifestyle + Math.Abs(lifestyle)) * (current + Math.Sqrt(1 / (3 * current))) / (2 * lifestyle) + Math.Sqrt(1 / Math.Abs(lifestyle)) * (Math.Sqrt(current + 1 / 4) - 1 / 2) / (2 * lifestyle);
+            var result = (1 + Math.Sqrt(Math.Abs(lifestyle))) * (lifestyle + Math.Abs(lifestyle)) * (current + Math.Sqrt(1 / (10 * current))) / (4 * lifestyle)
+                + Math.Sqrt(1 / Math.Abs(lifestyle)) * ((lifestyle - Math.Abs(lifestyle)) * (Math.Sqrt(current + 0.25) - 0.5) / (2 * lifestyle));
             if (result > 3)
                 result = 3;
             if (result < 0.3)
