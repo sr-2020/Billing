@@ -10,7 +10,7 @@ namespace Scoringspace
     {
         public static int GetEventNumberLifestyle(Lifestyles from, Lifestyles to)
         {
-            return (int)QRHelper.Concatenate((int)from, (int)to);
+            return (int)from * 10 + (int)to;
         }
     }
 }

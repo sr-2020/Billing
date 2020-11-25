@@ -192,8 +192,8 @@ namespace Scoringspace
             var scoring = GetScoringByModelId(model);
             ScoringEvent(scoring.Id, factorId, (context) =>
             {
-                    var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == 1);
-                    return value?.Value ?? 1;
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == 1);
+                return value?.Value ?? 1;
             });
         }
 
@@ -234,6 +234,8 @@ namespace Scoringspace
                             var lifestyle = action(context);
                             var factor = context.Set<ScoringFactor>().AsNoTracking().FirstOrDefault(f => f.Id == factorId);
                             var category = context.Set<ScoringCategory>().AsNoTracking().FirstOrDefault(f => f.Id == factor.CategoryId);
+                            var scoring = context.Set<Scoring>().AsTracking().FirstOrDefault(s => s.Id == scoringId);
+                            var systemsettings = IocContainer.Get<ISettingsManager>();
 
                             var curFactor = context.Set<CurrentFactor>().AsNoTracking().FirstOrDefault(s => s.ScoringId == scoringId && s.ScoringFactorId == factorId);
                             if (curFactor == null)
@@ -249,7 +251,6 @@ namespace Scoringspace
                             var newValue = CalculateFactor((double)lifestyle, (double)curFactor.Value);
                             curFactor.Value = newValue;
                             Add(curFactor, context);
-
                             var curCategory = context.Set<CurrentCategory>().AsNoTracking().FirstOrDefault(c => c.ScoringId == scoringId && c.CategoryId == factor.CategoryId);
                             if (curCategory == null)
                             {
@@ -259,23 +260,20 @@ namespace Scoringspace
                                     CategoryId = factor.CategoryId
                                 };
                             }
-                            var curFactors = context.Set<CurrentFactor>().AsNoTracking().Include(f => f.ScoringFactor).Where(f => f.ScoringFactor.CategoryId == factor.CategoryId && f.ScoringId == scoringId);
-                            curCategory.Value = curFactors.Sum(f => f.Value);
+                            var curFactors = context.Set<CurrentFactor>().AsNoTracking().Include(f => f.ScoringFactor).Where(f => f.ScoringFactor.CategoryId == factor.CategoryId && f.ScoringId == scoringId).ToList();
+                            var factorsCount = curFactors.Count;
+                            curCategory.Value = curFactors.Sum(f => f.Value) / factorsCount;
                             Add(curCategory, context);
-
                             var curCategories = context.Set<CurrentCategory>().AsNoTracking().Include(f => f.Category).Where(c => c.Category.CategoryType == category.CategoryType && c.ScoringId == scoringId);
-                            var scoring = context.Set<Scoring>().AsTracking().FirstOrDefault(s => s.Id == scoringId);
-                            var systemsettings = IocContainer.Get<ISettingsManager>();
-
+                            var curCatCount = curCategories.ToList().Count;
+                            var k = 1 / ((curCatCount > 0 ? curCatCount : 2) * 2);
                             if (category.CategoryType == (int)ScoringCategoryType.Fix)
                             {
-                                var k = systemsettings.GetDecimalValue(SystemSettingsEnum.fixK);
-                                scoring.CurrentFix = curCategories.Sum(c => c.Value * c.Category.Weight) * k;
+                                scoring.CurrentFix = (decimal)curCategories.Sum(c => Math.Pow((double)c.Value, (double)(c.Category.Weight > 1 || c.Category.Weight <  0 ? 0 : c.Category.Weight))) * k;
                             }
                             else if (category.CategoryType == (int)ScoringCategoryType.Relative)
                             {
-                                var k = systemsettings.GetDecimalValue(SystemSettingsEnum.relativeK);
-                                scoring.CurerentRelative = curCategories.Sum(c => c.Value * c.Category.Weight) * k;
+                                scoring.CurerentRelative = (decimal)curCategories.Sum(c => Math.Pow((double)c.Value, (double)(c.Category.Weight > 1 || c.Category.Weight < 0 ? 0 : c.Category.Weight))) * k;
                             }
                             Add(scoring, context);
                             var end = DateTime.Now;

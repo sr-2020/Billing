@@ -67,6 +67,7 @@ namespace Billing
             {
                 DeleteScoring(scoring);
             }
+            InitScoring(scoring);
             scoring.CurrentFix = initScoring.CurrentFix;
             scoring.CurerentRelative = initScoring.CurerentRelative;
             Context.SaveChanges();
@@ -80,6 +81,20 @@ namespace Billing
             var currentCategories = GetList<CurrentCategory>(c => c.ScoringId == scoring.Id);
             RemoveRange(currentCategories);
             Context.SaveChanges();
+        }
+
+        protected void InitScoring(Scoring scoring)
+        {
+            var categories = GetList<ScoringCategory>(c => c.CategoryType > 0);
+            foreach (var category in categories)
+            {
+                var current = new CurrentCategory
+                {
+                    CategoryId = category.Id,
+                    ScoringId = scoring.Id,
+                    Value = 1
+                };
+            }
         }
 
         protected Scoring GetInitScoring(int modelId)
