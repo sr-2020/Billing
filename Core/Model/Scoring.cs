@@ -12,5 +12,7 @@ namespace Core.Model
         public decimal CurrentFix { get; set; }
         [Column("current_scoring_relative")]
         public decimal CurerentRelative { get; set; }
+        [Column("start_factor")]
+        public decimal? StartFactor { get; set; }
     }
 }

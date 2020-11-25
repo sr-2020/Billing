@@ -255,7 +255,7 @@ namespace Scoringspace
                                 {
                                     ScoringFactorId = factorId,
                                     ScoringId = scoringId,
-                                    Value = 1
+                                    Value = scoring.StartFactor ?? 1
                                 };
                                 Add(curFactor, context);
                             }
