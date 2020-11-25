@@ -369,6 +369,11 @@ namespace Billing
                     manager = IoC.IocContainer.Get<IScoringManager>();
                     manager.OnMagicBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
+                case "Insurance":
+                    manager = IoC.IocContainer.Get<IScoringManager>();
+                    manager.OnInsuranceBuy(sin, sku.Nomenklatura.Lifestyle);
+                    break;
+
                 default:
                     manager = IoC.IocContainer.Get<IScoringManager>();
                     manager.OnOtherBuy(sin, sku.Nomenklatura.Lifestyle);

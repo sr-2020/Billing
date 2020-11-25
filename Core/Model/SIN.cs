@@ -54,5 +54,7 @@ namespace Core.Model
         public string Viza { get; set; }
         [Column("mortgagee")]
         public string Mortgagee { get; set; }
+        [Column("old_ins")]
+        public int? OldInsurance { get; set; }
     }
 }

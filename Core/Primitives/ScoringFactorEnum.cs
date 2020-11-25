@@ -23,5 +23,6 @@ namespace Core.Primitives
         worse,
         dumpshock,
         clinical_death
+        
     }
 }
