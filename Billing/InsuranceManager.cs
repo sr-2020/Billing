@@ -29,9 +29,9 @@ namespace Billing
             {
                 BuyTime = DateTime.MinValue,
                 SkuName = "Страховка отсутствует",
-                LifeStyle = BillingHelper.GetLifestyle(-1).ToString(),
+                LifeStyle = "Страховка отсутствует",
                 ShopName = "Страховка отсутствует",
-                PersonName = $"{sin.PersonName} !!!(Без страховки)!!!"
+                PersonName = $"{sin.PersonName}"
             };
             var lastIns = GetList<Renta>(r => r.Sku.Nomenklatura.ProductTypeId == dbinsurance.Id && r.SinId == sin.Id, r => r.Shop, r => r.Sku.Nomenklatura)
                                 .OrderByDescending(r => r.DateCreated)
