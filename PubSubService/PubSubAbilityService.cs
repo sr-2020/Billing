@@ -52,6 +52,7 @@ namespace PubSubService
                     break;
                 case ActiveAbility.LetHim:
                     billing = IocContainer.Get<IBillingManager>();
+                    billing.LetHimPay(model?.CharacterId, model?.TargetCharacterId, model?.QrCode?.Data?.DealId);
                     break;
                 case ActiveAbility.Letme:
                     billing = IocContainer.Get<IBillingManager>();

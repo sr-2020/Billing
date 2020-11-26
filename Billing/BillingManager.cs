@@ -60,6 +60,7 @@ namespace Billing
 
         #region admin
         void LetMePay(string modelId, string rentaId);
+        void LetHimPay(string modelId, string targetId, string rentaId);
         List<SIN> GetSinsInGame();
         List<CharacterDto> GetCharactersInGame();
         List<TransferDto> GetTransfersByRenta(int rentaID);

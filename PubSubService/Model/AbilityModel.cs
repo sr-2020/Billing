@@ -9,6 +9,7 @@ namespace PubSubService.Model
         public string Id { get; set; }
         public string Name { get; set; }
         public QrCodeModel QrCode { get; set; }
+        public string TargetCharacterId { get; set; }
     }
 
     public class QrCodeModel
