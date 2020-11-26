@@ -275,14 +275,16 @@ namespace Scoringspace
                             var curFactors = context.Set<CurrentFactor>().AsNoTracking().Include(f => f.ScoringFactor).Where(f => f.ScoringFactor.CategoryId == factor.CategoryId && f.ScoringId == scoringId).ToList();
                             var factorsCount = curFactors.Count;
                             if (factorsCount == 0)
+                            {
                                 factorsCount = 1;
+                            }
                             var oldCatValue = curCategory.Value;
                             curCategory.Value = curFactors.Sum(f => f.Value) / factorsCount;
                             var newCatValue = curCategory.Value;
                             Add(curCategory, context);
                             var curCategories = context.Set<CurrentCategory>().AsNoTracking().Include(f => f.Category).Where(c => c.Category.CategoryType == category.CategoryType && c.ScoringId == scoringId);
                             var curCatCount = curCategories.ToList().Count;
-                            var k = 1 / ((curCatCount > 0 ? curCatCount : 2) * 2);
+                            var k = (decimal)Math.Pow((curCatCount > 0 ? curCatCount : 2) * 2, -1);
                             if (category.CategoryType == (int)ScoringCategoryType.Fix)
                             {
                                 scoring.CurrentFix = (decimal)curCategories.Sum(c => Math.Pow((double)c.Value, (double)(c.Category.Weight > 1 || c.Category.Weight <  0 ? 0 : c.Category.Weight))) * k;
