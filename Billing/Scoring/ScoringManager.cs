@@ -259,6 +259,7 @@ namespace Scoringspace
                                 };
                                 Add(curFactor, context);
                             }
+                            var oldFactorValue = curFactor.Value;
                             var newValue = CalculateFactor((double)lifestyle, (double)curFactor.Value);
                             curFactor.Value = newValue;
                             Add(curFactor, context);
@@ -273,7 +274,11 @@ namespace Scoringspace
                             }
                             var curFactors = context.Set<CurrentFactor>().AsNoTracking().Include(f => f.ScoringFactor).Where(f => f.ScoringFactor.CategoryId == factor.CategoryId && f.ScoringId == scoringId).ToList();
                             var factorsCount = curFactors.Count;
+                            if (factorsCount == 0)
+                                factorsCount = 1;
+                            var oldCatValue = curCategory.Value;
                             curCategory.Value = curFactors.Sum(f => f.Value) / factorsCount;
+                            var newCatValue = curCategory.Value;
                             Add(curCategory, context);
                             var curCategories = context.Set<CurrentCategory>().AsNoTracking().Include(f => f.Category).Where(c => c.Category.CategoryType == category.CategoryType && c.ScoringId == scoringId);
                             var curCatCount = curCategories.ToList().Count;
@@ -292,7 +297,11 @@ namespace Scoringspace
                             {
                                 FinishTime = end,
                                 StartTime = start,
-                                CurrentFactor = curFactor
+                                CurrentFactor = curFactor,
+                                OldFactorValue = oldFactorValue,
+                                NewFactorValue = newValue,
+                                OldCategoryValue = oldCatValue,
+                                NewCategoryValue = newCatValue
                             };
                             Add(scoringEvent, context);
                             dbContextTransaction.Commit();

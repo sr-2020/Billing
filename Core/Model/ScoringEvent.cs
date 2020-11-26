@@ -16,5 +16,13 @@ namespace Core.Model
         public DateTime StartTime { get; set; }
         [Column("finish_time")]
         public DateTime FinishTime { get; set; }
+        [Column("old_factor_value")]
+        public decimal? OldFactorValue { get; set; }
+        [Column("new_factor_value")]
+        public decimal? NewFactorValue { get; set; }
+        [Column("old_cat_value")]
+        public decimal? OldCategoryValue { get; set; }
+        [Column("new_cat_value")]
+        public decimal? NewCategoryValue { get; set; }
     }
 }
