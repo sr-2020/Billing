@@ -1,6 +1,7 @@
 ﻿using Billing;
 using Billing.Dto;
 using Billing.DTO;
+using Billing.Excel;
 using CommonExcel;
 using CommonExcel.Model;
 using Core.Model;
@@ -26,24 +27,31 @@ namespace Billing
             if (excel == null)
                 throw new Exception("model not found");
             var manager = IocContainer.Get<IBillingManager>();
-            
             foreach (var item in excel)
             {
-                var productType = manager.GetExtProductType(item.ProductType);
-                if(productType == null)
+                try
                 {
-                    productType = manager.CreateOrUpdateProductType(0, item.ProductType, item.ProductDiscountType);
+                    var productType = manager.GetExtProductType(item.ProductType);
+                    if (productType == null)
+                    {
+                        productType = manager.CreateOrUpdateProductType(0, item.ProductType, int.Parse(item.ProductDiscountType));
+                    }
+                    var nomenklatura = manager.GetExtNomenklatura(item.NomenklaturaName);
+                    if (nomenklatura == null)
+                    {
+                        nomenklatura = manager.CreateOrUpdateNomenklatura(0, item.NomenklaturaName, item.Code, productType.Id, int.Parse(item.LifeStyle), decimal.Parse(item.BasePrice), item.Description, string.Empty);
+                    }
+                    var sku = manager.GetExtSku(item.SkuName);
+                    if (sku == null)
+                    {
+                        manager.CreateOrUpdateSku(0, nomenklatura.Id, int.Parse(item.Count), int.Parse(item.Corporation), item.SkuName, int.Parse(item.Enabled) == 1 ? true : false);
+                    }
                 }
-                var nomenklatura = manager.GetExtNomenklatura(item.NomenklaturaName);
-                if(nomenklatura == null)
+                catch (Exception e)
                 {
-                    nomenklatura = manager.CreateOrUpdateNomenklatura(0, item.NomenklaturaName, item.Code, productType.Id, item.LifeStyle, item.BasePrice, item.Description, string.Empty);
+                    Console.WriteLine(e.ToString());
                 }
-                var sku = manager.GetExtSku(item.SkuName);
-                if(sku == null)
-                {
-                    manager.CreateOrUpdateSku(0, nomenklatura.Id, item.Count, item.Corporation, item.SkuName, item.Enabled == 1 ? true : false);
-                }
+
             }
             return errors;
         }
@@ -52,14 +60,23 @@ namespace Billing
         {
             List<ExcelError> errors;
             var reader = new ExcelReader();
-            var excel = reader.ParseRows<BillingInit>(filename, file, out errors);
+            var excel = reader.ParseRows<BillingInitDto>(filename, file, out errors);
             if (excel == null)
                 throw new Exception("model not found");
             var manager = IocContainer.Get<IBillingManager>();
 
             foreach (var item in excel)
             {
-                manager.AddAndSave(item);
+                var db = new BillingInit
+                {
+                    Citizenship = item.Citizenship,
+                    Model = int.Parse(item.Model),
+                    Nation = item.Nation,
+                    StartCash = decimal.Parse(item.StartCash),
+                    StartFak = decimal.Parse(item.StartFak),
+                    Status = item.Status
+                };
+                manager.AddAndSave(db);
             }
             return errors;
         }

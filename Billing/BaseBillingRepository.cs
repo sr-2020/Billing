@@ -80,7 +80,7 @@ namespace Billing
             {
                 scoring = new Scoring();
                 sin.Scoring = scoring;
-                Add(scoring);
+                AddAndSave(scoring);
             }
             else
             {

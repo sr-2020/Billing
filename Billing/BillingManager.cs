@@ -866,6 +866,10 @@ namespace Billing
                 discount = 0;
             }
             var currentScoring = sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative;
+            if (currentScoring == 0)
+            {
+                currentScoring = 1;
+            }
             var price = new Price
             {
                 Sku = sku,

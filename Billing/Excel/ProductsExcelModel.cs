@@ -14,19 +14,19 @@ namespace CommonExcel.Model
         [Column(2, false)]
         public string ProductType { get; set; }
         [Column(3, false)]
-        public int ProductDiscountType { get; set; }
+        public string ProductDiscountType { get; set; }
         [Column(4, false)]
         public string Code { get; set; }
         [Column(5, false)]
-        public int BasePrice { get; set; }
+        public string BasePrice { get; set; }
         [Column(6, false)]
-        public int Corporation { get; set; }
+        public string Corporation { get; set; }
         [Column(7, false)]
-        public int Enabled { get; set; }
+        public string Enabled { get; set; }
         [Column(8, false)]
-        public int Count { get; set; }
+        public string Count { get; set; }
         [Column(9, false)]
-        public int LifeStyle { get; set; }
+        public string LifeStyle { get; set; }
         [Column(10, false)]
         public string Description { get; set; }
     }

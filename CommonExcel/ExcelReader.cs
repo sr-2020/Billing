@@ -177,23 +177,6 @@ namespace CommonExcel
                         col.Property.SetValue(tnew, cell.NumericCellValue);
                         return;
                     }
-                    if (col.Property.PropertyType == typeof(decimal))
-                    {
-                        if (cell.CellType == CellType.Blank)
-                        {
-                            if (col.Column.AllowNull)
-                            {
-                                col.Property.SetValue(tnew, 0);
-                            }
-                            else
-                            {
-                                throw new Exception("Empty cell while expected double");
-                            }
-                        }
-                        var value = cell.NumericCellValue;
-                        col.Property.SetValue(tnew, (decimal)value);
-                        return;
-                    }
                     if (col.Property.PropertyType == typeof(DateTime))
                     {
                         if (cell.CellType == CellType.Blank)
