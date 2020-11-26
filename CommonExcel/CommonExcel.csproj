@@ -10,10 +10,4 @@
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0-preview.4.20251.6" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Billing\Billing.csproj" />
-    <ProjectReference Include="..\Core\Core.csproj" />
-    <ProjectReference Include="..\IoC.Container\IoC.Container.csproj" />
-  </ItemGroup>
-
 </Project>

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Billing;
@@ -28,6 +29,43 @@ namespace BillingAPI.Controllers
         }
 
         #region product_type
+
+        [Microsoft.AspNetCore.Mvc.HttpGet]
+        public FileResult LoadExcel()
+        {
+            var manager = new ExcelManager();
+            var memStream = manager.LoadMainExcel();
+
+            byte[] fileBytes = memStream.ToArray();
+            string fileName = "shreconomics.xlsx";
+            return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
+
+        }
+
+
+        [Microsoft.AspNetCore.Mvc.HttpGet]
+        public FileResult LoadTransfers()
+        {
+            var manager = new ExcelManager();
+            var memStream = manager.LoadTransfers();
+
+            byte[] fileBytes = memStream.ToArray();
+            string fileName = "transfers.xlsx";
+            return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
+
+        }
+
+        [Microsoft.AspNetCore.Mvc.HttpGet]
+        public FileResult LoadRents()
+        {
+            var manager = new ExcelManager();
+            var memStream = manager.LoadRents();
+
+            byte[] fileBytes = memStream.ToArray();
+            string fileName = "rents.xlsx";
+            return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
+
+        }
 
         public IActionResult ProductList()
         {

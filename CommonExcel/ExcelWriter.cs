@@ -44,7 +44,7 @@ namespace CommonExcel
             return 10000;
         }
 
-        public static ExcelPackage CreateExcel<T>(List<T> rows, string author = "Mouzenidis Travel", string title = "Отчёт")
+        public static ExcelPackage CreateExcel<T>(List<T> rows, string author = "Случай", string title = "Отчёт")
         {
             var excelPackage = new ExcelPackage();
             excelPackage.Workbook.Properties.Author = author;
@@ -52,7 +52,7 @@ namespace CommonExcel
 
             //Create a sheet
             excelPackage.Workbook.Worksheets.Add("List 1");
-            ExcelWorksheet ws = excelPackage.Workbook.Worksheets[1];
+            ExcelWorksheet ws = excelPackage.Workbook.Worksheets[0];
             ws.Cells.Style.Font.Size = 11; //Default font size for whole sheet
             ws.Cells.Style.Font.Name = "Calibri"; //Default Font name for whole sheet
             var headerIndex = 1;
@@ -71,7 +71,7 @@ namespace CommonExcel
                 var fill = cell.Style.Fill;
                 fill.PatternType = ExcelFillStyle.Solid;
                 fill.BackgroundColor.SetColor(Color.Silver);
-                cell.AutoFitColumns(5);
+                //cell.AutoFitColumns(5);
                 headerIndex++;
             }
             int rowIndex = 2;

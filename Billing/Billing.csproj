@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CommonExcel\CommonExcel.csproj" />
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\FileHelper\FileHelper.csproj" />
     <ProjectReference Include="..\InternalServices\InternalServices.csproj" />

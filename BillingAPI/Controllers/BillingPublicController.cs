@@ -48,7 +48,7 @@ namespace BillingAPI.Controllers
         public DataResult<List<CharacterDto>> GetCharacters()
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetCharacters(), $"getcharacters ");
+            var result = RunAction(() => manager.GetCharactersInGame(), $"getcharacters ");
             return result;
         }
 

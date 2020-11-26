@@ -48,6 +48,7 @@ namespace Billing
                 };
                 Add(sin);
             }
+            sin.InGame = true;
             sin.OldMetaTypeId = null;
             sin.PersonName = name;
             sin.Sin = modelId.ToString();
@@ -140,11 +141,12 @@ namespace Billing
             }
         }
 
-        protected TransferDto CreateTransferDto(Transfer transfer, TransferType type, string owner = "владелец кошелька")
+        protected TransferDto CreateTransferDto(Transfer transfer, TransferType type, int modelId = 0, string owner = "владелец кошелька")
         {
             bool anon = transfer.Anonymous;
             return new TransferDto
             {
+                ModelId = modelId.ToString(),
                 Comment = transfer.Comment,
                 TransferType = type.ToString(),
                 Amount = BillingHelper.RoundDown(transfer.Amount),

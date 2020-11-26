@@ -60,7 +60,8 @@ namespace Billing
 
         #region admin
 
-        List<CharacterDto> GetCharacters();
+        List<SIN> GetSinsInGame();
+        List<CharacterDto> GetCharactersInGame();
         List<TransferDto> GetTransfersByRenta(int rentaID);
         Sku CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled, int externalId = 0);
         Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description, string pictureurl, int externalId = 0);
@@ -77,14 +78,14 @@ namespace Billing
     public class BillingManager : BaseBillingRepository, IBillingManager
     {
         public static string UrlNotFound = "";
-
+        protected int CURRENTGAME = 2;
         public int ProcessIkar(List<SIN> sins, decimal k)
         {
             var count = 0;
             var mir = GetMIR();
             foreach (var sin in sins)
             {
-                if((sin.IKAR ?? 0) == 0)
+                if ((sin.IKAR ?? 0) == 0)
                 {
                     continue;
                 }
@@ -268,11 +269,13 @@ namespace Billing
 
         public List<RentaDto> GetRentas(int modelId)
         {
-            var list = GetListAsNoTracking<Renta>(r => r.Sin.Character.Model == modelId, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation, r => r.Shop);
+            var list = GetListAsNoTracking<Renta>(r => r.Sin.Character.Model == modelId, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation, r => r.Shop, r => r.Sin.Character);
             return list
                     .Select(r =>
                     new RentaDto
                     {
+                        ModelId = modelId.ToString(),
+                        CharacterName = r.Sin.PersonName,
                         FinalPrice = BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring),
                         ProductType = r.Sku.Nomenklatura.ProductType.Name,
                         Shop = r.Shop.Name,
@@ -555,12 +558,12 @@ namespace Billing
             var owner = GetWalletName(sin.Wallet, false);
             if (listFrom != null)
                 allList.AddRange(listFrom
-                    .Select(s => CreateTransferDto(s, TransferType.Outcoming, owner))
+                    .Select(s => CreateTransferDto(s, TransferType.Outcoming, modelId, owner))
                     .ToList());
             var listTo = GetList<Transfer>(t => t.WalletToId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
             if (listTo != null)
                 allList.AddRange(listTo
-                    .Select(s => CreateTransferDto(s, TransferType.Incoming, owner))
+                    .Select(s => CreateTransferDto(s, TransferType.Incoming, modelId, owner))
                     .ToList());
             return allList.OrderBy(t => t.OperationTime).ToList();
         }
@@ -760,9 +763,14 @@ namespace Billing
             return transfer;
         }
 
-        public List<CharacterDto> GetCharacters()
+        public List<SIN> GetSinsInGame()
         {
-            var result = GetList<SIN>(s => s.InGame ?? false, s => s.Character).Select(s => new CharacterDto { PersonName = s.PersonName, ModelId = s.Character.Model.ToString() }).ToList();
+            return GetSinsInGame(s => s.Character, s => s.Wallet, s => s.Scoring);
+        }
+
+        public List<CharacterDto> GetCharactersInGame()
+        {
+            var result = GetSinsInGame(s => s.Character).Select(s => new CharacterDto { PersonName = s.PersonName, ModelId = s.Character.Model.ToString() }).ToList();
             return result;
         }
 
@@ -890,6 +898,11 @@ namespace Billing
                 }
             }
             return rentas.Count;
+        }
+
+        private List<SIN> GetSinsInGame(params Expression<Func<SIN, object>>[] includes)
+        {
+            return GetList(s => (s.InGame ?? false) && s.Character.Game == CURRENTGAME, includes);
         }
         #endregion
     }
