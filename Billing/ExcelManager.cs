@@ -48,6 +48,22 @@ namespace Billing
             return errors;
         }
 
+        public List<ExcelError> UploadBillingInit(Stream file, string filename)
+        {
+            List<ExcelError> errors;
+            var reader = new ExcelReader();
+            var excel = reader.ParseRows<BillingInit>(filename, file, out errors);
+            if (excel == null)
+                throw new Exception("model not found");
+            var manager = IocContainer.Get<IBillingManager>();
+
+            foreach (var item in excel)
+            {
+                manager.AddAndSave(item);
+            }
+            return errors;
+        }
+
         public MemoryStream LoadTransfers()
         {
             var billing = IocContainer.Get<IBillingManager>();

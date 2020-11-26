@@ -31,7 +31,7 @@ namespace Billing
             return CreateOrUpdatePhysicalWallet(modelId, name, race?.Id, defaultbalance);
         }
 
-        public SIN CreateOrUpdatePhysicalWallet(int modelId, string name, int? metarace, decimal balance = 50)
+        public SIN CreateOrUpdatePhysicalWallet(int modelId, string name, int? metarace, decimal balance = 1)
         {
             if (modelId == 0)
                 throw new BillingAuthException($"character {modelId} not found");
@@ -39,6 +39,21 @@ namespace Billing
             if (character == null)
                 throw new BillingAuthException($"character {modelId} not found");
             var sin = Get<SIN>(s => s.Character.Model == modelId);
+
+            var initData = Get<BillingInit>(i => i.Model == modelId);
+            if(initData == null)
+            {
+                initData = new BillingInit
+                {
+                    Model = modelId,
+                    Citizenship = "неизвестно",
+                    Nation = "неизвестно",
+                    StartCash = balance,
+                    StartFak = 0.5m,
+                    Status = "неизвестно"
+                };
+            }
+
             if (sin == null)
             {
                 sin = new SIN
@@ -51,10 +66,13 @@ namespace Billing
             sin.InGame = true;
             sin.OldMetaTypeId = null;
             sin.PersonName = name;
+            sin.Citizen_state = initData.Status;
+            sin.NationDisplay = initData.Nation;
+            sin.Citizenship = initData.Citizenship;
             sin.Sin = modelId.ToString();
             sin.MetatypeId = metarace;
             sin.EVersion = _settings.GetValue(SystemSettingsEnum.eversion);
-            var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId, balance);
+            var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId, initData.StartCash);
             sin.Wallet = wallet;
             var scoring = Get<Scoring>(s => s.Id == sin.ScoringId);
             var initScoring = GetInitScoring(modelId);
@@ -69,6 +87,7 @@ namespace Billing
                 DeleteScoring(scoring);
             }
             InitScoring(scoring);
+            scoring.StartFactor = initData.StartFak;
             scoring.CurrentFix = initScoring.CurrentFix;
             scoring.CurerentRelative = initScoring.CurerentRelative;
             Context.SaveChanges();

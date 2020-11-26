@@ -35,11 +35,9 @@ namespace BillingAPI.Controllers
         {
             var manager = new ExcelManager();
             var memStream = manager.LoadMainExcel();
-
             byte[] fileBytes = memStream.ToArray();
             string fileName = "shreconomics.xlsx";
             return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
-
         }
 
 
@@ -104,7 +102,18 @@ namespace BillingAPI.Controllers
             }
             var manager = new ExcelManager();
             var errors = manager.UploadProductTypes(formFile.OpenReadStream(), formFile.FileName);
-            return new JsonResult(errors);
+            return new JsonResult(errors.Select(e=> e.Error));
+        }
+
+        public IActionResult UploadBillingInit(Microsoft.AspNetCore.Http.IFormFile formFile)
+        {
+            if (formFile == null)
+            {
+                throw new Exception("file not found");
+            }
+            var manager = new ExcelManager();
+            var errors = manager.UploadBillingInit(formFile.OpenReadStream(), formFile.FileName);
+            return new JsonResult(errors.Select(e => e.Error));
         }
 
         public IActionResult UploadPProductTypeList(Microsoft.AspNetCore.Http.IFormFile formFile)

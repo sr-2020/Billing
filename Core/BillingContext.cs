@@ -17,6 +17,7 @@ namespace Core
         }
         public DbSet<BillingAbilityLog> AbilityLogs { get; set; }
         public DbSet<BillingBeat> BillingCycle { get; set; }
+        public DbSet<BillingInit> BillingInit { get; set; }
         public DbSet<CacheQRContent> CacheQR { get; set; }
         public DbSet<Character> Character { get; set; }
         public DbSet<Contract> Contract { get; set; }
