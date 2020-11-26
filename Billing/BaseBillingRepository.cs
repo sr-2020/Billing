@@ -82,10 +82,6 @@ namespace Billing
                 sin.Scoring = scoring;
                 AddAndSave(scoring);
             }
-            else
-            {
-                DeleteScoring(scoring);
-            }
             InitScoring(scoring);
             scoring.StartFactor = initData.StartFak;
             scoring.CurrentFix = initScoring.CurrentFix;
@@ -94,15 +90,6 @@ namespace Billing
             return sin;
         }
         
-        protected void DeleteScoring(Scoring scoring)
-        {
-            var currentFactors = GetList<CurrentFactor>(f => f.ScoringId == scoring.Id);
-            RemoveRange(currentFactors);
-            var currentCategories = GetList<CurrentCategory>(c => c.ScoringId == scoring.Id);
-            RemoveRange(currentCategories);
-            Context.SaveChanges();
-        }
-
         protected void InitScoring(Scoring scoring)
         {
             var categories = GetList<ScoringCategory>(c => c.CategoryType > 0);
