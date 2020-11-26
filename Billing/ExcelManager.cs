@@ -64,19 +64,27 @@ namespace Billing
             if (excel == null)
                 throw new Exception("model not found");
             var manager = IocContainer.Get<IBillingManager>();
-
             foreach (var item in excel)
             {
-                var db = new BillingInit
+                try
                 {
-                    Citizenship = item.Citizenship,
-                    Model = int.Parse(item.Model),
-                    Nation = item.Nation,
-                    StartCash = decimal.Parse(item.StartCash),
-                    StartFak = decimal.Parse(item.StartFak),
-                    Status = item.Status
-                };
-                manager.AddAndSave(db);
+                    var db = new BillingInit
+                    {
+                        Citizenship = item.Citizenship,
+                        Model = int.Parse(item.Model),
+                        Nation = item.Nation,
+                        StartCash = decimal.Parse(item.StartCash),
+                        StartFak = decimal.Parse(item.StartFak),
+                        Status = item.Status
+                    };
+                    manager.AddAndSave(db);
+                }
+                catch (Exception e)
+                {
+
+                    Console.WriteLine(e.ToString());
+                }
+
             }
             return errors;
         }

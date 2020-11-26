@@ -59,7 +59,7 @@ namespace Billing
         #endregion
 
         #region admin
-
+        void LetMePay(string modelId, string rentaId);
         List<SIN> GetSinsInGame();
         List<CharacterDto> GetCharactersInGame();
         List<TransferDto> GetTransfersByRenta(int rentaID);
@@ -761,6 +761,91 @@ namespace Billing
                 EreminPushAdapter.SendNotification(characterTo, "Кошелек", $"Вам переведено денег {amount}");
             }
             return transfer;
+        }
+
+        public void LetMePay(string modelId, string rentaId)
+        {
+            if(string.IsNullOrEmpty(modelId) || string.IsNullOrEmpty(rentaId))
+            {
+                Console.Error.WriteLine($"Ошибка LetMePay modelId {modelId}, rentaId {rentaId}");
+                return;
+            }
+            var modelIdInt = 0;
+            if (!int.TryParse(modelId, out modelIdInt))
+            {
+                Console.Error.WriteLine($"Ошибка LetMePay modelId {modelId}");
+                return;
+            }
+            if (modelIdInt == 0)
+            {
+                Console.Error.WriteLine($"Ошибка LetMePay modelId {modelId}");
+                return;
+            }
+            var sin = GetSINByModelId(modelIdInt, s => s.Scoring);
+            var rentaIdint = 0;
+            if (!int.TryParse(rentaId, out rentaIdint))
+            {
+                Console.Error.WriteLine($"Ошибка LetMePay rentaId {rentaId}");
+                EreminPushAdapter.SendNotification(modelIdInt, "Давай я заплачу", $"Ошибка получения ренты {rentaIdint}");
+            }
+            var renta = Get<Renta>(r => r.Id == rentaIdint);
+            if (renta == null)
+            {
+                Console.Error.WriteLine($"Ошибка LetMePay rentaId {rentaId}");
+                EreminPushAdapter.SendNotification(modelIdInt, "Давай я заплачу", "Ошибка получения ренты");
+            }
+            renta.SinId = sin.Id;
+            renta.CurrentScoring = sin.Scoring.CurerentRelative + sin.Scoring.CurrentFix;
+            Context.SaveChanges();
+            EreminPushAdapter.SendNotification(modelIdInt, "Давай я заплачу", "Рента переоформлена");
+        }
+
+        public void LetHimPay(string modelId, string targetId, string rentaId)
+        {
+            if (string.IsNullOrEmpty(modelId) || string.IsNullOrEmpty(rentaId))
+            {
+                Console.Error.WriteLine($"Ошибка LetHimPay modelId {modelId}, rentaId {rentaId}");
+                return;
+            }
+            var modelIdInt = 0;
+            if (!int.TryParse(modelId, out modelIdInt))
+            {
+                Console.Error.WriteLine($"Ошибка LetHimPay modelId {modelId}");
+                return;
+            }
+            if (modelIdInt == 0)
+            {
+                Console.Error.WriteLine($"Ошибка LetHimPay modelId {modelId}");
+                return;
+            }
+            var targetIdInt = 0;
+            if (!int.TryParse(targetId, out targetIdInt))
+            {
+                Console.Error.WriteLine($"Ошибка LetHimPay targetId {targetId}");
+                return;
+            }
+            if (targetIdInt == 0)
+            {
+                Console.Error.WriteLine($"Ошибка LetHimPay targetIdInt {targetId}");
+                return;
+            }
+            var sin = GetSINByModelId(targetIdInt, s => s.Scoring);
+            var rentaIdint = 0;
+            if (!int.TryParse(rentaId, out rentaIdint))
+            {
+                Console.Error.WriteLine($"Ошибка LetHimPay rentaId {rentaId}");
+                EreminPushAdapter.SendNotification(modelIdInt, "Давай он заплатит", $"Ошибка получения ренты {rentaIdint}");
+            }
+            var renta = Get<Renta>(r => r.Id == rentaIdint);
+            if (renta == null)
+            {
+                Console.Error.WriteLine($"Ошибка LetHimPay rentaId {rentaId}");
+                EreminPushAdapter.SendNotification(modelIdInt, "Давай он заплатит", "Ошибка получения ренты");
+            }
+            renta.SinId = sin.Id;
+            renta.CurrentScoring = sin.Scoring.CurerentRelative + sin.Scoring.CurrentFix;
+            Context.SaveChanges();
+            EreminPushAdapter.SendNotification(modelIdInt, "Давай он заплатит", "Рента переоформлена");
         }
 
         public List<SIN> GetSinsInGame()

@@ -25,7 +25,15 @@ namespace PubSubService
             base.Handle(model);
             if (ModelPrimitives.Abilities.ContainsKey(model.Id))
             {
-                HandleAbility(model);
+                try
+                {
+                    HandleAbility(model);
+                }
+                catch (Exception e)
+                {
+                    e.ToString();
+                }
+
             }
         }
 
@@ -33,7 +41,7 @@ namespace PubSubService
         {
             ActiveAbility activeAbilityEnum;
             ModelPrimitives.Abilities.TryGetValue(model.Id, out activeAbilityEnum);
-
+            IBillingManager billing;
             switch (activeAbilityEnum)
             {
                 case ActiveAbility.HowMuch:
@@ -43,8 +51,11 @@ namespace PubSubService
                 case ActiveAbility.PayAndCry:
                     break;
                 case ActiveAbility.LetHim:
+                    billing = IocContainer.Get<IBillingManager>();
                     break;
                 case ActiveAbility.Letme:
+                    billing = IocContainer.Get<IBillingManager>();
+                    billing.LetMePay(model?.CharacterId, model?.QrCode?.Data?.DealId);
                     break;
                 default:
                     break;
