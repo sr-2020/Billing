@@ -52,7 +52,7 @@ namespace PubSubService
 
         public virtual void Read(string message)
         {
-            Console.WriteLine($"message {message} readed");
+            //Console.WriteLine($"message {message} readed");
             T model;
             try
             {

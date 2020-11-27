@@ -75,7 +75,6 @@ namespace Billing
             var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId, initData.StartCash);
             sin.Wallet = wallet;
             var scoring = Get<Scoring>(s => s.Id == sin.ScoringId);
-            var initScoring = GetInitScoring(modelId);
             if (scoring == null)
             {
                 scoring = new Scoring();
@@ -84,8 +83,8 @@ namespace Billing
             }
             InitScoring(scoring);
             scoring.StartFactor = initData.StartFak;
-            scoring.CurrentFix = initScoring.CurrentFix;
-            scoring.CurerentRelative = initScoring.CurerentRelative;
+            scoring.CurrentFix = initData.StartFak * 0.5m;
+            scoring.CurerentRelative = initData.StartFak * 0.5m;
             Context.SaveChanges();
             return sin;
         }
@@ -95,24 +94,19 @@ namespace Billing
             var categories = GetList<ScoringCategory>(c => c.CategoryType > 0);
             foreach (var category in categories)
             {
-                var current = new CurrentCategory
+                var current = GetAsNoTracking<CurrentCategory>(c => c.CategoryId == category.Id && c.ScoringId == scoring.Id);
+                if (current == null)
                 {
-                    CategoryId = category.Id,
-                    ScoringId = scoring.Id,
-                    Value = 1
-                };
-            }
-        }
+                    current = new CurrentCategory
+                    {
+                        CategoryId = category.Id,
+                        ScoringId = scoring.Id,
+                        Value = 1
+                    };
+                    AddAndSave(current);
+                }
 
-        protected Scoring GetInitScoring(int modelId)
-        {
-            //TODO get at start
-            var scoring = new Scoring
-            {
-                CurrentFix = 0.5m,
-                CurerentRelative = 0.5m
-            };
-            return scoring;
+            }
         }
 
         protected string GetWalletName(Wallet wallet, bool anon)
