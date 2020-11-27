@@ -60,6 +60,7 @@ namespace Billing
 
         #region admin
         void LetMePay(string modelId, string rentaId);
+        void Rerent(string rentaId);
         void LetHimPay(string modelId, string targetId, string rentaId);
         List<SIN> GetSinsInGame();
         List<CharacterDto> GetCharactersInGame();
@@ -766,7 +767,7 @@ namespace Billing
 
         public void LetMePay(string modelId, string rentaId)
         {
-            if(string.IsNullOrEmpty(modelId) || string.IsNullOrEmpty(rentaId))
+            if (string.IsNullOrEmpty(modelId) || string.IsNullOrEmpty(rentaId))
             {
                 Console.Error.WriteLine($"Ошибка LetMePay modelId {modelId}, rentaId {rentaId}");
                 return;
@@ -799,6 +800,23 @@ namespace Billing
             renta.CurrentScoring = sin.Scoring.CurerentRelative + sin.Scoring.CurrentFix;
             Context.SaveChanges();
             EreminPushAdapter.SendNotification(modelIdInt, "Давай я заплачу", "Рента переоформлена");
+        }
+
+        public void Rerent(string rentaId)
+        {
+            var rentaIdint = 0;
+            if (!int.TryParse(rentaId, out rentaIdint))
+            {
+                Console.Error.WriteLine($"Ошибка Rerent rentaId {rentaId}");
+            }
+            var renta = Get<Renta>(r => r.Id == rentaIdint, r => r.Sin.Scoring, r=>r.Sin.Character);
+            if (renta == null)
+            {
+                Console.Error.WriteLine($"Ошибка Rerent rentaId {rentaId}");
+            }
+            renta.CurrentScoring = renta.Sin.Scoring.CurerentRelative + renta.Sin.Scoring.CurrentFix;
+            Context.SaveChanges();
+            EreminPushAdapter.SendNotification(renta.Sin.Character.Model, "Давай он заплатит", "Рента переоформлена");
         }
 
         public void LetHimPay(string modelId, string targetId, string rentaId)

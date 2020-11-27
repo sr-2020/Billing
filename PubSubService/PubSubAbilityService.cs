@@ -58,6 +58,10 @@ namespace PubSubService
                     billing = IocContainer.Get<IBillingManager>();
                     billing.LetMePay(model?.CharacterId, model?.QrCode?.Data?.DealId);
                     break;
+                case ActiveAbility.Rerent:
+                    billing = IocContainer.Get<IBillingManager>();
+                    billing.Rerent(model?.QrCode?.Data?.DealId);
+                    break;
                 default:
                     break;
             }

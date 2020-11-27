@@ -81,10 +81,10 @@ namespace Billing
                 sin.Scoring = scoring;
                 AddAndSave(scoring);
             }
-            InitScoring(scoring);
             scoring.StartFactor = initData.StartFak;
             scoring.CurrentFix = initData.StartFak * 0.5m;
             scoring.CurerentRelative = initData.StartFak * 0.5m;
+            InitScoring(scoring);
             Context.SaveChanges();
             return sin;
         }
@@ -101,7 +101,7 @@ namespace Billing
                     {
                         CategoryId = category.Id,
                         ScoringId = scoring.Id,
-                        Value = 1
+                        Value = scoring.StartFactor ?? 1
                     };
                     AddAndSave(current);
                 }
