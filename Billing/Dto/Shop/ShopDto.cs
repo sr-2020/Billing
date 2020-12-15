@@ -8,9 +8,8 @@ namespace Billing.DTO
 {
     public class ShopDto : OrganisationBase
     {
-        public decimal Comission { get; set; }
         public string Lifestyle { get; set; }
         public decimal Balance { get; set; }
-        public List<SpecialisationDto> Specialisations { get; set; }
+        public List<int> Specialisations { get; set; }
     }
 }

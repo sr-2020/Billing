@@ -34,8 +34,8 @@ namespace Billing
         #region web
         PriceShopDto GetPriceByQR(int character, string qrid);
         PriceShopDto GetPrice(int modelId, int shop, int sku);
-        Specialisation SetSpecialisation(int productType, int shop);
-        void DropSpecialisation(int productType, int shop);
+        Specialisation SetSpecialisation(int nomenklatura, int shop);
+        void DropSpecialisation(int nomenklatura, int shop);
         void BreakContract(int corporation, int shop);
         Contract CreateContract(int corporation, int shop);
         RentaDto ConfirmRenta(int modelId, int priceId);
@@ -167,20 +167,22 @@ namespace Billing
             return sins;
         }
 
-        public Specialisation SetSpecialisation(int productTypeid, int shopid)
+        public Specialisation SetSpecialisation(int nomenklaturaid, int shopid)
         {
-            var specialisation = GetAsNoTracking<Specialisation>(s => s.ProductTypeId == productTypeid && s.ShopId == shopid);
+            var specialisation = GetAsNoTracking<Specialisation>(s => s.NomenklaturaId == nomenklaturaid && s.ShopId == shopid);
             if (specialisation != null)
                 throw new BillingException("У магазина уже есть эта специализация");
-            var producttype = GetAsNoTracking<ProductType>(p => p.Id == productTypeid);
-            if (producttype == null)
-                throw new BillingException("ProductType не найден");
+            var nomenklatura = GetAsNoTracking<Nomenklatura>(n => n.Id == nomenklaturaid);
+            if(nomenklatura == null)
+            {
+                throw new BillingException("nomenklatura не найден");
+            }
             var shop = Get<ShopWallet>(s => s.Id == shopid);
             if (shop == null)
                 throw new BillingException("shop не найден");
             specialisation = new Specialisation
             {
-                ProductTypeId = producttype.Id,
+                NomenklaturaId = nomenklatura.Id,
                 ShopId = shop.Id
             };
             Add(specialisation);
@@ -188,9 +190,9 @@ namespace Billing
             return specialisation;
         }
 
-        public void DropSpecialisation(int productType, int shop)
+        public void DropSpecialisation(int nomenklatura, int shop)
         {
-            var specialisation = Get<Specialisation>(s => s.ProductTypeId == productType && s.ShopId == shop);
+            var specialisation = Get<Specialisation>(s => s.NomenklaturaId == nomenklatura && s.ShopId == shop);
             if (specialisation == null)
                 throw new BillingException("У магазина нет указанной специализации");
             Remove(specialisation);
@@ -532,7 +534,7 @@ namespace Billing
             var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring, s => s.Metatype);
             var balance = new BalanceDto
             {
-                CharacterId = modelId,
+                ModelId = modelId,
                 CurrentBalance = BillingHelper.RoundDown(sin.Wallet.Balance),
                 CurrentScoring = sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative,
                 SIN = sin.Sin,

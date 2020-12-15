@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Billing;
+using Billing.Dto;
 using Billing.Dto.Shop;
 using Billing.DTO;
 using BillingAPI.Filters;
@@ -18,10 +19,15 @@ namespace BillingAPI.Controllers
     [ApiController]
     public class ShopManagerController : EvarunApiController
     {
+        #region refactored
+
+        #endregion
+
         [HttpGet("getmyshops")]
         [Obsolete]
         public DataResult<OrganisationViewModel> GetMyShops(int character)
         {
+            
             var manager = IocContainer.Get<IShopManager>();
             var result = RunAction(() => manager.GetAvailableOrganisations(character), "getmyshops");
             return result;

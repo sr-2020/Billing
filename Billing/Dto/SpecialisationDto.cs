@@ -8,7 +8,7 @@ namespace Billing.DTO
     {
         public int ShopId { get; set; }
         public string ShopName { get; set; }
-        public int ProductTypeId { get; set; }
-        public string ProductTypeName { get; set; }
+        public int NomenklaturaId { get; set; }
+        public string NomenklaturaName { get; set; }
     }
 }

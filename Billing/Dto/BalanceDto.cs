@@ -7,6 +7,7 @@ namespace Billing.DTO
     public class BalanceDto
     {
         public int CharacterId { get; set; }
+        public int ModelId { get; set; }
         public string SIN { get; set; }
         public decimal CurrentBalance { get; set; }
         public string PersonName { get; set; }

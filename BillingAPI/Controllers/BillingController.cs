@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Billing;
+using Billing.Dto;
 using Billing.Dto.Shop;
 using Billing.DTO;
+using BillingAPI.Filters;
 using BillingAPI.Model;
 using Core.Model;
 using IoC;
@@ -17,6 +19,27 @@ namespace BillingAPI.Controllers
     [ApiController]
     public class BillingController : EvarunApiController
     {
+        #region refactored
+        /// <summary>
+        /// Get base info for current character
+        /// </summary>
+        /// <param name="characterId"></param>
+        /// <returns></returns>
+        [HttpGet("info/getbalance")]
+        public DataResult<BalanceDto> GetBalance(int characterId)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetBalance(characterId), $"GetBalance {characterId}");
+            return result;
+        }
+
+
+
+        #endregion
+
+
+
+
         #region admin
 
         /// <summary>
@@ -26,6 +49,7 @@ namespace BillingAPI.Controllers
         /// <param name="balance">initial wallet amount</param>
         /// <returns></returns>
         [HttpGet("admin/createphysicalwallet")]
+        [Obsolete]
         public DataResult<SIN> CreatePhysicalWallet(int character, decimal balance)
         {
             var manager = IocContainer.Get<IBillingManager>();
@@ -46,7 +70,27 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.InitCharacter(modelid, request.Name, request.Metarace), $"InitCharacter: {modelid};{request.Name};{request.Metarace};{request.Karma}");
             return result;
         }
+        [HttpPost("createtransfermir")]
+        [AdminAuthorization]
+        public DataResult<Transfer> CreateTransferMIR([FromBody] CreateTransferSinSinRequest request)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.CreateTransferMIRSIN(request.CharacterTo, request.Amount), "createtransfermir");
+            return result;
+        }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("getcharacters")]
+        [AdminAuthorization]
+        public DataResult<List<CharacterDto>> GetCharacters()
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetCharactersInGame(), $"getcharacters ");
+            return result;
+        }
 
         /// <summary>
         /// Create or update allowed product type
@@ -142,22 +186,23 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        /// <summary>
-        /// Get shop wallet. If wallet not exists, then create it
-        /// </summary>
-        /// <param name="foreignId">0 for create new, specified for update</param>
-        /// <param name="amount">if negative value then amount will no change or 0</param>
-        /// <param name="name">Some name</param>
-        /// <param name="lifestyle">lifestyle from 1 to 6</param>
-        /// <param name="owner">lifestyle from 1 to 6</param>
-        /// <returns></returns>
-        [HttpPut("admin/createorupdateshopwallet")]
-        public DataResult<ShopWallet> CreateOrUpdateShopWallet(int foreignId, decimal amount, string name, int lifestyle, int owner)
+        [HttpGet("admin/getshop")]
+        [AdminAuthorization]
+        public DataResult<ShopDto> GetShop(int shopId)
         {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdateShopWallet(foreignId, amount, name, lifestyle, owner), $"createorupdateshopwallet {foreignId} {amount} {name} {lifestyle}");
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.GetShops(s => s.Id == shopId).FirstOrDefault());
             return result;
         }
+
+
+        //[HttpPut("admin/createorupdateshopwallet")]
+        //public DataResult<ShopWallet> CreateOrUpdateShopWallet([FromBody] CreateShopModel request)
+        //{
+        //    var manager = IocContainer.Get<IBillingManager>();
+        //    var result = RunAction(() => manager.CreateOrUpdateShopWallet(foreignId, amount, name, lifestyle, owner), $"createorupdateshopwallet {foreignId} {amount} {name} {lifestyle}");
+        //    return result;
+        //}
 
         #endregion
 
@@ -312,6 +357,7 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetShops(s => true), "getshops");
             return result;
         }
+
         /// <summary>
         /// Get all corporations
         /// </summary>
@@ -335,18 +381,7 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        /// <summary>
-        /// Get base info for current character
-        /// </summary>
-        /// <param name="characterId"></param>
-        /// <returns></returns>
-        [HttpGet("info/getbalance")]
-        public DataResult<BalanceDto> GetBalance(int characterId)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetBalance(characterId), $"GetBalance {characterId}");
-            return result;
-        }
+
 
         [HttpGet("info/getcharacteridbysin")]
         public DataResult<int> GetCharacterIdBySin(string sinString)

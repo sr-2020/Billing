@@ -13,52 +13,30 @@ namespace BillingAPI.Controllers
 {
     public abstract class EvarunApiController : ControllerBase
     {
-        protected DataResult<T> RunAction<T>(Func<T> action, string actionName = "", string logmessage = "")
+
+        private DataResult<T> Handle<T>(Func<T> func, Action action, string actionName = "", string logmessage = "")
         {
             var guid = Guid.NewGuid();
             var result = new DataResult<T>();
             try
             {
                 Start(actionName, logmessage, guid);
-                result.Data = action();
+                if(func == null)
+                {
+                    action();
+                }
+                else
+                {
+                    result.Data = func();
+                }
                 result.Status = true;
                 Finish(guid);
             }
             catch (BillingAuthException e)
             {
-                return HandleException(401, e.Message, guid, result, actionName);
+                return HandleException(403, e.Message, guid, result, actionName);
             }
-            catch (BillingException ex)
-            {
-                return HandleException(422, ex.Message, guid, result, actionName);
-            }
-            catch (ShopException se)
-            {
-                return HandleException(418, se.Message, guid, result, actionName);
-            }
-            catch(HttpResponseException re)
-            {
-                return HandleException((int)re.Response.StatusCode, re.Message, guid, result, actionName);
-            }
-            catch (Exception exc)
-            {
-                return HandleException(500, exc.ToString(), guid, result, actionName);
-            }
-            return result;
-        }
-
-        protected Result RunAction(Action action, string actionName ="", string logmessage = "")
-        {
-            var guid = Guid.NewGuid();
-            var result = new Result();
-            try
-            {
-                Start(actionName, logmessage, guid);
-                action();
-                result.Status = true;
-                Finish(guid);
-            }
-            catch (BillingAuthException e)
+            catch (BillingUnauthorizedException e)
             {
                 return HandleException(401, e.Message, guid, result, actionName);
             }
@@ -79,6 +57,16 @@ namespace BillingAPI.Controllers
                 return HandleException(500, exc.ToString(), guid, result, actionName);
             }
             return result;
+        }
+
+        protected DataResult<T> RunAction<T>(Func<T> func, string logmessage = "")
+        {
+            return Handle(func, null, func.Method.Name, logmessage);
+        }
+
+        protected Result RunAction(Action action, string logmessage = "")
+        {
+            return Handle<string>(null, action, action.Method.Name, logmessage);
         }
 
         private void Start(string action, string message, Guid guid)

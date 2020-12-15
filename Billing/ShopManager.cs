@@ -159,7 +159,7 @@ namespace Billing
         {
             if (modelId == 0)
             {
-                throw new BillingAuthException("Character not authorized");
+                throw new BillingUnauthorizedException("Character not authorized");
             }
             var sin = GetSINByModelId(modelId);
             var shop = Get<ShopWallet>(s => s.Id == shopId, s => s.Owner);
@@ -177,10 +177,9 @@ namespace Billing
                       {
                           Id = s.Id,
                           Name = s.Name,
-                          Comission = s.Commission,
                           Lifestyle = ((Lifestyles)s.LifeStyle).ToString(),
                           Balance = BillingHelper.RoundDown(s.Wallet.Balance),
-                          Specialisations = CreateSpecialisationDto(s)
+                          Specialisations = GetSpecialisations(s)
                       }).ToList();
         }
 
@@ -231,18 +230,12 @@ namespace Billing
             return qr;
         }
 
-        private List<SpecialisationDto> CreateSpecialisationDto(ShopWallet shop)
+        private List<int> GetSpecialisations(ShopWallet shop)
         {
-            var list = new List<SpecialisationDto>();
+            var list = new List<int>();
             if (shop.Specialisations == null)
                 return list;
-            list.AddRange(shop.Specialisations.Select(s => new SpecialisationDto
-            {
-                ProductTypeId = s.ProductTypeId,
-                ProductTypeName = s.ProductType?.Name,
-                ShopId = s.ShopId,
-                ShopName = shop.Name
-            }));
+            list.AddRange(shop.Specialisations.Select(s => s.NomenklaturaId));
             return list;
         }
         private List<SkuDto> GetSkusForShop(int shop)

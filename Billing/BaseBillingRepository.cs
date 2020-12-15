@@ -34,7 +34,7 @@ namespace Billing
         public SIN CreateOrUpdatePhysicalWallet(int modelId, string name, int? metarace, decimal balance = 1)
         {
             if (modelId == 0)
-                throw new BillingAuthException($"character {modelId} not found");
+                throw new BillingUnauthorizedException($"character {modelId} not found");
             var character = GetAsNoTracking<Character>(c => c.Model == modelId);
             if (character == null)
                 throw new BillingAuthException($"character {modelId} not found");

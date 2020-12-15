@@ -17,41 +17,18 @@ namespace BillingAPI.Controllers
     [ApiController]
     public class BillingPublicController : EvarunApiController
     {
-
-        [HttpPost("createtransfermir")]
-        [AdminAuthorization]
-        public DataResult<Transfer> CreateTransferMIR([FromBody] CreateTransferSinSinRequest request)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateTransferMIRSIN(request.CharacterTo, request.Amount), "createtransfermir");
-            return result;
-        }
-
         /// <summary>
-        /// Create transfer from Character1 to Character2 using sins
+        /// Get base info for current character
         /// </summary>
+        /// <param name="character"></param>
         /// <returns></returns>
-        [HttpPost("createtransfer")]
-        public DataResult<Transfer> CreateTransferSINSIN(int character, [FromBody] CreateTransferSinSinRequest request)
+        [HttpGet("getsin")]
+        public DataResult<BalanceDto> GetSin(int character)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateTransferSINSIN(character.ToString(), request.CharacterTo, request.Amount, request.Comment), "createtransfer");
+            var result = RunAction(() => manager.GetBalance(character), $"getsin {character}");
             return result;
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("getcharacters")]
-        [AdminAuthorization]
-        public DataResult<List<CharacterDto>> GetCharacters()
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetCharactersInGame(), $"getcharacters ");
-            return result;
-        }
-
 
     }
 }
