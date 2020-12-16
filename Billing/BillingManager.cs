@@ -444,12 +444,19 @@ namespace Billing
         {
             ShopWallet shop = null;
             if (shopId > 0)
+            {
                 shop = Get<ShopWallet>(w => w.Id == shopId, s => s.Wallet);
+                if (shop == null)
+                {
+                    throw new BillingException("shop not found");
+                }
+            }
+            
             var owner = GetSINByModelId(ownerId);
             if (owner == null)
                 throw new BillingException("owner not found");
-
-            if (shop == null)
+            
+            if (shopId == 0)
             {
                 var newWallet = CreateOrUpdateWallet(WalletTypes.Shop);
                 shop = new ShopWallet

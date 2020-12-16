@@ -20,6 +20,14 @@ namespace BillingAPI.Controllers
     public class ShopManagerController : EvarunApiController
     {
         #region refactored
+        
+        [HttpGet("getmyorganisations")]
+        public DataResult<OrganisationViewModel> GetMyOrganisations(int character)
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.GetAvailableOrganisations(character), "getmyorganisations");
+            return result;
+        }
 
         #endregion
 
@@ -33,13 +41,7 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        [HttpGet("getmyorganisations")]
-        public DataResult<OrganisationViewModel> GetMyOrganisations(int character)
-        {
-            var manager = IocContainer.Get<IShopManager>();
-            var result = RunAction(() => manager.GetAvailableOrganisations(character), "getmyorganisations");
-            return result;
-        }
+
 
         [HttpPost("maketransfertosin")]
         [ShopAuthorization]

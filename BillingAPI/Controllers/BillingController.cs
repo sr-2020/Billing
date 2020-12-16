@@ -33,7 +33,59 @@ namespace BillingAPI.Controllers
             return result;
         }
 
+        [HttpGet("getshop")]
+        [AdminAuthorization]
+        public DataResult<ShopDto> GetShop(int shopId)
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.GetShops(s => s.Id == shopId).FirstOrDefault());
+            return result;
+        }
 
+
+        [HttpGet("getnomenklaturas")]
+        [AdminAuthorization]
+        public DataResult<List<NomenklaturaDto>> GetNomenklaturas()
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetNomenklaturas(0,0), $"getnomenklaturas");
+            return result;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("getshops")]
+        [AdminAuthorization]
+        public DataResult<List<ShopDto>> GetShops()
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.GetShops(s => true), "getshops");
+            return result;
+        }
+
+        //[HttpPut("admin/createorupdateshopwallet")]
+        //[AdminAuthorization]
+        //public DataResult<ShopWallet> CreateOrUpdateShopWallet([FromBody] CreateShopModel request)
+        //{
+        //    var manager = IocContainer.Get<IBillingManager>();
+        //    var result = RunAction(() => manager.CreateOrUpdateShopWallet(foreignId, amount, name, lifestyle, owner), $"createorupdateshopwallet {foreignId} {amount} {name} {lifestyle}");
+        //    return result;
+        //}
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("getcharacters")]
+        [AdminAuthorization]
+        public DataResult<List<CharacterDto>> GetCharacters()
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetCharactersInGame(), $"getcharacters ");
+            return result;
+        }
 
         #endregion
 
@@ -79,18 +131,7 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("getcharacters")]
-        [AdminAuthorization]
-        public DataResult<List<CharacterDto>> GetCharacters()
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetCharactersInGame(), $"getcharacters ");
-            return result;
-        }
+
 
         /// <summary>
         /// Create or update allowed product type
@@ -186,23 +227,9 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        [HttpGet("admin/getshop")]
-        [AdminAuthorization]
-        public DataResult<ShopDto> GetShop(int shopId)
-        {
-            var manager = IocContainer.Get<IShopManager>();
-            var result = RunAction(() => manager.GetShops(s => s.Id == shopId).FirstOrDefault());
-            return result;
-        }
 
 
-        //[HttpPut("admin/createorupdateshopwallet")]
-        //public DataResult<ShopWallet> CreateOrUpdateShopWallet([FromBody] CreateShopModel request)
-        //{
-        //    var manager = IocContainer.Get<IBillingManager>();
-        //    var result = RunAction(() => manager.CreateOrUpdateShopWallet(foreignId, amount, name, lifestyle, owner), $"createorupdateshopwallet {foreignId} {amount} {name} {lifestyle}");
-        //    return result;
-        //}
+
 
         #endregion
 
@@ -318,19 +345,6 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="producttype"></param>
-        /// <param name="lifestyle"></param>
-        /// <returns></returns>
-        [HttpGet("info/getnomenklaturas")]
-        public DataResult<List<NomenklaturaDto>> GetNomenklaturas(int producttype, int lifestyle)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetNomenklaturas(producttype, lifestyle), $"getnomenklaturas {producttype}");
-            return result;
-        }
 
 
         /// <summary>
@@ -346,17 +360,7 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("info/getshops")]
-        public DataResult<List<ShopDto>> GetShops()
-        {
-            var manager = IocContainer.Get<IShopManager>();
-            var result = RunAction(() => manager.GetShops(s => true), "getshops");
-            return result;
-        }
+
 
         /// <summary>
         /// Get all corporations

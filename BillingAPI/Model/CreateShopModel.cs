@@ -7,5 +7,6 @@ namespace BillingAPI.Model
 {
     public class CreateShopModel
     {
+        public int ShopId { get; set; }
     }
 }
