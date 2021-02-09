@@ -172,7 +172,7 @@ namespace Billing
 
         public List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate)
         {
-            return GetList(predicate, new string[] { "Owner", "Wallet", "Specialisations", "Specialisations.ProductType" }).Select(s =>
+            return GetList(predicate, new string[] { "Owner", "Wallet", "Specialisations", "Specialisations.Nomenklatura" }).Select(s =>
                       new ShopDto()
                       {
                           Id = s.Id,

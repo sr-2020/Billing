@@ -41,8 +41,6 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-
-
         [HttpPost("maketransfertosin")]
         [ShopAuthorization]
         public DataResult<Transfer> MakeTransferLegSIN([FromBody] MakeTransferLegSINRequest request)
