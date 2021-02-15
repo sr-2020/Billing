@@ -180,11 +180,11 @@ namespace Billing
                           Lifestyle = ((Lifestyles)s.LifeStyle).ToString(),
                           Balance = BillingHelper.RoundDown(s.Wallet.Balance),
                           Specialisations = GetSpecialisations(s),
-                          Owner = new UserDto
+                          Owner = (s.Owner != null) ? new UserDto
                           {
                               ModelId = s.Owner.CharacterId,
                               Name = s.Owner.PersonName
-                          }
+                          } : null
                       }).ToList();
         }
 
