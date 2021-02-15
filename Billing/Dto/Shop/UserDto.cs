@@ -4,10 +4,9 @@ using System.Text;
 
 namespace Billing.Dto.Shop
 {
-    public class OrganisationBase
+    public class UserDto
     {
-        public int Id { get; set; }
         public string Name { get; set; }
-        public UserDto Owner { get; set; }
+        public int ModelId { get; set; }
     }
 }

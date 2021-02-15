@@ -179,7 +179,12 @@ namespace Billing
                           Name = s.Name,
                           Lifestyle = ((Lifestyles)s.LifeStyle).ToString(),
                           Balance = BillingHelper.RoundDown(s.Wallet.Balance),
-                          Specialisations = GetSpecialisations(s)
+                          Specialisations = GetSpecialisations(s),
+                          Owner = new UserDto
+                          {
+                              ModelId = s.Owner.CharacterId,
+                              Name = s.Owner.PersonName
+                          }
                       }).ToList();
         }
 
@@ -191,7 +196,11 @@ namespace Billing
                         Id = c.Id,
                         Name = c.Name,
                         CorporationUrl = c.CorporationLogoUrl,
-                        OwnerName = c.Owner.PersonName
+                        Owner = new UserDto
+                        {
+                            ModelId = c.Owner.CharacterId,
+                            Name = c.Owner.PersonName
+                        }
                     }).ToList();
         }
 
