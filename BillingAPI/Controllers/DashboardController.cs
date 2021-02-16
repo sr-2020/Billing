@@ -14,8 +14,12 @@ namespace BillingAPI.Controllers
     [ApiController]
     public class DashboardController : EvarunApiController
     {
-        [Route("a-shops")]
-        //checkrights
+
+        /// <summary>
+        /// GetShops
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("a-shops")]
         public DataResult<List<ShopDto>> GetShops()
         {
             var manager = IocContainer.Get<IShopManager>();
