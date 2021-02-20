@@ -8,8 +8,8 @@ namespace Core
     [Obsolete]
     public class UsingNewContextAttribute : OnMethodBoundaryAspect
     {
-        private Guid _mainContext;
-        private Guid _currentContext;
+        //private Guid _mainContext;
+        //private Guid _currentContext;
         public override void OnEntry(MethodExecutionArgs args)
         {
             //if (!(args.Instance is IBaseRepository))
