@@ -52,19 +52,6 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("getshops")]
-        [AdminAuthorization]
-        public DataResult<List<ShopDto>> GetShops()
-        {
-            var manager = IocContainer.Get<IShopManager>();
-            var result = RunAction(() => manager.GetShops(s => true), "getshops");
-            return result;
-        }
-
         //[HttpPut("admin/createorupdateshopwallet")]
         //[AdminAuthorization]
         //public DataResult<ShopWallet> CreateOrUpdateShopWallet([FromBody] CreateShopModel request)
@@ -287,22 +274,6 @@ namespace BillingAPI.Controllers
         #endregion
 
         #region renta
-
-        [HttpPost("renta/setspecialisation")]
-        public DataResult<Specialisation> SetScpecialisation(int productType, int shop)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.SetSpecialisation(productType, shop), $"setspecialisation {productType}:{shop}");
-            return result;
-        }
-
-        [HttpDelete("renta/dropspecialisation")]
-        public Result DropScpecialisation(int productType, int shop)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.DropSpecialisation(productType, shop), $"dropspecialisation {productType}:{shop}");
-            return result;
-        }
 
         [HttpPost("renta/createcontract")]
         public DataResult<Contract> CreateContract(int corporation, int shop)

@@ -17,6 +17,7 @@ namespace Billing
     {
         bool HasAccessToShop(int character, int shop);
         List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate);
+        List<SpecialisationDto> GetSpecialisations(Expression<Func<Specialisation, bool>> predicate);
         List<CorporationDto> GetCorporations(Expression<Func<CorporationWallet, bool>> predicate);
         List<QRDto> GetAvailableQR(int shop);
         OrganisationViewModel GetAvailableOrganisations(int modelId);
@@ -172,7 +173,7 @@ namespace Billing
 
         public List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate)
         {
-            return GetList(predicate, new string[] { "Owner", "Wallet", "Specialisations", "Specialisations.Nomenklatura" }).Select(s =>
+            return GetList(predicate, s => s.Owner.Sins, s => s.Wallet, s => s.Specialisations).Select(s =>
                       new ShopDto()
                       {
                           Id = s.Id,
@@ -182,10 +183,20 @@ namespace Billing
                           Specialisations = GetSpecialisations(s),
                           Owner = (s.Owner != null) ? new UserDto
                           {
-                              ModelId = s.Owner.CharacterId,
-                              Name = s.Owner.PersonName
+                              ModelId = s.Owner.Model,
+                              Name = s.Owner.GetActualSIN().PersonName
                           } : null
                       }).ToList();
+        }
+
+        public List<SpecialisationDto> GetSpecialisations(Expression<Func<Specialisation, bool>> predicate)
+        {
+            return GetList(predicate).Select(s =>
+              new SpecialisationDto()
+              {
+                  Id = s.Id,
+                  Name = s.Name
+              }).ToList();
         }
 
         public List<CorporationDto> GetCorporations(Expression<Func<CorporationWallet, bool>> predicate)
@@ -244,7 +255,7 @@ namespace Billing
             var list = new List<int>();
             if (shop.Specialisations == null)
                 return list;
-            list.AddRange(shop.Specialisations.Select(s => s.NomenklaturaId));
+            list.AddRange(shop.Specialisations.Select(s => s.SpecialisationId));
             return list;
         }
         private List<SkuDto> GetSkusForShop(int shop)

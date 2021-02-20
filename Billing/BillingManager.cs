@@ -34,8 +34,8 @@ namespace Billing
         #region web
         PriceShopDto GetPriceByQR(int character, string qrid);
         PriceShopDto GetPrice(int modelId, int shop, int sku);
-        Specialisation SetSpecialisation(int nomenklatura, int shop);
-        void DropSpecialisation(int nomenklatura, int shop);
+        ShopSpecialisation SetSpecialisation(int specialisation, int shop);
+        void DropSpecialisation(int specialisation, int shop);
         void BreakContract(int corporation, int shop);
         Contract CreateContract(int corporation, int shop);
         RentaDto ConfirmRenta(int modelId, int priceId);
@@ -69,7 +69,7 @@ namespace Billing
         Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description, string pictureurl, int externalId = 0);
         ProductType CreateOrUpdateProductType(int id, string name, int discounttype = 1, int externalId = 0);
         CorporationWallet CreateOrUpdateCorporationWallet(int id, decimal amount, string name, string logoUrl);
-        ShopWallet CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle, int owner);
+        ShopDto CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle, int owner);
         void DeleteCorporation(int corpid);
         void DeleteShop(int shopid);
         void DeleteProductType(int id, bool force);
@@ -167,32 +167,32 @@ namespace Billing
             return sins;
         }
 
-        public Specialisation SetSpecialisation(int nomenklaturaid, int shopid)
+        public ShopSpecialisation SetSpecialisation(int specialisationId, int shopid)
         {
-            var specialisation = GetAsNoTracking<Specialisation>(s => s.NomenklaturaId == nomenklaturaid && s.ShopId == shopid);
-            if (specialisation != null)
+            var shopSpecialisation = GetAsNoTracking<ShopSpecialisation>(s => s.SpecialisationId == specialisationId && s.ShopId == shopid);
+            if (shopSpecialisation != null)
                 throw new BillingException("У магазина уже есть эта специализация");
-            var nomenklatura = GetAsNoTracking<Nomenklatura>(n => n.Id == nomenklaturaid);
-            if(nomenklatura == null)
+            var specialisation = GetAsNoTracking<Specialisation>(n => n.Id == specialisationId);
+            if(specialisation == null)
             {
-                throw new BillingException("nomenklatura не найден");
+                throw new BillingException("specialisation не найден");
             }
             var shop = Get<ShopWallet>(s => s.Id == shopid);
             if (shop == null)
                 throw new BillingException("shop не найден");
-            specialisation = new Specialisation
+            shopSpecialisation = new ShopSpecialisation
             {
-                NomenklaturaId = nomenklatura.Id,
+                SpecialisationId = specialisation.Id,
                 ShopId = shop.Id
             };
-            Add(specialisation);
+            Add(shopSpecialisation);
             Context.SaveChanges();
-            return specialisation;
+            return shopSpecialisation;
         }
 
-        public void DropSpecialisation(int nomenklatura, int shop)
+        public void DropSpecialisation(int specialisationId, int shop)
         {
-            var specialisation = Get<Specialisation>(s => s.NomenklaturaId == nomenklatura && s.ShopId == shop);
+            var specialisation = Get<ShopSpecialisation>(s => s.SpecialisationId == specialisationId && s.ShopId == shop);
             if (specialisation == null)
                 throw new BillingException("У магазина нет указанной специализации");
             Remove(specialisation);
@@ -440,7 +440,7 @@ namespace Billing
             return corporation;
         }
 
-        public ShopWallet CreateOrUpdateShopWallet(int shopId = 0, decimal amount = 0, string name = "default shop", int lifestyle = 1, int ownerId = 0)
+        public ShopDto CreateOrUpdateShopWallet(int shopId = 0, decimal amount = 0, string name = "default shop", int lifestyle = 1, int ownerId = 0)
         {
             ShopWallet shop = null;
             if (shopId > 0)
@@ -471,7 +471,11 @@ namespace Billing
             shop.Wallet.Balance = amount;
             shop.LifeStyle = (int)BillingHelper.GetLifestyle(lifestyle);
             Context.SaveChanges();
-            return shop;
+            var dto = new ShopDto
+            {
+                Owner = new UserDto { ModelId = ownerId }
+            };
+            return dto;
         }
 
         public void DeleteCorporation(int corpid)

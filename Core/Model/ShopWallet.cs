@@ -19,9 +19,9 @@ namespace Core.Model
         [Column("owner")]
         [ForeignKey("owner")]
         public int? OwnerId { get; set; }
-        public virtual SIN Owner { get; set; }
+        public virtual Character Owner { get; set; }
         [Column("commission")]
         public decimal Commission { get; set; }
-        public virtual List<Specialisation> Specialisations { get; set; }
+        public virtual List<ShopSpecialisation> Specialisations { get; set; }
     }
 }
