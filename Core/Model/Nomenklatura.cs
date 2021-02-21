@@ -18,10 +18,10 @@ namespace Core.Model
         public decimal BasePrice { get; set; }
         [Column("lifestyle")]
         public int Lifestyle { get; set; }
-        [ForeignKey("product_type")]
-        [Column("product_type")]
-        public int ProductTypeId { get; set; }
-        public virtual ProductType ProductType { get; set; }
+        [ForeignKey("specialisation")]
+        [Column("specialisation")]
+        public int SpecialisationId { get; set; }
+        public virtual Specialisation Specialisation { get; set; }
         [Column("picture_url")]
         public string PictureUrl { get; set; }
         [Column("external_id")]

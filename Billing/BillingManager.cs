@@ -40,11 +40,11 @@ namespace Billing
         Contract CreateContract(int corporation, int shop);
         RentaDto ConfirmRenta(int modelId, int priceId);
         List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1);
-        List<ProductTypeDto> GetProductTypes(int id = -1);
+        List<ProductTypeDto> GetSpecialisations(int id = -1);
         ProductType GetExtProductType(string name);
         Nomenklatura GetExtNomenklatura(string name);
         Sku GetExtSku(string name);
-        List<NomenklaturaDto> GetNomenklaturas(int producttype, int lifestyle, int id = -1);
+        List<NomenklaturaDto> GetNomenklaturas(int specialisationId, int lifestyle, int id = -1);
         List<Contract> GetContrats(int shopid, int corporationId);
         #endregion
 
@@ -66,13 +66,13 @@ namespace Billing
         List<CharacterDto> GetCharactersInGame();
         List<TransferDto> GetTransfersByRenta(int rentaID);
         Sku CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled, int externalId = 0);
-        Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description, string pictureurl, int externalId = 0);
+        Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int specialisationId, int lifestyle, decimal baseprice, string description, string pictureurl, int externalId = 0);
         ProductType CreateOrUpdateProductType(int id, string name, int discounttype = 1, int externalId = 0);
         CorporationWallet CreateOrUpdateCorporationWallet(int id, decimal amount, string name, string logoUrl);
         ShopDto CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle, int owner);
         void DeleteCorporation(int corpid);
         void DeleteShop(int shopid);
-        void DeleteProductType(int id, bool force);
+        void DeleteSpecialisation(int id, bool force);
         void DeleteNomenklatura(int id, bool force);
         #endregion
     }
@@ -224,13 +224,13 @@ namespace Billing
             return newContract;
         }
 
-        public List<NomenklaturaDto> GetNomenklaturas(int producttype, int lifestyle, int id = -1)
+        public List<NomenklaturaDto> GetNomenklaturas(int specialisationId, int lifestyle, int id = -1)
         {
             var list = GetListAsNoTracking<Nomenklatura>(n =>
-                (n.ProductTypeId == producttype || producttype == 0)
+                (n.SpecialisationId == specialisationId || specialisationId == 0)
                 && (n.Lifestyle == lifestyle || lifestyle == 0)
                 && (n.Id == id || id == -1)
-                , n => n.ProductType);
+                , n => n.Specialisation.ProductType);
             return list.Select(s => new NomenklaturaDto(s)).ToList();
         }
 
@@ -240,9 +240,9 @@ namespace Billing
             return list;
         }
 
-        public List<ProductTypeDto> GetProductTypes(int id = -1)
+        public List<ProductTypeDto> GetSpecialisations(int id = -1)
         {
-            return GetListAsNoTracking<ProductType>(p => p.Id == id || id == -1).Select(p =>
+            return GetListAsNoTracking<Specialisation>(p => p.Id == id || id == -1).Select(p =>
                 new ProductTypeDto(p)).ToList();
         }
 
@@ -267,13 +267,13 @@ namespace Billing
                 && (s.NomenklaturaId == nomenklaturaId || nomenklaturaId == 0)
                 && (s.Enabled == enabled || !enabled.HasValue)
                 && (s.Id == id || id == -1)
-                , s => s.Corporation, s => s.Nomenklatura, s => s.Nomenklatura.ProductType);
+                , s => s.Corporation, s => s.Nomenklatura, s => s.Nomenklatura.Specialisation.ProductType);
             return list.Select(s => new SkuDto(s)).ToList();
         }
 
         public List<RentaDto> GetRentas(int modelId)
         {
-            var list = GetListAsNoTracking<Renta>(r => r.Sin.Character.Model == modelId, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation, r => r.Shop, r => r.Sin.Character);
+            var list = GetListAsNoTracking<Renta>(r => r.Sin.Character.Model == modelId, r => r.Sku.Nomenklatura.Specialisation.ProductType, r => r.Sku.Corporation, r => r.Shop, r => r.Sin.Character);
             return list
                     .Select(r =>
                     new RentaDto
@@ -281,7 +281,7 @@ namespace Billing
                         ModelId = modelId.ToString(),
                         CharacterName = r.Sin.PersonName,
                         FinalPrice = BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring),
-                        ProductType = r.Sku.Nomenklatura.ProductType.Name,
+                        ProductType = r.Sku.Nomenklatura.Specialisation.Name,
                         Shop = r.Shop.Name,
                         NomenklaturaName = r.Sku.Nomenklatura.Name,
                         SkuName = r.Sku.Name,
@@ -349,7 +349,7 @@ namespace Billing
 
         private void ProcessByuScoring(SIN sin, Sku sku)
         {
-            var type = sku.Nomenklatura.ProductType;
+            var type = sku.Nomenklatura.Specialisation.ProductType;
             if (type == null)
                 throw new Exception("type not found");
             IScoringManager manager;
@@ -500,9 +500,9 @@ namespace Billing
             Context.SaveChanges();
         }
 
-        public void DeleteProductType(int id, bool force)
+        public void DeleteSpecialisation(int id, bool force)
         {
-            var nomenklaturas = GetList<Nomenklatura>(n => n.ProductTypeId == id);
+            var nomenklaturas = GetList<Nomenklatura>(n => n.SpecialisationId == id);
             if (nomenklaturas != null && nomenklaturas.Count > 0)
             {
                 if (force)
@@ -517,7 +517,7 @@ namespace Billing
                     throw new Exception($"Сперва необходимо удалить номенклатуры ссылающиеся на этот тип товара");
                 }
             }
-            Delete<ProductType>(id);
+            Delete<Specialisation>(id);
         }
 
         public void DeleteNomenklatura(int id, bool force)
@@ -625,7 +625,7 @@ namespace Billing
             return type;
         }
 
-        public Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int producttypeid, int lifestyle, decimal baseprice, string description, string pictureurl, int externalId = 0)
+        public Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int specialisationId, int lifestyle, decimal baseprice, string description, string pictureurl, int externalId = 0)
         {
             Nomenklatura nomenklatura = null;
             if (id > 0)
@@ -651,16 +651,16 @@ namespace Billing
             {
                 nomenklatura.ExternalId = externalId;
             }
-            ProductType producttype = null;
-            if (producttypeid > 0)
-                producttype = Get<ProductType>(p => p.Id == producttypeid);
+            Specialisation specialisation = null;
+            if (specialisationId > 0)
+                specialisation = Get<Specialisation>(p => p.Id == specialisationId);
             else
-                producttype = Get<ProductType>(p => p.Id == nomenklatura.ProductTypeId);
-            if (producttype == null)
+                specialisation = Get<Specialisation>(p => p.Id == nomenklatura.SpecialisationId);
+            if (specialisation == null)
             {
-                throw new BillingException("ProductType not found");
+                throw new BillingException("specialisation not found");
             }
-            nomenklatura.ProductTypeId = producttype.Id;
+            nomenklatura.SpecialisationId = specialisation.Id;
             if (lifestyle > 0)
                 nomenklatura.Lifestyle = lifestyle;
             nomenklatura.Lifestyle = (int)BillingHelper.GetLifestyle(nomenklatura.Lifestyle);
@@ -963,9 +963,16 @@ namespace Billing
                 nomenklatura = Get<Nomenklatura>(n => n.Id == sku.NomenklaturaId);
             if (nomenklatura == null)
                 throw new Exception("Nomenklatura not found");
-            var producttype = nomenklatura.ProductType;
+            var producttype = nomenklatura?.Specialisation?.ProductType;
             if (producttype == null)
-                producttype = Get<ProductType>(p => p.Id == nomenklatura.ProductTypeId);
+            {
+                var specialisation = Get<Specialisation>(s => s.Id == nomenklatura.SpecialisationId);
+                if(specialisation == null)
+                {
+                    throw new Exception("Specialisation not found");
+                }
+                producttype = Get<ProductType>(p => p.Id == specialisation.ProductTypeId);
+            }
             if (producttype == null)
                 throw new Exception("ProductType not found");
             return BillingHelper.GetDiscountType(producttype.DiscountType);

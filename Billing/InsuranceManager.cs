@@ -33,7 +33,7 @@ namespace Billing
                 ShopName = "Страховка отсутствует",
                 PersonName = $"{sin.PersonName}"
             };
-            var lastIns = GetList<Renta>(r => r.Sku.Nomenklatura.ProductTypeId == dbinsurance.Id && r.SinId == sin.Id, r => r.Shop, r => r.Sku.Nomenklatura)
+            var lastIns = GetList<Renta>(r => r.Sku.Nomenklatura.Specialisation.ProductTypeId == dbinsurance.Id && r.SinId == sin.Id, r => r.Shop, r => r.Sku.Nomenklatura)
                                 .OrderByDescending(r => r.DateCreated)
                                 .FirstOrDefault();
             if (lastIns != null)

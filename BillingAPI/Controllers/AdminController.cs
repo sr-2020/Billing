@@ -67,31 +67,33 @@ namespace BillingAPI.Controllers
 
         public IActionResult ProductList()
         {
-            var manager = IocContainer.Get<IBillingManager>();
-            var list = manager.GetProductTypes();
-            return View(list);
+            throw new NotImplementedException();
+            //var manager = IocContainer.Get<IBillingManager>();
+            //var list = manager.GetProductTypes();
+            //return View(list);
         }
 
         public IActionResult Deleteallpt()
         {
-            var manager = IocContainer.Get<IBillingManager>();
-            var list = manager.GetProductTypes();
-            var count = 0;
-            var errors = 0;
-            foreach (var item in list)
-            {
-                try
-                {
-                    manager.DeleteProductType(item.ProductTypeId, true);
-                    count++;
-                }
-                catch (Exception e)
-                {
-                    errors++;
-                }
-            }
-            var result = $"количество удаленных записей {count}, ошибок {errors}";
-            return Content(result);
+            throw new NotImplementedException();
+            //var manager = IocContainer.Get<IBillingManager>();
+            //var list = manager.GetProductTypes();
+            //var count = 0;
+            //var errors = 0;
+            //foreach (var item in list)
+            //{
+            //    try
+            //    {
+            //        manager.DeleteProductType(item.ProductTypeId, true);
+            //        count++;
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        errors++;
+            //    }
+            //}
+            //var result = $"количество удаленных записей {count}, ошибок {errors}";
+            //return Content(result);
         }
 
         public IActionResult UploadProductsList(Microsoft.AspNetCore.Http.IFormFile formFile)
@@ -146,11 +148,12 @@ namespace BillingAPI.Controllers
         [Microsoft.AspNetCore.Mvc.HttpGet]
         public IActionResult Editpt(int id)
         {
-            var manager = IocContainer.Get<IBillingManager>();
-            var dto = manager.GetProductTypes(id).FirstOrDefault();
-            if (dto == null)
-                dto = new ProductTypeDto();
-            return View(dto);
+            throw new NotImplementedException();
+            //var manager = IocContainer.Get<IBillingManager>();
+            //var dto = manager.GetProductTypes(id).FirstOrDefault();
+            //if (dto == null)
+            //    dto = new ProductTypeDto();
+            //return View(dto);
 
         }
         [Microsoft.AspNetCore.Mvc.HttpPost]
@@ -162,9 +165,10 @@ namespace BillingAPI.Controllers
         }
         public IActionResult Deletept(int id)
         {
-            var manager = IocContainer.Get<IBillingManager>();
-            manager.DeleteProductType(id, false);
-            return RedirectToAction("ProductList");
+            throw new NotImplementedException();
+            //var manager = IocContainer.Get<IBillingManager>();
+            //manager.DeleteProductType(id, false);
+            //return RedirectToAction("ProductList");
         }
 
         #endregion
@@ -172,36 +176,39 @@ namespace BillingAPI.Controllers
         #region nomenklatura
         public IActionResult NomenklaturaList(int productid)
         {
-            var manager = IocContainer.Get<IBillingManager>();
-            var producttype = manager.Get<ProductType>(p => p.Id == productid);
-            if (producttype == null)
-                throw new BillingException("producttype not found");
-            var list = manager.GetNomenklaturas(productid, 0);
-            var model = new NomenklaturaPage();
-            model.ProductTypeId = productid;
-            model.ProductName = producttype.Name;
-            model.Items = list;
-            return View(model);
+            throw new NotImplementedException();
+            //var manager = IocContainer.Get<IBillingManager>();
+            //var producttype = manager.Get<ProductType>(p => p.Id == productid);
+            //if (producttype == null)
+            //    throw new BillingException("producttype not found");
+            //var list = manager.GetNomenklaturas(productid, 0);
+            //var model = new NomenklaturaPage();
+            //model.ProductTypeId = productid;
+            //model.ProductName = producttype.Name;
+            //model.Items = list;
+            //return View(model);
         }
         [Microsoft.AspNetCore.Mvc.HttpGet]
         public IActionResult Editnm(int id, int productId)
         {
-            var manager = IocContainer.Get<IBillingManager>();
-            var dto = manager.GetNomenklaturas(0, 0, id).FirstOrDefault();
-            if (dto == null)
-            {
-                dto = new NomenklaturaDto();
-                dto.ProductTypeId = productId;
-            }
-            return View(dto);
+            throw new NotImplementedException();
+            //var manager = IocContainer.Get<IBillingManager>();
+            //var dto = manager.GetNomenklaturas(0, 0, id).FirstOrDefault();
+            //if (dto == null)
+            //{
+            //    dto = new NomenklaturaDto();
+            //    dto.ProductTypeId = productId;
+            //}
+            //return View(dto);
         }
         [Microsoft.AspNetCore.Mvc.HttpPost]
         public IActionResult Editnm(NomenklaturaDto dto)
         {
-            var manager = IocContainer.Get<IBillingManager>();
+            throw new NotImplementedException();
+            //var manager = IocContainer.Get<IBillingManager>();
 
-            manager.CreateOrUpdateNomenklatura(dto.NomenklaturaId, dto.NomenklaturaName, dto.Code, dto.ProductTypeId, dto.LifeStyleId, dto.BasePrice, dto.Description, dto.UrlPicture);
-            return RedirectToAction("NomenklaturaList", new { productid = dto.ProductTypeId });
+            //manager.CreateOrUpdateNomenklatura(dto.NomenklaturaId, dto.NomenklaturaName, dto.Code, dto.ProductTypeId, dto.LifeStyleId, dto.BasePrice, dto.Description, dto.UrlPicture);
+            //return RedirectToAction("NomenklaturaList", new { productid = dto.ProductTypeId });
         }
 
         public IActionResult Deletenm(int id, int productid)

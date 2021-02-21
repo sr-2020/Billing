@@ -68,13 +68,14 @@ namespace Billing
 
         public List<RentaDto> GetRentas(int shop)
         {
-            var list = GetList<Renta>(r => r.ShopId == shop, r => r.Sku.Nomenklatura.ProductType, r => r.Sku.Corporation, r => r.Shop, r => r.Sin);
+            var list = GetList<Renta>(r => r.ShopId == shop, r => r.Sku.Nomenklatura.Specialisation.ProductType, r => r.Sku.Corporation, r => r.Shop, r => r.Sin);
             return list.OrderByDescending(r => r.DateCreated)
                     .Select(r =>
                     new RentaDto
                     {
                         FinalPrice = BillingHelper.RoundDown(BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring)),
-                        ProductType = r.Sku.Nomenklatura.ProductType.Name,
+                        ProductType = r.Sku.Nomenklatura.Specialisation.ProductType.Name,
+                        Specialisation = r.Sku.Nomenklatura.Specialisation.Name,
                         Shop = r.Shop.Name,
                         NomenklaturaName = r.Sku.Nomenklatura.Name,
                         SkuName = r.Sku.Name,

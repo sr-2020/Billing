@@ -16,6 +16,7 @@ namespace Billing.DTO
         [Display(Name = "Сумма по ренте")]
         public decimal FinalPrice { get; set; }
         public string ProductType { get; set; }
+        public string Specialisation { get; set; }
         public string NomenklaturaName { get; set; }
         [Display(Name = "Название Ску")]
         public string SkuName { get; set; }

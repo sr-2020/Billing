@@ -141,17 +141,17 @@ namespace BillingAPI.Controllers
         /// <param name="id">0 for create new, specified for update</param>
         /// <param name="name">Header of product</param>
         /// <param name="code">it will be executed when user byu sku of this nomenklatura</param>
-        /// <param name="producttype">id from getproducttypes</param>
+        /// <param name="specialisationId">id from getproducttypes</param>
         /// <param name="lifestyle">from 1 to 6</param>
         /// <param name="baseprice">decimal base price</param>
         /// <param name="description">description shown for user</param>
         /// <param name="pictureurl">url for picture</param>
         /// <returns></returns>
         [HttpPut("admin/createorupdatenomenklatura")]
-        public DataResult<Nomenklatura> CreateOrUpdateNomenklatura(int id, string name, string code, int producttype, int lifestyle, decimal baseprice, string description, string pictureurl)
+        public DataResult<Nomenklatura> CreateOrUpdateNomenklatura(int id, string name, string code, int specialisationId, int lifestyle, decimal baseprice, string description, string pictureurl)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdateNomenklatura(id, name, code, producttype, lifestyle, baseprice, description, pictureurl), $"createorupdatenomenklatura {id}:{name}:{code}:{producttype}:{lifestyle}:{baseprice}:{description}:{pictureurl}");
+            var result = RunAction(() => manager.CreateOrUpdateNomenklatura(id, name, code, specialisationId, lifestyle, baseprice, description, pictureurl), $"createorupdatenomenklatura {id}:{name}:{code}:{specialisationId}:{lifestyle}:{baseprice}:{description}:{pictureurl}");
             return result;
         }
 
@@ -344,19 +344,6 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetCorporations(s => true), "getcorps");
             return result;
         }
-        /// <summary>
-        /// get all product types
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("info/getproducttypes")]
-        public DataResult<List<ProductTypeDto>> GetProductTypes()
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetProductTypes(), "getproducttypes");
-            return result;
-        }
-
-
 
         [HttpGet("info/getcharacteridbysin")]
         public DataResult<int> GetCharacterIdBySin(string sinString)

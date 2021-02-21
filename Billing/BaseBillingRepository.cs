@@ -260,7 +260,7 @@ namespace Billing
         protected List<Sku> GetSkuList(int shopId)
         {
             var skuids = ExecuteQuery<int>($"SELECT * FROM get_sku({shopId})");
-            var result = GetList<Sku>(s => skuids.Contains(s.Id), s => s.Corporation.Wallet, s => s.Nomenklatura.ProductType);
+            var result = GetList<Sku>(s => skuids.Contains(s.Id), s => s.Corporation.Wallet, s => s.Nomenklatura.Specialisation.ProductType);
             //TODO filter by contractlimit
             return result;
         }

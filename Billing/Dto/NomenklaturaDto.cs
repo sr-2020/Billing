@@ -7,7 +7,7 @@ namespace Billing.DTO
 {
     public class NomenklaturaDto : ProductTypeDto
     {
-        public NomenklaturaDto(Nomenklatura nomenklatura) : base(nomenklatura.ProductType)
+        public NomenklaturaDto(Nomenklatura nomenklatura) : base(nomenklatura.Specialisation)
         {
             this.BasePrice = nomenklatura.BasePrice;
             this.NomenklaturaId = nomenklatura.Id;
