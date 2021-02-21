@@ -12,6 +12,7 @@ namespace Core.Model
         [Column("product_type")]
         public int ProductTypeId { get; set; }
         public virtual ProductType ProductType { get; set; }
+        [Column("name")]
         public string Name { get; set; }
     }
 }
