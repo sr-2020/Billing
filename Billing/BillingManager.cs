@@ -385,12 +385,9 @@ namespace Billing
             if (shop == null || sin == null)
                 throw new Exception("some went wrong");
             var price = CreateNewPrice(sku, shop, sin);
-            var dto = new PriceShopDto(new PriceDto(price));
+            var dto = new PriceShopDto(new PriceDto(price), sku.Corporation);
             return dto;
         }
-
-
-
 
         public BalanceDto GetBalance(int modelId)
         {

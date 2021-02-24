@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Billing.Dto.Shop
 {
-    public class CorporationDto : OrganisationBase
+    public class CorporationDto : OrganisationBaseDto
     {
         public CorporationDto(CorporationWallet corporation) : base(corporation)
         {

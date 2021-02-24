@@ -14,9 +14,7 @@ namespace Billing.DTO
             this.SkuId = sku.Id;
             this.SkuName = sku.Name;
             this.Count = sku.Count;
-            this.CorporationName = sku.Corporation?.Name;
             this.Enabled = sku.Enabled;
-            this.CorporationLogo = sku.Corporation?.CorporationLogoUrl;
             this.CorporationId = sku.CorporationId;
         }
         public SkuDto() : base() { }
@@ -25,8 +23,6 @@ namespace Billing.DTO
         public string SkuName { get; set; }
         public int Count { get; set; }
         public int CorporationId { get; set; }
-        public string CorporationName { get; set; }
         public bool Enabled { get; set; }
-        public string CorporationLogo { get; set; }
     }
 }

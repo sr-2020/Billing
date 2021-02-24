@@ -35,7 +35,6 @@ namespace BillingAPI.Controllers
         [Obsolete]
         public DataResult<OrganisationViewModel> GetMyShops(int character)
         {
-            
             var manager = IocContainer.Get<IShopManager>();
             var result = RunAction(() => manager.GetAvailableOrganisations(character), "getmyshops");
             return result;

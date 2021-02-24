@@ -15,7 +15,7 @@ namespace Core.Model
         [Column("base_price")]
         public decimal BasePrice { get; set; }
         [Column("base_count")]
-        public decimal BaseCount { get; set; }
+        public int BaseCount { get; set; }
         [Column("lifestyle")]
         public int Lifestyle { get; set; }
         [ForeignKey("specialisation")]

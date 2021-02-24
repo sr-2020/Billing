@@ -24,5 +24,6 @@ namespace Billing.Dto.Shop
         public string Name { get; set; }
         public string ModelId { get; set; }
         public decimal Balance { get; set; }
+        public string Rights { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Core.Model;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -21,7 +22,7 @@ namespace Billing.DTO
         public string Description { get; set; }
         public string UrlPicture { get; set; }
         public string ProductTypeName { get; set; }
-        public PriceShopDto(PriceDto dto)
+        public PriceShopDto(PriceDto dto, CorporationWallet corp)
         {
             this.PriceId = dto.PriceId;
             this.DateCreated = dto.DateCreated;
@@ -31,13 +32,16 @@ namespace Billing.DTO
             this.FinalPrice = dto.FinalPrice;
             this.SkuName = dto.SkuName;
             this.Count = dto.Count;
-            this.CorporationLogo = dto.CorporationLogo;
-            this.CorporationName = dto.CorporationName;
+            this.CorporationLogo = corp.CorporationLogoUrl;
+            this.CorporationName = corp.Name;
             this.NomenklaturaName = dto.NomenklaturaName;
             this.LifeStyle = dto.LifeStyle;
             this.Description = dto.Description;
-            this.UrlPicture = dto.UrlPicture;
-            this.ProductTypeName = dto.ProductTypeName;
+            this.UrlPicture = dto.PictureUrl;
+            this.ProductTypeName = dto.Name;
         }
+
+        
+
     }
 }

@@ -17,14 +17,14 @@ namespace Billing.DTO
             this.SpecialisationId = specialisation.Id;
             if (specialisation?.ProductType == null)
                 return;
-            this.ProductTypeId = specialisation.ProductType.Id;
-            this.ProductTypeName = specialisation.ProductType.Name;
+            this.Id = specialisation.ProductType.Id;
+            this.Name = specialisation.ProductType.Name;
             this.DiscountType = specialisation.ProductType.DiscountType;
         }
         public SpecialisationDto() { }
-        public int ProductTypeId { get; set; }
+        public int Id { get; set; }
         [Column(0, false)]
-        public string ProductTypeName { get; set; }
+        public string Name { get; set; }
 
         [DisplayName("тип скидки(1 или 2)")]
         [Column(1, false)]

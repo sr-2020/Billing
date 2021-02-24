@@ -7,6 +7,8 @@ using Billing.Dto;
 using Billing.Dto.Shop;
 using Billing.DTO;
 using BillingAPI.Model;
+using Core.Model;
+using Core.Primitives;
 using IoC;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,7 +45,7 @@ namespace BillingAPI.Controllers
         }
 
         /// <summary>
-        /// GetShops
+        /// GetShop
         /// </summary>
         /// <returns></returns>
         [HttpGet("a-shop")]
@@ -339,6 +341,21 @@ namespace BillingAPI.Controllers
         {
             var manager = IocContainer.Get<IAdminManager>();
             var result = RunAction(() => manager.DropSpecialisation(request.ShopId, request.SpecialisationId));
+            return result;
+        }
+
+        [HttpGet("a-lifestyles")]
+        public DataResult<List<Lifestyles>> GetLifeStyles()
+        {
+            throw new NotImplementedException();
+        }
+
+
+        [HttpGet("a-lifestyle")]
+        public DataResult<NamedEntity> GetLifeStyle(int lifestyle)
+        {
+            var ls = BillingHelper.GetLifestyle(lifestyle);
+            var result = RunAction(() => new NamedEntity { Id = (int)ls, Name = ls.ToString() });
             return result;
         }
 

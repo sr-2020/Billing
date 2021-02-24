@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Billing.Dto.Shop
 {
-    public class OrganisationBase
+    public class OrganisationBaseDto
     {
-        public OrganisationBase(OwnerEntity organisation)
+        public OrganisationBaseDto(OwnerEntity organisation)
         {
             Id = organisation.Id;
             Name = organisation.Name;
