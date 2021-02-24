@@ -6,12 +6,10 @@ using System.Text;
 namespace Core.Model
 {
     [Table("nomenklatura")]
-    public class Nomenklatura : BaseEntity
+    public class Nomenklatura : NamedEntity
     {
         [Column("code")]
         public string Code { get; set; }
-        [Column("name")]
-        public string Name { get; set; }
         [Column("description")]
         public string Description { get; set; }
         [Column("base_price")]

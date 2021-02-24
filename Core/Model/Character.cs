@@ -17,9 +17,7 @@ namespace Core.Model
 
         public SIN GetActualSIN()
         {
-            if (Sins == null)
-                throw new BillingException("не найдена коллекция sins");
-            return Sins.FirstOrDefault();
+            return Sins?.FirstOrDefault();
         }
     }
 }

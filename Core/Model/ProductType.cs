@@ -6,10 +6,8 @@ using System.Text;
 namespace Core.Model
 {
     [Table("product_type")]
-    public class ProductType : BaseEntity
+    public class ProductType : NamedEntity
     {
-        [Column("name")]
-        public string Name { get; set; }
         [Column("discount_type")]
         public int DiscountType { get; set; }
         [Column("external_id")]

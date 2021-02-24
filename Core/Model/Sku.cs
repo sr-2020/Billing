@@ -6,7 +6,7 @@ using System.Text;
 namespace Core.Model
 {
     [Table("sku")]
-    public class Sku : BaseEntity
+    public class Sku : NamedEntity
     {
         [Column("nomenklatura")]
         public int NomenklaturaId { get; set; }
@@ -19,8 +19,6 @@ namespace Core.Model
         public virtual CorporationWallet Corporation { get; set; }
         [Column("enabled")]
         public bool Enabled { get; set; }
-        [Column("name")]
-        public string Name { get; set; }
         [Column("external_id")]
         public int ExternalId { get; set; }
     }

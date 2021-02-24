@@ -43,19 +43,7 @@ namespace Billing
         public List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate)
         {
             return GetList(predicate, s => s.Owner.Sins, s => s.Wallet, s => s.Specialisations).Select(s =>
-                      new ShopDto()
-                      {
-                          Id = s.Id,
-                          Name = s.Name,
-                          Lifestyle = ((Lifestyles)s.LifeStyle).ToString(),
-                          Balance = BillingHelper.RoundDown(s.Wallet.Balance),
-                          Specialisations = GetSpecialisationIds(s),
-                          Owner = (s.Owner != null) ? new UserDto
-                          {
-                              ModelId = s.Owner.Model,
-                              Name = s.Owner.GetActualSIN().PersonName
-                          } : null
-                      }).ToList();
+                      new ShopDto(s)).ToList();
         }
 
         public List<SpecialisationDto> GetSpecialisations(Expression<Func<Specialisation, bool>> predicate)
@@ -66,18 +54,8 @@ namespace Billing
 
         public List<CorporationDto> GetCorporations(Expression<Func<CorporationWallet, bool>> predicate)
         {
-            return GetList(predicate, c => c.Wallet, c => c.Owner).Select(c =>
-                    new CorporationDto
-                    {
-                        Id = c.Id,
-                        Name = c.Name,
-                        CorporationUrl = c.CorporationLogoUrl,
-                        Owner = new UserDto
-                        {
-                            ModelId = c.Owner.CharacterId,
-                            Name = c.Owner.PersonName
-                        }
-                    }).ToList();
+            return GetList(predicate, c => c.Wallet, c => c.Owner.Sins).Select(c =>
+                    new CorporationDto(c)).ToList();
         }
 
         public List<ProductTypeDto> GetProductTypes(Expression<Func<ProductType, bool>> predicate)
@@ -104,8 +82,8 @@ namespace Billing
 
         public List<UserDto> GetUsers(Expression<Func<SIN, bool>> predicate)
         {
-            var list = GetListAsNoTracking(predicate, u => u.Character);
-            return list.Select(c => new UserDto { Name = c.PersonName, ModelId = c.Character?.Model ?? 0 }).ToList();
+            var list = GetListAsNoTracking(predicate, u => u.Character, u => u.Wallet);
+            return list.Select(c => new UserDto(c)).ToList();
         }
 
         public ShopDto CreateOrUpdateShopWallet(int shopId = 0, decimal amount = 0, string name = "default shop", int lifestyle = 1, int ownerId = 0)
@@ -119,7 +97,6 @@ namespace Billing
                     throw new BillingException("shop not found");
                 }
             }
-
             var owner = GetSINByModelId(ownerId);
             if (owner == null)
                 throw new BillingException("owner not found");
@@ -137,12 +114,10 @@ namespace Billing
             }
             shop.Name = name;
             shop.Wallet.Balance = amount;
-            shop.LifeStyle = (int)BillingHelper.GetLifestyle(lifestyle);
+            var ls = BillingHelper.GetLifestyle(lifestyle);
+            shop.LifeStyle = (int)ls;
             Context.SaveChanges();
-            var dto = new ShopDto
-            {
-                Owner = new UserDto { ModelId = ownerId }
-            };
+            var dto = new ShopDto(shop);
             return dto;
         }
 
@@ -162,7 +137,7 @@ namespace Billing
             specialisation.ProductTypeId = producttype;
             Add(specialisation);
             SaveContext();
-            var dbspec = Get<Specialisation>(s => s.Id == specialisation.Id, s=>s.ProductType);
+            var dbspec = Get<Specialisation>(s => s.Id == specialisation.Id, s => s.ProductType);
             if (dbspec == null)
                 throw new Exception("Ошибка добавления специализации");
             return new SpecialisationDto(dbspec);
@@ -353,15 +328,6 @@ namespace Billing
                 Remove(specialisation);
                 SaveContext();
             }
-        }
-
-        private List<int> GetSpecialisationIds(ShopWallet shop)
-        {
-            var list = new List<int>();
-            if (shop.Specialisations == null)
-                return list;
-            list.AddRange(shop.Specialisations.Select(s => s.SpecialisationId));
-            return list;
         }
     }
 

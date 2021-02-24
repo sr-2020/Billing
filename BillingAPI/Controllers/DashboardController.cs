@@ -19,7 +19,7 @@ namespace BillingAPI.Controllers
         #region CRUD
 
         /// <summary>
-        /// GetShops
+        /// GetUsers
         /// </summary>
         /// <returns></returns>
         [HttpGet("a-users")]

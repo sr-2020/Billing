@@ -6,20 +6,13 @@ using System.Text;
 namespace Core.Model
 {
     [Table("corporation_wallet")]
-    public class CorporationWallet : BaseEntity
+    public class CorporationWallet : OwnerEntity
     {
         [ForeignKey("wallet")]
         [Column("wallet")]
         public int? WalletId { get; set; }
         public virtual Wallet Wallet { get; set; }
-        [Column("name")]
-        public string Name { get; set; }
         [Column("logo_url")]
         public string CorporationLogoUrl { get; set; }
-        [ForeignKey("owner")]
-        [Column("owner")]
-        public int? OwnerId { get; set; }
-        public SIN Owner { get; set; }
-        
     }
 }
