@@ -19,42 +19,6 @@ namespace Billing
 {
     public class ExcelManager
     {
-        public List<ExcelError> UploadProductTypes(Stream file, string filename)
-        {
-            List<ExcelError> errors;
-            var reader = new ExcelReader();
-            var excel = reader.ParseRows<ProductsExcelModel>(filename, file, out errors);
-            if (excel == null)
-                throw new Exception("model not found");
-            var manager = IocContainer.Get<IBillingManager>();
-            foreach (var item in excel)
-            {
-                try
-                {
-                    var productType = manager.GetExtProductType(item.ProductType);
-                    if (productType == null)
-                    {
-                        productType = manager.CreateOrUpdateProductType(0, item.ProductType, int.Parse(item.ProductDiscountType));
-                    }
-                    var nomenklatura = manager.GetExtNomenklatura(item.NomenklaturaName);
-                    if (nomenklatura == null)
-                    {
-                        nomenklatura = manager.CreateOrUpdateNomenklatura(0, item.NomenklaturaName, item.Code, productType.Id, int.Parse(item.LifeStyle), decimal.Parse(item.BasePrice), item.Description, string.Empty);
-                    }
-                    var sku = manager.GetExtSku(item.SkuName);
-                    if (sku == null)
-                    {
-                        manager.CreateOrUpdateSku(0, nomenklatura.Id, int.Parse(item.Count), int.Parse(item.Corporation), item.SkuName, int.Parse(item.Enabled) == 1 ? true : false);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.ToString());
-                }
-
-            }
-            return errors;
-        }
 
         public List<ExcelError> UploadBillingInit(Stream file, string filename)
         {

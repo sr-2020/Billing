@@ -37,29 +37,10 @@ namespace BillingAPI.Controllers
         [AdminAuthorization]
         public DataResult<ShopDto> GetShop(int shopId)
         {
-            var manager = IocContainer.Get<IShopManager>();
+            var manager = IocContainer.Get<IAdminManager>();
             var result = RunAction(() => manager.GetShops(s => s.Id == shopId).FirstOrDefault());
             return result;
         }
-
-
-        [HttpGet("getnomenklaturas")]
-        [AdminAuthorization]
-        public DataResult<List<NomenklaturaDto>> GetNomenklaturas()
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetNomenklaturas(0,0), $"getnomenklaturas");
-            return result;
-        }
-
-        //[HttpPut("admin/createorupdateshopwallet")]
-        //[AdminAuthorization]
-        //public DataResult<ShopWallet> CreateOrUpdateShopWallet([FromBody] CreateShopModel request)
-        //{
-        //    var manager = IocContainer.Get<IBillingManager>();
-        //    var result = RunAction(() => manager.CreateOrUpdateShopWallet(foreignId, amount, name, lifestyle, owner), $"createorupdateshopwallet {foreignId} {amount} {name} {lifestyle}");
-        //    return result;
-        //}
 
         /// <summary>
         /// 
@@ -75,9 +56,6 @@ namespace BillingAPI.Controllers
         }
 
         #endregion
-
-
-
 
         #region admin
 
@@ -118,86 +96,6 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-
-
-        /// <summary>
-        /// Create or update allowed product type
-        /// </summary>
-        /// <param name="id">0 for create new, specified for update</param>
-        /// <param name="name">short description</param>
-        /// <param name="discounttype">1 - for gesheftmaher only, 2 - for samurai too(weapons)</param>
-        /// <returns></returns>
-        [HttpPut("admin/createorupdateproduct")]
-        public DataResult<ProductType> CreateOrUpdateProductType(int id, string name, int discounttype)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdateProductType(id, name, discounttype), $"createorupdateproduct {id}:{name}:{discounttype}");
-            return result;
-        }
-
-        /// <summary>
-        /// Create or update allowed nomenklatura
-        /// </summary>
-        /// <param name="id">0 for create new, specified for update</param>
-        /// <param name="name">Header of product</param>
-        /// <param name="code">it will be executed when user byu sku of this nomenklatura</param>
-        /// <param name="specialisationId">id from getproducttypes</param>
-        /// <param name="lifestyle">from 1 to 6</param>
-        /// <param name="baseprice">decimal base price</param>
-        /// <param name="description">description shown for user</param>
-        /// <param name="pictureurl">url for picture</param>
-        /// <returns></returns>
-        [HttpPut("admin/createorupdatenomenklatura")]
-        public DataResult<Nomenklatura> CreateOrUpdateNomenklatura(int id, string name, string code, int specialisationId, int lifestyle, decimal baseprice, string description, string pictureurl)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdateNomenklatura(id, name, code, specialisationId, lifestyle, baseprice, description, pictureurl), $"createorupdatenomenklatura {id}:{name}:{code}:{specialisationId}:{lifestyle}:{baseprice}:{description}:{pictureurl}");
-            return result;
-        }
-
-        /// <summary>
-        /// Create or update allowed sku
-        /// </summary>
-        /// <param name="id">0 for create new, specified for update</param>
-        /// <param name="nomenklatura">id from getnomenklaturas</param>
-        /// <param name="count">count of this item, minimum 1</param>
-        /// <param name="corporation">id from getcorps</param>
-        /// <param name="name">header</param>
-        /// <param name="enabled"></param>
-        /// <returns></returns>
-        [HttpPut("admin/createorupdatesku")]
-        public DataResult<Sku> CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdateSku(id, nomenklatura, count, corporation, name, enabled), $"CreateOrUpdateSku {id}:{name}:{nomenklatura}:{count}:{corporation}:{name}:{enabled}");
-            return result;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="corpid">id for delete</param>
-        /// <returns></returns>
-        [HttpDelete("admin/deletecorporation")]
-        public Result DeleteCorporation(int corpid)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.DeleteCorporation(corpid), $"deletecorporation {corpid}");
-            return result;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="shopid">id for delete</param>
-        /// <returns></returns>
-        [HttpDelete("admin/deleteshop")]
-        public Result DeleteShop(int shopid)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.DeleteShop(shopid), $"deleteshop {shopid}");
-            return result;
-        }
-
         /// <summary>
         /// Get corporation wallet. If wallet not exists, then create it
         /// </summary>
@@ -207,16 +105,13 @@ namespace BillingAPI.Controllers
         /// <param name="logoUrl">Url to picture</param>
         /// <returns></returns>
         [HttpPut("admin/createorupdatecorporationwallet")]
+        [AdminAuthorization]
         public DataResult<CorporationWallet> CreateOrUpdateCorporationWallet(int id, decimal amount, string name, string logoUrl)
         {
-            var manager = IocContainer.Get<IBillingManager>();
+            var manager = IocContainer.Get<IAdminManager>();
             var result = RunAction(() => manager.CreateOrUpdateCorporationWallet(id, amount, name, logoUrl), $"createorupdatecorporationwallet {id}:{amount}:{name}:{logoUrl}");
             return result;
         }
-
-
-
-
 
         #endregion
 
@@ -230,7 +125,7 @@ namespace BillingAPI.Controllers
         public DataResult<Transfer> CreateTransferSINSIN(int character, [FromBody] CreateTransferSinSinRequest request)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateTransferSINSIN(character.ToString() , request.CharacterTo, request.Amount, request.Comment), "transfer/createtransfersinsin");
+            var result = RunAction(() => manager.CreateTransferSINSIN(character.ToString(), request.CharacterTo, request.Amount, request.Comment), "transfer/createtransfersinsin");
             return result;
         }
 
@@ -250,6 +145,7 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.MakeTransferSINSIN(character1, character2, amount, comment), "transfer/maketransfersinsin");
             return result;
         }
+
         [HttpGet("transfer/maketransfersinleg")]
         public DataResult<Transfer> MakeTransferSINLeg(int sin, int leg, decimal amount, string comment)
         {
@@ -316,8 +212,6 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-
-
         /// <summary>
         /// Get all rentas for current character
         /// </summary>
@@ -331,8 +225,6 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-
-
         /// <summary>
         /// Get all corporations
         /// </summary>
@@ -340,7 +232,7 @@ namespace BillingAPI.Controllers
         [HttpGet("info/getcorps")]
         public DataResult<List<CorporationDto>> GetCorps()
         {
-            var manager = IocContainer.Get<IShopManager>();
+            var manager = IocContainer.Get<IAdminManager>();
             var result = RunAction(() => manager.GetCorporations(s => true), "getcorps");
             return result;
         }

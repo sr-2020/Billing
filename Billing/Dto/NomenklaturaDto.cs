@@ -5,10 +5,12 @@ using System.Text;
 
 namespace Billing.DTO
 {
-    public class NomenklaturaDto : ProductTypeDto
+    public class NomenklaturaDto : SpecialisationDto
     {
-        public NomenklaturaDto(Nomenklatura nomenklatura) : base(nomenklatura.Specialisation)
+        public NomenklaturaDto(Nomenklatura nomenklatura) : base(nomenklatura?.Specialisation)
         {
+            if (nomenklatura == null)
+                return;
             this.BasePrice = nomenklatura.BasePrice;
             this.NomenklaturaId = nomenklatura.Id;
             this.NomenklaturaName = nomenklatura.Name;

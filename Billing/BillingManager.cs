@@ -40,11 +40,9 @@ namespace Billing
         Contract CreateContract(int corporation, int shop);
         RentaDto ConfirmRenta(int modelId, int priceId);
         List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1);
-        List<ProductTypeDto> GetSpecialisations(int id = -1);
         ProductType GetExtProductType(string name);
         Nomenklatura GetExtNomenklatura(string name);
         Sku GetExtSku(string name);
-        List<NomenklaturaDto> GetNomenklaturas(int specialisationId, int lifestyle, int id = -1);
         List<Contract> GetContrats(int shopid, int corporationId);
         #endregion
 
@@ -53,33 +51,25 @@ namespace Billing
         int ProcessRentas(List<SIN> sins);
         int ProcessKarma(List<SIN> sins, decimal k);
         int ProcessIkar(List<SIN> sins, decimal k);
-
         List<SIN> GetActiveSins();
 
         #endregion
 
         #region admin
+
         void LetMePay(string modelId, string rentaId);
         void Rerent(string rentaId);
         void LetHimPay(string modelId, string targetId, string rentaId);
         List<SIN> GetSinsInGame();
         List<CharacterDto> GetCharactersInGame();
         List<TransferDto> GetTransfersByRenta(int rentaID);
-        Sku CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled, int externalId = 0);
-        Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int specialisationId, int lifestyle, decimal baseprice, string description, string pictureurl, int externalId = 0);
-        ProductType CreateOrUpdateProductType(int id, string name, int discounttype = 1, int externalId = 0);
-        CorporationWallet CreateOrUpdateCorporationWallet(int id, decimal amount, string name, string logoUrl);
-        ShopDto CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle, int owner);
-        void DeleteCorporation(int corpid);
-        void DeleteShop(int shopid);
-        void DeleteSpecialisation(int id, bool force);
-        void DeleteNomenklatura(int id, bool force);
+
         #endregion
     }
 
-    public class BillingManager : BaseBillingRepository, IBillingManager
+    public class BillingManager : AdminManager, IBillingManager
     {
-        public static string UrlNotFound = "";
+        
         protected int CURRENTGAME = 2;
         public int ProcessIkar(List<SIN> sins, decimal k)
         {
@@ -224,26 +214,12 @@ namespace Billing
             return newContract;
         }
 
-        public List<NomenklaturaDto> GetNomenklaturas(int specialisationId, int lifestyle, int id = -1)
-        {
-            var list = GetListAsNoTracking<Nomenklatura>(n =>
-                (n.SpecialisationId == specialisationId || specialisationId == 0)
-                && (n.Lifestyle == lifestyle || lifestyle == 0)
-                && (n.Id == id || id == -1)
-                , n => n.Specialisation.ProductType);
-            return list.Select(s => new NomenklaturaDto(s)).ToList();
-        }
+
 
         public List<Contract> GetContrats(int shopid, int corporationId)
         {
             var list = GetListAsNoTracking<Contract>(c => (c.ShopId == shopid || shopid == 0) && (c.CorporationId == corporationId || corporationId == 0));
             return list;
-        }
-
-        public List<ProductTypeDto> GetSpecialisations(int id = -1)
-        {
-            return GetListAsNoTracking<Specialisation>(p => p.Id == id || id == -1).Select(p =>
-                new ProductTypeDto(p)).ToList();
         }
 
         public ProductType GetExtProductType(string name)
@@ -263,12 +239,11 @@ namespace Billing
 
         public List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1)
         {
-            var list = GetListAsNoTracking<Sku>(s => (s.CorporationId == corporationId || corporationId == 0)
+            var list = GetSkus(s => (s.CorporationId == corporationId || corporationId == 0)
                 && (s.NomenklaturaId == nomenklaturaId || nomenklaturaId == 0)
                 && (s.Enabled == enabled || !enabled.HasValue)
-                && (s.Id == id || id == -1)
-                , s => s.Corporation, s => s.Nomenklatura, s => s.Nomenklatura.Specialisation.ProductType);
-            return list.Select(s => new SkuDto(s)).ToList();
+                && (s.Id == id || id == -1));
+            return list;
         }
 
         public List<RentaDto> GetRentas(int modelId)
@@ -414,131 +389,8 @@ namespace Billing
             return dto;
         }
 
-        public CorporationWallet CreateOrUpdateCorporationWallet(int corpId = 0, decimal amount = 0, string name = "unknown corporation", string logoUrl = "")
-        {
-            CorporationWallet corporation = null;
-            if (corpId > 0)
-                corporation = Get<CorporationWallet>(w => w.Id == corpId, c => c.Wallet);
-            if (corporation == null)
-            {
-                var newWallet = CreateOrUpdateWallet(WalletTypes.Corporation);
-                corporation = new CorporationWallet
-                {
-                    Wallet = newWallet,
-                    Id = corpId,
-                    CorporationLogoUrl = UrlNotFound
-                };
-                Add(corporation);
-            }
-            if (!string.IsNullOrEmpty(logoUrl))
-                corporation.CorporationLogoUrl = logoUrl;
-            if (!string.IsNullOrEmpty(name))
-                corporation.Name = name;
-            if (amount > 0)
-                corporation.Wallet.Balance = amount;
-            Context.SaveChanges();
-            return corporation;
-        }
 
-        public ShopDto CreateOrUpdateShopWallet(int shopId = 0, decimal amount = 0, string name = "default shop", int lifestyle = 1, int ownerId = 0)
-        {
-            ShopWallet shop = null;
-            if (shopId > 0)
-            {
-                shop = Get<ShopWallet>(w => w.Id == shopId, s => s.Wallet);
-                if (shop == null)
-                {
-                    throw new BillingException("shop not found");
-                }
-            }
-            
-            var owner = GetSINByModelId(ownerId);
-            if (owner == null)
-                throw new BillingException("owner not found");
-            
-            if (shopId == 0)
-            {
-                var newWallet = CreateOrUpdateWallet(WalletTypes.Shop);
-                shop = new ShopWallet
-                {
-                    Wallet = newWallet,
-                    Id = shopId,
-                    OwnerId = ownerId
-                };
-                Add(shop);
-            }
-            shop.Name = name;
-            shop.Wallet.Balance = amount;
-            shop.LifeStyle = (int)BillingHelper.GetLifestyle(lifestyle);
-            Context.SaveChanges();
-            var dto = new ShopDto
-            {
-                Owner = new UserDto { ModelId = ownerId }
-            };
-            return dto;
-        }
 
-        public void DeleteCorporation(int corpid)
-        {
-            var corporation = Get<CorporationWallet>(c => c.Id == corpid);
-            if (corporation == null)
-                throw new Exception("corporation not found");
-            var wallet = Get<Wallet>(w => w.Id == corporation.WalletId);
-            Remove(corporation);
-            Remove(wallet);
-            Context.SaveChanges();
-        }
-
-        public void DeleteShop(int shopid)
-        {
-            var shop = Get<ShopWallet>(c => c.Id == shopid);
-            if (shop == null)
-                throw new Exception("shop not found");
-            var wallet = Get<Wallet>(w => w.Id == shop.WalletId);
-            Remove(shop);
-            Remove(wallet);
-            Context.SaveChanges();
-        }
-
-        public void DeleteSpecialisation(int id, bool force)
-        {
-            var nomenklaturas = GetList<Nomenklatura>(n => n.SpecialisationId == id);
-            if (nomenklaturas != null && nomenklaturas.Count > 0)
-            {
-                if (force)
-                {
-                    foreach (var nomenklatura in nomenklaturas)
-                    {
-                        DeleteNomenklatura(nomenklatura.Id, true);
-                    }
-                }
-                else
-                {
-                    throw new Exception($"Сперва необходимо удалить номенклатуры ссылающиеся на этот тип товара");
-                }
-            }
-            Delete<Specialisation>(id);
-        }
-
-        public void DeleteNomenklatura(int id, bool force)
-        {
-            var skus = GetList<Sku>(s => s.NomenklaturaId == id);
-            if (skus != null && skus.Count > 0)
-            {
-                if (force)
-                {
-                    foreach (var sku in skus)
-                    {
-                        Delete<Sku>(sku.Id);
-                    }
-                }
-                else
-                {
-                    throw new Exception("Сперва необходимо удалить ску ссылающиеся на эту номенклатуру");
-                }
-            }
-            Delete<Nomenklatura>(id);
-        }
 
         public BalanceDto GetBalance(int modelId)
         {
@@ -623,95 +475,6 @@ namespace Billing
                 type.Name = name;
             Context.SaveChanges();
             return type;
-        }
-
-        public Nomenklatura CreateOrUpdateNomenklatura(int id, string name, string code, int specialisationId, int lifestyle, decimal baseprice, string description, string pictureurl, int externalId = 0)
-        {
-            Nomenklatura nomenklatura = null;
-            if (id > 0)
-                nomenklatura = Get<Nomenklatura>(n => n.Id == id);
-            if (nomenklatura == null)
-            {
-                nomenklatura = new Nomenklatura();
-                nomenklatura.PictureUrl = UrlNotFound;
-                nomenklatura.Code = string.Empty;
-                Add(nomenklatura);
-            }
-            if (!string.IsNullOrEmpty(name))
-                nomenklatura.Name = name;
-            if (!string.IsNullOrEmpty(code))
-                nomenklatura.Code = code;
-            if (baseprice > 0)
-                nomenklatura.BasePrice = baseprice;
-            if (!string.IsNullOrEmpty(description))
-                nomenklatura.Description = description;
-            if (!string.IsNullOrEmpty(pictureurl))
-                nomenklatura.PictureUrl = pictureurl;
-            if (externalId != 0)
-            {
-                nomenklatura.ExternalId = externalId;
-            }
-            Specialisation specialisation = null;
-            if (specialisationId > 0)
-                specialisation = Get<Specialisation>(p => p.Id == specialisationId);
-            else
-                specialisation = Get<Specialisation>(p => p.Id == nomenklatura.SpecialisationId);
-            if (specialisation == null)
-            {
-                throw new BillingException("specialisation not found");
-            }
-            nomenklatura.SpecialisationId = specialisation.Id;
-            if (lifestyle > 0)
-                nomenklatura.Lifestyle = lifestyle;
-            nomenklatura.Lifestyle = (int)BillingHelper.GetLifestyle(nomenklatura.Lifestyle);
-            Context.SaveChanges();
-            return nomenklatura;
-        }
-
-        public Sku CreateOrUpdateSku(int id, int nomenklaturaid, int count, int corporationid, string name, bool enabled, int externalId = 0)
-        {
-            Sku sku = null;
-            if (id > 0)
-                sku = Get<Sku>(s => s.Id == id);
-            if (sku == null)
-            {
-                sku = new Sku();
-                Add(sku);
-            }
-            sku.Enabled = enabled;
-            if (count > 0)
-                sku.Count = count;
-            if (!string.IsNullOrEmpty(name))
-                sku.Name = name;
-            CorporationWallet corporation = null;
-            if (corporationid > 0)
-                corporation = Get<CorporationWallet>(c => c.Id == corporationid);
-            else
-                corporation = Get<CorporationWallet>(c => c.Id == sku.CorporationId);
-            if (corporation == null)
-            {
-                throw new BillingException("Corporation not found");
-                //corporation = CreateOrUpdateCorporationWallet(corporationid);
-            }
-
-            sku.CorporationId = corporation.Id;
-            if (externalId != 0)
-            {
-                sku.ExternalId = externalId;
-            }
-            Nomenklatura nomenklatura = null;
-            if (nomenklaturaid > 0)
-                nomenklatura = Get<Nomenklatura>(n => n.Id == nomenklaturaid);
-            else
-                nomenklatura = Get<Nomenklatura>(n => n.Id == sku.NomenklaturaId);
-            if (nomenklatura == null)
-            {
-                throw new BillingException("Nomenklatura not found");
-                //nomenklatura = CreateOrUpdateNomenklatura(nomenklaturaid, "unknown nomenklatura", string.Empty, 0, 1, 0, "unknown nomenklatura", string.Empty);
-            }
-            sku.NomenklaturaId = nomenklatura.Id;
-            Context.SaveChanges();
-            return sku;
         }
 
         [BillingBlock]

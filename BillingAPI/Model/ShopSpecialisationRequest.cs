@@ -5,10 +5,9 @@ using System.Threading.Tasks;
 
 namespace BillingAPI.Model
 {
-    public class CreateSpecialisationRequest
+    public class ShopSpecialisationRequest
     {
+        public int ShopId { get; set; }
         public int SpecialisationId { get; set; }
-        public int ProductTypeId { get; set; }
-        public string Name { get; set; }
     }
 }
