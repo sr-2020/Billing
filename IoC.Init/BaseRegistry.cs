@@ -26,6 +26,7 @@ namespace IoC.Init
             For<IInsuranceManager>().Use<InsuranceManager>().SetLifecycleTo(Lifecycles.Transient);
             For<IScoringManager>().Use<ScoringManager>().SetLifecycleTo(Lifecycles.Transient);
             For<ISubscribeManager>().Use<SubscribeManager>().SetLifecycleTo(Lifecycles.Singleton);
+            For<IAdminManager>().Use<AdminManager>().SetLifecycleTo(Lifecycles.Singleton);
         }
     }
 }

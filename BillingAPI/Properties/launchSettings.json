@@ -35,7 +35,7 @@
       "launchBrowser": true,
       "stdoutLogEnabled": true,
       //"launchUrl": "{Scheme}://{ServiceHost}:32769/swagger/v1/index.html",
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/admin",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger/v1/index.html",
       "environmentVariables": {
         "Key": "Value",
         "ASPNETCORE_ENVIRONMENT": "Development",
