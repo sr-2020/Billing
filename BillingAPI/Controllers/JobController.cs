@@ -41,14 +41,6 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        [HttpGet("getalljobs")]
-        public DataResult<List<HangfireJob>> Index(bool? finished, int jobType)
-        {
-            throw new NotImplementedException();
-            var result = RunAction(() => Manager.GetAllJobs(finished ?? true, jobType), $"getalljobs");
-            return result;
-        }
-
 
     }
 }

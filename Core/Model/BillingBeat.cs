@@ -12,17 +12,13 @@ namespace Core.Model
         public DateTime StartTime { get; set; }
         [Column("finish_time")]
         public DateTime FinishTime { get; set; }
-        [Column("period")]
-        public int Period { get; set; }
-        [Column("success_inflation")]
-        public bool SuccessInflation { get; set; }
-        [Column("success_rent")]
-        public bool SuccessRent { get; set; }
-        [Column("success_ikar")]
-        public bool SuccessIkar { get; set; }
-        [Column("success_work")]
-        public bool SuccessWork { get; set; }
-        [Column("success_scoring")]
-        public bool SuccessScoring { get; set; }
+        [Column("number")]
+        public int Number { get; set; }
+        [Column("token")]
+        public string Token { get; set; }
+        [ForeignKey("billing_cycle")]
+        [Column("billing_cycle")]
+        public int CycleId { get; set; }
+        public virtual BillingCycle Cycle { get; set; }
     }
 }

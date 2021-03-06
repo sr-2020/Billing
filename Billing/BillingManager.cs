@@ -34,8 +34,6 @@ namespace Billing
         #region web
         PriceShopDto GetPriceByQR(int character, string qrid);
         PriceShopDto GetPrice(int modelId, int shop, int sku);
-        ShopSpecialisation SetSpecialisation(int specialisation, int shop);
-        void DropSpecialisation(int specialisation, int shop);
         void BreakContract(int corporation, int shop);
         Contract CreateContract(int corporation, int shop);
         RentaDto ConfirmRenta(int modelId, int priceId);
@@ -155,38 +153,6 @@ namespace Billing
             var currentGame = 2;
             var sins = GetList<SIN>(s => s.InGame ?? false && s.Character.Game == currentGame, s => s.Character, s => s.Wallet);
             return sins;
-        }
-
-        public ShopSpecialisation SetSpecialisation(int specialisationId, int shopid)
-        {
-            var shopSpecialisation = GetAsNoTracking<ShopSpecialisation>(s => s.SpecialisationId == specialisationId && s.ShopId == shopid);
-            if (shopSpecialisation != null)
-                throw new BillingException("У магазина уже есть эта специализация");
-            var specialisation = GetAsNoTracking<Specialisation>(n => n.Id == specialisationId);
-            if(specialisation == null)
-            {
-                throw new BillingException("specialisation не найден");
-            }
-            var shop = Get<ShopWallet>(s => s.Id == shopid);
-            if (shop == null)
-                throw new BillingException("shop не найден");
-            shopSpecialisation = new ShopSpecialisation
-            {
-                SpecialisationId = specialisation.Id,
-                ShopId = shop.Id
-            };
-            Add(shopSpecialisation);
-            Context.SaveChanges();
-            return shopSpecialisation;
-        }
-
-        public void DropSpecialisation(int specialisationId, int shop)
-        {
-            var specialisation = Get<ShopSpecialisation>(s => s.SpecialisationId == specialisationId && s.ShopId == shop);
-            if (specialisation == null)
-                throw new BillingException("У магазина нет указанной специализации");
-            Remove(specialisation);
-            Context.SaveChanges();
         }
 
         public void BreakContract(int corporation, int shop)
