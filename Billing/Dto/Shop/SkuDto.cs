@@ -18,7 +18,6 @@ namespace Billing.DTO
             this.CorporationId = sku.CorporationId;
         }
         public SkuDto() : base() { }
-
         public int SkuId { get; set; }
         public string SkuName { get; set; }
         public int Count { get; set; }
