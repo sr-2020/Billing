@@ -14,6 +14,7 @@ namespace Billing.DTO
             if(main)
             {
                 this.Id = sku.Id;
+                Name = sku.Name;
             }
             this.SkuId = sku.Id;
             this.SkuName = sku.Name;
@@ -21,7 +22,6 @@ namespace Billing.DTO
             this.Enabled = sku.Enabled;
             this.CorporationId = sku.CorporationId;
         }
-        public SkuDto() : base() { }
         public int SkuId { get; set; }
         public string SkuName { get; set; }
         public int Count { get; set; }

@@ -15,6 +15,7 @@ namespace Billing.DTO
             if(main)
             {
                 this.Id = nomenklatura.Id;
+                this.Name = nomenklatura.Name;
             }
             this.BasePrice = nomenklatura.BasePrice;
             this.NomenklaturaId = nomenklatura.Id;
@@ -27,7 +28,6 @@ namespace Billing.DTO
             this.BaseCount = nomenklatura.BaseCount;
             this.Secret = nomenklatura.Secret;
         }
-        public NomenklaturaDto() : base() { }
         public int NomenklaturaId { get; set; }
         public string NomenklaturaName { get; set; }
         public string Code { get; set; }

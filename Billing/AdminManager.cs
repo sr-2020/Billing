@@ -61,11 +61,7 @@ namespace Billing
         public List<ProductTypeDto> GetProductTypes(Expression<Func<ProductType, bool>> predicate)
         {
             return GetList(predicate).Select(p =>
-            new ProductTypeDto
-            {
-                Alias = p.Alias,
-                Name = p.Name
-            }).ToList();
+            new ProductTypeDto(p, true)).ToList();
         }
 
         public List<NomenklaturaDto> GetNomenklaturas(Expression<Func<Nomenklatura, bool>> predicate)
