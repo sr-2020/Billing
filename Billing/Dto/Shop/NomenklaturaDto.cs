@@ -20,6 +20,7 @@ namespace Billing.DTO
             this.NomenklaturaId = nomenklatura.Id;
             this.NomenklaturaName = nomenklatura.Name;
             this.LifeStyleId = nomenklatura.Lifestyle;
+            this.LifeStyle = BillingHelper.GetLifestyle(nomenklatura.Lifestyle).ToString();
             this.Code = nomenklatura.Code;
             this.Description = nomenklatura.Description;
             this.PictureUrl = nomenklatura.PictureUrl;
