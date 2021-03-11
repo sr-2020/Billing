@@ -19,11 +19,13 @@ namespace Billing.Dto
                 Name = pt.Name;
             }
             DiscountType = pt.DiscountType;
+            ProductTypeName = pt.Name;
             ProductTypeId = pt.Id;
             Alias = pt.Alias;
         }
         public int Id { get; set; }
         public int ProductTypeId { get; set; }
+        public string ProductTypeName { get; set; }
         public string Name { get; set; }
         public string Alias { get; set; }
         public int DiscountType { get; set; }

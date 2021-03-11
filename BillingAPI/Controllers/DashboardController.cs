@@ -336,7 +336,7 @@ namespace BillingAPI.Controllers
         /// delete shopspecialisation
         /// </summary>
         /// <returns></returns>
-        [HttpPost("a-drop-shopspecialisation")]
+        [HttpDelete("a-drop-shopspecialisation")]
         public Result DropShopSpecialisation([FromBody] ShopSpecialisationRequest request)
         {
             var manager = IocContainer.Get<IAdminManager>();
