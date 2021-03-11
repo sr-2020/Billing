@@ -9,15 +9,19 @@ namespace Billing.DTO
 {
     public class SpecialisationDto
     {
-        public SpecialisationDto(Specialisation specialisation)
+        public SpecialisationDto(Specialisation specialisation, bool main)
         {
             if (specialisation == null)
                 return;
+            if(main)
+            {
+                Id = specialisation.Id;
+            }
             this.SpecialisationName = specialisation.Name;
             this.SpecialisationId = specialisation.Id;
             if (specialisation?.ProductType == null)
                 return;
-            this.Id = specialisation.ProductType.Id;
+            this.ProductTypeId = specialisation.ProductType.Id;
             this.Name = specialisation.ProductType.Name;
             this.DiscountType = specialisation.ProductType.DiscountType;
         }
@@ -33,5 +37,6 @@ namespace Billing.DTO
         [Column(2, false)]
         public int SpecialisationId { get; set; }
         public string SpecialisationName { get; set; }
+        public int ProductTypeId { get; set; }
     }
 }

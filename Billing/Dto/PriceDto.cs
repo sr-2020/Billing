@@ -9,8 +9,12 @@ namespace Billing.DTO
 {
     public class PriceDto : SkuDto
     {
-        public PriceDto(Price price) : base(price.Sku)
+        public PriceDto(Price price, bool main) : base(price.Sku, false)
         {
+            if(main)
+            {
+                this.Id = price.Id;
+            }
             this.PriceId = price.Id;
             this.DateCreated = new DateTimeOffset(price.DateCreated).ToUnixTimeSeconds();
             this.DateTill = new DateTimeOffset(price.DateCreated.AddMinutes(IocContainer.Get<ISettingsManager>().GetIntValue(Core.Primitives.SystemSettingsEnum.price_minutes))).ToUnixTimeSeconds();

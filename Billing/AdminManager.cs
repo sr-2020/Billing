@@ -49,7 +49,7 @@ namespace Billing
         public List<SpecialisationDto> GetSpecialisations(Expression<Func<Specialisation, bool>> predicate)
         {
             return GetList(predicate, s => s.ProductType).Select(s =>
-                new SpecialisationDto(s)).ToList();
+                new SpecialisationDto(s, true)).ToList();
         }
 
         public List<CorporationDto> GetCorporations(Expression<Func<CorporationWallet, bool>> predicate)
@@ -71,13 +71,13 @@ namespace Billing
         public List<NomenklaturaDto> GetNomenklaturas(Expression<Func<Nomenklatura, bool>> predicate)
         {
             var list = GetListAsNoTracking(predicate, n => n.Specialisation.ProductType);
-            return list.Select(s => new NomenklaturaDto(s)).ToList();
+            return list.Select(s => new NomenklaturaDto(s, true)).ToList();
         }
 
         public List<SkuDto> GetSkus(Expression<Func<Sku, bool>> predicate)
         {
             var list = GetListAsNoTracking(predicate, s => s.Corporation, s => s.Nomenklatura, s => s.Nomenklatura.Specialisation.ProductType);
-            return list.Select(s => new SkuDto(s)).ToList();
+            return list.Select(s => new SkuDto(s, true)).ToList();
         }
 
         public List<UserDto> GetUsers(Expression<Func<SIN, bool>> predicate)
@@ -140,7 +140,7 @@ namespace Billing
             var dbspec = Get<Specialisation>(s => s.Id == specialisation.Id, s => s.ProductType);
             if (dbspec == null)
                 throw new Exception("Ошибка добавления специализации");
-            return new SpecialisationDto(dbspec);
+            return new SpecialisationDto(dbspec, true);
         }
 
         public NomenklaturaDto CreateOrUpdateNomenklatura(int id, string name, string code, int specialisationId, int lifestyle, decimal baseprice, int basecount, string description, string pictureurl, int externalId = 0)
@@ -181,7 +181,7 @@ namespace Billing
             nomenklatura = GetAsNoTracking<Nomenklatura>(n => n.Id == nomenklatura.Id, n => n.Specialisation.ProductType);
             if (nomenklatura == null)
                 throw new Exception("Создать nomenklatura не получилось");
-            return new NomenklaturaDto(nomenklatura);
+            return new NomenklaturaDto(nomenklatura, true);
         }
 
         public SkuDto CreateOrUpdateSku(int id, int nomenklaturaid, int count, int corporationid, string name, bool enabled, int externalId = 0)
@@ -228,7 +228,7 @@ namespace Billing
             sku = GetAsNoTracking<Sku>(s => s.Id == sku.Id, s => s.Nomenklatura.Specialisation.ProductType);
             if (sku == null)
                 throw new Exception("создать sku не получилось");
-            return new SkuDto(sku);
+            return new SkuDto(sku, true);
         }
 
         public void DeleteSpecialisation(int id)

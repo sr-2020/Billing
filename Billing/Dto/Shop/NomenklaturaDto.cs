@@ -7,11 +7,15 @@ namespace Billing.DTO
 {
     public class NomenklaturaDto : SpecialisationDto
     {
-        public NomenklaturaDto(Nomenklatura nomenklatura) 
-            : base(nomenklatura?.Specialisation)
+        public NomenklaturaDto(Nomenklatura nomenklatura, bool main) 
+            : base(nomenklatura?.Specialisation, false)
         {
             if (nomenklatura == null)
                 return;
+            if(main)
+            {
+                this.Id = nomenklatura.Id;
+            }
             this.BasePrice = nomenklatura.BasePrice;
             this.NomenklaturaId = nomenklatura.Id;
             this.NomenklaturaName = nomenklatura.Name;

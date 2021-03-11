@@ -7,10 +7,14 @@ namespace Billing.DTO
 {
     public class SkuDto : NomenklaturaDto
     {
-        public SkuDto(Sku sku) : base(sku?.Nomenklatura)
+        public SkuDto(Sku sku, bool main) : base(sku?.Nomenklatura, false)
         {
             if (sku == null)
                 return;
+            if(main)
+            {
+                this.Id = sku.Id;
+            }
             this.SkuId = sku.Id;
             this.SkuName = sku.Name;
             this.Count = sku.Count;

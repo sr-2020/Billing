@@ -20,7 +20,7 @@ namespace Jobs
     {
         HangfireJob AddOrUpdateJob(int id, DateTimeOffset? start, DateTimeOffset? end, string cron, string jobname, int jobtype);
         List<HangfireJob> GetAllJobs(bool finished, int jobtype);
-        BillingBeat GetLastBeat();
+        //BillingBeat GetLastBeat();
     }
 
     public class JobManager : BaseEntityRepository, IJobManager
@@ -63,12 +63,12 @@ namespace Jobs
             return job;
         }
 
-        public BillingBeat GetLastBeat()
-        {
-            return GetListAsNoTracking<BillingBeat>(c => true)
-                .OrderByDescending(c => c.Period)
-                .FirstOrDefault();
-        }
+        //public BillingBeat GetLastBeat()
+        //{
+        //    return GetListAsNoTracking<BillingBeat>(c => true)
+        //        .OrderByDescending(c => c.Period)
+        //        .FirstOrDefault();
+        //}
 
 
         #region hangfire(obsolete)

@@ -209,7 +209,7 @@ namespace Billing
 
         private List<SkuDto> GetSkusForShop(int shop)
         {
-            return GetSkuList(shop).Select(s => new SkuDto(s)).ToList();
+            return GetSkuList(shop).Select(s => new SkuDto(s, true)).ToList();
         }
         #endregion
     }
