@@ -32,6 +32,7 @@ namespace Core.Primitives
         pre_inflation,
         post_inflation,
         karma_k,
-        ikar_k
+        ikar_k,
+        token
     }
 }

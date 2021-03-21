@@ -14,6 +14,7 @@ namespace Core
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql(SystemHelper.GetConnectionString("billing"));
+            optionsBuilder.EnableSensitiveDataLogging();
         }
         public DbSet<BillingAbilityLog> AbilityLogs { get; set; }
         public DbSet<BillingBeat> BillingCycle { get; set; }

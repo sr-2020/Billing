@@ -87,9 +87,9 @@ namespace Billing
                     }).ToList();
         }
 
-        [BillingBlock]
         public Transfer MakeTransferLegLeg(int shopFrom, int shopTo, decimal amount, string comment)
         {
+            BillingHelper.BillingBlocked();
             var shopWalletFrom = Get<ShopWallet>(s => s.Id == shopFrom, s => s.Wallet);
             var shopWalletTo = Get<ShopWallet>(s => s.Id == shopTo, s => s.Wallet);
             var transfer = MakeNewTransfer(shopWalletFrom.Wallet, shopWalletTo.Wallet, amount, comment);
@@ -97,9 +97,9 @@ namespace Billing
             return transfer;
         }
 
-        [BillingBlock]
         public Transfer MakeTransferLegSIN(int shop, int character, decimal amount, string comment)
         {
+            BillingHelper.BillingBlocked();
             var sin = GetSINByModelId(character, s => s.Wallet);
             var anon = false;
             try

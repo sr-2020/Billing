@@ -18,116 +18,56 @@ namespace Jobs
 {
     public interface IJobManager : IBaseRepository
     {
-        HangfireJob AddOrUpdateJob(int id, DateTimeOffset? start, DateTimeOffset? end, string cron, string jobname, int jobtype);
-        List<HangfireJob> GetAllJobs(bool finished, int jobtype);
-        //BillingBeat GetLastBeat();
+        BillingCycle GetLastCycle(string token);
+        BillingBeat GetLastBeat(int cycleId);
+        bool BlockBilling();
+        bool UnblockBilling();
+        List<BillingAction> GetAllActions();
+
     }
 
     public class JobManager : BaseEntityRepository, IJobManager
     {
-        public HangfireJob AddOrUpdateJob(int id, DateTimeOffset? start, DateTimeOffset? end, string cron, string jobname, int jobtype)
-        {
-            HangfireJob job = null;
-            if (id > 0)
-                job = Get<HangfireJob>(h => h.Id == id);
-            if (job == null)
-            {
-                job = new HangfireJob();
-            }
-            if (start.HasValue && start > DateTimeOffset.Now)
-            {
-                job.StartTime = start.Value;
-            }
-            if (end.HasValue && end > DateTimeOffset.Now)
-            {
-                job.EndTime = end.Value;
-            }
-            if (SystemHelper.CronParse(cron) != null)
-            {
-                job.Cron = cron;
-            }
-            if (!string.IsNullOrEmpty(jobname))
-            {
-                job.JobName = jobname;
-            }
-            if (Enum.IsDefined(typeof(JobType), jobtype))
-            {
-                job.JobType = jobtype;
-            }
-            Add(job);
-            Context.SaveChanges();
-            job = CreateOrUpdateStartJob(job);
+        ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
 
-            Add(job);
-            Context.SaveChanges();
-            return job;
+        public BillingCycle GetLastCycle(string token)
+        {
+            var cycle = Query<BillingCycle>()
+                .Where(c => c.Token == token)
+                .OrderByDescending(c => c.Number)
+                .FirstOrDefault();
+            return cycle;
+        }
+        public BillingBeat GetLastBeat(int cycleId)
+        {
+            var beat = Query<BillingBeat>()
+                .Where(b => b.CycleId == cycleId)
+                .OrderByDescending(c => c.Number)
+                .FirstOrDefault();
+            return beat;
         }
 
-        //public BillingBeat GetLastBeat()
-        //{
-        //    return GetListAsNoTracking<BillingBeat>(c => true)
-        //        .OrderByDescending(c => c.Period)
-        //        .FirstOrDefault();
-        //}
-
-
-        #region hangfire(obsolete)
-
-        public List<HangfireJob> GetAllJobs(bool finished, int jobtype)
+        public bool BlockBilling()
         {
-            var filter = DateTimeOffset.Now;
-            return GetList<HangfireJob>(j => (j.EndTime > filter || finished) && j.JobType == jobtype).ToList();
+            var blocked = _settings.GetBoolValue(SystemSettingsEnum.block);
+            if (blocked)
+                return false;
+            _settings.SetValue(SystemSettingsEnum.block, "true");
+            return true;
         }
 
-        private HangfireJob CreateOrUpdateStopJob(HangfireJob job)
+        public bool UnblockBilling()
         {
-            if (!string.IsNullOrEmpty(job.HangfireEndId))
-            {
-                RecurringJob.RemoveIfExists(job.HangfireEndId);
-            }
-            var date = job.EndTime;
-            job.HangfireEndId = BackgroundJob.Schedule(() => RecurringJob.RemoveIfExists(job.HangfireRecurringId), date);
-            return job;
+            var blocked = _settings.GetBoolValue(SystemSettingsEnum.block);
+            if (!blocked)
+                return false;
+            _settings.SetValue(SystemSettingsEnum.block, "false");
+            return true;
         }
 
-        private HangfireJob CreateOrUpdateStartJob(HangfireJob job)
+        public List<BillingAction> GetAllActions()
         {
-            if (job.StartTime < DateTimeOffset.Now)
-                return job;
-            if (!string.IsNullOrEmpty(job.HangfireStartId))
-            {
-                RecurringJob.RemoveIfExists(job.HangfireStartId);
-            }
-            var date = job.StartTime;
-            job.HangfireStartId = BackgroundJob.Schedule(() => CreateOrUpdateRecurringJob(job.Id), date);
-            return job;
+            return GetList<BillingAction>(a => a.Enabled).OrderBy(a => a.Order).ToList();
         }
-
-        public void CreateOrUpdateRecurringJob(int dbJobId)
-        {
-            BaseJob job;
-            var dbJob = Get<HangfireJob>(j => j.Id == dbJobId);
-            switch ((JobType)dbJob.JobType)
-            {
-                default:
-                    throw new Exception("jobtype not found");
-            }
-            dbJob = CreateOrUpdateStopJob(dbJob);
-            Add(dbJob);
-            Context.SaveChanges();
-        }
-
-        private HangfireJob CreateOrUpdateRecurringJob(HangfireJob dbJob, BaseJob job)
-        {
-            if (string.IsNullOrEmpty(dbJob.HangfireRecurringId))
-            {
-                dbJob.HangfireRecurringId = Guid.NewGuid().ToString();
-            }
-
-            RecurringJob.AddOrUpdate(dbJob.HangfireRecurringId, () => job.DoJob(), $"{dbJob.Cron}");
-            return dbJob;
-        }
-
-        #endregion
     }
 }

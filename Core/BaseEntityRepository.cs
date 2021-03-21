@@ -29,6 +29,7 @@ namespace Core
         void AddAndSave<T>(T entity) where T : BaseEntity;
         void Delete<T>(int id) where T : BaseEntity;
         void SaveContext();
+        void RefreshContext();
     }
 
 
@@ -44,6 +45,12 @@ namespace Core
         public void SaveContext()
         {
             Context?.SaveChanges();
+        }
+
+        public void RefreshContext()
+        {
+            Context?.Dispose();
+            Context = new BillingContext();
         }
 
         public List<T> ExecuteQuery<T>(string query)
@@ -88,6 +95,7 @@ namespace Core
         {
             Add(entity);
             SaveContext();
+            Context.Entry(entity).Reload();
         }
 
         public virtual void Add<T>(T entity) where T : BaseEntity

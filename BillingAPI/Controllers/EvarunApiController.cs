@@ -34,27 +34,27 @@ namespace BillingAPI.Controllers
             }
             catch (BillingAuthException e)
             {
-                return HandleException(403, e.Message, guid, result, actionName);
+                return HandleException(403, e.Message, guid, result, actionName, logmessage);
             }
             catch (BillingUnauthorizedException e)
             {
-                return HandleException(401, e.Message, guid, result, actionName);
+                return HandleException(401, e.Message, guid, result, actionName, logmessage);
             }
             catch (BillingException ex)
             {
-                return HandleException(422, ex.Message, guid, result, actionName);
+                return HandleException(422, ex.Message, guid, result, actionName, logmessage);
             }
             catch (ShopException se)
             {
-                return HandleException(418, se.Message, guid, result, actionName);
+                return HandleException(418, se.Message, guid, result, actionName, logmessage);
             }
             catch (HttpResponseException re)
             {
-                return HandleException((int)re.Response.StatusCode, re.Message, guid, result, actionName);
+                return HandleException((int)re.Response.StatusCode, re.Message, guid, result, actionName, logmessage);
             }
             catch (Exception exc)
             {
-                return HandleException(500, exc.ToString(), guid, result, actionName);
+                return HandleException(500, exc.ToString(), guid, result, actionName, logmessage);
             }
             return result;
         }
@@ -82,10 +82,10 @@ namespace BillingAPI.Controllers
         {
             //Console.WriteLine($"Action for {guid} finished");
         }
-        private T HandleException<T>(int code, string message, Guid guid, T result, string action) where T : Result 
+        private T HandleException<T>(int code, string message, Guid guid, T result, string action, string logmessage) where T : Result 
         {
             Response.StatusCode = code;
-            Console.Error.WriteLine($"ERROR for {guid}({action}): {message}: {code}");
+            Console.Error.WriteLine($"ERROR for {logmessage}:{guid}({action}): {message}: code {code}");
             result.Message = message;
             result.Status = false;
             return result;

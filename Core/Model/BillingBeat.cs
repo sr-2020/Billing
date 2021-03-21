@@ -14,8 +14,6 @@ namespace Core.Model
         public DateTime FinishTime { get; set; }
         [Column("number")]
         public int Number { get; set; }
-        [Column("token")]
-        public string Token { get; set; }
         [ForeignKey("billing_cycle")]
         [Column("billing_cycle")]
         public int CycleId { get; set; }

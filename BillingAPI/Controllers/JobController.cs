@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Billing;
+using BillingAPI.Filters;
 using BillingAPI.Model;
 using Core;
 using Core.Model;
@@ -20,23 +21,26 @@ namespace BillingAPI.Controllers
     {
         private readonly IJobManager Manager = IocContainer.Get<IJobManager>();
 
-        private const string SECRET = "fee6f53e";
 
-        [HttpGet("period")]
-        public Result ProcessPeriod(string secret)
+        [HttpGet("cycle")]
+        [CheckSecret]
+        public Result ProcessCycle()
         {
-            if (secret != SECRET)
-            {
-                for (int i = 0; i < 10; i++)
-                {
-                    Console.Error.WriteLine("WARNING!! HACK DETECTED!!");
-                }
-                return RunAction(() => { throw new BillingException("Процесс пересчета уже запущен! Повторите позже"); });
-            }
             var result = RunAction(() => 
             {
-                var life = new JobLife();
-                life.Start();
+                var life = new JobLifeService();
+                life.ToggleCycle();
+            }, $"period");
+            return result;
+        }
+
+        [HttpGet("beat")]
+        public Result ProcessBeat()
+        {
+            var result = RunAction(() =>
+            {
+                var life = new JobLifeService();
+                life.DoBeat();
             }, $"period");
             return result;
         }

@@ -16,5 +16,7 @@ namespace Core.Model
         public int Beat { get; set; }
         [Column("enabled")]
         public bool Enabled { get; set; }
+        [Column("order")]
+        public int Order { get; set; }
     }
 }

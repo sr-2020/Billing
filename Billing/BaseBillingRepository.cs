@@ -198,7 +198,6 @@ namespace Billing
                 RentaId = rentaId
             };
             Add(transfer);
-            Context.SaveChanges();
             return transfer;
         }
 
@@ -257,18 +256,13 @@ namespace Billing
             var skuList = GetSkuList(shop);
             return skuList.FirstOrDefault(s => s.Id == sku);
         }
+
         protected List<Sku> GetSkuList(int shopId)
         {
             var skuids = ExecuteQuery<int>($"SELECT * FROM get_sku({shopId})");
             var result = GetList<Sku>(s => skuids.Contains(s.Id), s => s.Corporation.Wallet, s => s.Nomenklatura.Specialisation.ProductType);
             //TODO filter by contractlimit
             return result;
-        }
-
-        protected string GetJoinCharacterName(int modelId)
-        {
-            var currentCharacterName = GetAsNoTracking<JoinCharacter>(j => j.Character.Model == modelId, c => c.Character);
-            return currentCharacterName?.Name;
         }
 
         private int GetMIRId()

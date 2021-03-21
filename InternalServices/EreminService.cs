@@ -35,18 +35,62 @@ namespace InternalServices
             return false;
         }
 
-        public static decimal GetDiscount(int characterId, DiscountType discountType)
+        public static decimal GetDiscount(int characterId, DiscountType discountType, CorporationEnum corporation)
         {
             var model = GetCharacter(characterId);
+            decimal every = 1;
             if (model != null)
             {
-                var gesheft = ParseToDecimal(model.workModel.discounts.all);
-                decimal samurai = 0;
+                var gesheft = model.workModel.discounts.everything;
+                decimal samurai = 1;
                 if (discountType == DiscountType.Samurai)
-                    samurai = ParseToDecimal(model.workModel.discounts.samurai);
-                return gesheft > samurai ? gesheft : samurai;
+                    samurai = model.workModel.discounts.weaponsArmor;
+                every = gesheft < samurai ? gesheft : samurai;
             }
-            return 0;
+            decimal corpDisc = 1;
+            switch (corporation)
+            {
+                case CorporationEnum.ares:
+                    corpDisc = model.workModel.discounts.ares;
+                    break;
+                case CorporationEnum.aztechnology:
+                    corpDisc = model.workModel.discounts.aztechnology;
+                    break;
+                case CorporationEnum.saederKrupp:
+                    corpDisc = model.workModel.discounts.saederKrupp;
+                    break;
+                case CorporationEnum.spinradGlobal:
+                    corpDisc = model.workModel.discounts.spinradGlobal;
+                    break;
+                case CorporationEnum.neonet1:
+                    corpDisc = model.workModel.discounts.neonet1;
+                    break;
+                case CorporationEnum.evo:
+                    corpDisc = model.workModel.discounts.evo;
+                    break;
+                case CorporationEnum.horizon:
+                    corpDisc = model.workModel.discounts.horizon;
+                    break;
+                case CorporationEnum.wuxing:
+                    corpDisc = model.workModel.discounts.wuxing;
+                    break;
+                case CorporationEnum.russia:
+                    corpDisc = model.workModel.discounts.russia;
+                    break;
+                case CorporationEnum.renraku:
+                    corpDisc = model.workModel.discounts.renraku;
+                    break;
+                case CorporationEnum.mutsuhama:
+                    corpDisc = model.workModel.discounts.mutsuhama;
+                    break;
+                case CorporationEnum.shiavase:
+                    corpDisc = model.workModel.discounts.shiavase;
+                    break;
+                case CorporationEnum.unknown:
+                default:
+                    break;
+            }
+            return every * corpDisc;
         }
 
         public static bool WriteQR(string qr, string id, string name, string description, int numberOfUses, decimal basePrice, decimal rentPrice, string gmDescription, int rentaId, Lifestyles lifestyle)
@@ -73,7 +117,7 @@ namespace InternalServices
             var json = Serializer.ToJSON(body);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var response = client.PostAsync(url, content).Result;
-            return response.StatusCode == System.Net.HttpStatusCode.OK;
+            return response.StatusCode == System.Net.HttpStatusCode.OK || response.StatusCode == System.Net.HttpStatusCode.Created;
         }
 
         private static decimal ParseToDecimal(string value)

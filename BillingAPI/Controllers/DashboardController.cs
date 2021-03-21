@@ -344,13 +344,21 @@ namespace BillingAPI.Controllers
             return result;
         }
 
+        /// <summary>
+        /// get Lifestyles
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("a-lifestyles")]
         public DataResult<List<Lifestyles>> GetLifeStyles()
         {
             throw new NotImplementedException();
         }
 
-
+        /// <summary>
+        /// get lifestyle
+        /// </summary>
+        /// <param name="lifestyle"></param>
+        /// <returns></returns>
         [HttpGet("a-lifestyle")]
         public DataResult<NamedEntity> GetLifeStyle(int lifestyle)
         {
@@ -358,6 +366,8 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => new NamedEntity { Id = (int)ls, Name = ls.ToString() });
             return result;
         }
+
+        
 
     }
 }

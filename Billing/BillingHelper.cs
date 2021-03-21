@@ -12,7 +12,7 @@ namespace Billing
 {
     public class BillingHelper
     {
-
+        public const string BlockErrorMessage = "В данный момент ведется пересчет рентных платежей, попробуйте повторить чуть позже";
         public static int GetModelId(string model)
         {
             int modelId;
@@ -65,7 +65,7 @@ namespace Billing
 
         public static decimal GetFinalPrice(decimal basePrice, decimal discount, decimal scoring)
         {
-            return (basePrice - (basePrice * (discount / 100))) / scoring;
+            return (basePrice * discount) / scoring;
         }
 
         //public static int GetComission(int shopLifestyle)
@@ -76,7 +76,7 @@ namespace Billing
 
         public static decimal CalculateComission(decimal basePrice, decimal comission)
         {
-            return basePrice * (comission/100);
+            return basePrice * (comission / 100);
         }
 
         public static bool HasQrWrite(string code)
@@ -100,6 +100,16 @@ namespace Billing
             {
 
                 return false;
+            }
+        }
+
+        public static void BillingBlocked()
+        {
+            ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
+            var block = _settings.GetBoolValue(SystemSettingsEnum.block);
+            if (block)
+            {
+                throw new BillingException(BlockErrorMessage);
             }
         }
 
