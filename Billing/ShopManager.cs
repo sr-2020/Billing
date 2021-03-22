@@ -30,6 +30,7 @@ namespace Billing
 
     public class ShopManager : AdminManager, IShopManager
     {
+        EreminService _ereminService = new EreminService();
         public int ProcessInflation(decimal k)
         {
             var nomenklaturas = GetList<Nomenklatura>(n => true);
@@ -55,10 +56,7 @@ namespace Billing
             var description = renta.Sku.Nomenklatura.Description;
             //TODO
             var count = 1;
-            if (!EreminService.WriteQR(qr, code, name, description, count, renta.BasePrice, BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring), renta.Secret, rentaId, (Lifestyles)renta.LifeStyle))
-            {
-                throw new ShopException("запись на qr не получилось");
-            }
+            _ereminService.WriteQR(qr, code, name, description, count, renta.BasePrice, BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring), renta.Secret, rentaId, (Lifestyles)renta.LifeStyle);
             renta.QRRecorded = qr;
             Add(renta);
             Context.SaveChanges();

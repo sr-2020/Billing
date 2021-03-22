@@ -1,7 +1,9 @@
-﻿using Core.Primitives;
+﻿using Core;
+using Core.Primitives;
 using InternalServices.EreminModel;
 using Serialization;
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -93,7 +95,7 @@ namespace InternalServices
             return every * corpDisc;
         }
 
-        public static bool WriteQR(string qr, string id, string name, string description, int numberOfUses, decimal basePrice, decimal rentPrice, string gmDescription, int rentaId, Lifestyles lifestyle)
+        public async void WriteQR(string qr, string id, string name, string description, int numberOfUses, decimal basePrice, decimal rentPrice, string gmDescription, int rentaId, Lifestyles lifestyle)
         {
             var client = new HttpClient();
             var url = $"{URL}/qr/model/{qr}";
@@ -116,8 +118,11 @@ namespace InternalServices
             };
             var json = Serializer.ToJSON(body);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = client.PostAsync(url, content).Result;
-            return response.StatusCode == System.Net.HttpStatusCode.OK || response.StatusCode == System.Net.HttpStatusCode.Created;
+            var response = await client.PostAsync(url, content);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK || response.StatusCode == System.Net.HttpStatusCode.Created)
+                return;
+            var message = await response.Content.ReadAsStringAsync();
+            throw new BillingException(message);
         }
 
         private static decimal ParseToDecimal(string value)
