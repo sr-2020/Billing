@@ -26,6 +26,10 @@ Message - описание ошибки, если status = false
 * POST a-set-specialisation, a-drop-specialisation - установка/сброс специализации магазину
 
 ## Приложение.
+* GET sin - получение информации по SIN для авторизованного персонажа.
+* GET rentas, transfers - получение списка рент/переводов для авторизованного персонажа.
+
+
 
 ## Сайт магазина.
 
@@ -35,3 +39,4 @@ Message - описание ошибки, если status = false
 ## Генерация персонажа.
 * POST api/billing/admin/initcharacter/{modelid} -инициализация персонажа для указанного modelId. Обнуляет скоринг, кошелек.
 ## Карта страховок.
+* GET insurance/getinsurance - получение информации по страховке
