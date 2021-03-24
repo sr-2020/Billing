@@ -2,6 +2,7 @@
 https://billing.evarun.ru/swagger/v1/index.html
 
 Ответ на все методы имеет структуру json:
+```
 {
   "Data": 
   {
@@ -10,6 +11,7 @@ https://billing.evarun.ru/swagger/v1/index.html
   "Status": true,
   "Message": "string"
 }
+```
 Где, Data - это объект или коллекция объектов, если такие ожидаются.
 Status - успешность запроса.
 Message - описание ошибки, если status = false
