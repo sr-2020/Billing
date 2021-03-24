@@ -1,4 +1,4 @@
-Для получения подробных сведений о методах можно пользоваться сваггером:
+Часть подробных сведений о методах можно получить сваггером:
 https://billing.evarun.ru/swagger/v1/index.html
 
 Ответ на все методы имеет структуру:
@@ -13,8 +13,11 @@ https://billing.evarun.ru/swagger/v1/index.html
 Status - успешность запроса.
 Message - описание ошибки, если status = false
 
-# Методы, доступные извне: https://gateway.evarun.ru/api/v1/billing/{url}
-## Методы требуюущие авторизационный хедер(Authorization если обращаться через gateway).
-### Админка
+# Методы требуюущие авторизационный хедер(Authorization если обращаться через gateway).
+Шаблон URL: https://gateway.evarun.ru/api/v1/billing/{url}
+## Админка, требуют наличия у пользователя прав администратора. Выдаются по запросу.
 * GET a-users, a-skus, a-sku, a-nomenklaturas, a-nomenklatura, a-specialisations, a-specialisation, a-shops, a-shop, a-corporations, a-corporation, a-producttypes, a-producttype - получение 
-
+* POST a-add-shop, a-add-specialisation, a-add-nomenklatura, a-add-sku - добавление 
+* PATCH a-edit-shop, a-edit-specialisation, a-edit-nomenklatura, a-edit-sku - изменение 
+* DELETE a-del-shop, a-del-nomenklatura, a-del-sku - удаление 
+* POST a-set-specialisation, a-drop-specialisation - установка/сброс специализации магазину
