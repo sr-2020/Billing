@@ -6,7 +6,7 @@ https://billing.evarun.ru/swagger/v1/index.html
 {
   "Data": 
   {
-    
+    //something
   },
   "Status": true,
   "Message": "string"
