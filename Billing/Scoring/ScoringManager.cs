@@ -247,7 +247,7 @@ namespace Scoringspace
                             var category = context.Set<ScoringCategory>().AsNoTracking().FirstOrDefault(f => f.Id == factor.CategoryId);
                             var scoring = context.Set<Scoring>().AsTracking().FirstOrDefault(s => s.Id == scoringId);
                             var systemsettings = IocContainer.Get<ISettingsManager>();
-
+                            var oldScoring = scoring.CurerentRelative + scoring.CurrentFix;
                             var curFactor = context.Set<CurrentFactor>().AsNoTracking().FirstOrDefault(s => s.ScoringId == scoringId && s.ScoringFactorId == factorId);
                             if (curFactor == null)
                             {
@@ -303,7 +303,9 @@ namespace Scoringspace
                                 OldFactorValue = oldFactorValue,
                                 NewFactorValue = newValue,
                                 OldCategoryValue = oldCatValue,
-                                NewCategoryValue = newCatValue
+                                NewCategoryValue = newCatValue,
+                                OldScoring = oldScoring,
+                                NewScoring = scoring.CurerentRelative + scoring.CurrentFix
                             };
                             Add(scoringEvent, context);
                             dbContextTransaction.Commit();

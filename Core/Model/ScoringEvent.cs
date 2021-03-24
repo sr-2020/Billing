@@ -24,5 +24,9 @@ namespace Core.Model
         public decimal? OldCategoryValue { get; set; }
         [Column("new_cat_value")]
         public decimal? NewCategoryValue { get; set; }
+        [Column("old_scoring_value")]
+        public decimal OldScoring { get; set; }
+        [Column("new_scoring_value")]
+        public decimal NewScoring { get; set; }
     }
 }

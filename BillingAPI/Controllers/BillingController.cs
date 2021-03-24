@@ -26,10 +26,10 @@ namespace BillingAPI.Controllers
         /// <param name="characterId"></param>
         /// <returns></returns>
         [HttpGet("info/getbalance")]
-        public DataResult<BalanceDto> GetBalance(int characterId)
+        public DataResult<BalanceDtoOld> GetBalance(int characterId)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetBalance(characterId), $"GetBalance {characterId}");
+            var result = RunAction(() => manager.GetBalanceOld(characterId), $"GetBalance {characterId}");
             return result;
         }
 
@@ -265,11 +265,6 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetTransfers(characterId), $"gettransfers {characterId}");
             return result;
         }
-
-        #endregion
-
-        #region test
-
 
         #endregion
     }

@@ -16,7 +16,7 @@ namespace BillingAPI.Controllers
     public class InfoController : EvarunApiController
     {
         [HttpGet("getbalanсe")]
-        public DataResult<BalanceDto> GetBalanсe(int character)
+        public DataResult<BalanceDtoOld> GetBalanсe(int character)
         {
             var manager = IocContainer.Get<IBillingManager>();
             var result = RunAction(() => manager.GetBalance(character), "getbalanсe");

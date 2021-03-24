@@ -28,6 +28,7 @@ namespace Billing
         string GetSinStringByCharacter(int modelId);
         int GetModelIdBySinString(string sinString);
         List<TransferDto> GetTransfers(int modelId);
+        BalanceDtoOld GetBalanceOld(int modelId);
         BalanceDto GetBalance(int modelId);
         List<RentaDto> GetRentas(int modelId);
         #endregion
@@ -357,6 +358,29 @@ namespace Billing
             return dto;
         }
 
+        public BalanceDtoOld GetBalanceOld(int modelId)
+        {
+            var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring, s => s.Metatype);
+            var balance = new BalanceDtoOld
+            {
+                ModelId = modelId,
+                CurrentBalance = BillingHelper.RoundDown(sin.Wallet.Balance),
+                CurrentScoring = sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative,
+                SIN = sin.Sin,
+                ForecastLifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
+                LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
+                PersonName = sin.PersonName,
+                Metatype = sin.Metatype?.Name ?? "неизвестно",
+                Citizenship = sin.Citizenship ?? "неизвестно",
+                Nationality = sin.NationDisplay ?? "неизвестно",
+                Status = sin.Citizen_state ?? "неизвестно",
+                Nation = sin.Nation ?? "неизвестно",
+                Viza = sin.Viza ?? "неизвестно",
+                Pledgee = sin.Mortgagee ?? "неизвестно"
+            };
+            return balance;
+        }
+
         public BalanceDto GetBalance(int modelId)
         {
             var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring, s => s.Metatype);
@@ -366,7 +390,6 @@ namespace Billing
                 CurrentBalance = BillingHelper.RoundDown(sin.Wallet.Balance),
                 CurrentScoring = sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative,
                 SIN = sin.Sin,
-                ForecastLifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
                 LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
                 PersonName = sin.PersonName,
                 Metatype = sin.Metatype?.Name ?? "неизвестно",

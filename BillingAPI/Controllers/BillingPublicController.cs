@@ -22,11 +22,37 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <param name="character"></param>
         /// <returns></returns>
-        [HttpGet("getsin")]
+        [HttpGet("sin")]
         public DataResult<BalanceDto> GetSin(int character)
         {
             var manager = IocContainer.Get<IBillingManager>();
             var result = RunAction(() => manager.GetBalance(character), $"getsin {character}");
+            return result;
+        }
+
+        /// <summary>
+        /// Get all rentas for character
+        /// </summary>
+        /// <param name="character"></param>
+        /// <returns></returns>
+        [HttpGet("rentas")]
+        public DataResult<List<RentaDto>> GetRentas(int character)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetRentas(character), $"getrentas {character}");
+            return result;
+        }
+
+        /// <summary>
+        ///  Get all transfers for character
+        /// </summary>
+        /// <param name="character"></param>
+        /// <returns></returns>
+        [HttpGet("transfers")]
+        public DataResult<List<TransferDto>> GetTransfers(int character)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetTransfers(character), $"gettransfers {character}");
             return result;
         }
 
