@@ -21,3 +21,14 @@ Message - описание ошибки, если status = false
 * PATCH a-edit-shop, a-edit-specialisation, a-edit-nomenklatura, a-edit-sku - изменение 
 * DELETE a-del-shop, a-del-nomenklatura, a-del-sku - удаление 
 * POST a-set-specialisation, a-drop-specialisation - установка/сброс специализации магазину
+
+## Приложение.
+
+## Сайт магазина.
+
+# Методы, не требующие авторизационный хедер, но доступные через gateway.
+
+# Методы, не требующие авторизационный хедер, доступны только по прямому запросу.
+## Генерация персонажа.
+* POST api/billing/admin/initcharacter/{modelid} -инициализация персонажа для указанного modelId. Обнуляет скоринг, кошелек.
+## Карта страховок.
