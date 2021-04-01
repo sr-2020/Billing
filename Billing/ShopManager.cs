@@ -44,7 +44,6 @@ namespace Billing
             return nomenklaturas.Count;
         }
 
-
         public void WriteRenta(int rentaId, string qrEncoded)
         {
             var qr = EreminQrService.GetPayload(qrEncoded);

@@ -1,4 +1,5 @@
 ﻿using Billing;
+using Billing.Dto;
 using Core;
 using Core.Model;
 using Core.Primitives;
@@ -33,6 +34,7 @@ namespace Scoringspace
         void OnImplantBuy(SIN sin, int lifestyle);
         void OnImplantInstalled(string model, string implantlifestyle, string autodoclifestyle);
         void OnMetatypeChanged(SIN sin);
+        ScoringDto GetFullScoring(int character);
     }
 
     public class ScoringManager : BaseEntityRepository, IScoringManager
@@ -227,6 +229,52 @@ namespace Scoringspace
                 return 0;
             });
         }
+
+        public ScoringDto GetFullScoring(int character)
+        {
+            var sin = Get<SIN>(s => s.Character.Model == character, s => s.Scoring);
+            var fixenum = (int)ScoringCategoryType.Fix;
+            var relativenum = (int)ScoringCategoryType.Relative;
+
+            var fixFactors = GetList<CurrentFactor>(f => f.CurrentCategory.Category.CategoryType == fixenum && f.CurrentCategory.ScoringId == sin.ScoringId, f => f.ScoringFactor, f => f.CurrentCategory.Category);
+            var relativFactors = GetList<CurrentFactor>(f => f.CurrentCategory.Category.CategoryType == relativenum && f.CurrentCategory.ScoringId == sin.ScoringId, f => f.ScoringFactor, f => f.CurrentCategory.Category);
+            var fixCategories = fixFactors
+                .GroupBy(f => f.ScoringFactor.Category)
+                .Select(g => new ScoringCategoryDto
+                {
+                    Name = g.Key.Name,
+                    Value = g.FirstOrDefault()?.CurrentCategory?.Value ?? 0,
+                    Weight = g.Key.Weight,
+                    Factors = g.Select(f => new ScoringFactorDto
+                    {
+                        Value = f.Value,
+                        Name = f.ScoringFactor.Name
+                    }).ToList()
+                }).ToList();
+            var relativCategories = relativFactors
+                .GroupBy(f => f.ScoringFactor.Category)
+                .Select(g => new ScoringCategoryDto
+                {
+                    Name = g.Key.Name,
+                    Value = g.FirstOrDefault()?.CurrentCategory?.Value ?? 0,
+                    Weight = g.Key.Weight,
+                    Factors = g.Select(f => new ScoringFactorDto
+                    {
+                        Value = f.Value,
+                        Name = f.ScoringFactor.Name,
+                    }).ToList()
+                }).ToList();
+
+            return new ScoringDto
+            {
+                Character = character,
+                CurrentFix = sin.Scoring.CurrentFix,
+                CurrentRelative = sin.Scoring.CurerentRelative,
+                FixCategories = fixCategories,
+                RelativeCategories = relativCategories
+            };
+        }
+
         #region mathematic
 
         private void ScoringEvent(int scoringId, int factorId, Func<BillingContext, decimal> action)
@@ -248,21 +296,6 @@ namespace Scoringspace
                             var scoring = context.Set<Scoring>().AsTracking().FirstOrDefault(s => s.Id == scoringId);
                             var systemsettings = IocContainer.Get<ISettingsManager>();
                             var oldScoring = scoring.CurerentRelative + scoring.CurrentFix;
-                            var curFactor = context.Set<CurrentFactor>().AsNoTracking().FirstOrDefault(s => s.ScoringId == scoringId && s.ScoringFactorId == factorId);
-                            if (curFactor == null)
-                            {
-                                curFactor = new CurrentFactor
-                                {
-                                    ScoringFactorId = factorId,
-                                    ScoringId = scoringId,
-                                    Value = scoring.StartFactor ?? 1
-                                };
-                                Add(curFactor, context);
-                            }
-                            var oldFactorValue = curFactor.Value;
-                            var newValue = CalculateFactor((double)lifestyle, (double)curFactor.Value);
-                            curFactor.Value = newValue;
-                            Add(curFactor, context);
                             var curCategory = context.Set<CurrentCategory>().AsNoTracking().FirstOrDefault(c => c.ScoringId == scoringId && c.CategoryId == factor.CategoryId);
                             if (curCategory == null)
                             {
@@ -271,8 +304,27 @@ namespace Scoringspace
                                     ScoringId = scoringId,
                                     CategoryId = factor.CategoryId
                                 };
+                                Add(curCategory, context);
                             }
-                            var curFactors = context.Set<CurrentFactor>().AsNoTracking().Include(f => f.ScoringFactor).Where(f => f.ScoringFactor.CategoryId == factor.CategoryId && f.ScoringId == scoringId).ToList();
+                            var curFactor = context.Set<CurrentFactor>().AsNoTracking().FirstOrDefault(s => s.CurrentCategoryId == curCategory.Id && s.ScoringFactorId == factorId);
+                            if (curFactor == null)
+                            {
+                                curFactor = new CurrentFactor
+                                {
+                                    ScoringFactorId = factorId,
+                                    CurrentCategoryId = curCategory.Id,
+                                    //ScoringId = scoringId,
+                                    Value = scoring.StartFactor ?? 1
+                                };
+                                Add(curFactor, context);
+                            }
+                            var oldFactorValue = curFactor.Value;
+                            var newValue = CalculateFactor((double)lifestyle, (double)curFactor.Value);
+                            curFactor.Value = newValue;
+                            Add(curFactor, context);
+
+
+                            var curFactors = context.Set<CurrentFactor>().AsNoTracking().Include(f => f.ScoringFactor).Where(f => f.CurrentCategoryId == curCategory.Id).ToList();
                             var factorsCount = curFactors.Count;
                             if (factorsCount == 0)
                             {
@@ -287,7 +339,7 @@ namespace Scoringspace
                             var k = (decimal)Math.Pow((curCatCount > 0 ? curCatCount : 2) * 2, -1);
                             if (category.CategoryType == (int)ScoringCategoryType.Fix)
                             {
-                                scoring.CurrentFix = (decimal)curCategories.Sum(c => Math.Pow((double)c.Value, (double)(c.Category.Weight > 1 || c.Category.Weight <  0 ? 0 : c.Category.Weight))) * k;
+                                scoring.CurrentFix = (decimal)curCategories.Sum(c => Math.Pow((double)c.Value, (double)(c.Category.Weight > 1 || c.Category.Weight < 0 ? 0 : c.Category.Weight))) * k;
                             }
                             else if (category.CategoryType == (int)ScoringCategoryType.Relative)
                             {

@@ -2,16 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Billing.Dto;
 using BillingAPI.Model;
 using Core.Model;
+using IoC;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Scoringspace;
 
 namespace BillingAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ScoringController : ControllerBase
+    public class ScoringController : EvarunApiController
     {
         [HttpGet("test")]
         public DataResult<Scoring> Test(int id)
@@ -33,9 +36,10 @@ namespace BillingAPI.Controllers
         }
 
         [HttpGet("info/getmyscoring")]
-        public DataResult<Scoring> GetScoring(int character)
+        public DataResult<ScoringDto> GetScoring(int character)
         {
-            throw new NotImplementedException();
+            var manager = IocContainer.Get<IScoringManager>();
+            return RunAction(()=> manager.GetFullScoring(character));
         }
 
     }
