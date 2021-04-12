@@ -25,7 +25,7 @@ namespace Jobs
         }
         ManagerFactory Factory { get; set; }
 
-        public BillingCycle ToggleCycle(string token = "")
+        public string ToggleCycle(string token = "")
         {
             token = CheckToken(token);
             var cycle = Factory.Job.GetLastCycle(token);
@@ -47,7 +47,7 @@ namespace Jobs
             cycle.IsActive = !cycle.IsActive;
             cycle.Token = token;
             Factory.Job.AddAndSave(cycle);
-            return cycle;
+            return $"{cycle.Token}_{cycle.Number} {(cycle.IsActive ? "стартовал": "остановлен")}";
         }
 
         public string DoBeat(string token = "", BeatTypes type = BeatTypes.Test)
@@ -109,8 +109,9 @@ namespace Jobs
                         throw new Exception("Биллинг был разблокирован раньше времени");
                     }
                 }
+
             });
-            return "Пересчет запущен";
+            return $"Пересчет для {cycle.Token}_{cycle.Number} запущен ";
         }
 
         private JobLifeDto DoCharactersBeat(JobLifeDto beat)

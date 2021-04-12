@@ -24,12 +24,12 @@ namespace BillingAPI.Controllers
 
         [HttpGet("cycle")]
         //[CheckSecret]
-        public Result ProcessCycle()
+        public DataResult<string> ProcessCycle()
         {
             var result = RunAction(() => 
             {
                 var life = new JobLifeService();
-                life.ToggleCycle();
+                return life.ToggleCycle();
             }, $"period");
             return result;
         }
