@@ -17,6 +17,7 @@ namespace Billing
     {
         SIN CreateOrUpdatePhysicalWallet(int modelId, string name, int? metarace, decimal balance = 50);
         SIN InitCharacter(int modelId, string name, string metarace);
+        SIN GetSINByModelId(int modelId, params Expression<Func<SIN, object>>[] includes);
     }
 
     public class BaseBillingRepository : BaseEntityRepository, IBaseBillingRepository
@@ -158,17 +159,7 @@ namespace Billing
             };
         }
 
-        /// <summary>
-        /// Create transfer from walletFrom to walletTo. NOTE: No context saved in method. Need to attach wallets to context manually, and call Context.SaveChanges()
-        /// </summary>
-        /// <param name="walletFrom"></param>
-        /// <param name="walletTo"></param>
-        /// <param name="amount"></param>
-        /// <param name="comment"></param>
-        /// <param name="anonymous"></param>
-        /// <param name="rentaId"></param>
-        /// <returns></returns>
-        protected Transfer MakeNewTransfer(Wallet walletFrom, Wallet walletTo, decimal amount, string comment, bool anonymous = false, int? rentaId = null)
+        protected Transfer AddNewTransfer(Wallet walletFrom, Wallet walletTo, decimal amount, string comment, bool anonymous = false, int? rentaId = null, bool overdraft = false)
         {
             if (walletFrom == null)
                 throw new BillingException($"Нет кошелька отправителя");
@@ -195,7 +186,8 @@ namespace Billing
                 NewBalanceTo = walletTo.Balance,
                 OperationTime = DateTime.Now.ToUniversalTime(),
                 Anonymous = anonymous,
-                RentaId = rentaId
+                RentaId = rentaId,
+                Overdraft = overdraft
             };
             Add(transfer);
             return transfer;
@@ -224,9 +216,9 @@ namespace Billing
             {
                 var mir = GetMIR();
                 if (wallet.Balance > 0)
-                    MakeNewTransfer(wallet, mir, wallet.Balance, "Сброс кошелька");
+                    AddNewTransfer(wallet, mir, wallet.Balance, "Сброс кошелька");
                 wallet.Balance = 0;
-                MakeNewTransfer(mir, wallet, amount, "Заведение кошелька");
+                AddNewTransfer(mir, wallet, amount, "Заведение кошелька");
             }
             Context.SaveChanges();
             return wallet;
@@ -240,7 +232,7 @@ namespace Billing
             return mir;
         }
 
-        protected SIN GetSINByModelId(int modelId, params Expression<Func<SIN, object>>[] includes)
+        public SIN GetSINByModelId(int modelId, params Expression<Func<SIN, object>>[] includes)
         {
             var sin = Get(s => s.Character.Model == modelId, includes);
             if (sin == null)
@@ -251,16 +243,16 @@ namespace Billing
             return sin;
         }
 
-        protected Sku SkuAllowed(int shop, int sku)
+        protected Sku SkuAllowed(int shop, int sku, params Expression<Func<Sku, object>>[] includes)
         {
-            var skuList = GetSkuList(shop);
+            var skuList = GetSkuList(shop, includes);
             return skuList.FirstOrDefault(s => s.Id == sku);
         }
 
-        protected List<Sku> GetSkuList(int shopId)
+        protected List<Sku> GetSkuList(int shopId, params Expression<Func<Sku, object>>[] includes)
         {
             var skuids = ExecuteQuery<int>($"SELECT * FROM get_sku({shopId})");
-            var result = GetList<Sku>(s => skuids.Contains(s.Id), s => s.Corporation.Wallet, s => s.Nomenklatura.Specialisation.ProductType);
+            var result = GetList(s => skuids.Contains(s.Id), includes);
             //TODO filter by contractlimit
             return result;
         }

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Core
 {
-    public interface IBaseRepository
+    public interface IBaseRepository : IDisposable
     {
         T GetAsNoTracking<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class;
         T GetAsNoTracking<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class;
@@ -33,7 +33,7 @@ namespace Core
     }
 
 
-    public class BaseEntityRepository : IBaseRepository, IDisposable
+    public class BaseEntityRepository : IBaseRepository
     {
         protected BillingContext Context { get; set; }
 

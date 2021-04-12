@@ -28,6 +28,8 @@ namespace Core.Model
         public Scoring Scoring { get; set; }
         [Column("work")]
         public int? Work { get; set; }
+        [Column("blocked")]
+        public bool Blocked { get; set; }
         [Column("ikar")]
         public int? IKAR { get; set; }
         [Column("eversion")]

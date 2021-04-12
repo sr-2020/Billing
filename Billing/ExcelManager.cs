@@ -95,7 +95,8 @@ namespace Billing
                 decimal karma = 0;
                 try
                 {
-                    karma = EreminService.GetCharacter(sin.Character.Model)?.workModel?.karma?.spent ?? 0;
+                    var eService = new EreminService();
+                    karma = eService.GetCharacter(sin.Character.Model)?.workModel?.karma?.spent ?? 0;
                 }
                 catch (Exception e)
                 {

@@ -30,5 +30,7 @@ namespace Core.Model
         public DateTime OperationTime { get; set; }
         [Column("anonymous")]
         public bool Anonymous { get; set; }
+        [Column("overdraft")]
+        public bool Overdraft { get; set; }
     }
 }

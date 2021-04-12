@@ -47,11 +47,9 @@ namespace Billing
         #endregion
 
         #region jobs
-        //void ProcessPeriod(string model = "0");
-        //int ProcessRentas(List<SIN> sins);
-        //int ProcessKarma(List<SIN> sins, decimal k);
-        //int ProcessIkar(List<SIN> sins, decimal k);
-        List<SIN> GetActiveSins();
+
+        List<SIN> GetActiveSins(params Expression<Func<SIN, object>>[] includes);
+        void ProcessCharacterBeat(int sinId, decimal karmaCount, bool dividents1, bool dividents2, bool dividents3);
 
         #endregion
 
@@ -71,90 +69,12 @@ namespace Billing
     {
 
         protected int CURRENTGAME = 2;
-        public int ProcessIkar(List<SIN> sins, decimal k)
-        {
-            throw new NotImplementedException();
-            //    var count = 0;
-            //    var mir = GetMIR();
-            //    foreach (var sin in sins)
-            //    {
-            //        if ((sin.IKAR ?? 0) == 0)
-            //        {
-            //            continue;
-            //        }
-            //        try
-            //        {
-            //MakeNewTransfer(mir, sin.Wallet, sin.IKAR.Value * k, "Начисления по ИКАР");
-            //            count++;
-            //        }
-            //        catch (Exception e)
-            //        {
-            //            Console.WriteLine(e.ToString());
-            //        }
-            //    }
-            //    Context.SaveChanges();
-            //    return count;
-        }
 
-        //public int ProcessKarma(List<SIN> sins, decimal k)
-        //{
-        //    var count = 0;
-        //    var mir = GetMIR();
-        //    foreach (var sin in sins)
-        //    {
-        //        try
-        //        {
-        //            var character = sin.Character;
-        //            if (character == null)
-        //            {
-        //                character = GetAsNoTracking<Character>(c => c.Id == sin.CharacterId);
-        //            }
-        //            var model = EreminService.GetCharacter(character.Model);
-        //            var karma = model.workModel.karma.spent;
-        //            if (karma == 0)
-        //            {
-        //                continue;
-        //            }
-        //            MakeNewTransfer(mir, sin.Wallet, karma * k, "Рабочие начисления за экономический период");
-        //            count++;
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            Console.WriteLine(e.ToString());
-        //        }
-
-        //    }
-        //    return count;
-        //}
-
-        //public void ProcessPeriod(string model = "0")
-        //{
-        //    var modelId = BillingHelper.GetModelId(model);
-        //    var sins = GetList<SIN>(s => (s.Character.Model == modelId || modelId == 0) && (s.InGame ?? false), s => s.Character);
-        //    ProcessRentas(sins);
-        //}
-
-        public int ProcessRentas(List<SIN> sins)
-        {
-            var bulkCount = 100;
-            var pageCount = (sins.Count + bulkCount - 1) / bulkCount;
-            var rentasCount = 0;
-            for (int i = 0; i < pageCount; i++)
-            {
-                var mir = GetMIR();
-                foreach (var sin in sins.Skip(i * bulkCount).Take(bulkCount).ToList())
-                {
-                    rentasCount += ProcessRentas(sin, mir);
-                }
-                Context.SaveChanges();
-            }
-            return rentasCount;
-        }
-
-        public List<SIN> GetActiveSins()
+        public List<SIN> GetActiveSins(params Expression<Func<SIN, object>>[] includes)
         {
             var currentGame = 2;
-            var sins = GetList<SIN>(s => s.InGame ?? false && s.Character.Game == currentGame, s => s.Character, s => s.Wallet);
+            //var sins = GetListAsNoTracking(s => s.Character.Model == 44043, includes);
+            var sins = GetListAsNoTracking(s => s.InGame ?? false && s.Character.Game == currentGame, includes);
             return sins;
         }
 
@@ -182,8 +102,6 @@ namespace Billing
             Context.SaveChanges();
             return newContract;
         }
-
-
 
         public List<Contract> GetContrats(int shopid, int corporationId)
         {
@@ -239,8 +157,12 @@ namespace Billing
 
         public RentaDto ConfirmRenta(int modelId, int priceId)
         {
-            BillingHelper.BillingBlocked();
-            var price = Get<Price>(p => p.Id == priceId, p => p.Sku, s => s.Shop, s => s.Shop.Wallet, s => s.Sin.Character);
+            BillingHelper.BillingBlocked(modelId);
+            var price = Get<Price>(p => p.Id == priceId,
+                p => p.Sku.Nomenklatura.Specialisation.ProductType,
+                p => p.Sku.Corporation.Wallet,
+                s => s.Shop.Wallet,
+                s => s.Sin.Character);
             if (price == null)
                 throw new BillingException("Персональное предложение не найдено");
             if (price.Confirmed)
@@ -250,15 +172,15 @@ namespace Billing
             var dateTill = price.DateCreated.AddMinutes(_settings.GetIntValue(SystemSettingsEnum.price_minutes));
             if (dateTill < DateTime.Now)
                 throw new BillingException($"Персональное предложение больше не действительно, оно истекло {dateTill.ToString("HH:mm:ss")}");
-            var sku = SkuAllowed(price.ShopId, price.SkuId);
-            if (sku == null)
+            var allowed = SkuAllowed(price.ShopId, price.SkuId);
+            if (allowed == null)
                 throw new BillingException("Sku недоступно для продажи в данный момент");
             var sin = Get<SIN>(s => s.Id == price.SinId, s => s.Wallet, s => s.Character);
             if (sin.Wallet.Balance - price.FinalPrice < 0)
             {
                 throw new BillingException("Недостаточно средств");
             }
-            sku.Count--;
+            price.Sku.Count--;
             var renta = new Renta
             {
                 BasePrice = price.BasePrice,
@@ -269,17 +191,19 @@ namespace Billing
                 Discount = price.Discount,
                 ShopComission = price.ShopComission,
                 ShopId = price.ShopId,
-                HasQRWrite = BillingHelper.HasQrWrite(sku.Nomenklatura.Code),
+                Shop = price.Shop,
+                HasQRWrite = BillingHelper.HasQrWrite(price.Sku.Nomenklatura.Code),
                 PriceId = priceId,
-                Secret = sku.Nomenklatura.Secret,
-                LifeStyle = sku.Nomenklatura.Lifestyle
+                Secret = price.Sku.Nomenklatura.Secret,
+                LifeStyle = price.Sku.Nomenklatura.Lifestyle
             };
             Add(renta);
             price.Confirmed = true;
-            Context.SaveChanges();
-            ProcessByuScoring(sin, sku);
-            ProcessRenta(renta, sin);
-
+            SaveContext();
+            ProcessBuyScoring(sin, price.Sku);
+            var mir = GetMIR();
+            ProcessRenta(renta, mir, sin);
+            SaveContext();
             EreminPushAdapter.SendNotification(modelId, "Покупка совершена", $"Вы купили {price.Sku.Name}");
             var dto = new RentaDto
             {
@@ -291,7 +215,91 @@ namespace Billing
             return dto;
         }
 
-        private void ProcessByuScoring(SIN sin, Sku sku)
+        public void ProcessCharacterBeat(int sinId, decimal karmaCount, bool dividents1, bool dividents2, bool dividents3)
+        {
+            var sin = BlockCharacter(sinId);
+            SaveContext();
+            var mir = GetMIR();
+            //ability
+            if(dividents1)
+            {
+                var dk1 = _settings.GetDecimalValue(SystemSettingsEnum.dividents1_k);
+                AddNewTransfer(mir, sin.Wallet, dk1, "Дивиденды *");
+            }    
+            if(dividents2)
+            {
+                var dk2 = _settings.GetDecimalValue(SystemSettingsEnum.dividents2_k);
+                AddNewTransfer(mir, sin.Wallet, dk2, "Дивиденды **");
+            }
+            if (dividents2)
+            {
+                var dk3 = _settings.GetDecimalValue(SystemSettingsEnum.dividents3_k);
+                AddNewTransfer(mir, sin.Wallet, dk3, "Дивиденды ***");
+            }
+            //karma
+            if (karmaCount > 0)
+            {
+                var k = _settings.GetDecimalValue(SystemSettingsEnum.karma_k);
+                AddNewTransfer(mir, sin.Wallet, k * karmaCount, "пассивный доход");
+            }
+            //rentas
+            var rentas = GetList<Renta>(r => r.SinId == sin.Id, r => r.Shop.Wallet, r => r.Sku.Corporation.Wallet);
+            foreach (var renta in rentas)
+            {
+                ProcessRenta(renta, mir, sin);
+            }
+            //scoring
+
+            //forecast
+            var sum = rentas.Sum(r => BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring));
+            sin.Wallet.ForecastBalance = sin.Wallet.Balance - (sum * 3);
+            UnblockCharacter(sin);
+            SaveContext();
+        }
+
+        /// <summary>
+        /// НЕ ВЫПОЛНЯЕТСЯ SAVECONTEXT
+        /// </summary>
+        private void ProcessRenta(Renta renta, Wallet mir, SIN sin)
+        {
+            if (renta?.Shop?.Wallet == null
+                || renta?.Sku?.Corporation?.Wallet == null
+                || sin?.Character == null
+                || sin?.Wallet == null)
+            {
+                throw new Exception("Ошибка загрузки моделей по ренте");
+            }
+            var finalPrice = BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
+            //если баланс положительный
+            if (sin.Wallet.Balance > 0)
+            {
+                AddNewTransfer(sin.Wallet, mir, finalPrice, $"Рентный платеж: { renta.Sku.Name} в {renta.Shop.Name}", false, renta.Id, false);
+                CloseOverdraft(renta, mir, sin);
+                //close overdraft here
+                var allOverdrafts = GetList<Transfer>(t => t.Overdraft && t.WalletFromId == sin.Wallet.Id && t.RentaId > 0);
+                foreach (var overdraft in allOverdrafts)
+                {
+                    overdraft.Overdraft = false;
+                    var closingRenta = Get<Renta>(r => r.Id == overdraft.RentaId);
+                    CloseOverdraft(renta, mir, sin);
+                }
+            }
+            else
+            {
+                AddNewTransfer(sin.Wallet, mir, finalPrice, $"Рентный платеж: {renta.Sku.Name} в {renta.Shop.Name}", false, renta.Id, true);
+            }
+        }
+
+        private void CloseOverdraft(Renta renta, Wallet mir, SIN sin)
+        {
+            var comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
+            //create KPI here
+            renta.Sku.Corporation.CurrentKPI += renta.BasePrice;
+            //comission
+            AddNewTransfer(mir, renta.Shop.Wallet, comission, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} от {sin.PersonName} ({sin.Sin})", false, renta.Id, false);
+        }
+
+        private void ProcessBuyScoring(SIN sin, Sku sku)
         {
             var type = sku.Nomenklatura.Specialisation.ProductType;
             if (type == null)
@@ -345,7 +353,7 @@ namespace Billing
 
         public PriceShopDto GetPrice(int modelId, int shopid, int skuid)
         {
-            BillingHelper.BillingBlocked();
+            BillingHelper.BillingBlocked(modelId);
             var sku = SkuAllowed(shopid, skuid);
             if (sku == null)
                 throw new BillingException("sku недоступен для продажи");
@@ -391,6 +399,7 @@ namespace Billing
                 CurrentScoring = sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative,
                 SIN = sin.Sin,
                 LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
+                ForecastLifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.ForecastBalance).ToString(),
                 PersonName = sin.PersonName,
                 Metatype = sin.Metatype?.Name ?? "неизвестно",
                 Citizenship = sin.Citizenship ?? "неизвестно",
@@ -467,13 +476,12 @@ namespace Billing
 
         public Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment)
         {
-            BillingHelper.BillingBlocked();
+            //BillingHelper.BillingBlocked(modelId);
             throw new NotImplementedException();
         }
 
         public Transfer CreateTransferSINSIN(string modelid, string characterTo, decimal amount, string comment)
         {
-            BillingHelper.BillingBlocked();
             int imodelId;
             int icharacterTo;
             if (!int.TryParse(modelid, out imodelId) || imodelId == 0)
@@ -484,6 +492,8 @@ namespace Billing
             {
                 throw new BillingAuthException($"Ошибка проверки получателя, должен быть инт");
             }
+            BillingHelper.BillingBlocked(imodelId);
+            BillingHelper.BillingBlocked(icharacterTo);
             return MakeTransferSINSIN(imodelId, icharacterTo, amount, comment);
         }
 
@@ -501,26 +511,28 @@ namespace Billing
                 throw new BillingException($"Не найден получатель");
             }
             var comment = "Перевод от международного банка";
-            return MakeNewTransfer(from, to.Wallet, amount, comment);
+            return AddNewTransfer(from, to.Wallet, amount, comment);
         }
 
         public Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment)
         {
-            BillingHelper.BillingBlocked();
+            BillingHelper.BillingBlocked(characterFrom);
+            BillingHelper.BillingBlocked(characterTo);
             var d1 = GetSINByModelId(characterFrom, s => s.Wallet);
             var d2 = GetSINByModelId(characterTo, s => s.Wallet);
             var anon = false;
             try
             {
-                var anonFrom = EreminService.GetAnonimous(characterFrom);
-                var anonto = EreminService.GetAnonimous(characterTo);
+                var erService = new EreminService();
+                var anonFrom = erService.GetAnonimous(characterFrom);
+                var anonto = erService.GetAnonimous(characterTo);
                 anon = anonFrom || anonto;
             }
             catch (Exception e)
             {
 
             }
-            var transfer = MakeNewTransfer(d1.Wallet, d2.Wallet, amount, comment, anon);
+            var transfer = AddNewTransfer(d1.Wallet, d2.Wallet, amount, comment, anon);
             Context.SaveChanges();
             if (transfer != null)
             {
@@ -650,65 +662,16 @@ namespace Billing
 
         #region private
 
-        private void ProcessRenta(Renta renta, SIN sin)
+        private SIN BlockCharacter(int sinId)
         {
-            var mir = GetMIR();
-            ProcessRenta(renta, mir, sin);
-            Context.SaveChanges();
+            var sin = Get<SIN>(s => s.Id == sinId, s => s.Wallet, s => s.Character);
+            sin.Blocked = true;
+            return sin;
         }
 
-        private void ProcessRenta(Renta renta, Wallet mir, SIN sin)
+        private void UnblockCharacter(SIN sin)
         {
-            if (renta == null)
-            {
-                throw new Exception("renta not found");
-            }
-            var shop = renta.Shop;
-            if (shop == null || shop.Wallet == null)
-            {
-                shop = Get<ShopWallet>(s => s.Id == renta.ShopId, s => s.Wallet);
-                if (shop == null)
-                    throw new Exception("Shop not found");
-            }
-            var sku = renta.Sku;
-            if (sku == null)
-            {
-                sku = Get<Sku>(s => s.Id == renta.SkuId, s => s.Corporation.Wallet);
-            }
-            var corporation = sku.Corporation;
-            if (corporation == null || corporation.Wallet == null)
-            {
-                corporation = Get<CorporationWallet>(c => c.Id == sku.CorporationId, c => c.Wallet);
-                if (corporation == null)
-                    throw new Exception("corporation not found");
-            }
-            var character = sin.Character;
-            if (character == null)
-            {
-                character = Get<Character>(c => c.Id == sin.CharacterId);
-            }
-            var walletFrom = sin.Wallet;
-            if (walletFrom == null)
-            {
-                walletFrom = Get<Wallet>(w => w.Id == sin.WalletId);
-            }
-            var finalPrice = BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
-            var comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
-            //с кошелька списываем всегда
-            MakeNewTransfer(walletFrom, mir, finalPrice, $"Рентный платеж: {sku.Name} в {shop.Name}", false, renta.Id);
-            //если баланс положительный
-            if (walletFrom.Balance > 0)
-            {
-                //TODO close overdraft here
-                //TODO create KPI here
-                //MakeNewTransfer(mir, corporation.Wallet, finalPrice - comission, $"Рентное начисление: {sku.Name} от {sin.PersonName} ({sin.Sin}) ", false, renta.Id);
-                MakeNewTransfer(mir, shop.Wallet, comission, $"Рентное начисление: {sku.Name} в {shop.Name} от {sin.PersonName} ({sin.Sin})", false, renta.Id);
-            }
-            else
-            {
-                //TODO open overdraft here
-            }
-            //EreminPushAdapter.SendNotification(character.Model, "Кошелек", $"Списание по рентному договору");
+            sin.Blocked = false;
         }
 
         private CorporationEnum GetCorporationForSku(Sku sku)
@@ -753,11 +716,12 @@ namespace Billing
             decimal discount;
             try
             {
-                discount = EreminService.GetDiscount(sin.Character.Model, GetDiscountTypeForSku(sku), GetCorporationForSku(sku));
+                var eService = new EreminService();
+                discount = eService.GetDiscount(sin.Character.Model, GetDiscountTypeForSku(sku), GetCorporationForSku(sku));
             }
-            catch (Exception e)
+            catch
             {
-                discount = 0;
+                discount = 1;
             }
             var currentScoring = sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative;
             if (currentScoring == 0)
@@ -779,23 +743,6 @@ namespace Billing
             Add(price);
             Context.SaveChanges();
             return price;
-        }
-
-        private int ProcessRentas(SIN sin, Wallet mir)
-        {
-            var rentas = GetList<Renta>(r => r.SinId == sin.Id, r => r.Shop, r => r.Sku.Corporation);
-            foreach (var renta in rentas)
-            {
-                try
-                {
-                    ProcessRenta(renta, mir, sin);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.ToString());
-                }
-            }
-            return rentas.Count;
         }
 
         private List<SIN> GetSinsInGame(params Expression<Func<SIN, object>>[] includes)

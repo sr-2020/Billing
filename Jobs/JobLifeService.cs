@@ -1,12 +1,16 @@
 ﻿using Billing;
 using Core;
 using Core.Model;
+using Core.Primitives;
 using InternalServices;
 using IoC;
 using Scoringspace;
 using Settings;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,20 +25,10 @@ namespace Jobs
         }
         ManagerFactory Factory { get; set; }
 
-        private Lazy<IJobManager> _lazyJob { get; set; } = new Lazy<IJobManager>(IocContainer.Get<IJobManager>);
-        private Lazy<IBillingManager> _lazyBilling { get; set; } = new Lazy<IBillingManager>(IocContainer.Get<IBillingManager>);
-        private Lazy<IShopManager> _lazyShop { get; set; } = new Lazy<IShopManager>(IocContainer.Get<IShopManager>);
-        private Lazy<IScoringManager> _lazyScoring { get; set; } = new Lazy<IScoringManager>(IocContainer.Get<IScoringManager>);
-        private IJobManager Job => _lazyJob.Value;
-        private IBillingManager Billing => _lazyBilling.Value;
-        private IShopManager Shop => _lazyShop.Value;
-        private IScoringManager Scoring => _lazyScoring.Value;
-
-
         public BillingCycle ToggleCycle(string token = "")
         {
             token = CheckToken(token);
-            var cycle = Job.GetLastCycle(token);
+            var cycle = Factory.Job.GetLastCycle(token);
             if (cycle == null)
             {
                 cycle = new BillingCycle()
@@ -52,108 +46,158 @@ namespace Jobs
             }
             cycle.IsActive = !cycle.IsActive;
             cycle.Token = token;
-            Job.AddAndSave(cycle);
+            Factory.Job.AddAndSave(cycle);
             return cycle;
         }
 
-        public BillingBeat DoBeat(string token = "")
+        public string DoBeat(string token = "", BeatTypes type = BeatTypes.Test)
         {
             BillingHelper.BillingBlocked();
             token = CheckToken(token);
-            var cycle = Job.GetLastCycle(token);
-            if (cycle == null)
-                return null;
-            if (!cycle.IsActive)
-                return null;
-            if (!Job.BlockBilling())
+            var cycle = Factory.Job.GetLastCycle(token);
+            if (cycle == null || !cycle.IsActive)
+            {
+                return "цикл не запущен";
+            }
+            if (!Factory.Job.BlockBilling())
             {
                 throw new Exception("Попытка повторной блокировки биллинга");
             }
-            var beat = Job.GetLastBeat(cycle.Id);
-            var newBeat = new BillingBeat();
-            newBeat.Number = beat != null ? beat.Number++ : 1;
-            newBeat.StartTime = DateTime.Now;
-            newBeat.CycleId = cycle.Id;
-            Job.AddAndSave(newBeat);
-            var actions = Job.GetAllActions();
-            foreach (var action in actions)
+            Task.Run(() =>
             {
-                if (!CheckActionTime(action, cycle.Number, beat.Number))
-                {
-                    continue;
-                }
-                var success = false;
-                var comment = string.Empty;
                 try
                 {
-                    comment = DoAction(action);
-                    success = true;
+                    var beat = Factory.Job.GetLastBeat(cycle.Id, type);
+                    var newBeat = new BillingBeat();
+                    newBeat.Number = beat != null ? beat.Number++ : 1;
+                    newBeat.StartTime = DateTime.Now;
+                    newBeat.CycleId = cycle.Id;
+                    newBeat.BeatType = (int)type;
+                    Factory.Job.AddAndSave(newBeat);
+                    var dto = new JobLifeDto
+                    {
+                        Beat = newBeat
+                    };
+                    switch ((BeatTypes)newBeat.BeatType)
+                    {
+                        case BeatTypes.Test:
+                            dto.AddHistory("test beat");
+                            break;
+                        case BeatTypes.Items:
+                            dto = DoItemsBeat(dto);
+                            break;
+                        case BeatTypes.Characters:
+                            dto = DoCharactersBeat(dto);
+                            break;
+                        default:
+                            dto.AddHistory("unknown beat type");
+                            break;
+                    }
+                    dto.Beat.FinishTime = DateTime.Now;
+                    Factory.Job.AddAndSave(dto.Beat);
+                    Factory.Job.AddRange(dto.History);
                 }
                 catch (Exception e)
                 {
-                    comment = e.ToString();
-                    LogException(e);
+                    Console.Error.WriteLine(e.Message);
+                    throw;
                 }
                 finally
                 {
-                    var history = new BeatHistory
+                    if (!Factory.Job.UnblockBilling())
                     {
-                        ActionId = action.Id,
-                        Comment = comment,
-                        Success = success,
-                        BeatId = newBeat.Id
-                    };
-                    Job.AddAndSave(history);
+                        throw new Exception("Биллинг был разблокирован раньше времени");
+                    }
                 }
-            }
-            newBeat.FinishTime = DateTime.Now;
-            Job.AddAndSave(newBeat);
-            if (!Job.UnblockBilling())
-            {
-                throw new Exception("Биллинг был разблокирован раньше времени");
-            }
-            return newBeat;
+            });
+            return "Пересчет запущен";
         }
 
-        private bool CheckActionTime(BillingAction action, int cycle, int beat)
+        private JobLifeDto DoCharactersBeat(JobLifeDto beat)
         {
-            if (action.Cycle != 0)
+            var sins = Factory.Billing.GetActiveSins(s => s.Wallet, s => s.Character);
+            var charactersLoaded = false;
+            var concurrent = new ConcurrentQueue<CharacterDto>();
+            var taskLoad = Task.Run(() =>
             {
-                if (cycle % action.Cycle != 0)
-                    return false;
-            }
-            if (action.Beat != 0)
+                LoadCharacters(sins, concurrent);
+                charactersLoaded = true;
+            });
+            var processedList = new List<CharacterDto>();
+            var errorList = new List<CharacterDto>();
+            var taskAll = Task.Run(() =>
             {
-                if (beat % action.Beat != 0)
-                    return false;
-            }
-            return true;
+                while (!charactersLoaded || !concurrent.IsEmpty)
+                {
+                    CharacterDto loaded;
+                    if (!concurrent.TryDequeue(out loaded))
+                    {
+                        Thread.Sleep(100);
+                        continue;
+                    }
+                    if (string.IsNullOrEmpty(loaded.ErrorText))
+                    {
+                        try
+                        {
+                            processedList.Add(ProcessModelCharacter(loaded));
+                        }
+                        catch (Exception e)
+                        {
+                            loaded.ErrorText = e.ToString();
+                            errorList.Add(loaded);
+                        }
+                    }
+                    else
+                    {
+                        errorList.Add(loaded);
+                    }
+                }
+            });
+            Task.WaitAll(taskLoad, taskAll);
+            return beat;
         }
 
-        private string DoAction(BillingAction action)
+        private CharacterDto ProcessModelCharacter(CharacterDto character)
         {
-            switch (action.Alias)
+            var billing = IocContainer.Get<IBillingManager>();
+            var d1 = character.EreminModel.workModel.passiveAbilities?.Any(p => p.id == "dividends-1");
+            var d2 = character.EreminModel.workModel.passiveAbilities?.Any(p => p.id == "dividends-2");
+            var d3 = character.EreminModel.workModel.passiveAbilities?.Any(p => p.id == "dividends-3");
+            billing.ProcessCharacterBeat(character.Sin.Id, character.EreminModel.workModel.karma.spent ?? 0, d1 ?? false, d2 ?? false, d3 ?? false);
+            try
             {
-                case "renta":
-                    return DoRentas();
-                case "karma":
-
-                    break;
-
-                case "ikar":
-
-                    break;
-
-                case "scoring":
-
-                    break;
-                case "inflation":
-
-                    break;
-                default:
-                    break;
+                EreminPushAdapter.SendNotification(character.Sin.Character.Model, "Кошелек", "Экономический пересчет завершен");
             }
-            return string.Empty;
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+            return character;
+        }
+
+        private void LoadCharacters(List<SIN> sins, ConcurrentQueue<CharacterDto> concurrent)
+        {
+            var erService = new EreminService();
+            Parallel.ForEach(sins, new ParallelOptions { MaxDegreeOfParallelism = 5 }, sin =>
+                {
+
+                    var dto = new CharacterDto { Sin = sin };
+                    try
+                    {
+                        dto.EreminModel = erService.GetCharacter(sin.Character.Model);
+                    }
+                    catch (Exception e)
+                    {
+                        dto.ErrorText = e.Message;
+                    }
+                    concurrent.Enqueue(dto);
+                });
+        }
+
+        private JobLifeDto DoItemsBeat(JobLifeDto beat)
+        {
+
+            return beat;
         }
 
         private string CheckToken(string token)
@@ -163,33 +207,6 @@ namespace Jobs
                 token = Factory.Settings.GetValue(Core.Primitives.SystemSettingsEnum.token);
             }
             return token;
-        }
-
-        private void DoPush(List<SIN> sins)
-        {
-            foreach (var sin in sins)
-            {
-                try
-                {
-                    EreminPushAdapter.SendNotification(sin.Character.Model, "Кошелек", "Пересчет экономического периода завершен");
-                }
-                catch (Exception e)
-                {
-
-                    Console.WriteLine(e.ToString());
-                }
-
-            }
-        }
-
-        private string DoKarma(List<SIN> sins)
-        {
-            //var k = _settingManager.GetDecimalValue(Core.Primitives.SystemSettingsEnum.karma_k);
-            //Console.WriteLine("Пересчет кармы начался");
-            //var count = Billing.ProcessKarma(sins, k);
-            //Console.WriteLine($"Пересчет кармы завершен, начислено для {count} персонажей с коэффициентом {k}");
-            //CurrentBeat.SuccessWork = true;
-            return $"";
         }
 
         private void DoIkar(List<SIN> sins)

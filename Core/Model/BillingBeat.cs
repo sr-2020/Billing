@@ -14,6 +14,8 @@ namespace Core.Model
         public DateTime FinishTime { get; set; }
         [Column("number")]
         public int Number { get; set; }
+        [Column("beat_type")]
+        public int BeatType { get; set; }
         [ForeignKey("billing_cycle")]
         [Column("billing_cycle")]
         public int CycleId { get; set; }
