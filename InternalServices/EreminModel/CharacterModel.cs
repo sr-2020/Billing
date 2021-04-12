@@ -6,8 +6,8 @@ namespace InternalServices.EreminModel
 {
     public class CharacterModel
     {
-        public BaseModel baseModel { get; set; }
         public WorkModel workModel { get; set; }
+
     }
     public class Discounts
     {
@@ -32,23 +32,26 @@ namespace InternalServices.EreminModel
         public bool anonymous { get; set; }
         public decimal stockGainPercentage { get; set; }
     }
-    public class BaseModel
-    {
-        public string modelId { get; set; }
-        public Discounts discounts { get; set; }
-        public Billing billing { get; set; }
-    }
     public class WorkModel
     {
         public string modelId { get; set; }
         public Discounts discounts { get; set; }
         public Billing billing { get; set; }
         public Karma karma { get; set; }
+        public List<PassiveAbility> passiveAbilities { get; set; }
     }
+
+    public class PassiveAbility
+    {
+        public string id { get; set; }
+        public string description { get; set; }
+        public string humanReadableName { get; set; }
+    }
+
     public class Karma
     {
-        public decimal available { get; set; }
-        public decimal spent { get; set; }
+        public decimal? available { get; set; }
+        public decimal? spent { get; set; }
     }
 
 

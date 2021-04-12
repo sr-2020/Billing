@@ -10,6 +10,8 @@ namespace Core.Model
     {
         [Column("balance")]
         public decimal Balance { get; set; }
+        [Column("forecast_balance")]
+        public decimal ForecastBalance { get; set; }
         [Column("wallet_type")]
         public int WalletType { get; set; }
         [Column("current_lifestyle")]

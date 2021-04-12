@@ -86,29 +86,29 @@ namespace Billing
 
         public Transfer MakeTransferLegLeg(int shopFrom, int shopTo, decimal amount, string comment)
         {
-            BillingHelper.BillingBlocked();
             var shopWalletFrom = Get<ShopWallet>(s => s.Id == shopFrom, s => s.Wallet);
             var shopWalletTo = Get<ShopWallet>(s => s.Id == shopTo, s => s.Wallet);
-            var transfer = MakeNewTransfer(shopWalletFrom.Wallet, shopWalletTo.Wallet, amount, comment);
+            var transfer = AddNewTransfer(shopWalletFrom.Wallet, shopWalletTo.Wallet, amount, comment);
             Context.SaveChanges();
             return transfer;
         }
 
         public Transfer MakeTransferLegSIN(int shop, int character, decimal amount, string comment)
         {
-            BillingHelper.BillingBlocked();
+            BillingHelper.BillingBlocked(character);
             var sin = GetSINByModelId(character, s => s.Wallet);
             var anon = false;
             try
             {
-                anon = EreminService.GetAnonimous(character);
+                var erService = new EreminService();
+                anon = erService.GetAnonimous(character);
             }
             catch (Exception e)
             {
 
             }
             var shopWallet = Get<ShopWallet>(s => s.Id == shop, s => s.Wallet);
-            var transfer = MakeNewTransfer(shopWallet.Wallet, sin.Wallet, amount, comment, anon);
+            var transfer = AddNewTransfer(shopWallet.Wallet, sin.Wallet, amount, comment, anon);
             Context.SaveChanges();
             return transfer;
         }
@@ -206,7 +206,7 @@ namespace Billing
 
         private List<SkuDto> GetSkusForShop(int shop)
         {
-            return GetSkuList(shop).Select(s => new SkuDto(s, true)).ToList();
+            return GetSkuList(shop, s => s.Corporation.Wallet, s => s.Nomenklatura.Specialisation.ProductType).Select(s => new SkuDto(s, true)).ToList();
         }
         #endregion
     }

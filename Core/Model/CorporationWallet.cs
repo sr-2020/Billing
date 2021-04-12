@@ -16,5 +16,9 @@ namespace Core.Model
         public string CorporationLogoUrl { get; set; }
         [Column("alias")]
         public string Alias { get; set; }
+        [Column("last_kpi")]
+        public decimal LastKPI { get; set; }
+        [Column("current_kpi")]
+        public decimal CurrentKPI { get; set; }
     }
 }

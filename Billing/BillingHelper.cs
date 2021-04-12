@@ -103,6 +103,16 @@ namespace Billing
             }
         }
 
+        public static void BillingBlocked(int modelId)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var sin = manager.GetSINByModelId(modelId);
+            if (sin?.Blocked ?? true)
+            {
+                throw new BillingException(BlockErrorMessage);
+            }
+        }
+
         public static void BillingBlocked()
         {
             ISettingsManager _settings = IocContainer.Get<ISettingsManager>();

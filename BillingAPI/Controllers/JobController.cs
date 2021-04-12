@@ -23,7 +23,7 @@ namespace BillingAPI.Controllers
 
 
         [HttpGet("cycle")]
-        [CheckSecret]
+        //[CheckSecret]
         public Result ProcessCycle()
         {
             var result = RunAction(() => 
@@ -34,13 +34,14 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        [HttpGet("beat")]
-        public Result ProcessBeat()
+        [HttpGet("beatcharacters")]
+        //[CheckSecret]
+        public DataResult<string> ProcessBeat()
         {
             var result = RunAction(() =>
             {
                 var life = new JobLifeService();
-                life.DoBeat();
+                return life.DoBeat("test", BeatTypes.Characters);
             }, $"period");
             return result;
         }

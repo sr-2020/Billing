@@ -12,9 +12,9 @@ namespace InternalServices
 {
     public class EreminService
     {
-        const string URL = "http://models-manager.evarun.ru";
+        const string URL = "https://models-manager.evarun.ru";
 
-        public static CharacterModel GetCharacter(int characterId)
+        public CharacterModel GetCharacter(int characterId)
         {
             var client = new HttpClient();
             var url = $"{URL}/character/model/{characterId}";
@@ -27,7 +27,7 @@ namespace InternalServices
             throw new Exception(response.Content.ReadAsStringAsync().Result);
         }
 
-        public static bool GetAnonimous(int characterId)
+        public bool GetAnonimous(int characterId)
         {
             var model = GetCharacter(characterId);
             if (model != null)
@@ -37,7 +37,7 @@ namespace InternalServices
             return false;
         }
 
-        public static decimal GetDiscount(int characterId, DiscountType discountType, CorporationEnum corporation)
+        public decimal GetDiscount(int characterId, DiscountType discountType, CorporationEnum corporation)
         {
             var model = GetCharacter(characterId);
             decimal every = 1;
@@ -124,14 +124,5 @@ namespace InternalServices
             var message = await response.Content.ReadAsStringAsync();
             throw new BillingException(message);
         }
-
-        private static decimal ParseToDecimal(string value)
-        {
-            decimal dec = 0;
-            decimal.TryParse(value, out dec);
-            return dec;
-        }
-
-
     }
 }

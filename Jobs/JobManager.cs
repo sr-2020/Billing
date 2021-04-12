@@ -19,11 +19,9 @@ namespace Jobs
     public interface IJobManager : IBaseRepository
     {
         BillingCycle GetLastCycle(string token);
-        BillingBeat GetLastBeat(int cycleId);
+        BillingBeat GetLastBeat(int cycleId, BeatTypes type);
         bool BlockBilling();
         bool UnblockBilling();
-        List<BillingAction> GetAllActions();
-
     }
 
     public class JobManager : BaseEntityRepository, IJobManager
@@ -38,10 +36,12 @@ namespace Jobs
                 .FirstOrDefault();
             return cycle;
         }
-        public BillingBeat GetLastBeat(int cycleId)
+
+        public BillingBeat GetLastBeat(int cycleId, BeatTypes type)
         {
+            var typeint = (int)type;
             var beat = Query<BillingBeat>()
-                .Where(b => b.CycleId == cycleId)
+                .Where(b => b.CycleId == cycleId && b.BeatType == typeint)
                 .OrderByDescending(c => c.Number)
                 .FirstOrDefault();
             return beat;
@@ -65,9 +65,7 @@ namespace Jobs
             return true;
         }
 
-        public List<BillingAction> GetAllActions()
-        {
-            return GetList<BillingAction>(a => a.Enabled).OrderBy(a => a.Order).ToList();
-        }
+
+
     }
 }
