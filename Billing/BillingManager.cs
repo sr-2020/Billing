@@ -136,10 +136,10 @@ namespace Billing
         public RentaSumDto GetRentas(int modelId)
         {
             var sum = new RentaSumDto();
-            var list = GetListAsNoTracking<Renta>(r => r.Sin.Character.Model == modelId, 
-                r => r.Sku.Nomenklatura.Specialisation.ProductType, 
-                r => r.Sku.Corporation, 
-                r => r.Shop, 
+            var list = GetListAsNoTracking<Renta>(r => r.Sin.Character.Model == modelId,
+                r => r.Sku.Nomenklatura.Specialisation.ProductType,
+                r => r.Sku.Corporation,
+                r => r.Shop,
                 r => r.Sin.Character)
                 .Select(r =>
                     new RentaDto
@@ -156,11 +156,11 @@ namespace Billing
                         HasQRWrite = r.HasQRWrite,
                         QRRecorded = r.QRRecorded,
                         DateCreated = r.DateCreated
-                    }).ToList(); 
+                    }).ToList();
             sum.Rentas = list;
             sum.Sum = list.Sum(r => r.FinalPrice);
             return sum;
-                    
+
         }
 
         public RentaDto ConfirmRenta(int modelId, int priceId)
@@ -411,7 +411,11 @@ namespace Billing
                 .OrderByDescending(r => r.Id)
                 .FirstOrDefault();
             var lics = ProductTypeEnum.Insurance.ToString();
-            var licences = GetList<Renta>(r => r.Sku.Nomenklatura.Specialisation.ProductType.Alias == lics, r => r.Sku);
+            var licences = GetList<Renta>(r => r.Sku.Nomenklatura.Specialisation.ProductType.Alias == lics, r => r.Sku.Nomenklatura)
+                .OrderByDescending(r => r.DateCreated)
+                .GroupBy(l => l.Sku.Nomenklatura.SpecialisationId)
+                .Select(g => g.FirstOrDefault()?.Sku?.Name)
+                .ToList();
             var balance = new BalanceDto
             {
                 ModelId = modelId,
@@ -429,7 +433,7 @@ namespace Billing
                 Viza = sin.Viza ?? "неизвестно",
                 Pledgee = sin.Mortgagee ?? "неизвестно",
                 Insurance = insur?.Sku?.Name ?? "нет страховки",
-                Licenses = licences.Select(l => l.Sku.Name).ToList()
+                Licenses = licences
             };
             return balance;
         }
