@@ -99,6 +99,48 @@ FinalPrice, DateCreated, SkuName, Corporation, Shop - Поля которые н
     ]
 ```
 From, To, OperationTime, NewBalance, Comment - поля необходимые отображать на вкладке подробности операции.
+* GET /api/Scoring/info/getmyscoring
+```
+ "Data": {
+    "Character": 0,
+    "CurrentFix": 0,
+    "CurrentRelative": 0,
+    "RelativeCategories": [
+      {
+        "Name": "string",
+        "Value": 0,
+        "Weight": 0,
+        "Factors": [
+          {
+            "Name": "string",
+            "Value": 0
+          }
+        ]
+      }
+    ],
+    "FixCategories": [
+      {
+        "Name": "string",
+        "Value": 0,
+        "Weight": 0,
+        "Factors": [
+          {
+            "Name": "string",
+            "Value": 0
+          }
+        ]
+      }
+    ]
+  },
+
+```
+CurrentFix, CurrentRelative - текущие значения составляющие итоговый скоринг.
+RelativeCategories - категории, вес которых будет изменяться на игре. 
+FixCategories - категории, вес которых не будет меняться на игре.
+Weight - вес категорий.
+Value - значение для текущего пользователя
+Factors - факторы составляющие категории
+
 
 ## Сайт магазина.
 
