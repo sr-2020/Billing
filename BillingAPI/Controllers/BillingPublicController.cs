@@ -36,7 +36,7 @@ namespace BillingAPI.Controllers
         /// <param name="character"></param>
         /// <returns></returns>
         [HttpGet("rentas")]
-        public DataResult<List<RentaDto>> GetRentas(int character)
+        public DataResult<RentaSumDto> GetRentas(int character)
         {
             var manager = IocContainer.Get<IBillingManager>();
             var result = RunAction(() => manager.GetRentas(character), $"getrentas {character}");
@@ -49,7 +49,7 @@ namespace BillingAPI.Controllers
         /// <param name="character"></param>
         /// <returns></returns>
         [HttpGet("transfers")]
-        public DataResult<List<TransferDto>> GetTransfers(int character)
+        public DataResult<TransferSum> GetTransfers(int character)
         {
             var manager = IocContainer.Get<IBillingManager>();
             var result = RunAction(() => manager.GetTransfers(character), $"gettransfers {character}");

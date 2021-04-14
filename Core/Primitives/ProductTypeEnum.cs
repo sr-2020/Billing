@@ -10,6 +10,7 @@ namespace Core.Primitives
         Implant,
         Food,
         Pill,
-        Magic
+        Magic,
+        Licences
     }
 }

@@ -11,6 +11,10 @@ namespace Billing.DTO
         Outcoming
     }
 
+    public class TransferSum
+    {
+        public List<TransferDto> Transfers { get; set; }
+    }
     public class TransferDto
     {
         [Display(Name ="SIN")]

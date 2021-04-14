@@ -61,7 +61,7 @@ namespace Billing
             foreach (var sin in sins)
             {
                 var transfers = billing.GetTransfers(sin.Character.Model);
-                var filteredTransfers = transfers.Where(t => t.TransferType == TransferType.Incoming.ToString());
+                var filteredTransfers = transfers.Transfers.Where(t => t.TransferType == TransferType.Incoming.ToString());
                 allTransfers.AddRange(filteredTransfers);
             }
             return ExcelWriter.CreateExcelAsStream(allTransfers);
@@ -75,7 +75,7 @@ namespace Billing
             foreach (var sin in sins)
             {
                 var rentas = billing.GetRentas(sin.Character.Model);
-                result.AddRange(rentas);
+                result.AddRange(rentas.Rentas);
             }
             return ExcelWriter.CreateExcelAsStream(result);
         }
@@ -115,7 +115,7 @@ namespace Billing
                     //Ikar = sin.IKAR,
                     ModelId = sin.Character.Model.ToString(),
                     LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
-                    SumRents = allRents.Sum(r => r.FinalPrice),
+                    SumRents = allRents.Sum,
                     Karma = karma
                 };
                 result.Add(excelCharacter);

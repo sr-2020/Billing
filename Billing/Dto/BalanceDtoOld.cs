@@ -40,5 +40,7 @@ namespace Billing.DTO
         public string Nation { get; set; }
         public string Viza { get; set; }
         public string Pledgee { get; set; }
+        public string Insurance { get; set; }
+        public List<string> Licenses { get; set; }
     }
 }

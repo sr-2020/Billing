@@ -47,7 +47,7 @@ namespace Jobs
             cycle.IsActive = !cycle.IsActive;
             cycle.Token = token;
             Factory.Job.AddAndSave(cycle);
-            return $"{cycle.Token}_{cycle.Number} {(cycle.IsActive ? "стартовал": "остановлен")}";
+            return $"Цикл {cycle.Token}_{cycle.Number} {(cycle.IsActive ? "стартовал": "остановлен")}";
         }
 
         public string DoBeat(string token = "", BeatTypes type = BeatTypes.Test)

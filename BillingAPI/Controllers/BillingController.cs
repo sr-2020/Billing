@@ -221,7 +221,7 @@ namespace BillingAPI.Controllers
         public DataResult<List<RentaDto>> GetRentas(int character)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetRentas(character), $"getrentas {character}");
+            var result = RunAction(() => manager.GetRentas(character)?.Rentas, $"getrentas {character}");
             return result;
         }
 
@@ -262,7 +262,7 @@ namespace BillingAPI.Controllers
         public DataResult<List<TransferDto>> GetTransfers(int characterId)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetTransfers(characterId), $"gettransfers {characterId}");
+            var result = RunAction(() => manager.GetTransfers(characterId)?.Transfers, $"gettransfers {characterId}");
             return result;
         }
 

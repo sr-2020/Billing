@@ -19,7 +19,6 @@ namespace BillingAPI.Controllers
     [Route("[controller]")]
     public class JobController : EvarunApiController
     {
-        private readonly IJobManager Manager = IocContainer.Get<IJobManager>();
 
 
         [HttpGet("cycle")]

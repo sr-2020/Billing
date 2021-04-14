@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Text;
 
 namespace Billing.DTO
@@ -22,7 +23,6 @@ namespace Billing.DTO
         public string SkuName { get; set; }
         public string Corporation { get; set; }
         public string Shop { get; set; }
-
         public bool HasQRWrite { get; set; }
         [Display(Name = "Записанный QR")]
         public string QRRecorded { get; set; }
@@ -30,5 +30,12 @@ namespace Billing.DTO
 
         [Display(Name = "Дата создания")]
         public DateTime DateCreated { get; set; }
+    }
+
+    public class RentaSumDto
+    {
+        public List<RentaDto> Rentas { get; set; }
+        public decimal Sum { get; set; }
+
     }
 }

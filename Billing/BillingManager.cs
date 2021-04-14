@@ -27,10 +27,10 @@ namespace Billing
 
         string GetSinStringByCharacter(int modelId);
         int GetModelIdBySinString(string sinString);
-        List<TransferDto> GetTransfers(int modelId);
+        TransferSum GetTransfers(int modelId);
         BalanceDtoOld GetBalanceOld(int modelId);
         BalanceDto GetBalance(int modelId);
-        List<RentaDto> GetRentas(int modelId);
+        RentaSumDto GetRentas(int modelId);
         #endregion
 
         #region web
@@ -133,11 +133,15 @@ namespace Billing
             return list;
         }
 
-        public List<RentaDto> GetRentas(int modelId)
+        public RentaSumDto GetRentas(int modelId)
         {
-            var list = GetListAsNoTracking<Renta>(r => r.Sin.Character.Model == modelId, r => r.Sku.Nomenklatura.Specialisation.ProductType, r => r.Sku.Corporation, r => r.Shop, r => r.Sin.Character);
-            return list
-                    .Select(r =>
+            var sum = new RentaSumDto();
+            var list = GetListAsNoTracking<Renta>(r => r.Sin.Character.Model == modelId, 
+                r => r.Sku.Nomenklatura.Specialisation.ProductType, 
+                r => r.Sku.Corporation, 
+                r => r.Shop, 
+                r => r.Sin.Character)
+                .Select(r =>
                     new RentaDto
                     {
                         ModelId = modelId.ToString(),
@@ -152,7 +156,11 @@ namespace Billing
                         HasQRWrite = r.HasQRWrite,
                         QRRecorded = r.QRRecorded,
                         DateCreated = r.DateCreated
-                    }).ToList();
+                    }).ToList(); 
+            sum.Rentas = list;
+            sum.Sum = list.Sum(r => r.FinalPrice);
+            return sum;
+                    
         }
 
         public RentaDto ConfirmRenta(int modelId, int priceId)
@@ -220,27 +228,33 @@ namespace Billing
             var sin = BlockCharacter(sinId);
             SaveContext();
             var mir = GetMIR();
+            decimal sum = 0;
             //ability
-            if(dividents1)
+            if (dividents1)
             {
                 var dk1 = _settings.GetDecimalValue(SystemSettingsEnum.dividents1_k);
                 AddNewTransfer(mir, sin.Wallet, dk1, "Дивиденды *");
-            }    
-            if(dividents2)
-            {
-                var dk2 = _settings.GetDecimalValue(SystemSettingsEnum.dividents2_k);
-                AddNewTransfer(mir, sin.Wallet, dk2, "Дивиденды **");
+                sum += dk1;
             }
             if (dividents2)
             {
+                var dk2 = _settings.GetDecimalValue(SystemSettingsEnum.dividents2_k);
+                AddNewTransfer(mir, sin.Wallet, dk2, "Дивиденды **");
+                sum += dk2;
+            }
+            if (dividents3)
+            {
                 var dk3 = _settings.GetDecimalValue(SystemSettingsEnum.dividents3_k);
                 AddNewTransfer(mir, sin.Wallet, dk3, "Дивиденды ***");
+                sum += dk3;
             }
             //karma
             if (karmaCount > 0)
             {
                 var k = _settings.GetDecimalValue(SystemSettingsEnum.karma_k);
-                AddNewTransfer(mir, sin.Wallet, k * karmaCount, "пассивный доход");
+                var karmasum = k * karmaCount;
+                sum += karmasum;
+                AddNewTransfer(mir, sin.Wallet, karmasum, "пассивный доход");
             }
             //rentas
             var rentas = GetList<Renta>(r => r.SinId == sin.Id, r => r.Shop.Wallet, r => r.Sku.Corporation.Wallet);
@@ -251,8 +265,8 @@ namespace Billing
             //scoring
 
             //forecast
-            var sum = rentas.Sum(r => BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring));
-            sin.Wallet.ForecastBalance = sin.Wallet.Balance - (sum * 3);
+            sum -= rentas.Sum(r => BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring));
+            sin.Wallet.IncomeOutcome = sin.Wallet.Balance - (sum * 3);
             UnblockCharacter(sin);
             SaveContext();
         }
@@ -392,6 +406,12 @@ namespace Billing
         public BalanceDto GetBalance(int modelId)
         {
             var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring, s => s.Metatype);
+            var inss = ProductTypeEnum.Insurance.ToString();
+            var insur = GetList<Renta>(r => r.Sku.Nomenklatura.Specialisation.ProductType.Alias == inss, r => r.Sku)
+                .OrderByDescending(r => r.Id)
+                .FirstOrDefault();
+            var lics = ProductTypeEnum.Insurance.ToString();
+            var licences = GetList<Renta>(r => r.Sku.Nomenklatura.Specialisation.ProductType.Alias == lics, r => r.Sku);
             var balance = new BalanceDto
             {
                 ModelId = modelId,
@@ -399,7 +419,7 @@ namespace Billing
                 CurrentScoring = sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative,
                 SIN = sin.Sin,
                 LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
-                ForecastLifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.ForecastBalance).ToString(),
+                ForecastLifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.IncomeOutcome).ToString(),
                 PersonName = sin.PersonName,
                 Metatype = sin.Metatype?.Name ?? "неизвестно",
                 Citizenship = sin.Citizenship ?? "неизвестно",
@@ -407,13 +427,16 @@ namespace Billing
                 Status = sin.Citizen_state ?? "неизвестно",
                 Nation = sin.Nation ?? "неизвестно",
                 Viza = sin.Viza ?? "неизвестно",
-                Pledgee = sin.Mortgagee ?? "неизвестно"
+                Pledgee = sin.Mortgagee ?? "неизвестно",
+                Insurance = insur?.Sku?.Name ?? "нет страховки",
+                Licenses = licences.Select(l => l.Sku.Name).ToList()
             };
             return balance;
         }
 
-        public List<TransferDto> GetTransfers(int modelId)
+        public TransferSum GetTransfers(int modelId)
         {
+            var result = new TransferSum();
             var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Character);
             if (sin == null)
                 throw new BillingException("sin not found");
@@ -429,7 +452,8 @@ namespace Billing
                 allList.AddRange(listTo
                     .Select(s => CreateTransferDto(s, TransferType.Incoming, modelId, owner))
                     .ToList());
-            return allList.OrderBy(t => t.OperationTime).ToList();
+            result.Transfers = allList.OrderBy(t => t.OperationTime).ToList();
+            return result;
         }
 
         public string GetSinStringByCharacter(int modelId)
