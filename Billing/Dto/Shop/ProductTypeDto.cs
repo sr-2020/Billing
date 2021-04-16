@@ -1,4 +1,5 @@
 ﻿using Core.Model;
+using Core.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -21,6 +22,7 @@ namespace Billing.Dto
             DiscountType = pt.DiscountType;
             ProductTypeName = pt.Name;
             ProductTypeId = pt.Id;
+            InstantConsume = pt.InstantConsume;
             Alias = pt.Alias;
         }
         public int Id { get; set; }
@@ -29,5 +31,6 @@ namespace Billing.Dto
         public string Name { get; set; }
         public string Alias { get; set; }
         public int DiscountType { get; set; }
+        public bool InstantConsume { get; set; }
     }
 }

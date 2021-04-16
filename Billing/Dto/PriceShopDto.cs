@@ -22,6 +22,7 @@ namespace Billing.DTO
         public string Description { get; set; }
         public string UrlPicture { get; set; }
         public string ProductTypeName { get; set; }
+        public bool InstantConsume { get; set; }
         public PriceShopDto(PriceDto dto, CorporationWallet corp)
         {
             this.PriceId = dto.PriceId;
@@ -39,9 +40,8 @@ namespace Billing.DTO
             this.Description = dto.Description;
             this.UrlPicture = dto.PictureUrl;
             this.ProductTypeName = dto.Name;
+            this.InstantConsume = dto.InstantConsume;
         }
-
-        
 
     }
 }

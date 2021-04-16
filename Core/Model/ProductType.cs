@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Core.Primitives;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
@@ -14,5 +15,7 @@ namespace Core.Model
         public int ExternalId { get; set; }
         [Column("alias")]
         public string Alias { get; set; }
+
+        public bool InstantConsume { get => this.Alias == ProductTypeEnum.EdibleFood.ToString(); }
     }
 }

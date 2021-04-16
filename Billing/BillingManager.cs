@@ -146,7 +146,7 @@ namespace Billing
                     {
                         ModelId = modelId.ToString(),
                         CharacterName = r.Sin.PersonName,
-                        FinalPrice = BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring),
+                        FinalPrice = Math.Round(BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring), 2),
                         ProductType = r.Sku.Nomenklatura.Specialisation.Name,
                         Shop = r.Shop.Name,
                         NomenklaturaName = r.Sku.Nomenklatura.Name,
@@ -189,6 +189,7 @@ namespace Billing
                 throw new BillingException("Недостаточно средств");
             }
             price.Sku.Count--;
+            var instantConsume = price.Sku.Nomenklatura.Specialisation.ProductType.InstantConsume;
             var renta = new Renta
             {
                 BasePrice = price.BasePrice,
@@ -200,7 +201,7 @@ namespace Billing
                 ShopComission = price.ShopComission,
                 ShopId = price.ShopId,
                 Shop = price.Shop,
-                HasQRWrite = BillingHelper.HasQrWrite(price.Sku.Nomenklatura.Code),
+                HasQRWrite = instantConsume ? false : BillingHelper.HasQrWrite(price.Sku.Nomenklatura.Code),
                 PriceId = priceId,
                 Secret = price.Sku.Nomenklatura.Secret,
                 LifeStyle = price.Sku.Nomenklatura.Lifestyle
@@ -212,6 +213,11 @@ namespace Billing
             var mir = GetMIR();
             ProcessRenta(renta, mir, sin);
             SaveContext();
+            if(instantConsume)
+            {
+                var erService = new EreminService();
+                erService.ConsumeFood(renta.Id, (Lifestyles)renta.LifeStyle, modelId);
+            }
             EreminPushAdapter.SendNotification(modelId, "Покупка совершена", $"Вы купили {price.Sku.Name}");
             var dto = new RentaDto
             {
@@ -420,7 +426,7 @@ namespace Billing
             {
                 ModelId = modelId,
                 CurrentBalance = BillingHelper.RoundDown(sin.Wallet.Balance),
-                CurrentScoring = sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative,
+                CurrentScoring = Math.Round(sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative, 2),
                 SIN = sin.Sin,
                 LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
                 ForecastLifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.IncomeOutcome).ToString(),

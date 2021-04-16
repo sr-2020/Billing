@@ -95,10 +95,42 @@ namespace InternalServices
             return every * corpDisc;
         }
 
-        public async void WriteQR(string qr, string id, string name, string description, int numberOfUses, decimal basePrice, decimal rentPrice, string gmDescription, int rentaId, Lifestyles lifestyle)
+        public void ConsumeFood(int rentaId, Lifestyles lifestyle, int modelId)
+        {
+            var eventType = "consumeFood";
+            var id = "food";
+            var data = new
+            {
+                id,
+                dealId = rentaId.ToString(),
+                lifestyle = lifestyle.ToString(),
+
+            };
+            var url = $"{URL}/character/model/{modelId}";
+            CreateEvent(data, eventType, url);
+        }
+
+        private async void CreateEvent(dynamic data, string eventType, string url)
         {
             var client = new HttpClient();
-            var url = $"{URL}/qr/model/{qr}";
+            var body = new
+            {
+                eventType,
+                data
+            };
+            var json = Serializer.ToJSON(body);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync(url, content);
+            if (response.StatusCode == System.Net.HttpStatusCode.OK || response.StatusCode == System.Net.HttpStatusCode.Created)
+                return;
+            var message = await response.Content.ReadAsStringAsync();
+            throw new BillingException(message);
+        }
+
+        public void WriteQR(string qr, string id, string name, string description, int numberOfUses, decimal basePrice, decimal rentPrice, string gmDescription, int rentaId, Lifestyles lifestyle)
+        {
+            var eventType = "createMerchandise";
+
             var data = new
             {
                 id,
@@ -111,18 +143,8 @@ namespace InternalServices
                 dealId = rentaId.ToString(),
                 lifestyle = lifestyle.ToString()
             };
-            var body = new
-            {
-                eventType = "createMerchandise",
-                data
-            };
-            var json = Serializer.ToJSON(body);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync(url, content);
-            if (response.StatusCode == System.Net.HttpStatusCode.OK || response.StatusCode == System.Net.HttpStatusCode.Created)
-                return;
-            var message = await response.Content.ReadAsStringAsync();
-            throw new BillingException(message);
+            var url = $"{URL}/qr/model/{qr}";
+            CreateEvent(data, eventType, url);
         }
     }
 }

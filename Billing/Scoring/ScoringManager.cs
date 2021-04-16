@@ -243,11 +243,11 @@ namespace Scoringspace
                 .Select(g => new ScoringCategoryDto
                 {
                     Name = g.Key.Name,
-                    Value = g.FirstOrDefault()?.CurrentCategory?.Value ?? 0,
+                    Value = Math.Round(g.FirstOrDefault()?.CurrentCategory?.Value ?? 0, 2),
                     Weight = g.Key.Weight,
                     Factors = g.Select(f => new ScoringFactorDto
                     {
-                        Value = f.Value,
+                        Value = Math.Round(f.Value, 2),
                         Name = f.ScoringFactor.Name
                     }).ToList()
                 }).ToList();
@@ -256,11 +256,11 @@ namespace Scoringspace
                 .Select(g => new ScoringCategoryDto
                 {
                     Name = g.Key.Name,
-                    Value = g.FirstOrDefault()?.CurrentCategory?.Value ?? 0,
+                    Value = Math.Round(g.FirstOrDefault()?.CurrentCategory?.Value ?? 0, 2),
                     Weight = g.Key.Weight,
                     Factors = g.Select(f => new ScoringFactorDto
                     {
-                        Value = f.Value,
+                        Value = Math.Round(f.Value, 2),
                         Name = f.ScoringFactor.Name,
                     }).ToList()
                 }).ToList();
@@ -268,8 +268,8 @@ namespace Scoringspace
             return new ScoringDto
             {
                 Character = character,
-                CurrentFix = sin.Scoring.CurrentFix,
-                CurrentRelative = sin.Scoring.CurerentRelative,
+                CurrentFix = Math.Round(sin.Scoring.CurrentFix, 2),
+                CurrentRelative = Math.Round(sin.Scoring.CurerentRelative, 2),
                 FixCategories = fixCategories,
                 RelativeCategories = relativCategories
             };

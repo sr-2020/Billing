@@ -11,6 +11,7 @@ namespace Core.Primitives
         Food,
         Pill,
         Magic,
-        Licences
+        Licences,
+        EdibleFood
     }
 }
