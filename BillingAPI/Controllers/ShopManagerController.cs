@@ -58,7 +58,7 @@ namespace BillingAPI.Controllers
 
         [HttpPost("proposecontract")]
         [CorporationAuthorization]
-        public Result ProposeContract([FromBody] ProposeContractRequest request)
+        public Result ProposeContract([FromBody] RequestTerminateContractRequest request)
         {
             var manager = IocContainer.Get<IShopManager>();
             var result = RunAction(() => manager.ProposeContract(request.Corporation, request.Shop));
