@@ -24,6 +24,7 @@ namespace Core
         List<T> GetList<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class;
         void RemoveRange<T>(IEnumerable<T> entities) where T : class;
         void Remove<T>(T entity) where T : class;
+        void RemoveAndSave<T>(T entity) where T : class;
         void AddRange<T>(IEnumerable<T> entities) where T : BaseEntity;
         void Add<T>(T entity) where T : BaseEntity;
         void AddAndSave<T>(T entity) where T : BaseEntity;
@@ -133,6 +134,12 @@ namespace Core
         public virtual void RemoveRange<T>(IEnumerable<T> entities) where T : class
         {
             Context.Set<T>().RemoveRange(entities);
+        }
+
+        public virtual void RemoveAndSave<T>(T entity) where T : class
+        {
+            Context.Set<T>().Remove(entity);
+            SaveContext();
         }
 
         public virtual List<T> GetList<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class

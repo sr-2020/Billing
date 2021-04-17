@@ -17,8 +17,15 @@ namespace Billing
     public interface IShopManager : IBaseRepository
     {
         bool HasAccessToShop(int character, int shop);
+        bool HasAccessToCorporation(int character, int corporation);
         List<QRDto> GetAvailableQR(int shop);
         OrganisationViewModel GetAvailableOrganisations(int modelId);
+        List<ShopCorporationContractDto> GetCorporationContracts(int corporationId);
+        List<ShopCorporationContractDto> GetShopContracts(int shopId);
+        void SuggestContract(int corporation, int shop);
+        void ApproveContract(int corporation, int shop);
+        void ProposeContract(int corporation, int shop);
+        void TerminateContract(int corporation, int shop);
         string GetCharacterName(int modelId);
         List<TransferDto> GetTransfers(int shop);
         Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
@@ -146,6 +153,70 @@ namespace Billing
             return model;
         }
 
+        public List<ShopCorporationContractDto> GetCorporationContracts(int corporationId)
+        {
+            var contracts = GetList<Contract>(c => c.CorporationId == corporationId, c => c.Shop).Select(c => new ShopCorporationContractDto(c)).ToList();
+            return contracts;
+        }
+        public List<ShopCorporationContractDto> GetShopContracts(int shopId)
+        {
+            var contracts = GetList<Contract>(c => c.ShopId == shopId, c => c.Corporation).Select(c => new ShopCorporationContractDto(c)).ToList();
+            return contracts;
+        }
+
+        public void SuggestContract(int corporation, int shop)
+        {
+            var contract = Get<Contract>(c => c.CorporationId == corporation && c.ShopId == shop);
+            if (contract != null)
+            {
+                throw new BillingException("Контракт уже создан");
+            }
+            contract = new Contract { CorporationId = corporation, ShopId = shop, Status = (int)ContractStatusEnum.Suggested };
+            AddAndSave(contract);
+        }
+
+        public void ApproveContract(int corporation, int shop)
+        {
+            var status = (int)ContractStatusEnum.Suggested;
+            var contract = Get<Contract>(c => c.CorporationId == corporation && c.ShopId == shop && c.Status == status);
+            if (contract == null)
+            {
+                throw new BillingException("Контракт не найден");
+            }
+            contract.Status = (int)ContractStatusEnum.Approved;
+            AddAndSave(contract);
+        }
+
+        public void ProposeContract(int corporation, int shop)
+        {
+            var statuss = (int)ContractStatusEnum.Suggested;
+            var statusa = (int)ContractStatusEnum.Approved;
+            var contract = Get<Contract>(c => c.CorporationId == corporation && c.ShopId == shop && (c.Status == statuss || c.Status == statusa));
+            if (contract == null)
+            {
+                throw new BillingException("Контракт не найден");
+            }
+            if (contract.Status == (int)ContractStatusEnum.Suggested)
+            {
+                contract.Status = (int)ContractStatusEnum.Terminating;
+                AddAndSave(contract);
+            }
+            else
+            {
+                RemoveAndSave(contract);
+            }
+        }
+
+        public void TerminateContract(int corporation, int shop)
+        {
+            var contract = Get<Contract>(c => c.CorporationId == corporation && c.ShopId == shop);
+            if (contract == null)
+            {
+                throw new BillingException("Контракт не найден");
+            }
+            RemoveAndSave(contract);
+        }
+
         public string GetCharacterName(int modelId)
         {
             var character = Get<SIN>(s => s.Character.Model == modelId);
@@ -167,6 +238,20 @@ namespace Billing
             return shop.OwnerId == sin.Id;
         }
 
+        public bool HasAccessToCorporation(int modelId, int corporation)
+        {
+            if (modelId == 0)
+            {
+                throw new BillingUnauthorizedException("Character not authorized");
+            }
+            var sin = GetSINByModelId(modelId);
+            var corp = Get<CorporationWallet>(s => s.Id == corporation, s => s.Owner);
+            if (corp == null)
+            {
+                throw new BillingException("corporation not found");
+            }
+            return corp.OwnerId == sin.Id;
+        }
         public List<QRDto> GetAvailableQR(int shop)
         {
             var skus = GetSkusForShop(shop);

@@ -21,7 +21,7 @@ namespace BillingAPI.Controllers
     {
         #region refactored
         
-        [HttpGet("getmyorganisations")]
+        [HttpGet("organisations")]
         public DataResult<OrganisationViewModel> GetMyOrganisations(int character)
         {
             var manager = IocContainer.Get<IShopManager>();
@@ -29,6 +29,59 @@ namespace BillingAPI.Controllers
             return result;
         }
 
+        [HttpGet("corporationcontracts")]
+        [CorporationAuthorization]
+        public DataResult<List<ShopCorporationContractDto>> GetCorporationContracts(int corporation)
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.GetCorporationContracts(corporation));
+            return result;
+        }
+
+        [HttpGet("shopcontracts")]
+        [ShopAuthorization]
+        public DataResult<List<ShopCorporationContractDto>> GetShopContracts(int shop)
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.GetShopContracts(shop));
+            return result;
+        }
+
+        [HttpPost("suggestcontract")]
+        [CorporationAuthorization]
+        public Result SuggestContract([FromBody] SuggestContractRequest request)
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.SuggestContract(request.Corporation, request.Shop));
+            return result;
+        }
+
+        [HttpPost("proposecontract")]
+        [CorporationAuthorization]
+        public Result ProposeContract([FromBody] ProposeContractRequest request)
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.ProposeContract(request.Corporation, request.Shop));
+            return result;
+        }
+
+        [HttpPost("approvecontract")]
+        [ShopAuthorization]
+        public Result ApproveContract([FromBody] ApproveContractRequest request)
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.ApproveContract(request.Corporation, request.Shop));
+            return result;
+        }
+
+        [HttpPost("terminatecontract")]
+        [ShopAuthorization]
+        public Result TerminateContract([FromBody] TerminateContractRequest request)
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.TerminateContract(request.Corporation, request.Shop));
+            return result;
+        }
         #endregion
 
         [HttpGet("getmyshops")]
