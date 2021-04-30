@@ -321,30 +321,6 @@ namespace BillingAPI.Controllers
         #endregion
 
         /// <summary>
-        /// add new shopspecialisation
-        /// </summary>
-        /// <returns></returns>
-        [HttpPost("a-set-shopspecialisation")]
-        public Result AddShopSpecialisation([FromBody] ShopSpecialisationRequest request)
-        {
-            var manager = IocContainer.Get<IAdminManager>();
-            var result = RunAction(() => manager.SetSpecialisation(request.ShopId, request.SpecialisationId));
-            return result;
-        }
-
-        /// <summary>
-        /// delete shopspecialisation
-        /// </summary>
-        /// <returns></returns>
-        [HttpDelete("a-drop-shopspecialisation")]
-        public Result DropShopSpecialisation([FromBody] ShopSpecialisationRequest request)
-        {
-            var manager = IocContainer.Get<IAdminManager>();
-            var result = RunAction(() => manager.DropSpecialisation(request.ShopId, request.SpecialisationId));
-            return result;
-        }
-
-        /// <summary>
         /// get Lifestyles
         /// </summary>
         /// <returns></returns>

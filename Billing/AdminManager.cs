@@ -31,9 +31,6 @@ namespace Billing
         void DeleteNomenklatura(int id);
         void DeleteShop(int shopid);
         void DeleteSku(int skuId);
-
-        void SetSpecialisation(int shopId, int specialisationId);
-
     }
     public class AdminManager : BaseBillingRepository, IAdminManager
     {
@@ -267,15 +264,15 @@ namespace Billing
             var shop = Get<ShopWallet>(c => c.Id == shopid);
             if (shop == null)
                 throw new Exception("shop not found");
-            var specialisations = GetList<ShopSpecialisation>(s => s.ShopId == shopid);
-            if (specialisations != null && specialisations.Count > 0)
-            {
-                throw new Exception("Сперва необходимо убрать все специализации магазина");
-            }
             var contracts = GetList<Contract>(c => c.ShopId == shopid);
             if (contracts != null && contracts.Count > 0)
             {
                 throw new Exception("Сперва необходимо убрать все контракты магазина");
+            }
+            var specialisations = GetList<ShopSpecialisation>(s => s.ShopId == shopid);
+            foreach (var specialisation in specialisations)
+            {
+                Remove(specialisation);
             }
             var wallet = Get<Wallet>(w => w.Id == shop.WalletId);
             Remove(shop);
@@ -317,20 +314,6 @@ namespace Billing
             SaveContext();
             return corporation;
         }
-
-        public void SetSpecialisation(int shopId, int specialisationId)
-        {
-            var shopspecialisation = Get<ShopSpecialisation>(s => s.ShopId == shopId && s.SpecialisationId == specialisationId);
-            if (shopspecialisation != null)
-                return;
-            var shop = Get<ShopWallet>(s => s.Id == shopId);
-            var specialisation = Get<Specialisation>(s => s.Id == specialisationId);
-            if (shop == null || specialisation == null)
-                throw new Exception($"некорректные входные данные shop: {shop?.Id}, specialisation: {specialisation?.Id} ");
-            Add(new ShopSpecialisation { ShopId = shopId, SpecialisationId = specialisationId });
-            SaveContext();
-        }
-
 
     }
 
