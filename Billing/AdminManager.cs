@@ -21,8 +21,7 @@ namespace Billing
         List<NomenklaturaDto> GetNomenklaturas(Expression<Func<Nomenklatura, bool>> predicate);
         List<SkuDto> GetSkus(Expression<Func<Sku, bool>> predicate);
         List<UserDto> GetUsers(Expression<Func<SIN, bool>> predicate);
-
-        ShopDto CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle, int owner);
+        ShopDto CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle, int owner, List<int> specialisations);
         SpecialisationDto CreateOrUpdateSpecialisation(int id, int producttype, string name);
         NomenklaturaDto CreateOrUpdateNomenklatura(int id, string name, string code, int specialisationId, int lifestyle, decimal baseprice, int baseCount, string description, string pictureurl, int externalId = 0);
         SkuDto CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled, int externalId = 0);
@@ -34,7 +33,7 @@ namespace Billing
         void DeleteSku(int skuId);
 
         void SetSpecialisation(int shopId, int specialisationId);
-        void DropSpecialisation(int shopId, int specialisationId);
+
     }
     public class AdminManager : BaseBillingRepository, IAdminManager
     {
@@ -82,12 +81,12 @@ namespace Billing
             return list.Select(c => new UserDto(c)).ToList();
         }
 
-        public ShopDto CreateOrUpdateShopWallet(int shopId = 0, decimal amount = 0, string name = "default shop", int lifestyle = 1, int ownerId = 0)
+        public ShopDto CreateOrUpdateShopWallet(int shopId = 0, decimal balance = 0, string name = "default shop", int lifestyle = 1, int ownerId = 0, List<int> specialisations = null)
         {
             ShopWallet shop = null;
             if (shopId > 0)
             {
-                shop = Get<ShopWallet>(w => w.Id == shopId, s => s.Wallet);
+                shop = Get<ShopWallet>(w => w.Id == shopId, s => s.Wallet, s => s.Specialisations);
                 if (shop == null)
                 {
                     throw new BillingException("shop not found");
@@ -103,16 +102,32 @@ namespace Billing
                 shop = new ShopWallet
                 {
                     Wallet = newWallet,
-                    Id = shopId,
                     OwnerId = ownerId
                 };
                 Add(shop);
             }
             shop.Name = name;
-            shop.Wallet.Balance = amount;
+            shop.Wallet.Balance = balance;
             var ls = BillingHelper.GetLifestyle(lifestyle);
             shop.LifeStyle = (int)ls;
             Context.SaveChanges();
+            var dbSpecialisations = GetList<ShopSpecialisation>(s => s.ShopId == shop.Id);
+            foreach (var shopspecialisation in dbSpecialisations)
+            {
+                Remove(shopspecialisation);
+            }
+            SaveContext();
+            if (specialisations != null)
+            {
+                foreach (var specialisationId in specialisations)
+                {
+                    var specialisation = Get<Specialisation>(s => s.Id == specialisationId);
+                    if (specialisation == null)
+                        throw new Exception($"некорректные входные данные specialisation: {specialisation?.Id} ");
+                    Add(new ShopSpecialisation { ShopId = shopId, SpecialisationId = specialisationId });
+                }
+                SaveContext();
+            }
             var dto = new ShopDto(shop);
             return dto;
         }
@@ -316,15 +331,7 @@ namespace Billing
             SaveContext();
         }
 
-        public void DropSpecialisation(int shopId, int specialisationId)
-        {
-            var specialisation = Get<ShopSpecialisation>(s => s.ShopId == shopId && s.SpecialisationId == specialisationId);
-            if (specialisation != null)
-            {
-                Remove(specialisation);
-                SaveContext();
-            }
-        }
+
     }
 
 }

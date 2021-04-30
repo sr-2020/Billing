@@ -64,7 +64,7 @@ namespace BillingAPI.Controllers
         public DataResult<ShopDto> AddShop([FromBody] CreateShopModel request)
         {
             var manager = IocContainer.Get<IAdminManager>();
-            var result = RunAction(() => manager.CreateOrUpdateShopWallet(0, request.Amount, request.Name, request.LifeStyle, request.Owner));
+            var result = RunAction(() => manager.CreateOrUpdateShopWallet(0, request.Balance, request.Name, request.LifeStyle, request.Owner, request.Specialisations));
             return result;
         }
 
@@ -76,7 +76,7 @@ namespace BillingAPI.Controllers
         public DataResult<ShopDto> EditShop([FromBody] CreateShopModel request)
         {
             var manager = IocContainer.Get<IAdminManager>();
-            var result = RunAction(() => manager.CreateOrUpdateShopWallet(request.ShopId, request.Amount, request.Name, request.LifeStyle, request.Owner));
+            var result = RunAction(() => manager.CreateOrUpdateShopWallet(request.ShopId, request.Balance, request.Name, request.LifeStyle, request.Owner, request.Specialisations));
             return result;
         }
 

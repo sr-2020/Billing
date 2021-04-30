@@ -13,17 +13,25 @@ namespace Billing.DTO
         {
             if (shop == null)
                 return;
-            Lifestyle = BillingHelper.GetLifestyle(shop.LifeStyle).ToString();
-            var list = new List<int>();
+            Lifestyle = new LifestyleDto
+            {
+                Id = shop.LifeStyle,
+                Name = BillingHelper.GetLifestyle(shop.LifeStyle).ToString()
+            };
+
             if (shop.Specialisations == null)
-                Specialisations = list;
-            list.AddRange(shop.Specialisations.Select(s => s.SpecialisationId));
-            Specialisations = list;
+            {
+                Specialisations = new List<int>();
+            }
+            else
+            {
+                Specialisations = shop.Specialisations.Select(s => s.SpecialisationId).ToList();
+            }
             if (shop.Wallet == null)
                 return;
             Balance = shop.Wallet.Balance;
         }
-        public string Lifestyle { get; set; }
+        public LifestyleDto Lifestyle { get; set; }
         public decimal Balance { get; set; }
         public List<int> Specialisations { get; set; }
     }

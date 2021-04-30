@@ -39,9 +39,9 @@ namespace Billing
                 return DiscountType.Gesheftmaher;
         }
 
-        public static decimal RoundDown(decimal value)
+        public static decimal Round(decimal value)
         {
-            return Math.Floor(value * 2) / 2;
+            return Math.Round(value, 2);// Math.Floor(value * 2) / 2;
         }
 
         public static Lifestyles GetLifeStyleByBalance(decimal balance)
@@ -65,7 +65,7 @@ namespace Billing
 
         public static decimal GetFinalPrice(decimal basePrice, decimal discount, decimal scoring)
         {
-            return (basePrice * discount) / scoring;
+            return BillingHelper.Round((basePrice * discount) / scoring);
         }
 
         //public static int GetComission(int shopLifestyle)

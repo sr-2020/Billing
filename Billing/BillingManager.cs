@@ -392,7 +392,7 @@ namespace Billing
             var balance = new BalanceDtoOld
             {
                 ModelId = modelId,
-                CurrentBalance = BillingHelper.RoundDown(sin.Wallet.Balance),
+                CurrentBalance = BillingHelper.Round(sin.Wallet.Balance),
                 CurrentScoring = sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative,
                 SIN = sin.Sin,
                 ForecastLifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
@@ -425,7 +425,7 @@ namespace Billing
             var balance = new BalanceDto
             {
                 ModelId = modelId,
-                CurrentBalance = BillingHelper.RoundDown(sin.Wallet.Balance),
+                CurrentBalance = BillingHelper.Round(sin.Wallet.Balance),
                 CurrentScoring = Math.Round(sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative, 2),
                 SIN = sin.Sin,
                 LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),

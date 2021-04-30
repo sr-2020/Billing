@@ -75,7 +75,7 @@ namespace Billing
                     .Select(r =>
                     new RentaDto
                     {
-                        FinalPrice = BillingHelper.RoundDown(BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring)),
+                        FinalPrice = BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring),
                         ProductType = r.Sku.Nomenklatura.Specialisation.ProductType.Name,
                         Specialisation = r.Sku.Nomenklatura.Specialisation.Name,
                         Shop = r.Shop.Name,
@@ -225,9 +225,9 @@ namespace Billing
 
         public bool HasAccessToShop(int modelId, int shopId)
         {
-            if (modelId == 0)
+            if (modelId == 0 || shopId == 0)
             {
-                throw new BillingUnauthorizedException("Character not authorized");
+                return false;
             }
             var sin = GetSINByModelId(modelId);
             var shop = Get<ShopWallet>(s => s.Id == shopId, s => s.Owner);

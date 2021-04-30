@@ -150,7 +150,7 @@ namespace Billing
                 ModelId = modelId.ToString(),
                 Comment = transfer.Comment,
                 TransferType = type.ToString(),
-                Amount = BillingHelper.RoundDown(transfer.Amount),
+                Amount = BillingHelper.Round(transfer.Amount),
                 NewBalance = type == TransferType.Incoming ? transfer.NewBalanceTo : transfer.NewBalanceFrom,
                 OperationTime = transfer.OperationTime,
                 From = type == TransferType.Incoming ? GetWalletName(transfer.WalletFrom, anon) : owner,
