@@ -4,17 +4,17 @@ https://billing.evarun.ru/swagger/v1/index.html
 Ответ на все методы имеет структуру json:
 ```
 {
-  "Data": 
+  "data": 
   {
     //something
   },
-  "Status": true,
-  "Message": "string"
+  "status": true,
+  "message": "string"
 }
 ```
-Где, Data - это объект или коллекция объектов, если такие ожидаются.
-Status - успешность запроса.
-Message - описание ошибки, если status = false
+Где, data - это объект или коллекция объектов, если такие ожидаются.
+status - успешность запроса.
+message - описание ошибки, если status = false
 
 # Методы требуюущие авторизацию.
 Требуется  
@@ -31,102 +31,102 @@ Cookie: Authorization=token
 ## Приложение.
 * GET sin - получение информации по SIN для авторизованного персонажа.
 ```
-  "Data": {
-    "ModelId": ID, 
-    "SIN": "string",
-    "CurrentBalance": 0,
-    "PersonName": "string",
-    "CurrentScoring": 0,
-    "LifeStyle": "string",
-    "ForecastLifeStyle": "string",
-    "Metatype": "string",
-    "Citizenship": "string",
-    "Nationality": "string",
-    "Status": "string",
-    "Nation": "string",
-    "Viza": "string",
-    "Pledgee": "string",
-    "Insurance": "string",
-    "Licenses": [
+  "data": {
+    "modelId": ID, 
+    "sin": "string",
+    "currentBalance": 0,
+    "personName": "string",
+    "currentScoring": 0,
+    "lifeStyle": "string",
+    "forecastLifeStyle": "string",
+    "metatype": "string",
+    "citizenship": "string",
+    "nationality": "string",
+    "status": "string",
+    "nation": "string",
+    "viza": "string",
+    "pledgee": "string",
+    "insurance": "string",
+    "licenses": [
       "string"
     ]
   }
 ```
-ModelId - общий идентификатор персонажа. 
-SIN, CurrentBalance, PersonName, CurrentScoring, LifeStyle, ForecastLifeStyle - Информационные значения, которые необходимо отображать на экране экономика-обзор. 
-Nationality, Status, Nation, Viza, Pledgee, Insurance, Licenses - Значения, которые необходимо отображать на экране паспорт.
+modelId - общий идентификатор персонажа. 
+sin, currentBalance, personName, currentScoring, lifeStyle, forecastLifeStyle - Информационные значения, которые необходимо отображать на экране экономика-обзор. 
+nationality, status, nation, viza, pledgee, insurance, licenses - Значения, которые необходимо отображать на экране паспорт.
 * GET rentas, - получение списка рент для авторизованного персонажа.
 ```
-"Data": {
-    "Rentas": [
+"data": {
+    "rentas": [
       {
-        "ModelId": "string",
-        "CharacterName": "string",
-        "RentaId": 0,
-        "FinalPrice": 0,
-        "ProductType": "string",
-        "Specialisation": "string",
-        "NomenklaturaName": "string",
-        "SkuName": "string",
-        "Corporation": "string",
-        "Shop": "string",
-        "HasQRWrite": true,
-        "QRRecorded": "string",
-        "PriceId": 0,
-        "DateCreated": "2021-04-14T11:05:00.713Z"
+        "modelId": "string",
+        "characterName": "string",
+        "rentaId": 0,
+        "finalPrice": 0,
+        "productType": "string",
+        "specialisation": "string",
+        "nomenklaturaName": "string",
+        "skuName": "string",
+        "corporation": "string",
+        "shop": "string",
+        "hasQRWrite": true,
+        "qrRecorded": "string",
+        "priceId": 0,
+        "dateCreated": "2021-04-14T11:05:00.713Z"
       }
     ],
-    "Sum": 0
+    "sum": 0
 ```
-Rentas - массив рент
-Sum - общая сумма по рентам.
-FinalPrice, DateCreated, SkuName, Corporation, Shop - Поля которые необходимо отображать на экране подробности ренты.
+rentas - массив рент
+sum - общая сумма по рентам.
+finalPrice, dateCreated, skuName, corporation, shop - Поля которые необходимо отображать на экране подробности ренты.
 * GET  transfers - получение списка трансферов
 ```
- "Data": {
-    "Transfers": [
+ "data": {
+    "transfers": [
       {
-        "ModelId": "string",
-        "TransferType": "string",
-        "NewBalance": 0,
-        "Comment": "string",
-        "Amount": 0,
-        "OperationTime": "2021-04-14T11:20:15.600Z",
-        "From": "string",
-        "To": "string",
-        "Anonimous": true
+        "modelId": "string",
+        "transferType": "string",
+        "newBalance": 0,
+        "comment": "string",
+        "amount": 0,
+        "operationTime": "2021-04-14T11:20:15.600Z",
+        "from": "string",
+        "to": "string",
+        "anonimous": true
       }
     ]
 ```
-From, To, OperationTime, NewBalance, Comment - поля необходимые отображать на вкладке подробности операции.
+from, to, operationTime, newBalance, comment - поля необходимые отображать на вкладке подробности операции.
 * GET /api/Scoring/info/getmyscoring
 ```
- "Data": {
-    "Character": 0,
-    "CurrentFix": 0,
-    "CurrentRelative": 0,
-    "RelativeCategories": [
+ "data": {
+    "character": 0,
+    "currentFix": 0,
+    "currentRelative": 0,
+    "relativeCategories": [
       {
-        "Name": "string",
-        "Value": 0,
-        "Weight": 0,
-        "Factors": [
+        "name": "string",
+        "value": 0,
+        "weight": 0,
+        "factors": [
           {
-            "Name": "string",
-            "Value": 0
+            "name": "string",
+            "value": 0
           }
         ]
       }
     ],
-    "FixCategories": [
+    "fixCategories": [
       {
-        "Name": "string",
-        "Value": 0,
-        "Weight": 0,
-        "Factors": [
+        "name": "string",
+        "value": 0,
+        "weight": 0,
+        "factors": [
           {
-            "Name": "string",
-            "Value": 0
+            "name": "string",
+            "value": 0
           }
         ]
       }
@@ -134,12 +134,12 @@ From, To, OperationTime, NewBalance, Comment - поля необходимые �
   },
 
 ```
-CurrentFix, CurrentRelative - текущие значения составляющие итоговый скоринг.
-RelativeCategories - категории, вес которых будет изменяться на игре. 
-FixCategories - категории, вес которых не будет меняться на игре.
-Weight - вес категорий.
-Value - значение для текущего пользователя
-Factors - факторы составляющие категории
+currentFix, currentRelative - текущие значения составляющие итоговый скоринг.
+relativeCategories - категории, вес которых будет изменяться на игре. 
+fixCategories - категории, вес которых не будет меняться на игре.
+weight - вес категорий.
+value - значение для текущего пользователя
+factors - факторы составляющие категории
 
 
 ## Сайт магазина.
