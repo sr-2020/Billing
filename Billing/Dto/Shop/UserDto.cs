@@ -11,12 +11,12 @@ namespace Billing.Dto.Shop
         {
             if (sin == null)
                 return;
-            Name = sin.PersonName;
+            Name = sin.Passport?.PersonName;
             if (sin.Character != null)
                 ModelId = sin.Character.Model.ToString();
             else
             {
-                ModelId = sin.Sin;
+                ModelId = sin.Passport?.Sin;
             }
             Balance = sin.Wallet?.Balance ?? 0;
         }

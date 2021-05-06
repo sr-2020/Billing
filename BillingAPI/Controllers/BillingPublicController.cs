@@ -17,6 +17,8 @@ namespace BillingAPI.Controllers
     [ApiController]
     public class BillingPublicController : EvarunApiController
     {
+
+
         /// <summary>
         /// Get base info for current character
         /// </summary>

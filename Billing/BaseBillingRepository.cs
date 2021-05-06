@@ -41,20 +41,6 @@ namespace Billing
                 throw new BillingAuthException($"character {modelId} not found");
             var sin = Get<SIN>(s => s.Character.Model == modelId);
 
-            var initData = Get<BillingInit>(i => i.Model == modelId);
-            if(initData == null)
-            {
-                initData = new BillingInit
-                {
-                    Model = modelId,
-                    Citizenship = "неизвестно",
-                    Nation = "неизвестно",
-                    StartCash = balance,
-                    StartFak = 0.5m,
-                    Status = "неизвестно"
-                };
-            }
-
             if (sin == null)
             {
                 sin = new SIN
@@ -66,14 +52,8 @@ namespace Billing
             }
             sin.InGame = true;
             sin.OldMetaTypeId = null;
-            sin.PersonName = name;
-            sin.Citizen_state = initData.Status;
-            sin.NationDisplay = initData.Nation;
-            sin.Citizenship = initData.Citizenship;
-            sin.Sin = modelId.ToString();
-            sin.MetatypeId = metarace;
             sin.EVersion = _settings.GetValue(SystemSettingsEnum.eversion);
-            var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId, initData.StartCash);
+            var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId, balance);
             sin.Wallet = wallet;
             var scoring = Get<Scoring>(s => s.Id == sin.ScoringId);
             if (scoring == null)
@@ -82,14 +62,14 @@ namespace Billing
                 sin.Scoring = scoring;
                 AddAndSave(scoring);
             }
-            scoring.StartFactor = initData.StartFak;
-            scoring.CurrentFix = initData.StartFak * 0.5m;
-            scoring.CurerentRelative = initData.StartFak * 0.5m;
+            scoring.StartFactor = 0.5m;
+            scoring.CurrentFix = 0.5m * 0.5m;
+            scoring.CurerentRelative = 0.5m * 0.5m;
             InitScoring(scoring);
             Context.SaveChanges();
             return sin;
         }
-        
+
         protected void InitScoring(Scoring scoring)
         {
             var categories = GetList<ScoringCategory>(c => c.CategoryType > 0);
@@ -112,7 +92,7 @@ namespace Billing
 
         protected string GetWalletName(Wallet wallet, bool anon)
         {
-            if(anon)
+            if (anon)
             {
                 return "Anonymous";
             }
@@ -121,10 +101,10 @@ namespace Billing
             switch (wallet.WalletType)
             {
                 case (int)WalletTypes.Character:
-                    var sin = GetAsNoTracking<SIN>(s => s.WalletId == wallet.Id, s => s.Character);
+                    var sin = GetAsNoTracking<SIN>(s => s.WalletId == wallet.Id, s => s.Character, s => s.Passport);
                     if (sin == null)
                         return string.Empty;
-                    return $"{sin.Character.Model} {sin.PersonName} {sin.Sin}";
+                    return $"{sin.Character.Model} {sin.Passport.PersonName} {sin.Passport.Sin}";
                 case (int)WalletTypes.Corporation:
                     var corp = GetAsNoTracking<CorporationWallet>(c => c.WalletId == wallet.Id);
                     if (corp == null)
@@ -155,7 +135,10 @@ namespace Billing
                 OperationTime = transfer.OperationTime,
                 From = type == TransferType.Incoming ? GetWalletName(transfer.WalletFrom, anon) : owner,
                 To = type == TransferType.Incoming ? owner : GetWalletName(transfer.WalletTo, anon),
-                Anonimous = transfer.Anonymous
+                Anonimous = transfer.Anonymous,
+                Id = transfer.Id,
+                Overdraft = transfer.Overdraft,
+                RentaId = transfer.RentaId
             };
         }
 

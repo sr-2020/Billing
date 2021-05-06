@@ -106,13 +106,11 @@ namespace Billing
                 var excelCharacter = new MainExcelDto
                 {
                     Balance = sin.Wallet.Balance,
-                    PersonName = sin.PersonName,
-                    //IkarKoef = ikarkoef,
+                    PersonName = sin.Passport?.PersonName,
                     KarmaKoef = karmakoef,
                     InflationKoef = inflationkoef,
                     ScoringFix = sin.Scoring.CurrentFix,
                     ScoringRelative = sin.Scoring.CurerentRelative,
-                    //Ikar = sin.IKAR,
                     ModelId = sin.Character.Model.ToString(),
                     LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
                     SumRents = allRents.Sum,

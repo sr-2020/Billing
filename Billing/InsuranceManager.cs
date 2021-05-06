@@ -22,7 +22,7 @@ namespace Billing
             var dbinsurance = Get<ProductType>(p => p.Alias == ProductTypeEnum.Insurance.ToString());
             if (dbinsurance == null)
                 throw new Exception("insurance type not found");
-            var sin = GetSINByModelId(modelId);
+            var sin = GetSINByModelId(modelId, s => s.Passport);
             if (sin == null)
                 throw new Exception("sin not found");
             var insurance = new InsuranceDto
@@ -31,7 +31,7 @@ namespace Billing
                 SkuName = "Страховка отсутствует",
                 LifeStyle = "Страховка отсутствует",
                 ShopName = "Страховка отсутствует",
-                PersonName = $"{sin.PersonName}"
+                PersonName = $"{sin.Passport?.PersonName}"
             };
             var lastIns = GetList<Renta>(r => r.Sku.Nomenklatura.Specialisation.ProductTypeId == dbinsurance.Id && r.SinId == sin.Id, r => r.Shop, r => r.Sku.Nomenklatura)
                                 .OrderByDescending(r => r.DateCreated)

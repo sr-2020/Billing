@@ -140,12 +140,13 @@ namespace Billing
                 r => r.Sku.Nomenklatura.Specialisation.ProductType,
                 r => r.Sku.Corporation,
                 r => r.Shop,
+                r => r.Sin.Passport,
                 r => r.Sin.Character)
                 .Select(r =>
                     new RentaDto
                     {
                         ModelId = modelId.ToString(),
-                        CharacterName = r.Sin.PersonName,
+                        CharacterName = r.Sin.Passport?.PersonName ?? "Unknown",
                         FinalPrice = Math.Round(BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring), 2),
                         ProductType = r.Sku.Nomenklatura.Specialisation.Name,
                         Shop = r.Shop.Name,
@@ -213,7 +214,7 @@ namespace Billing
             var mir = GetMIR();
             ProcessRenta(renta, mir, sin);
             SaveContext();
-            if(instantConsume)
+            if (instantConsume)
             {
                 var erService = new EreminService();
                 erService.ConsumeFood(renta.Id, (Lifestyles)renta.LifeStyle, modelId);
@@ -316,7 +317,7 @@ namespace Billing
             //create KPI here
             renta.Sku.Corporation.CurrentKPI += renta.BasePrice;
             //comission
-            AddNewTransfer(mir, renta.Shop.Wallet, comission, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} от {sin.PersonName} ({sin.Sin})", false, renta.Id, false);
+            AddNewTransfer(mir, renta.Shop.Wallet, comission, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} от {sin.Passport.PersonName} ({sin.Passport.Sin})", false, renta.Id, false);
         }
 
         private void ProcessBuyScoring(SIN sin, Sku sku)
@@ -388,30 +389,30 @@ namespace Billing
 
         public BalanceDtoOld GetBalanceOld(int modelId)
         {
-            var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring, s => s.Metatype);
+            var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring, s => s.Passport.Metatype);
             var balance = new BalanceDtoOld
             {
                 ModelId = modelId,
                 CurrentBalance = BillingHelper.Round(sin.Wallet.Balance),
                 CurrentScoring = sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative,
-                SIN = sin.Sin,
+                SIN = sin.Passport.Sin,
                 ForecastLifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
                 LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
-                PersonName = sin.PersonName,
-                Metatype = sin.Metatype?.Name ?? "неизвестно",
-                Citizenship = sin.Citizenship ?? "неизвестно",
-                Nationality = sin.NationDisplay ?? "неизвестно",
-                Status = sin.Citizen_state ?? "неизвестно",
-                Nation = sin.Nation ?? "неизвестно",
-                Viza = sin.Viza ?? "неизвестно",
-                Pledgee = sin.Mortgagee ?? "неизвестно"
+                PersonName = sin.Passport.PersonName,
+                Metatype = sin.Passport.Metatype?.Name ?? "неизвестно",
+                Citizenship = sin.Passport.Citizenship ?? "неизвестно",
+                Nationality = "устарело на Амуре",
+                Status = "устарело на Амуре",
+                Nation = "устарело на Амуре",
+                Viza = sin.Passport.Viza ?? "неизвестно",
+                Pledgee = sin.Passport.Mortgagee ?? "неизвестно"
             };
             return balance;
         }
 
         public BalanceDto GetBalance(int modelId)
         {
-            var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring, s => s.Metatype);
+            var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring, s => s.Passport.Metatype);
             var inss = ProductTypeEnum.Insurance.ToString();
             var insur = GetList<Renta>(r => r.Sku.Nomenklatura.Specialisation.ProductType.Alias == inss, r => r.Sku)
                 .OrderByDescending(r => r.Id)
@@ -427,17 +428,17 @@ namespace Billing
                 ModelId = modelId,
                 CurrentBalance = BillingHelper.Round(sin.Wallet.Balance),
                 CurrentScoring = Math.Round(sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative, 2),
-                SIN = sin.Sin,
+                SIN = sin.Passport.Sin,
                 LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
                 ForecastLifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.IncomeOutcome).ToString(),
-                PersonName = sin.PersonName,
-                Metatype = sin.Metatype?.Name ?? "неизвестно",
-                Citizenship = sin.Citizenship ?? "неизвестно",
-                Nationality = sin.NationDisplay ?? "неизвестно",
-                Status = sin.Citizen_state ?? "неизвестно",
-                Nation = sin.Nation ?? "неизвестно",
-                Viza = sin.Viza ?? "неизвестно",
-                Pledgee = sin.Mortgagee ?? "неизвестно",
+                PersonName = sin.Passport.PersonName,
+                Metatype = sin.Passport.Metatype?.Name ?? "неизвестно",
+                Citizenship = sin.Passport.Citizenship ?? "неизвестно",
+                Nationality = "устарело на Амуре",
+                Status = "устарело на Амуре",
+                Nation = "устарело на Амуре",
+                Viza = sin.Passport.Viza ?? "неизвестно",
+                Pledgee = sin.Passport.Mortgagee ?? "неизвестно",
                 Insurance = insur?.Sku?.Name ?? "нет страховки",
                 Licenses = licences
             };
@@ -468,15 +469,15 @@ namespace Billing
 
         public string GetSinStringByCharacter(int modelId)
         {
-            var sin = GetSINByModelId(modelId);
+            var sin = GetSINByModelId(modelId, s => s.Passport);
             if (sin == null)
                 throw new Exception("sin not found");
-            return sin.Sin;
+            return sin.Passport.Sin;
         }
 
         public int GetModelIdBySinString(string sinString)
         {
-            var sin = Get<SIN>(s => s.Sin == sinString);
+            var sin = Get<SIN>(s => s.Passport.Sin == sinString);
             if (sin == null)
                 throw new Exception("sin not found");
             return sin.Character.Model;
@@ -679,12 +680,12 @@ namespace Billing
 
         public List<SIN> GetSinsInGame()
         {
-            return GetSinsInGame(s => s.Character, s => s.Wallet, s => s.Scoring);
+            return GetSinsInGame(s => s.Character, s => s.Wallet, s => s.Scoring, s => s.Passport);
         }
 
         public List<CharacterDto> GetCharactersInGame()
         {
-            var result = GetSinsInGame(s => s.Character).Select(s => new CharacterDto { PersonName = s.PersonName, ModelId = s.Character.Model.ToString() }).ToList();
+            var result = GetSinsInGame(s => s.Character, s => s.Passport).Select(s => new CharacterDto { PersonName = s.Passport?.PersonName, ModelId = s.Character.Model.ToString() }).ToList();
             return result;
         }
 
@@ -698,7 +699,7 @@ namespace Billing
 
         private SIN BlockCharacter(int sinId)
         {
-            var sin = Get<SIN>(s => s.Id == sinId, s => s.Wallet, s => s.Character);
+            var sin = Get<SIN>(s => s.Id == sinId, s => s.Wallet, s => s.Character, s => s.Passport);
             sin.Blocked = true;
             return sin;
         }

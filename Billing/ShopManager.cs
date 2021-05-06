@@ -70,7 +70,7 @@ namespace Billing
 
         public List<RentaDto> GetRentas(int shop)
         {
-            var list = GetList<Renta>(r => r.ShopId == shop, r => r.Sku.Nomenklatura.Specialisation.ProductType, r => r.Sku.Corporation, r => r.Shop, r => r.Sin);
+            var list = GetList<Renta>(r => r.ShopId == shop, r => r.Sku.Nomenklatura.Specialisation.ProductType, r => r.Sku.Corporation, r => r.Shop, r => r.Sin.Passport);
             return list.OrderByDescending(r => r.DateCreated)
                     .Select(r =>
                     new RentaDto
@@ -87,7 +87,7 @@ namespace Billing
                         PriceId = r.PriceId,
                         RentaId = r.Id,
                         DateCreated = r.DateCreated,
-                        CharacterName = r.Sin.PersonName
+                        CharacterName = r.Sin.Passport.PersonName
                     }).ToList();
         }
 
@@ -219,8 +219,8 @@ namespace Billing
 
         public string GetCharacterName(int modelId)
         {
-            var character = Get<SIN>(s => s.Character.Model == modelId);
-            return character?.PersonName;
+            var character = Get<SIN>(s => s.Character.Model == modelId, s=>s.Passport);
+            return character.Passport.PersonName;
         }
 
         public bool HasAccessToShop(int modelId, int shopId)

@@ -56,7 +56,7 @@ namespace Scoringspace
             var factorId = GetFactorId(ScoringFactorEnum.metatype);
             ScoringEvent(sin.ScoringId, factorId, (context) =>
             {
-                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == sin.MetatypeId);
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == sin.Passport.MetatypeId);
                 return value?.Value ?? 1;
             });
         }
