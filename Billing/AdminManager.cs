@@ -82,33 +82,33 @@ namespace Billing
         public ShopDto CreateOrUpdateShopWallet(int shopId = 0, decimal balance = 0, string name = "default shop", int lifestyle = 1, int ownerId = 0, List<int> specialisations = null)
         {
             ShopWallet shop = null;
-            if (shopId > 0)
-            {
-                shop = Get<ShopWallet>(w => w.Id == shopId, s => s.Wallet, s => s.Specialisations);
-                if (shop == null)
-                {
-                    throw new BillingException("shop not found");
-                }
-            }
-            var owner = GetSINByModelId(ownerId);
-            if (owner == null)
-                throw new BillingException("owner not found");
-
             if (shopId == 0)
             {
                 var newWallet = CreateOrUpdateWallet(WalletTypes.Shop);
                 shop = new ShopWallet
                 {
-                    Wallet = newWallet,
-                    OwnerId = ownerId
+                    Wallet = newWallet
                 };
-                Add(shop);
+                AddAndSave(shop);
+                shopId = shop.Id;
             }
+            else
+            {
+                shop = Get<ShopWallet>(w => w.Id == shopId, s => s.Wallet, s => s.Specialisations);
+            }
+            if (shop == null)
+            {
+                throw new BillingException("shop not found");
+            }
+            var owner = GetSINByModelId(ownerId);
+            if (owner == null)
+                throw new BillingException("owner not found");
             shop.Name = name;
+            shop.OwnerId = ownerId;
             shop.Wallet.Balance = balance;
             var ls = BillingHelper.GetLifestyle(lifestyle);
             shop.LifeStyle = (int)ls;
-            Context.SaveChanges();
+            SaveContext();
             var dbSpecialisations = GetList<ShopSpecialisation>(s => s.ShopId == shop.Id);
             foreach (var shopspecialisation in dbSpecialisations)
             {
