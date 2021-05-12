@@ -254,7 +254,7 @@ namespace BillingAPI.Controllers
         public DataResult<NomenklaturaDto> AddNomenklatura([FromBody] CreateNomenklaturaRequest request)
         {
             var manager = IocContainer.Get<IAdminManager>();
-            var result = RunAction(() => manager.CreateOrUpdateNomenklatura(0, request.Name,  request.Code, request.SpecialisationId, request.Lifestyle, request.BasePrice, request.BaseCount, request.Description, request.PictureUrl));
+            var result = RunAction(() => manager.CreateOrUpdateNomenklatura(0, request.Name, request.Code, request.SpecialisationId, request.Lifestyle, request.BasePrice, request.BaseCount, request.Description, request.PictureUrl));
             return result;
         }
 
@@ -325,9 +325,11 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("a-lifestyles")]
-        public DataResult<List<Lifestyles>> GetLifeStyles()
+        public DataResult<List<NamedEntity>> GetLifeStyles()
         {
-            throw new NotImplementedException();
+            var ls = BillingHelper.GetLifestyles();
+            var result = RunAction(() => ls);
+            return result;
         }
 
         /// <summary>
@@ -336,14 +338,14 @@ namespace BillingAPI.Controllers
         /// <param name="lifestyle"></param>
         /// <returns></returns>
         [HttpGet("a-lifestyle")]
-        public DataResult<NamedEntity> GetLifeStyle(int lifestyle)
+        public DataResult<NamedEntity> GetLifeStyle(Lifestyles lifestyle)
         {
-            var ls = BillingHelper.GetLifestyle(lifestyle);
-            var result = RunAction(() => new NamedEntity { Id = (int)ls, Name = ls.ToString() });
+            var ls = BillingHelper.GetLifestyleDto(lifestyle);
+            var result = RunAction(() => ls);
             return result;
         }
 
-        
+
 
     }
 }

@@ -1,4 +1,5 @@
-﻿using Core;
+﻿using Billing.Dto.Shop;
+using Core;
 using Core.Model;
 using Core.Primitives;
 using IoC;
@@ -63,16 +64,25 @@ namespace Billing
                 return Lifestyles.Wood;
         }
 
+        public static List<NamedEntity> GetLifestyles()
+        {
+            var ls = new List<NamedEntity>();
+            foreach (Lifestyles lifestyle in Enum.GetValues(typeof(Lifestyles)))
+            {
+                ls.Add(GetLifestyleDto(lifestyle));
+            }
+            return ls;
+        }
+
+        public static NamedEntity GetLifestyleDto(Lifestyles lifestyle)
+        {
+            return new NamedEntity { Id = (int)lifestyle, Name = lifestyle.ToString() };
+        }
+
         public static decimal GetFinalPrice(decimal basePrice, decimal discount, decimal scoring)
         {
             return BillingHelper.Round((basePrice * discount) / scoring);
         }
-
-        //public static int GetComission(int shopLifestyle)
-        //{
-        //    var manager = IocContainer.Get<ISettingsManager>();
-        //    return manager.GetIntValue($"shop{((Lifestyles)shopLifestyle).ToString().ToLower()}");
-        //}
 
         public static decimal CalculateComission(decimal basePrice, decimal comission)
         {
