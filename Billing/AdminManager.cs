@@ -44,8 +44,9 @@ namespace Billing
 
         public List<SpecialisationDto> GetSpecialisations(Expression<Func<Specialisation, bool>> predicate)
         {
-            return GetList(predicate, s => s.ProductType).Select(s =>
-                new SpecialisationDto(s, true)).ToList();
+            return GetList(predicate, s => s.ProductType)
+                .Select(s => new SpecialisationDto(s, true))
+                .ToList();
         }
 
         public List<CorporationDto> GetCorporations(Expression<Func<CorporationWallet, bool>> predicate)
