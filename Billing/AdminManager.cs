@@ -75,7 +75,7 @@ namespace Billing
 
         public List<UserDto> GetUsers(Expression<Func<SIN, bool>> predicate)
         {
-            var list = GetListAsNoTracking(predicate, u => u.Character, u => u.Wallet);
+            var list = GetListAsNoTracking(predicate, u => u.Character, u => u.Wallet, u => u.Passport);
             return list.Select(c => new UserDto(c)).ToList();
         }
 
