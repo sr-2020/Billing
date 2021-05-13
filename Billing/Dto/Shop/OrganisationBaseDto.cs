@@ -13,10 +13,10 @@ namespace Billing.Dto.Shop
             Name = organisation.Name;
             if (organisation.Owner == null)
                 return;
-            Owner = new UserDto(organisation.Owner.GetActualSIN());
+            Owner = organisation.OwnerId ?? 0;
         }
         public int Id { get; set; }
         public string Name { get; set; }
-        public UserDto Owner { get; set; }
+        public int Owner { get; set; }
     }
 }
