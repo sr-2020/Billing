@@ -100,9 +100,6 @@ namespace Billing
             {
                 throw new BillingException("shop not found");
             }
-            var owner = GetSINByModelId(ownerId);
-            if (owner == null)
-                throw new BillingException("owner not found");
             shop.Name = name;
             shop.OwnerId = ownerId;
             shop.Wallet.Balance = balance;
