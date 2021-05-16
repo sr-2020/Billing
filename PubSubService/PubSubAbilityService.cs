@@ -31,7 +31,7 @@ namespace PubSubService
                 }
                 catch (Exception e)
                 {
-                    e.ToString();
+                    Console.Error.WriteLine(e.ToString());
                 }
 
             }
@@ -41,7 +41,6 @@ namespace PubSubService
         {
             ActiveAbility activeAbilityEnum;
             ModelPrimitives.Abilities.TryGetValue(model.Id, out activeAbilityEnum);
-            IBillingManager billing;
             switch (activeAbilityEnum)
             {
                 case ActiveAbility.HowMuch:
@@ -51,16 +50,16 @@ namespace PubSubService
                 case ActiveAbility.PayAndCry:
                     break;
                 case ActiveAbility.LetHim:
-                    billing = IocContainer.Get<IBillingManager>();
-                    billing.LetHimPay(model?.CharacterId, model?.TargetCharacterId, model?.QrCode?.Data?.DealId);
+                    IocContainer.Get<IAbilityManager>().LetHimPay(model?.CharacterId, model?.TargetCharacterId, model?.QrCode?.Data?.DealId);
                     break;
                 case ActiveAbility.Letme:
-                    billing = IocContainer.Get<IBillingManager>();
-                    billing.LetMePay(model?.CharacterId, model?.QrCode?.Data?.DealId);
+                    IocContainer.Get<IAbilityManager>().LetMePay(model?.CharacterId, model?.QrCode?.Data?.DealId);
                     break;
                 case ActiveAbility.Rerent:
-                    billing = IocContainer.Get<IBillingManager>();
-                    billing.Rerent(model?.QrCode?.Data?.DealId);
+                    IocContainer.Get<IAbilityManager>().Rerent(model?.QrCode?.Data?.DealId);
+                    break;
+                case ActiveAbility.Marauder:
+                    IocContainer.Get<IAbilityManager>().Marauder(model?.CharacterId, model?.TargetCharacterId);
                     break;
                 default:
                     break;

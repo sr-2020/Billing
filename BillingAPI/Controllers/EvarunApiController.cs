@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using BillingAPI.Model;
 using Core;
+using Core.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,6 +35,10 @@ namespace BillingAPI.Controllers
             catch (BillingAuthException e)
             {
                 return HandleException(403, e.Message, guid, result, actionName, logmessage);
+            }
+            catch (BillingNotFoundException e)
+            {
+                return HandleException(404, e.Message, guid, result, actionName, logmessage);
             }
             catch (BillingUnauthorizedException e)
             {

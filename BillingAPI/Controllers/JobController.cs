@@ -19,8 +19,6 @@ namespace BillingAPI.Controllers
     [Route("[controller]")]
     public class JobController : EvarunApiController
     {
-
-
         [HttpGet("cycle")]
         //[CheckSecret]
         public DataResult<string> ProcessCycle()

@@ -2,6 +2,7 @@
 using Billing.Dto.Shop;
 using Billing.DTO;
 using Core;
+using Core.Exceptions;
 using Core.Model;
 using Core.Primitives;
 using InternalServices;
@@ -17,13 +18,11 @@ using System.Text;
 
 namespace Billing
 {
-    public interface IBillingManager : IBaseBillingRepository
+    public interface IBillingManager : IAdminManager
     {
         #region application
-        Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment);
-        Transfer CreateTransferSINSIN(string modelId, string characterTo, decimal amount, string comment);
-        Transfer CreateTransferMIRSIN(string characterTo, decimal amount);
-        Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment);
+
+        Transfer CreateTransferMIRSIN(int characterTo, decimal amount);
 
         string GetSinStringByCharacter(int modelId);
         int GetModelIdBySinString(string sinString);
@@ -55,9 +54,6 @@ namespace Billing
 
         #region admin
 
-        void LetMePay(string modelId, string rentaId);
-        void Rerent(string rentaId);
-        void LetHimPay(string modelId, string targetId, string rentaId);
         List<SIN> GetSinsInGame();
         List<CharacterDto> GetCharactersInGame();
         List<TransferDto> GetTransfersByRenta(int rentaID);
@@ -509,175 +505,19 @@ namespace Billing
             return type;
         }
 
-        public Transfer MakeTransferSINLeg(int sinFrom, int legTo, decimal amount, string comment)
+        public Transfer CreateTransferMIRSIN(int characterTo, decimal amount)
         {
-            //BillingHelper.BillingBlocked(modelId);
-            throw new NotImplementedException();
-        }
-
-        public Transfer CreateTransferSINSIN(string modelid, string characterTo, decimal amount, string comment)
-        {
-            int imodelId;
-            int icharacterTo;
-            if (!int.TryParse(modelid, out imodelId) || imodelId == 0)
-            {
-                throw new BillingAuthException($"Ошибка авторизации {modelid}");
-            }
-            if (!int.TryParse(characterTo, out icharacterTo) || icharacterTo == 0)
-            {
-                throw new BillingAuthException($"Ошибка проверки получателя, должен быть инт");
-            }
-            BillingHelper.BillingBlocked(imodelId);
-            BillingHelper.BillingBlocked(icharacterTo);
-            return MakeTransferSINSIN(imodelId, icharacterTo, amount, comment);
-        }
-
-        public Transfer CreateTransferMIRSIN(string characterTo, decimal amount)
-        {
+            BillingHelper.BillingBlocked(characterTo);
             var from = GetMIR();
-            int icharacterTo;
-            if (!int.TryParse(characterTo, out icharacterTo) || icharacterTo == 0)
-            {
-                throw new BillingAuthException($"Ошибка проверки получателя, должен быть инт");
-            }
-            var to = GetSINByModelId(icharacterTo, s => s.Wallet);
+            var to = GetSINByModelId(characterTo, s => s.Wallet);
             if (to == null)
             {
-                throw new BillingException($"Не найден получатель");
+                throw new BillingNotFoundException($"Не найден получатель");
             }
             var comment = "Перевод от международного банка";
             return AddNewTransfer(from, to.Wallet, amount, comment);
         }
-
-        public Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment)
-        {
-            BillingHelper.BillingBlocked(characterFrom);
-            BillingHelper.BillingBlocked(characterTo);
-            var d1 = GetSINByModelId(characterFrom, s => s.Wallet);
-            var d2 = GetSINByModelId(characterTo, s => s.Wallet);
-            var anon = false;
-            try
-            {
-                var erService = new EreminService();
-                var anonFrom = erService.GetAnonimous(characterFrom);
-                var anonto = erService.GetAnonimous(characterTo);
-                anon = anonFrom || anonto;
-            }
-            catch (Exception e)
-            {
-
-            }
-            var transfer = AddNewTransfer(d1.Wallet, d2.Wallet, amount, comment, anon);
-            Context.SaveChanges();
-            if (transfer != null)
-            {
-                EreminPushAdapter.SendNotification(characterTo, "Кошелек", $"Вам переведено денег {amount}");
-            }
-            return transfer;
-        }
-
-        public void LetMePay(string modelId, string rentaId)
-        {
-            if (string.IsNullOrEmpty(modelId) || string.IsNullOrEmpty(rentaId))
-            {
-                Console.Error.WriteLine($"Ошибка LetMePay modelId {modelId}, rentaId {rentaId}");
-                return;
-            }
-            var modelIdInt = 0;
-            if (!int.TryParse(modelId, out modelIdInt))
-            {
-                Console.Error.WriteLine($"Ошибка LetMePay modelId {modelId}");
-                return;
-            }
-            if (modelIdInt == 0)
-            {
-                Console.Error.WriteLine($"Ошибка LetMePay modelId {modelId}");
-                return;
-            }
-            var sin = GetSINByModelId(modelIdInt, s => s.Scoring);
-            var rentaIdint = 0;
-            if (!int.TryParse(rentaId, out rentaIdint))
-            {
-                Console.Error.WriteLine($"Ошибка LetMePay rentaId {rentaId}");
-                EreminPushAdapter.SendNotification(modelIdInt, "Давай я заплачу", $"Ошибка получения ренты {rentaIdint}");
-            }
-            var renta = Get<Renta>(r => r.Id == rentaIdint);
-            if (renta == null)
-            {
-                Console.Error.WriteLine($"Ошибка LetMePay rentaId {rentaId}");
-                EreminPushAdapter.SendNotification(modelIdInt, "Давай я заплачу", "Ошибка получения ренты");
-            }
-            renta.SinId = sin.Id;
-            renta.CurrentScoring = sin.Scoring.CurerentRelative + sin.Scoring.CurrentFix;
-            Context.SaveChanges();
-            EreminPushAdapter.SendNotification(modelIdInt, "Давай я заплачу", "Рента переоформлена");
-        }
-
-        public void Rerent(string rentaId)
-        {
-            var rentaIdint = 0;
-            if (!int.TryParse(rentaId, out rentaIdint))
-            {
-                Console.Error.WriteLine($"Ошибка Rerent rentaId {rentaId}");
-            }
-            var renta = Get<Renta>(r => r.Id == rentaIdint, r => r.Sin.Scoring, r => r.Sin.Character);
-            if (renta == null)
-            {
-                Console.Error.WriteLine($"Ошибка Rerent rentaId {rentaId}");
-            }
-            renta.CurrentScoring = renta.Sin.Scoring.CurerentRelative + renta.Sin.Scoring.CurrentFix;
-            Context.SaveChanges();
-            EreminPushAdapter.SendNotification(renta.Sin.Character.Model, "Давай он заплатит", "Рента переоформлена");
-        }
-
-        public void LetHimPay(string modelId, string targetId, string rentaId)
-        {
-            if (string.IsNullOrEmpty(modelId) || string.IsNullOrEmpty(rentaId))
-            {
-                Console.Error.WriteLine($"Ошибка LetHimPay modelId {modelId}, rentaId {rentaId}");
-                return;
-            }
-            var modelIdInt = 0;
-            if (!int.TryParse(modelId, out modelIdInt))
-            {
-                Console.Error.WriteLine($"Ошибка LetHimPay modelId {modelId}");
-                return;
-            }
-            if (modelIdInt == 0)
-            {
-                Console.Error.WriteLine($"Ошибка LetHimPay modelId {modelId}");
-                return;
-            }
-            var targetIdInt = 0;
-            if (!int.TryParse(targetId, out targetIdInt))
-            {
-                Console.Error.WriteLine($"Ошибка LetHimPay targetId {targetId}");
-                return;
-            }
-            if (targetIdInt == 0)
-            {
-                Console.Error.WriteLine($"Ошибка LetHimPay targetIdInt {targetId}");
-                return;
-            }
-            var sin = GetSINByModelId(targetIdInt, s => s.Scoring);
-            var rentaIdint = 0;
-            if (!int.TryParse(rentaId, out rentaIdint))
-            {
-                Console.Error.WriteLine($"Ошибка LetHimPay rentaId {rentaId}");
-                EreminPushAdapter.SendNotification(modelIdInt, "Давай он заплатит", $"Ошибка получения ренты {rentaIdint}");
-            }
-            var renta = Get<Renta>(r => r.Id == rentaIdint);
-            if (renta == null)
-            {
-                Console.Error.WriteLine($"Ошибка LetHimPay rentaId {rentaId}");
-                EreminPushAdapter.SendNotification(modelIdInt, "Давай он заплатит", "Ошибка получения ренты");
-            }
-            renta.SinId = sin.Id;
-            renta.CurrentScoring = sin.Scoring.CurerentRelative + sin.Scoring.CurrentFix;
-            Context.SaveChanges();
-            EreminPushAdapter.SendNotification(modelIdInt, "Давай он заплатит", "Рента переоформлена");
-        }
-
+        
         public List<SIN> GetSinsInGame()
         {
             return GetSinsInGame(s => s.Character, s => s.Wallet, s => s.Scoring, s => s.Passport);

@@ -1,5 +1,6 @@
 ﻿using Billing.DTO;
 using Core;
+using Core.Exceptions;
 using Core.Model;
 using Core.Primitives;
 using IoC;
@@ -34,10 +35,10 @@ namespace Billing
         public SIN CreateOrUpdatePhysicalWallet(int modelId, decimal balance = 1)
         {
             if (modelId == 0)
-                throw new BillingUnauthorizedException($"character {modelId} not found");
+                throw new BillingNotFoundException($"character {modelId} not found");
             var character = GetAsNoTracking<Character>(c => c.Model == modelId);
             if (character == null)
-                throw new BillingAuthException($"character {modelId} not found");
+                throw new BillingNotFoundException($"character {modelId} not found");
             var sin = Get<SIN>(s => s.Character.Model == modelId);
             if (sin == null)
             {
@@ -148,9 +149,9 @@ namespace Billing
         protected Transfer AddNewTransfer(Wallet walletFrom, Wallet walletTo, decimal amount, string comment, bool anonymous = false, int? rentaId = null, bool overdraft = false)
         {
             if (walletFrom == null)
-                throw new BillingException($"Нет кошелька отправителя");
+                throw new BillingNotFoundException($"Нет кошелька отправителя");
             if (walletTo == null)
-                throw new BillingException($"Нет кошелька получателя");
+                throw new BillingNotFoundException($"Нет кошелька получателя");
             if (walletFrom.Id == walletTo.Id)
                 throw new BillingException($"Самому себе нельзя переводить.");
             //баланса хватает, или один из кошельков MIR
@@ -187,7 +188,7 @@ namespace Billing
                 var inttype = (int)type;
                 wallet = Get<Wallet>(w => w.Id == id && w.WalletType == inttype);
                 if (wallet == null)
-                    throw new Exception($"кошелек {id} type {type} не найден");
+                    throw new BillingNotFoundException($"кошелек {id} type {type} не найден");
             }
             else
             {
@@ -204,7 +205,7 @@ namespace Billing
         {
             var mir = Get<Wallet>(w => w.Id == GetMIRId() && w.WalletType == (int)WalletTypes.MIR);
             if (mir == null)
-                throw new Exception("MIR not found");
+                throw new BillingNotFoundException("MIR not found");
             return mir;
         }
 
@@ -213,8 +214,7 @@ namespace Billing
             var sin = Get(s => s.Character.Model == modelId, includes);
             if (sin == null)
             {
-                var defaultBalance = _settings.GetIntValue(SystemSettingsEnum.defaultbalance);
-                sin = CreateOrUpdatePhysicalWallet(modelId, defaultBalance);
+                throw new BillingNotFoundException($"sin for modelId {modelId} not found");
             }
             return sin;
         }

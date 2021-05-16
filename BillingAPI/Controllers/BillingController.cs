@@ -125,7 +125,7 @@ namespace BillingAPI.Controllers
         public DataResult<Transfer> CreateTransferSINSIN(int character, [FromBody] CreateTransferSinSinRequest request)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateTransferSINSIN(character.ToString(), request.CharacterTo, request.Amount, request.Comment), "transfer/createtransfersinsin");
+            var result = RunAction(() => manager.MakeTransferSINSIN(character, request.CharacterTo, request.Amount, request.Comment), "transfer/createtransfersinsin");
             return result;
         }
 
@@ -146,27 +146,6 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        [HttpGet("transfer/maketransfersinleg")]
-        public DataResult<Transfer> MakeTransferSINLeg(int sin, int leg, decimal amount, string comment)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.MakeTransferSINLeg(sin, leg, amount, comment), "transfer/maketransfersinleg");
-            return result;
-        }
-        [HttpPost("transfer/maketransferlegsin")]
-        public DataResult<Transfer> MakeTransferLegSIN(int leg, int sin, decimal amount, string comment)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.MakeTransferSINLeg(leg, sin, amount, comment), "transfer/maketransferlegsin");
-            return result;
-        }
-        [HttpPost("transfer/maketransferlegleg")]
-        public DataResult<Transfer> MakeTransferLegLeg(int leg1, int leg2, decimal amount, string comment)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.MakeTransferSINLeg(leg1, leg2, amount, comment), "transfer/maketransferlegleg");
-            return result;
-        }
         #endregion
 
         #region renta

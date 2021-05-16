@@ -7,7 +7,7 @@ namespace BillingAPI.Model
 {
     public class CreateTransferSinSinRequest
     {
-        public string CharacterTo { get; set; }
+        public int CharacterTo { get; set; }
         public decimal Amount { get; set; }
         public string Comment { get; set; }
     }

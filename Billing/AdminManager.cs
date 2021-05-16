@@ -4,6 +4,7 @@ using Billing.DTO;
 using Core;
 using Core.Model;
 using Core.Primitives;
+using InternalServices;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ using System.Text;
 
 namespace Billing
 {
-    public interface IAdminManager : IBaseRepository
+    public interface IAdminManager : IBaseBillingRepository
     {
         List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate);
         List<SpecialisationDto> GetSpecialisations(Expression<Func<Specialisation, bool>> predicate);
@@ -31,6 +32,7 @@ namespace Billing
         void DeleteNomenklatura(int id);
         void DeleteShop(int shopid);
         void DeleteSku(int skuId);
+        Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment);
     }
     public class AdminManager : BaseBillingRepository, IAdminManager
     {
@@ -314,6 +316,32 @@ namespace Billing
             return corporation;
         }
 
+        public Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment)
+        {
+            BillingHelper.BillingBlocked(characterFrom);
+            BillingHelper.BillingBlocked(characterTo);
+            var d1 = GetSINByModelId(characterFrom, s => s.Wallet);
+            var d2 = GetSINByModelId(characterTo, s => s.Wallet);
+            var anon = false;
+            try
+            {
+                var erService = new EreminService();
+                var anonFrom = erService.GetAnonimous(characterFrom);
+                var anonto = erService.GetAnonimous(characterTo);
+                anon = anonFrom || anonto;
+            }
+            catch (Exception e)
+            {
+
+            }
+            var transfer = AddNewTransfer(d1.Wallet, d2.Wallet, amount, comment, anon);
+            Context.SaveChanges();
+            if (transfer != null)
+            {
+                EreminPushAdapter.SendNotification(characterTo, "Кошелек", $"Вам переведено денег {amount}");
+            }
+            return transfer;
+        }
     }
 
 }
