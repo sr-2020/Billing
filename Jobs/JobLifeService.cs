@@ -25,9 +25,9 @@ namespace Jobs
         }
         ManagerFactory Factory { get; set; }
 
-        public string ToggleCycle(string token = "")
+        public string ToggleCycle()
         {
-            token = CheckToken(token);
+            var token = GetCurrentToken();
             var cycle = Factory.Job.GetLastCycle(token);
             if (cycle == null)
             {
@@ -47,13 +47,13 @@ namespace Jobs
             cycle.IsActive = !cycle.IsActive;
             cycle.Token = token;
             Factory.Job.AddAndSave(cycle);
-            return $"Цикл {cycle.Token}_{cycle.Number} {(cycle.IsActive ? "стартовал": "остановлен")}";
+            return $"Цикл {cycle.Token}_{cycle.Number} {(cycle.IsActive ? "стартовал" : "остановлен")}";
         }
 
-        public string DoBeat(string token = "", BeatTypes type = BeatTypes.Test)
+        public string DoBeat(BeatTypes type = BeatTypes.Test)
         {
             BillingHelper.BillingBlocked();
-            token = CheckToken(token);
+            var token = GetCurrentToken();
             var cycle = Factory.Job.GetLastCycle(token);
             if (cycle == null || !cycle.IsActive)
             {
@@ -95,11 +95,12 @@ namespace Jobs
                     }
                     dto.Beat.FinishTime = DateTime.Now;
                     Factory.Job.AddAndSave(dto.Beat);
-                    Factory.Job.AddRange(dto.History);
+                    Factory.Job.AddRangeAndSave(dto.History);
+
                 }
                 catch (Exception e)
                 {
-                    Console.Error.WriteLine(e.Message);
+                    Console.Error.WriteLine(e.ToString());
                     throw;
                 }
                 finally
@@ -171,7 +172,7 @@ namespace Jobs
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                LogException(e);
             }
             return character;
         }
@@ -189,6 +190,7 @@ namespace Jobs
                     }
                     catch (Exception e)
                     {
+                        LogException(e);
                         dto.ErrorText = e.Message;
                     }
                     concurrent.Enqueue(dto);
@@ -201,13 +203,9 @@ namespace Jobs
             return beat;
         }
 
-        private string CheckToken(string token)
+        private string GetCurrentToken()
         {
-            if (string.IsNullOrEmpty(token))
-            {
-                token = Factory.Settings.GetValue(Core.Primitives.SystemSettingsEnum.token);
-            }
-            return token;
+            return Factory.Settings.GetValue(Core.Primitives.SystemSettingsEnum.token);
         }
 
         private void DoIkar(List<SIN> sins)

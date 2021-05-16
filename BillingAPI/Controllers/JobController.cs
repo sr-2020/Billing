@@ -40,7 +40,7 @@ namespace BillingAPI.Controllers
             var result = RunAction(() =>
             {
                 var life = new JobLifeService();
-                return life.DoBeat("test", BeatTypes.Characters);
+                return life.DoBeat(BeatTypes.Characters);
             }, $"period");
             return result;
         }

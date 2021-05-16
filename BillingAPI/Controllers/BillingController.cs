@@ -70,7 +70,7 @@ namespace BillingAPI.Controllers
         public DataResult<SIN> CreatePhysicalWallet(int character, decimal balance)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdatePhysicalWallet(character, "", null, balance), $"createphysicalwallet {character} {balance}");
+            var result = RunAction(() => manager.CreateOrUpdatePhysicalWallet(character, balance), $"createphysicalwallet {character} {balance}");
             return result;
         }
 
@@ -84,7 +84,7 @@ namespace BillingAPI.Controllers
         public DataResult<SIN> InitCharacter(int modelid, [FromBody] InitCharacterRequest request)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.InitCharacter(modelid, request.Name, request.Metarace), $"InitCharacter: {modelid};{request.Name};{request.Metarace};{request.Karma}");
+            var result = RunAction(() => manager.InitCharacter(modelid), $"InitCharacter: {modelid}");
             return result;
         }
         [HttpPost("createtransfermir")]

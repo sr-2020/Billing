@@ -26,6 +26,7 @@ namespace Core
         void Remove<T>(T entity) where T : class;
         void RemoveAndSave<T>(T entity) where T : class;
         void AddRange<T>(IEnumerable<T> entities) where T : BaseEntity;
+        void AddRangeAndSave<T>(IEnumerable<T> entities) where T : BaseEntity;
         void Add<T>(T entity) where T : BaseEntity;
         void AddAndSave<T>(T entity) where T : BaseEntity;
         void Delete<T>(int id) where T : BaseEntity;
@@ -115,6 +116,22 @@ namespace Core
                     Context.Entry(entity).State = EntityState.Modified;
                 else
                     Context.Entry(entity).State = EntityState.Added;
+            }
+        }
+
+        public virtual void AddRangeAndSave<T>(IEnumerable<T> entities) where T : BaseEntity
+        {
+            foreach (var entity in entities)
+            {
+                if (entity.Id > 0)
+                    Context.Entry(entity).State = EntityState.Modified;
+                else
+                    Context.Entry(entity).State = EntityState.Added;
+            }
+            SaveContext();
+            foreach (var entity in entities)
+            {
+                Context.Entry(entity).Reload();
             }
         }
 

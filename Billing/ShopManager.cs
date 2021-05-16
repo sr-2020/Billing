@@ -219,8 +219,12 @@ namespace Billing
 
         public string GetCharacterName(int modelId)
         {
-            var character = Get<SIN>(s => s.Character.Model == modelId, s=>s.Passport);
-            return character.Passport.PersonName;
+            var sin = Get<SIN>(s => s.Character.Model == modelId, s=>s.Passport);
+            if(sin?.Passport == null)
+            {
+                return $"Unknown name for {modelId}";
+            }
+            return sin.Passport.PersonName;
         }
 
         public bool HasAccessToShop(int modelId, int shopId)

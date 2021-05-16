@@ -15,8 +15,8 @@ namespace Billing
 {
     public interface IBaseBillingRepository : IBaseRepository
     {
-        SIN CreateOrUpdatePhysicalWallet(int modelId, string name, int? metarace, decimal balance = 50);
-        SIN InitCharacter(int modelId, string name, string metarace);
+        SIN CreateOrUpdatePhysicalWallet(int modelId, decimal balance = 1);
+        SIN InitCharacter(int modelId);
         SIN GetSINByModelId(int modelId, params Expression<Func<SIN, object>>[] includes);
     }
 
@@ -24,15 +24,14 @@ namespace Billing
     {
         protected ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
 
-        public SIN InitCharacter(int modelId, string name, string metarace)
+        public SIN InitCharacter(int modelId)
         {
-            var race = GetAsNoTracking<Metatype>(m => m.Alias == metarace);
             var settings = IoC.IocContainer.Get<ISettingsManager>();
             var defaultbalance = settings.GetDecimalValue(SystemSettingsEnum.defaultbalance);
-            return CreateOrUpdatePhysicalWallet(modelId, name, race?.Id, defaultbalance);
+            return CreateOrUpdatePhysicalWallet(modelId, defaultbalance);
         }
 
-        public SIN CreateOrUpdatePhysicalWallet(int modelId, string name, int? metarace, decimal balance = 1)
+        public SIN CreateOrUpdatePhysicalWallet(int modelId, decimal balance = 1)
         {
             if (modelId == 0)
                 throw new BillingUnauthorizedException($"character {modelId} not found");
@@ -40,15 +39,13 @@ namespace Billing
             if (character == null)
                 throw new BillingAuthException($"character {modelId} not found");
             var sin = Get<SIN>(s => s.Character.Model == modelId);
-
             if (sin == null)
             {
                 sin = new SIN
                 {
                     CharacterId = character.Id,
-                    InGame = true
                 };
-                Add(sin);
+                AddAndSave(sin);
             }
             sin.InGame = true;
             sin.OldMetaTypeId = null;
@@ -60,13 +57,19 @@ namespace Billing
             {
                 scoring = new Scoring();
                 sin.Scoring = scoring;
-                AddAndSave(scoring);
+                Add(scoring);
             }
             scoring.StartFactor = 0.5m;
             scoring.CurrentFix = 0.5m * 0.5m;
             scoring.CurerentRelative = 0.5m * 0.5m;
+            SaveContext();
             InitScoring(scoring);
-            Context.SaveChanges();
+            if(sin.PassportId == 0)
+            {
+                var passport = new Passport();
+                sin.Passport = passport;
+                AddAndSave(passport);
+            }
             return sin;
         }
 
@@ -84,10 +87,10 @@ namespace Billing
                         ScoringId = scoring.Id,
                         Value = scoring.StartFactor ?? 1
                     };
-                    AddAndSave(current);
+                    Add(current);
                 }
-
             }
+            SaveContext();
         }
 
         protected string GetWalletName(Wallet wallet, bool anon)
@@ -190,19 +193,9 @@ namespace Billing
             {
                 wallet = new Wallet();
                 wallet.WalletType = (int)type;
-                wallet.Balance = 0;
                 Add(wallet);
             }
-            //need to call to get id
-            Context.SaveChanges();
-            if (amount > 0)
-            {
-                var mir = GetMIR();
-                if (wallet.Balance > 0)
-                    AddNewTransfer(wallet, mir, wallet.Balance, "Сброс кошелька");
-                wallet.Balance = 0;
-                AddNewTransfer(mir, wallet, amount, "Заведение кошелька");
-            }
+            wallet.Balance = amount;
             Context.SaveChanges();
             return wallet;
         }
@@ -221,7 +214,7 @@ namespace Billing
             if (sin == null)
             {
                 var defaultBalance = _settings.GetIntValue(SystemSettingsEnum.defaultbalance);
-                sin = CreateOrUpdatePhysicalWallet(modelId, "", null, defaultBalance);
+                sin = CreateOrUpdatePhysicalWallet(modelId, defaultBalance);
             }
             return sin;
         }

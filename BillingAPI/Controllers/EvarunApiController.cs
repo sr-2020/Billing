@@ -13,7 +13,6 @@ namespace BillingAPI.Controllers
 {
     public abstract class EvarunApiController : ControllerBase
     {
-
         private DataResult<T> Handle<T>(Func<T> func, Action action, string actionName = "", string logmessage = "")
         {
             var guid = Guid.NewGuid();
