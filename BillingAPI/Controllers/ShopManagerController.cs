@@ -20,12 +20,12 @@ namespace BillingAPI.Controllers
     public class ShopManagerController : EvarunApiController
     {
         #region refactored
-        
+
         [HttpGet("organisations")]
         public DataResult<OrganisationViewModel> GetMyOrganisations(int character)
         {
             var manager = IocContainer.Get<IShopManager>();
-            var result = RunAction(() => manager.GetAvailableOrganisations(character), "getmyorganisations");
+            var result = RunAction(() => manager.GetAvailableOrganisations(character), $"character {character}");
             return result;
         }
 
@@ -147,7 +147,7 @@ namespace BillingAPI.Controllers
         }
 
         [HttpPost("createpricebyqr")]
-        public DataResult<PriceShopDto> GetPriceByQR([FromBody] GetPriceByQRRequest request) 
+        public DataResult<PriceShopDto> GetPriceByQR([FromBody] GetPriceByQRRequest request)
         {
             var manager = IocContainer.Get<IBillingManager>();
             var result = RunAction(() => manager.GetPriceByQR(request.Character, request.Qr), $"createpricebyqr {request.Character}:{request.Qr}");
@@ -155,7 +155,7 @@ namespace BillingAPI.Controllers
         }
 
         [HttpPost("createrenta")]
-        public DataResult<RentaDto> CreateRenta([FromBody] CreateRentaRequest request)  
+        public DataResult<RentaDto> CreateRenta([FromBody] CreateRentaRequest request)
         {
             var manager = IocContainer.Get<IBillingManager>();
             var result = RunAction(() => manager.ConfirmRenta(request.Character, request.PriceId), $"createrenta {request.Character}:{request.PriceId}");
