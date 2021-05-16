@@ -19,11 +19,15 @@ namespace Billing
         SIN CreateOrUpdatePhysicalWallet(int modelId, decimal balance = 1);
         SIN InitCharacter(int modelId);
         SIN GetSINByModelId(int modelId, params Expression<Func<SIN, object>>[] includes);
+        SIN GetSINBySinText(string sinText, params Expression<Func<SIN, object>>[] includes);
+        SIN BillingBlocked(int modelId, params Expression<Func<SIN, object>>[] includes);
+        SIN BillingBlocked(string sinText, params Expression<Func<SIN, object>>[] includes);
     }
 
     public class BaseBillingRepository : BaseEntityRepository, IBaseBillingRepository
     {
         protected ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
+        private string BlockErrorMessage = $"В данный момент ведется пересчет рентных платежей, попробуйте повторить чуть позже";
 
         public SIN InitCharacter(int modelId)
         {
@@ -65,7 +69,7 @@ namespace Billing
             scoring.CurerentRelative = 0.5m * 0.5m;
             SaveContext();
             InitScoring(scoring);
-            if(sin.PassportId == 0)
+            if (sin.PassportId == 0)
             {
                 var passport = new Passport();
                 sin.Passport = passport;
@@ -126,6 +130,9 @@ namespace Billing
             }
         }
 
+        /// <summary>
+        /// TODO need caching
+        /// </summary>
         protected TransferDto CreateTransferDto(Transfer transfer, TransferType type, int modelId = 0, string owner = "владелец кошелька")
         {
             bool anon = transfer.Anonymous;
@@ -209,12 +216,42 @@ namespace Billing
             return mir;
         }
 
+        public SIN BillingBlocked(int modelId, params Expression<Func<SIN, object>>[] includes)
+        {
+            var sin = GetSINByModelId(modelId, includes);
+            if (sin?.Blocked ?? true)
+            {
+                throw new BillingException(BlockErrorMessage);
+            }
+            return sin;
+        }
+
+        public SIN BillingBlocked(string sinText, params Expression<Func<SIN, object>>[] includes)
+        {
+            var sin = GetSINBySinText(sinText);
+            if (sin?.Blocked ?? true)
+            {
+                throw new BillingException(BlockErrorMessage);
+            }
+            return sin;
+        }
+
         public SIN GetSINByModelId(int modelId, params Expression<Func<SIN, object>>[] includes)
         {
             var sin = Get(s => s.Character.Model == modelId, includes);
             if (sin == null)
             {
                 throw new BillingNotFoundException($"sin for modelId {modelId} not found");
+            }
+            return sin;
+        }
+
+        public SIN GetSINBySinText(string sinText, params Expression<Func<SIN, object>>[] includes)
+        {
+            var sin = Get(s => s.Passport.Sin == sinText, includes);
+            if (sin == null)
+            {
+                throw new BillingNotFoundException($"sin for sinText {sinText} not found");
             }
             return sin;
         }

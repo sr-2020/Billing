@@ -32,6 +32,7 @@ namespace Billing
         void DeleteNomenklatura(int id);
         void DeleteShop(int shopid);
         void DeleteSku(int skuId);
+        Transfer MakeTransferSINSIN(int characterFrom, string sinTo, decimal amount, string comment);
         Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment);
     }
     public class AdminManager : BaseBillingRepository, IAdminManager
@@ -125,7 +126,7 @@ namespace Billing
                 }
                 SaveContext();
             }
-            shop = GetAsNoTracking<ShopWallet>(w => w.Id == shopId, s=>s.Owner, s => s.Wallet, s => s.Specialisations);
+            shop = GetAsNoTracking<ShopWallet>(w => w.Id == shopId, s => s.Owner, s => s.Wallet, s => s.Specialisations);
             var dto = new ShopDto(shop);
             return dto;
         }
@@ -315,33 +316,43 @@ namespace Billing
             SaveContext();
             return corporation;
         }
-
         public Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment)
         {
-            BillingHelper.BillingBlocked(characterFrom);
-            BillingHelper.BillingBlocked(characterTo);
-            var d1 = GetSINByModelId(characterFrom, s => s.Wallet);
-            var d2 = GetSINByModelId(characterTo, s => s.Wallet);
+            var d1 = BillingBlocked(characterFrom, s => s.Wallet, s => s.Character);
+            var d2 = BillingBlocked(characterTo, s => s.Wallet, s => s.Character);
+            return MakeTransferSINSIN(d1, d2, amount, comment);
+        }
+
+        public Transfer MakeTransferSINSIN(int characterFrom, string sinTo, decimal amount, string comment)
+        {
+            var d1 = BillingBlocked(characterFrom, s => s.Wallet, s => s.Character);
+            var d2 = BillingBlocked(sinTo, s => s.Wallet, s => s.Character);
+            return MakeTransferSINSIN(d1, d2, amount, comment);
+        }
+
+        protected Transfer MakeTransferSINSIN(SIN sinFrom, SIN sinTo, decimal amount, string comment)
+        {
             var anon = false;
             try
             {
                 var erService = new EreminService();
-                var anonFrom = erService.GetAnonimous(characterFrom);
-                var anonto = erService.GetAnonimous(characterTo);
+                var anonFrom = erService.GetAnonimous(sinFrom.Character.Model);
+                var anonto = erService.GetAnonimous(sinTo.Character.Model);
                 anon = anonFrom || anonto;
             }
             catch (Exception e)
             {
 
             }
-            var transfer = AddNewTransfer(d1.Wallet, d2.Wallet, amount, comment, anon);
+            var transfer = AddNewTransfer(sinFrom.Wallet, sinTo.Wallet, amount, comment, anon);
             Context.SaveChanges();
             if (transfer != null)
             {
-                EreminPushAdapter.SendNotification(characterTo, "Кошелек", $"Вам переведено денег {amount}");
+                EreminPushAdapter.SendNotification(sinTo.Character.Model, "Кошелек", $"Вам переведено денег {amount}");
             }
             return transfer;
         }
+
     }
 
 }

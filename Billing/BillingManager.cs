@@ -162,7 +162,7 @@ namespace Billing
 
         public RentaDto ConfirmRenta(int modelId, int priceId)
         {
-            BillingHelper.BillingBlocked(modelId);
+            var sin = BillingBlocked(modelId, s => s.Wallet, s => s.Character);
             var price = Get<Price>(p => p.Id == priceId,
                 p => p.Sku.Nomenklatura.Specialisation.ProductType,
                 p => p.Sku.Corporation.Wallet,
@@ -176,11 +176,10 @@ namespace Billing
                 throw new Exception("Персональное предложение заведено на другого персонажа");
             var dateTill = price.DateCreated.AddMinutes(_settings.GetIntValue(SystemSettingsEnum.price_minutes));
             if (dateTill < DateTime.Now)
-                throw new BillingException($"Персональное предложение больше не действительно, оно истекло {dateTill.ToString("HH:mm:ss")}");
+                throw new BillingException($"Персональное предложение больше не действительно, оно истекло {dateTill:HH:mm:ss}");
             var allowed = SkuAllowed(price.ShopId, price.SkuId);
             if (allowed == null)
                 throw new BillingException("Sku недоступно для продажи в данный момент");
-            var sin = Get<SIN>(s => s.Id == price.SinId, s => s.Wallet, s => s.Character);
             if (sin.Wallet.Balance - price.FinalPrice < 0)
             {
                 throw new BillingException("Недостаточно средств");
@@ -370,12 +369,11 @@ namespace Billing
 
         public PriceShopDto GetPrice(int modelId, int shopid, int skuid)
         {
-            BillingHelper.BillingBlocked(modelId);
+            var sin = BillingBlocked(modelId, s => s.Scoring, s => s.Character);
             var sku = SkuAllowed(shopid, skuid);
             if (sku == null)
                 throw new BillingException("sku недоступен для продажи");
             var shop = GetAsNoTracking<ShopWallet>(s => s.Id == shopid);
-            var sin = GetSINByModelId(modelId, s => s.Scoring, s => s.Character);
             if (shop == null || sin == null)
                 throw new Exception("some went wrong");
             var price = CreateNewPrice(sku, shop, sin);
@@ -447,9 +445,13 @@ namespace Billing
             var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Character);
             if (sin == null)
                 throw new BillingException("sin not found");
+
+
             var listFrom = GetList<Transfer>(t => t.WalletFromId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
             var allList = new List<TransferDto>();
             var owner = GetWalletName(sin.Wallet, false);
+            
+            
             if (listFrom != null)
                 allList.AddRange(listFrom
                     .Select(s => CreateTransferDto(s, TransferType.Outcoming, modelId, owner))
@@ -507,13 +509,8 @@ namespace Billing
 
         public Transfer CreateTransferMIRSIN(int characterTo, decimal amount)
         {
-            BillingHelper.BillingBlocked(characterTo);
+            var to = BillingBlocked(characterTo, s => s.Wallet);
             var from = GetMIR();
-            var to = GetSINByModelId(characterTo, s => s.Wallet);
-            if (to == null)
-            {
-                throw new BillingNotFoundException($"Не найден получатель");
-            }
             var comment = "Перевод от международного банка";
             return AddNewTransfer(from, to.Wallet, amount, comment);
         }

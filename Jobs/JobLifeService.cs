@@ -25,9 +25,14 @@ namespace Jobs
         }
         ManagerFactory Factory { get; set; }
 
-        public string ToggleCycle()
+        public const string BillingException = "Биллинг заблокирован";
+
+        public string ToggleCycle(string token = "")
         {
-            var token = GetCurrentToken();
+            if(string.IsNullOrEmpty(token))
+            {
+                token = GetCurrentToken();
+            }
             var cycle = Factory.Job.GetLastCycle(token);
             if (cycle == null)
             {
@@ -50,10 +55,12 @@ namespace Jobs
             return $"Цикл {cycle.Token}_{cycle.Number} {(cycle.IsActive ? "стартовал" : "остановлен")}";
         }
 
-        public string DoBeat(BeatTypes type = BeatTypes.Test)
+        public string DoBeat(BeatTypes type = BeatTypes.Test, string token = "")
         {
-            BillingHelper.BillingBlocked();
-            var token = GetCurrentToken();
+            if(string.IsNullOrEmpty(token))
+            {
+                token = GetCurrentToken();
+            }
             var cycle = Factory.Job.GetLastCycle(token);
             if (cycle == null || !cycle.IsActive)
             {
@@ -61,7 +68,7 @@ namespace Jobs
             }
             if (!Factory.Job.BlockBilling())
             {
-                throw new Exception("Попытка повторной блокировки биллинга");
+                throw new BillingException(BillingException);
             }
             Task.Run(() =>
             {

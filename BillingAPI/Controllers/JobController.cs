@@ -39,7 +39,19 @@ namespace BillingAPI.Controllers
             {
                 var life = new JobLifeService();
                 return life.DoBeat(BeatTypes.Characters);
-            }, $"period");
+            }, $"beatcharacters");
+            return result;
+        }
+
+        [HttpGet("beatitems")]
+        //[CheckSecret]
+        public DataResult<string> ProcessBeatItems()
+        {
+            var result = RunAction(() =>
+            {
+                var life = new JobLifeService();
+                return life.DoBeat(BeatTypes.Items);
+            }, $"beatitems");
             return result;
         }
 

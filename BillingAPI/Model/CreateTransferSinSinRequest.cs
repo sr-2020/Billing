@@ -10,5 +10,6 @@ namespace BillingAPI.Model
         public int CharacterTo { get; set; }
         public decimal Amount { get; set; }
         public string Comment { get; set; }
+        public string SinTo { get; set; }
     }
 }

@@ -64,8 +64,5 @@ namespace Jobs
             _settings.SetValue(SystemSettingsEnum.block, "false");
             return true;
         }
-
-
-
     }
 }

@@ -21,18 +21,19 @@ namespace Billing
     {
         public void Marauder(string modelIds, string targetIds)
         {
-            var model = ParseId(modelIds, "modelId");
-            var target = ParseId(targetIds, "targetId");
-            var sinFrom = GetSINByModelId(model, s => s.Wallet);
+            var modelId = ParseId(modelIds, "modelId");
+            var targetId = ParseId(targetIds, "targetId");
+            var sinFrom = BillingBlocked(modelId, s => s.Wallet, s => s.Character, s => s.Passport);
+            var sinTo = BillingBlocked(targetId, s => s.Wallet, s => s.Character, s => s.Passport);
             if (!((sinFrom?.Wallet?.Balance ?? 0) > 0))
             {
-                EreminPushAdapter.SendNotification(model, "Marauder", "у цели недостаточно средств для грабежа");
+                EreminPushAdapter.SendNotification(modelId, "Marauder", "у цели недостаточно средств для грабежа");
                 return;
             }
             decimal amount = sinFrom.Wallet.Balance * 0.1m;
-            var message = $"Ограбление на сумму {amount}";
-            MakeTransferSINSIN(model, target, amount, message);
-            EreminPushAdapter.SendNotification(model, "Marauder", message);
+            var message = $"Ограбление {sinFrom.Passport.Sin} на сумму {amount} в пользу {sinTo.Passport.Sin}";
+            MakeTransferSINSIN(sinFrom, sinTo, amount, message);
+            EreminPushAdapter.SendNotification(modelId, "Marauder", message);
         }
 
         public void Rerent(string rentaIds)
@@ -55,7 +56,7 @@ namespace Billing
             var sin = GetSINByModelId(modelId, s => s.Scoring);
             if (sin == null)
                 throw new BillingNotFoundException($"sin for {modelId} not found");
-            
+
             var renta = Get<Renta>(r => r.Id == rentaId);
             if (renta == null)
             {

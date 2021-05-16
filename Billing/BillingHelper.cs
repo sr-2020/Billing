@@ -13,7 +13,7 @@ namespace Billing
 {
     public class BillingHelper
     {
-        public const string BlockErrorMessage = "В данный момент ведется пересчет рентных платежей, попробуйте повторить чуть позже";
+        
         public static int GetModelId(string model)
         {
             int modelId;
@@ -110,26 +110,6 @@ namespace Billing
             {
 
                 return false;
-            }
-        }
-
-        public static void BillingBlocked(int modelId)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var sin = manager.GetSINByModelId(modelId);
-            if (sin?.Blocked ?? true)
-            {
-                throw new BillingException(BlockErrorMessage);
-            }
-        }
-
-        public static void BillingBlocked()
-        {
-            ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
-            var block = _settings.GetBoolValue(SystemSettingsEnum.block);
-            if (block)
-            {
-                throw new BillingException(BlockErrorMessage);
             }
         }
 

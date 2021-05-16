@@ -102,8 +102,7 @@ namespace Billing
 
         public Transfer MakeTransferLegSIN(int shop, int character, decimal amount, string comment)
         {
-            BillingHelper.BillingBlocked(character);
-            var sin = GetSINByModelId(character, s => s.Wallet);
+            var sin = BillingBlocked(character, s => s.Wallet);
             var anon = false;
             try
             {

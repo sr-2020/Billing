@@ -125,24 +125,7 @@ namespace BillingAPI.Controllers
         public DataResult<Transfer> CreateTransferSINSIN(int character, [FromBody] CreateTransferSinSinRequest request)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.MakeTransferSINSIN(character, request.CharacterTo, request.Amount, request.Comment), "transfer/createtransfersinsin");
-            return result;
-        }
-
-        /// <summary>
-        /// Create transfer from Character1 to Character2 using sins
-        /// </summary>
-        /// <param name="character1">ID from table Character</param>
-        /// <param name="character2">ID from table Character</param>
-        /// <param name="amount"></param>
-        /// <param name="comment"></param>
-        /// <returns></returns>
-        [Obsolete]
-        [HttpGet("transfer/maketransfersinsin")]
-        public DataResult<Transfer> MakeTransferSINSIN(int character1, int character2, decimal amount, string comment)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.MakeTransferSINSIN(character1, character2, amount, comment), "transfer/maketransfersinsin");
+            var result = RunAction(() => manager.MakeTransferSINSIN(character, request.SinTo, request.Amount, request.Comment), "transfer/createtransfersinsin");
             return result;
         }
 
