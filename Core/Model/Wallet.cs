@@ -16,5 +16,7 @@ namespace Core.Model
         public int WalletType { get; set; }
         [Column("current_lifestyle")]
         public int? LifeStyle { get; set; }
+        [Column("is_irridium")]
+        public bool IsIrridium { get; set; }
     }
 }

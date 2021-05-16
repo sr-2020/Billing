@@ -1,4 +1,6 @@
 ﻿using Billing;
+using Billing.Dto;
+using Billing.Dto.Shop;
 using Core;
 using Core.Model;
 using Core.Primitives;
@@ -127,14 +129,15 @@ namespace Jobs
             var sins = Factory.Billing.GetActiveSins(s => s.Wallet, s => s.Character);
             var charactersLoaded = false;
             var concurrent = new ConcurrentQueue<CharacterDto>();
+            var processedList = new List<CharacterDto>();
+            var errorList = new List<CharacterDto>();
+            var lsDto = new JobLifeStyleDto();
             var taskLoad = Task.Run(() =>
             {
                 LoadCharacters(sins, concurrent);
                 charactersLoaded = true;
             });
-            var processedList = new List<CharacterDto>();
-            var errorList = new List<CharacterDto>();
-            var taskAll = Task.Run(() =>
+            var taskProcess = Task.Run(() =>
             {
                 while (!charactersLoaded || !concurrent.IsEmpty)
                 {
@@ -148,7 +151,9 @@ namespace Jobs
                     {
                         try
                         {
-                            processedList.Add(ProcessModelCharacter(loaded));
+                            lsDto = ProcessModelCharacter(loaded, lsDto);
+                            lsDto.Count++;
+                            processedList.Add(loaded);
                         }
                         catch (Exception e)
                         {
@@ -162,17 +167,49 @@ namespace Jobs
                     }
                 }
             });
-            Task.WaitAll(taskLoad, taskAll);
+            Task.WaitAll(taskLoad, taskProcess);
+            foreach (var error in errorList)
+            {
+                beat.AddHistory($"ошибка обработки {error.Sin.CharacterId}: {error.ErrorText}");
+            }
+            try
+            {
+                var values = ProcessLifestyle(lsDto);
+                beat.AddHistory($"Значения для lifestyle {values}");
+            }
+            catch (Exception e)
+            {
+                beat.AddHistory(e.ToString());
+                Console.Error.WriteLine("Ошибка ProcessLifestyle, см таблицу beat_history");
+            }
             return beat;
         }
 
-        private CharacterDto ProcessModelCharacter(CharacterDto character)
+        private string ProcessLifestyle(JobLifeStyleDto dto)
+        {
+            var db = new LifeStyleAppDto();
+            db.Bronze = dto.Bronze();
+            db.Silver = dto.Silver();
+            db.Gold = dto.Gold();
+            db.Platinum = dto.Platinum();
+            db.ForecastBronze = dto.ForecastBronze();
+            db.ForecastSilver = dto.ForecastSilver();
+            db.ForecastGold = dto.ForecastGold();
+            db.ForecastPlatinum = dto.ForecastPlatinum();
+            var settings = IocContainer.Get<ISettingsManager>();
+            var value = Serialization.Serializer.ToJSON(db);
+            var save = Serialization.Serializer.ToJSON(dto);
+            settings.SetValue(SystemSettingsEnum.ls_dto, value);
+            return save;
+        }
+
+        private JobLifeStyleDto ProcessModelCharacter(CharacterDto character, JobLifeStyleDto dto)
         {
             var billing = IocContainer.Get<IBillingManager>();
             var d1 = character.EreminModel.workModel.passiveAbilities?.Any(p => p.id == "dividends-1");
             var d2 = character.EreminModel.workModel.passiveAbilities?.Any(p => p.id == "dividends-2");
             var d3 = character.EreminModel.workModel.passiveAbilities?.Any(p => p.id == "dividends-3");
-            billing.ProcessCharacterBeat(character.Sin.Id, character.EreminModel.workModel.karma.spent ?? 0, d1 ?? false, d2 ?? false, d3 ?? false);
+            dto = billing.ProcessCharacterBeat(character.Sin.Id, character.EreminModel.workModel.karma.spent ?? 0, d1 ?? false, d2 ?? false, d3 ?? false, dto);
             try
             {
                 EreminPushAdapter.SendNotification(character.Sin.Character.Model, "Кошелек", "Экономический пересчет завершен");
@@ -181,7 +218,7 @@ namespace Jobs
             {
                 LogException(e);
             }
-            return character;
+            return dto;
         }
 
         private void LoadCharacters(List<SIN> sins, ConcurrentQueue<CharacterDto> concurrent)

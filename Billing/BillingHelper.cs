@@ -1,4 +1,5 @@
-﻿using Billing.Dto.Shop;
+﻿using Billing.Dto;
+using Billing.Dto.Shop;
 using Core;
 using Core.Model;
 using Core.Primitives;
@@ -13,7 +14,7 @@ namespace Billing
 {
     public class BillingHelper
     {
-        
+
         public static int GetModelId(string model)
         {
             int modelId;
@@ -45,15 +46,21 @@ namespace Billing
             return Math.Round(value, 2);// Math.Floor(value * 2) / 2;
         }
 
-        public static Lifestyles GetLifeStyleByBalance(decimal balance)
+        public static LifeStyleAppDto GetLifeStyleDto()
         {
+            var result = new LifeStyleAppDto();
             var manager = IocContainer.Get<ISettingsManager>();
-            foreach (Lifestyles lifestyle in Enum.GetValues(typeof(Lifestyles)))
+            var dto = manager.GetValue(SystemSettingsEnum.ls_dto);
+            JobLifeStyleDto deserialized;
+            try
             {
-                if (balance < manager.GetIntValue(lifestyle.ToString().ToLower()))
-                    return lifestyle;
+                deserialized = Serialization.Serializer.Deserialize<JobLifeStyleDto>(dto);
             }
-            return Lifestyles.Iridium;
+            catch (Exception e)
+            {
+                Console.Error.WriteLine($"Ошибка десериализации ls_dto: {dto}");
+            }
+            return result;
         }
 
         public static Lifestyles GetLifestyle(int lifestyle)

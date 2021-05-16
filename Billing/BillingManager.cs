@@ -48,7 +48,7 @@ namespace Billing
         #region jobs
 
         List<SIN> GetActiveSins(params Expression<Func<SIN, object>>[] includes);
-        void ProcessCharacterBeat(int sinId, decimal karmaCount, bool dividents1, bool dividents2, bool dividents3);
+        JobLifeStyleDto ProcessCharacterBeat(int sinId, decimal karmaCount, bool dividents1, bool dividents2, bool dividents3, JobLifeStyleDto dto);
 
         #endregion
 
@@ -225,7 +225,7 @@ namespace Billing
             return dto;
         }
 
-        public void ProcessCharacterBeat(int sinId, decimal karmaCount, bool dividents1, bool dividents2, bool dividents3)
+        public JobLifeStyleDto ProcessCharacterBeat(int sinId, decimal karmaCount, bool dividents1, bool dividents2, bool dividents3, JobLifeStyleDto dto)
         {
             var sin = BlockCharacter(sinId);
             SaveContext();
@@ -269,8 +269,25 @@ namespace Billing
             //forecast
             sum -= rentas.Sum(r => BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring));
             sin.Wallet.IncomeOutcome = sin.Wallet.Balance - (sum * 3);
+            dto = CalculateLifeStyle(sin.Wallet, dto);
             UnblockCharacter(sin);
             SaveContext();
+            return dto;
+        }
+
+        private JobLifeStyleDto CalculateLifeStyle(Wallet wallet, JobLifeStyleDto dto)
+        {
+            if (dto.Min == null || ((dto.Min ?? 0) > wallet.Balance))
+                dto.Min = wallet.Balance;
+            if (dto.Max == null || ((dto.Max ?? 0) < wallet.Balance))
+                dto.Max = wallet.Balance;
+            if (dto.ForecastMin == null || ((dto.ForecastMin ?? 0) > wallet.IncomeOutcome))
+                dto.ForecastMin = wallet.IncomeOutcome;
+            if (dto.ForecastMax == null || ((dto.ForecastMax ?? 0) < wallet.IncomeOutcome))
+                dto.ForecastMax = wallet.IncomeOutcome;
+            dto.SumAll += wallet.Balance;
+            dto.ForecastSumAll += wallet.IncomeOutcome;
+            return dto;
         }
 
         /// <summary>
@@ -384,14 +401,15 @@ namespace Billing
         public BalanceDtoOld GetBalanceOld(int modelId)
         {
             var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring, s => s.Passport.Metatype);
+            var lifestyle = BillingHelper.GetLifeStyleDto();
             var balance = new BalanceDtoOld
             {
                 ModelId = modelId,
                 CurrentBalance = BillingHelper.Round(sin.Wallet.Balance),
                 CurrentScoring = sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative,
                 SIN = sin.Passport.Sin,
-                ForecastLifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
-                LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
+                ForecastLifeStyle = lifestyle.GetForecastLifeStyle(sin.Wallet).ToString(),
+                LifeStyle = lifestyle.GetLifeStyle(sin.Wallet).ToString(),
                 PersonName = sin.Passport.PersonName,
                 Metatype = sin.Passport.Metatype?.Name ?? "неизвестно",
                 Citizenship = sin.Passport.Citizenship ?? "неизвестно",
@@ -417,14 +435,15 @@ namespace Billing
                 .GroupBy(l => l.Sku.Nomenklatura.SpecialisationId)
                 .Select(g => g.FirstOrDefault()?.Sku?.Name)
                 .ToList();
+            var lifestyle = BillingHelper.GetLifeStyleDto();
             var balance = new BalanceDto
             {
                 ModelId = modelId,
                 CurrentBalance = BillingHelper.Round(sin.Wallet.Balance),
                 CurrentScoring = Math.Round(sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative, 2),
                 SIN = sin.Passport.Sin,
-                LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
-                ForecastLifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.IncomeOutcome).ToString(),
+                LifeStyle = lifestyle.GetLifeStyle(sin.Wallet).ToString(),
+                ForecastLifeStyle = lifestyle.GetForecastLifeStyle(sin.Wallet).ToString(),
                 PersonName = sin.Passport.PersonName,
                 Metatype = sin.Passport.Metatype?.Name ?? "неизвестно",
                 Citizenship = sin.Passport.Citizenship ?? "неизвестно",
@@ -450,8 +469,8 @@ namespace Billing
             var listFrom = GetList<Transfer>(t => t.WalletFromId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
             var allList = new List<TransferDto>();
             var owner = GetWalletName(sin.Wallet, false);
-            
-            
+
+
             if (listFrom != null)
                 allList.AddRange(listFrom
                     .Select(s => CreateTransferDto(s, TransferType.Outcoming, modelId, owner))
@@ -514,7 +533,7 @@ namespace Billing
             var comment = "Перевод от международного банка";
             return AddNewTransfer(from, to.Wallet, amount, comment);
         }
-        
+
         public List<SIN> GetSinsInGame()
         {
             return GetSinsInGame(s => s.Character, s => s.Wallet, s => s.Scoring, s => s.Passport);

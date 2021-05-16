@@ -167,9 +167,7 @@ namespace Billing
             if (amount < 0)
                 throw new BillingException($"Нельзя перевести отрицательное значение");
             walletFrom.Balance -= amount;
-            CheckLifestyle(walletFrom);
             walletTo.Balance += amount;
-            CheckLifestyle(walletTo);
             var transfer = new Transfer
             {
                 Amount = amount,
@@ -273,30 +271,6 @@ namespace Billing
         private int GetMIRId()
         {
             return _settings.GetIntValue(SystemSettingsEnum.MIR_ID);
-        }
-
-        private void CheckLifestyle(Wallet wallet)
-        {
-            if (wallet.WalletType != (int)WalletTypes.Character)
-            {
-                return;
-            }
-            var newlifestyle = BillingHelper.GetLifeStyleByBalance(wallet.Balance);
-            if (wallet.LifeStyle == null)
-            {
-                wallet.LifeStyle = (int)newlifestyle;
-            }
-            if (wallet.LifeStyle == (int)newlifestyle)
-            {
-                return;
-            }
-            var oldlifestyle = wallet.LifeStyle.Value;
-            wallet.LifeStyle = (int)newlifestyle;
-            var scoring = IocContainer.Get<ScoringManager>();
-            var sin = GetAsNoTracking<SIN>(s => s.WalletId == wallet.Id, s => s.Scoring);
-            if (sin == null)
-                throw new BillingException("sin not found");
-            scoring.OnLifeStyleChanged(sin.Scoring, BillingHelper.GetLifestyle(oldlifestyle), newlifestyle);
         }
 
     }

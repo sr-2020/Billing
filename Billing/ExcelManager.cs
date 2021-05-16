@@ -89,6 +89,7 @@ namespace Billing
             var ikarkoef = settings.GetDecimalValue(SystemSettingsEnum.ikar_k);
             var karmakoef = settings.GetDecimalValue(SystemSettingsEnum.karma_k);
             var inflationkoef = settings.GetDecimalValue(SystemSettingsEnum.pre_inflation);
+            var lifestyle = BillingHelper.GetLifeStyleDto();
             foreach (var sin in sins)
             {
                 var allRents = billing.GetRentas(sin.Character.Model);
@@ -112,7 +113,7 @@ namespace Billing
                     ScoringFix = sin.Scoring.CurrentFix,
                     ScoringRelative = sin.Scoring.CurerentRelative,
                     ModelId = sin.Character.Model.ToString(),
-                    LifeStyle = BillingHelper.GetLifeStyleByBalance(sin.Wallet.Balance).ToString(),
+                    LifeStyle = lifestyle.GetLifeStyle(sin.Wallet).ToString(),
                     SumRents = allRents.Sum,
                     Karma = karma
                 };

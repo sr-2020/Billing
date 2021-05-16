@@ -13,6 +13,7 @@ namespace Jobs
         }
         public BillingBeat Beat { get; set; }
         public List<BeatHistory> History { get; set; }
+
         public void AddHistory(string commment)
         {
             var history = new BeatHistory
