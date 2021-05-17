@@ -17,42 +17,42 @@ namespace Billing.Dto
 
         public decimal Bronze()
         {
-            return (Min ?? 0) + 1 / 3 * (SumAll / Count - (Min ?? 0));
+            return (Min ?? 0) + (SumAll / Count - (Min ?? 0)) / 3;
         }
 
         public decimal ForecastBronze()
         {
-            return (ForecastMin ?? 0) + 1 / 3 * (ForecastSumAll / Count - (ForecastMin ?? 0));
+            return (ForecastMin ?? 0) + (ForecastSumAll / Count - (ForecastMin ?? 0)) / 3;
         }
 
         public decimal Silver()
         {
-            return (Min ?? 0) + 2 / 3 * (SumAll / Count - (Min ?? 0));
+            return (Min ?? 0) + 2 * (SumAll / Count - (Min ?? 0)) / 3;
         }
 
         public decimal ForecastSilver()
         {
-            return (ForecastMin ?? 0) + 2 / 3 * (ForecastSumAll / Count - (ForecastMin ?? 0));
+            return (ForecastMin ?? 0) + 2 * (ForecastSumAll / Count - (ForecastMin ?? 0)) / 3;
         }
 
         public decimal Gold()
         {
-            return SumAll / Count + 1/3 * ((Max ?? 0) - SumAll / Count);
+            return SumAll / Count + ((Max ?? 0) - SumAll / Count) / 3;
         }
 
         public decimal ForecastGold()
         {
-            return ForecastSumAll / Count + 1 / 3 * ((ForecastMax ?? 0) - ForecastSumAll / Count);
+            return ForecastSumAll / Count + ((ForecastMax ?? 0) - ForecastSumAll / Count) / 3;
         }
 
         public decimal Platinum()
         {
-            return SumAll / Count + 2 / 3 * ((Max ?? 0) - SumAll / Count);
+            return SumAll / Count + 2 * ((Max ?? 0) - SumAll / Count) / 3;
         }
 
         public decimal ForecastPlatinum()
         {
-            return ForecastSumAll / Count + 2 / 3 * ((ForecastMax ?? 0) - ForecastSumAll / Count);
+            return ForecastSumAll / Count + 2 * ((ForecastMax ?? 0) - ForecastSumAll / Count) / 3;
         }
 
     }
