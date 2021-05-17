@@ -48,19 +48,19 @@ namespace Billing
 
         public static LifeStyleAppDto GetLifeStyleDto()
         {
-            var result = new LifeStyleAppDto();
             var manager = IocContainer.Get<ISettingsManager>();
             var dto = manager.GetValue(SystemSettingsEnum.ls_dto);
-            JobLifeStyleDto deserialized;
+            LifeStyleAppDto deserialized;
             try
             {
-                deserialized = Serialization.Serializer.Deserialize<JobLifeStyleDto>(dto);
+                deserialized = Serialization.Serializer.Deserialize<LifeStyleAppDto>(dto);
             }
             catch (Exception e)
             {
                 Console.Error.WriteLine($"Ошибка десериализации ls_dto: {dto}");
+                return new LifeStyleAppDto();
             }
-            return result;
+            return deserialized;
         }
 
         public static Lifestyles GetLifestyle(int lifestyle)

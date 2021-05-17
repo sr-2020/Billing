@@ -277,6 +277,10 @@ namespace Billing
 
         private JobLifeStyleDto CalculateLifeStyle(Wallet wallet, JobLifeStyleDto dto)
         {
+            if (wallet.IsIrridium)
+                return dto;
+            if (wallet.Balance < 0)
+                return dto;
             if (dto.Min == null || ((dto.Min ?? 0) > wallet.Balance))
                 dto.Min = wallet.Balance;
             if (dto.Max == null || ((dto.Max ?? 0) < wallet.Balance))
