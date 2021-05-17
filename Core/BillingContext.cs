@@ -45,5 +45,6 @@ namespace Core
         public DbSet<SystemSettings> SystemSettings { get; set; }
         public DbSet<Transfer> Transfer { get; set; }
         public DbSet<Wallet> Wallet { get; set; }
+        public DbSet<BeatHistory> BeatHistory { get; set; }
     }
 }
