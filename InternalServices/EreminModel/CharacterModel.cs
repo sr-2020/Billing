@@ -30,7 +30,7 @@ namespace InternalServices.EreminModel
     public class Billing
     {
         public bool anonymous { get; set; }
-        public decimal stockGainPercentage { get; set; }
+        public decimal? stockGainPercentage { get; set; }
     }
     public class WorkModel
     {

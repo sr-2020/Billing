@@ -14,12 +14,13 @@ namespace Jobs
         public BillingBeat Beat { get; set; }
         public List<BeatHistory> History { get; set; }
 
-        public void AddHistory(string commment)
+        public void AddHistory(string comment)
         {
+            Console.WriteLine(comment);
             var history = new BeatHistory
             {
                 BeatId = Beat.Id,
-                Comment = commment
+                Comment = comment
             };
             History.Add(history);
         }

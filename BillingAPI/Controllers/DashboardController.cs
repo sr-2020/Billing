@@ -6,6 +6,7 @@ using Billing;
 using Billing.Dto;
 using Billing.Dto.Shop;
 using Billing.DTO;
+using BillingAPI.Filters;
 using BillingAPI.Model;
 using Core.Model;
 using Core.Primitives;
@@ -16,6 +17,7 @@ namespace BillingAPI.Controllers
 {
     [Route("")]
     [ApiController]
+    [AdminAuthorization]
     public class DashboardController : EvarunApiController
     {
         #region CRUD
@@ -25,6 +27,7 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("a-users")]
+        
         public DataResult<List<UserDto>> GetUsers()
         {
             var manager = IocContainer.Get<IAdminManager>();

@@ -126,7 +126,9 @@ namespace Jobs
 
         private JobLifeDto DoCharactersBeat(JobLifeDto beat)
         {
+            Console.WriteLine("Запущен пересчет");
             var sins = Factory.Billing.GetActiveSins(s => s.Wallet, s => s.Character);
+            Console.WriteLine($"Обрабатывается {sins.Count} персонажей");
             var charactersLoaded = false;
             var concurrent = new ConcurrentQueue<CharacterDto>();
             var processedList = new List<CharacterDto>();
@@ -168,6 +170,7 @@ namespace Jobs
                 }
             });
             Task.WaitAll(taskLoad, taskProcess);
+            Console.WriteLine("Пересчеты персонажей закончены, записывается история и ошибки");
             foreach (var error in errorList)
             {
                 beat.AddHistory($"ошибка обработки {error.Sin.CharacterId}: {error.ErrorText}");
@@ -175,12 +178,12 @@ namespace Jobs
             try
             {
                 var values = ProcessLifestyle(lsDto);
-                beat.AddHistory($"Значения для lifestyle {values}");
+                var message = $"Значения для lifestyle {values}";
+                beat.AddHistory(message);
             }
             catch (Exception e)
             {
                 beat.AddHistory(e.ToString());
-                Console.Error.WriteLine("Ошибка ProcessLifestyle, см таблицу beat_history");
             }
             return beat;
         }
