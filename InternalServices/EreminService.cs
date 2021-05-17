@@ -32,7 +32,7 @@ namespace InternalServices
             var model = GetCharacter(characterId);
             if (model != null)
             {
-                return model.workModel.billing.anonymous;
+                return model.workModel.billing.anonymous ?? false;
             }
             return false;
         }
@@ -43,50 +43,50 @@ namespace InternalServices
             decimal every = 1;
             if (model != null)
             {
-                var gesheft = model.workModel.discounts.everything;
+                var gesheft = model?.workModel?.discounts?.everything ?? 1;
                 decimal samurai = 1;
                 if (discountType == DiscountType.Samurai)
-                    samurai = model.workModel.discounts.weaponsArmor;
+                    samurai = model?.workModel?.discounts?.weaponsArmor ?? 1;
                 every = gesheft < samurai ? gesheft : samurai;
             }
             decimal corpDisc = 1;
             switch (corporation)
             {
                 case CorporationEnum.ares:
-                    corpDisc = model.workModel.discounts.ares;
+                    corpDisc = model.workModel.discounts.ares ?? 1;
                     break;
                 case CorporationEnum.aztechnology:
-                    corpDisc = model.workModel.discounts.aztechnology;
+                    corpDisc = model.workModel.discounts.aztechnology ?? 1;
                     break;
                 case CorporationEnum.saederKrupp:
-                    corpDisc = model.workModel.discounts.saederKrupp;
+                    corpDisc = model.workModel.discounts.saederKrupp ?? 1;
                     break;
                 case CorporationEnum.spinradGlobal:
-                    corpDisc = model.workModel.discounts.spinradGlobal;
+                    corpDisc = model.workModel.discounts.spinradGlobal ?? 1;
                     break;
                 case CorporationEnum.neonet1:
-                    corpDisc = model.workModel.discounts.neonet1;
+                    corpDisc = model.workModel.discounts.neonet1 ?? 1;
                     break;
                 case CorporationEnum.evo:
-                    corpDisc = model.workModel.discounts.evo;
+                    corpDisc = model.workModel.discounts.evo ?? 1;
                     break;
                 case CorporationEnum.horizon:
-                    corpDisc = model.workModel.discounts.horizon;
+                    corpDisc = model.workModel.discounts.horizon ?? 1;
                     break;
                 case CorporationEnum.wuxing:
-                    corpDisc = model.workModel.discounts.wuxing;
+                    corpDisc = model.workModel.discounts.wuxing ?? 1;
                     break;
                 case CorporationEnum.russia:
-                    corpDisc = model.workModel.discounts.russia;
+                    corpDisc = model.workModel.discounts.russia ?? 1;
                     break;
                 case CorporationEnum.renraku:
-                    corpDisc = model.workModel.discounts.renraku;
+                    corpDisc = model.workModel.discounts.renraku ?? 1;
                     break;
                 case CorporationEnum.mutsuhama:
-                    corpDisc = model.workModel.discounts.mutsuhama;
+                    corpDisc = model.workModel.discounts.mutsuhama ?? 1;
                     break;
                 case CorporationEnum.shiavase:
-                    corpDisc = model.workModel.discounts.shiavase;
+                    corpDisc = model.workModel.discounts.shiavase ?? 1;
                     break;
                 case CorporationEnum.unknown:
                 default:
