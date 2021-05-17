@@ -30,9 +30,13 @@ namespace Billing.DTO
             if (shop.Wallet == null)
                 return;
             Balance = shop.Wallet.Balance;
+            Comment = shop.Comment;
+            Location = shop.Location;
         }
         public LifestyleDto Lifestyle { get; set; }
         public decimal Balance { get; set; }
+        public string Comment { get; set; }
+        public string Location { get; set; }
         public List<int> Specialisations { get; set; }
     }
 }

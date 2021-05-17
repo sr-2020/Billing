@@ -22,7 +22,7 @@ namespace Billing
         List<NomenklaturaDto> GetNomenklaturas(Expression<Func<Nomenklatura, bool>> predicate);
         List<SkuDto> GetSkus(Expression<Func<Sku, bool>> predicate);
         List<UserDto> GetUsers(Expression<Func<SIN, bool>> predicate);
-        ShopDto CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle, int owner, List<int> specialisations);
+        ShopDto CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle, int owner, List<int> specialisations, string comment = "", string location = "");
         SpecialisationDto CreateOrUpdateSpecialisation(int id, int producttype, string name);
         NomenklaturaDto CreateOrUpdateNomenklatura(int id, string name, string code, int specialisationId, int lifestyle, decimal baseprice, int baseCount, string description, string pictureurl, int externalId = 0);
         SkuDto CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled, int externalId = 0);
@@ -82,7 +82,7 @@ namespace Billing
             return list.Select(c => new UserDto(c)).ToList();
         }
 
-        public ShopDto CreateOrUpdateShopWallet(int shopId = 0, decimal balance = 0, string name = "default shop", int lifestyle = 1, int ownerId = 0, List<int> specialisations = null)
+        public ShopDto CreateOrUpdateShopWallet(int shopId = 0, decimal balance = 0, string name = "default shop", int lifestyle = 1, int ownerId = 0, List<int> specialisations = null, string comment = "", string location = "")
         {
             ShopWallet shop = null;
             if (shopId == 0)
@@ -106,6 +106,8 @@ namespace Billing
             shop.Name = name;
             shop.OwnerId = ownerId;
             shop.Wallet.Balance = balance;
+            shop.Comment = comment;
+            shop.Location = location;
             var ls = BillingHelper.GetLifestyle(lifestyle);
             shop.LifeStyle = (int)ls;
             SaveContext();
