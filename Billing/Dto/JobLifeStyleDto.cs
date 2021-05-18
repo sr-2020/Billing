@@ -13,7 +13,11 @@ namespace Billing.Dto
         public decimal? ForecastMin { get; set; }
         public decimal? Max { get; set; }
         public decimal? ForecastMax { get; set; }
-        public int Count { get; set; }
+        public decimal SumRents { get; set; }
+        public decimal SumKarma { get; set; }
+        public int Insolvent { get; set; }
+        public int Irridium { get; set; }
+        public int Count { get; set; } 
 
         public decimal Bronze()
         {

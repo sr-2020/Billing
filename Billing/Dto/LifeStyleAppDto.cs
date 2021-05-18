@@ -41,7 +41,8 @@ namespace Billing.Dto
         {
             if (wallet.IsIrridium)
                 return Lifestyles.Iridium;
-            return wallet.IncomeOutcome > ForecastPlatinum ? Lifestyles.Platinum : IsForecastGold(wallet.IncomeOutcome);
+            var forecast = BillingHelper.GetForecast(wallet);
+            return forecast > ForecastPlatinum ? Lifestyles.Platinum : IsForecastGold(forecast);
         }
         private Lifestyles IsForecastGold(decimal balance)
         {

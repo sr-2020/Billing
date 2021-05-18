@@ -230,32 +230,33 @@ namespace Billing
             var sin = BlockCharacter(sinId);
             SaveContext();
             var mir = GetMIR();
-            decimal sum = 0;
+            decimal income = 0;
+            decimal outcome = 0;
             //ability
             if (dividents1)
             {
                 var dk1 = _settings.GetDecimalValue(SystemSettingsEnum.dividents1_k);
                 AddNewTransfer(mir, sin.Wallet, dk1, "Дивиденды *");
-                sum += dk1;
+                income += dk1;
             }
             if (dividents2)
             {
                 var dk2 = _settings.GetDecimalValue(SystemSettingsEnum.dividents2_k);
                 AddNewTransfer(mir, sin.Wallet, dk2, "Дивиденды **");
-                sum += dk2;
+                income += dk2;
             }
             if (dividents3)
             {
                 var dk3 = _settings.GetDecimalValue(SystemSettingsEnum.dividents3_k);
                 AddNewTransfer(mir, sin.Wallet, dk3, "Дивиденды ***");
-                sum += dk3;
+                income += dk3;
             }
             //karma
             if (karmaCount > 0)
             {
                 var k = _settings.GetDecimalValue(SystemSettingsEnum.karma_k);
                 var karmasum = k * karmaCount;
-                sum += karmasum;
+                income += karmasum;
                 AddNewTransfer(mir, sin.Wallet, karmasum, "пассивный доход");
             }
             //rentas
@@ -267,30 +268,39 @@ namespace Billing
             //scoring
 
             //forecast
-            sum -= rentas.Sum(r => BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring));
-            sin.Wallet.IncomeOutcome = sin.Wallet.Balance - (sum * 3);
-            dto = CalculateLifeStyle(sin.Wallet, dto);
+            outcome -= rentas.Sum(r => BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring));
+            sin.Wallet.IncomeOutcome = income - outcome;
+            dto = CalculateLifeStyle(sin.Wallet, dto, income, outcome);
             UnblockCharacter(sin);
             SaveContext();
             return dto;
         }
 
-        private JobLifeStyleDto CalculateLifeStyle(Wallet wallet, JobLifeStyleDto dto)
+        private JobLifeStyleDto CalculateLifeStyle(Wallet wallet, JobLifeStyleDto dto, decimal income, decimal outcome)
         {
             if (wallet.IsIrridium)
+            {
+                dto.Irridium++;
                 return dto;
+            }
             if (wallet.Balance < 0)
+            {
+                dto.Insolvent++;
                 return dto;
+            }
+            var forecast = BillingHelper.GetForecast(wallet);
             if (dto.Min == null || ((dto.Min ?? 0) > wallet.Balance))
                 dto.Min = wallet.Balance;
             if (dto.Max == null || ((dto.Max ?? 0) < wallet.Balance))
                 dto.Max = wallet.Balance;
-            if (dto.ForecastMin == null || ((dto.ForecastMin ?? 0) > wallet.IncomeOutcome))
-                dto.ForecastMin = wallet.IncomeOutcome;
-            if (dto.ForecastMax == null || ((dto.ForecastMax ?? 0) < wallet.IncomeOutcome))
-                dto.ForecastMax = wallet.IncomeOutcome;
+            if (dto.ForecastMin == null || ((dto.ForecastMin ?? 0) > forecast))
+                dto.ForecastMin = forecast;
+            if (dto.ForecastMax == null || ((dto.ForecastMax ?? 0) < forecast))
+                dto.ForecastMax = forecast;
             dto.SumAll += wallet.Balance;
-            dto.ForecastSumAll += wallet.IncomeOutcome;
+            dto.SumKarma += income;
+            dto.SumRents += outcome;
+            dto.ForecastSumAll += forecast;
             return dto;
         }
 
@@ -317,7 +327,7 @@ namespace Billing
                 foreach (var overdraft in allOverdrafts)
                 {
                     overdraft.Overdraft = false;
-                    var closingRenta = Get<Renta>(r => r.Id == overdraft.RentaId);
+                    var closingRenta = Get<Renta>(r => r.Id == overdraft.RentaId, r=>r.Sku.Corporation, r=>r.Shop.Wallet);
                     CloseOverdraft(renta, mir, sin);
                 }
             }

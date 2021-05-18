@@ -63,6 +63,11 @@ namespace Billing
             return deserialized;
         }
 
+        public static decimal GetForecast(Wallet wallet)
+        {
+            return wallet.Balance + (wallet.IncomeOutcome * 3);
+        }
+
         public static Lifestyles GetLifestyle(int lifestyle)
         {
             if (Enum.IsDefined(typeof(Lifestyles), lifestyle))
