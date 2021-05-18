@@ -12,6 +12,8 @@ namespace BillingAPI.Model
         public int LifeStyle { get; set; }
         public string Name { get; set; }
         public int Owner { get; set; }
+        public string Comment { get; set; }
+        public string Location { get; set; }
         public List<int> Specialisations { get; set; }
     }
 }
