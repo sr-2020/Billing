@@ -90,7 +90,8 @@ namespace Billing
                 var newWallet = CreateOrUpdateWallet(WalletTypes.Shop);
                 shop = new ShopWallet
                 {
-                    Wallet = newWallet
+                    Wallet = newWallet,
+                    OwnerId = ownerId
                 };
                 AddAndSave(shop);
                 shopId = shop.Id;
@@ -104,7 +105,7 @@ namespace Billing
                 throw new BillingException("shop not found");
             }
             shop.Name = name;
-            shop.OwnerId = ownerId;
+
             shop.Wallet.Balance = balance;
             shop.Comment = comment;
             shop.Location = location;

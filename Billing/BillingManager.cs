@@ -131,6 +131,10 @@ namespace Billing
 
         public RentaSumDto GetRentas(int modelId)
         {
+            var result = new TransferSum();
+            var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Character);
+            if (sin == null)
+                throw new BillingException("sin not found");
             var sum = new RentaSumDto();
             var list = GetListAsNoTracking<Renta>(r => r.Sin.Character.Model == modelId,
                 r => r.Sku.Nomenklatura.Specialisation.ProductType,
