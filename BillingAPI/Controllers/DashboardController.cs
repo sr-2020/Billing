@@ -79,7 +79,7 @@ namespace BillingAPI.Controllers
         public DataResult<ShopDto> EditShop([FromBody] CreateShopModel request)
         {
             var manager = IocContainer.Get<IAdminManager>();
-            var result = RunAction(() => manager.CreateOrUpdateShopWallet(request.ShopId, request.Balance, request.Name, request.LifeStyle, request.Owner, request.Specialisations));
+            var result = RunAction(() => manager.CreateOrUpdateShopWallet(request.ShopId, request.Balance, request.Name, request.LifeStyle, request.Owner, request.Specialisations, request.Comment, request.Location));
             return result;
         }
 
