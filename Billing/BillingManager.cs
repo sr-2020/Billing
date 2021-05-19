@@ -450,7 +450,7 @@ namespace Billing
             var lics = ProductTypeEnum.Insurance.ToString();
             var licences = GetList<Renta>(r => r.Sku.Nomenklatura.Specialisation.ProductType.Alias == lics, r => r.Sku.Nomenklatura)
                 .OrderByDescending(r => r.DateCreated)
-                .GroupBy(l => l.Sku.Nomenklatura.SpecialisationId)
+                .GroupBy(l => l.Sku.NomenklaturaId)
                 .Select(g => g.FirstOrDefault()?.Sku?.Name)
                 .ToList();
             var lifestyle = BillingHelper.GetLifeStyleDto();
