@@ -332,7 +332,7 @@ namespace Billing
                 {
                     overdraft.Overdraft = false;
                     var closingRenta = Get<Renta>(r => r.Id == overdraft.RentaId, r=>r.Sku.Corporation, r=>r.Shop.Wallet);
-                    CloseOverdraft(renta, mir, sin);
+                    CloseOverdraft(closingRenta, mir, sin);
                 }
             }
             else
