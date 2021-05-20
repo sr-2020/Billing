@@ -31,7 +31,7 @@ namespace BillingAPI.Controllers
         public DataResult<List<UserDto>> GetUsers()
         {
             var manager = IocContainer.Get<IAdminManager>();
-            var result = RunAction(() => manager.GetUsers(s => true));
+            var result = RunAction(() => manager.GetUsers());
             return result;
         }
 
