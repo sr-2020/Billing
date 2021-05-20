@@ -63,7 +63,7 @@ namespace Billing
     public class BillingManager : AdminManager, IBillingManager
     {
 
-       
+
 
         public void BreakContract(int corporation, int shop)
         {
@@ -157,7 +157,7 @@ namespace Billing
 
         public RentaDto ConfirmRenta(int modelId, int priceId)
         {
-            var sin = BillingBlocked(modelId, s => s.Wallet, s => s.Character);
+            var sin = BillingBlocked(modelId, s => s.Wallet, s => s.Character, s => s.Passport);
             var price = Get<Price>(p => p.Id == priceId,
                 p => p.Sku.Nomenklatura.Specialisation.ProductType,
                 p => p.Sku.Corporation.Wallet,
@@ -322,7 +322,7 @@ namespace Billing
                 foreach (var overdraft in allOverdrafts)
                 {
                     overdraft.Overdraft = false;
-                    var closingRenta = Get<Renta>(r => r.Id == overdraft.RentaId, r=>r.Sku.Corporation, r=>r.Shop.Wallet);
+                    var closingRenta = Get<Renta>(r => r.Id == overdraft.RentaId, r => r.Sku.Corporation, r => r.Shop.Wallet);
                     CloseOverdraft(closingRenta, mir, sin);
                 }
             }
@@ -438,7 +438,7 @@ namespace Billing
             var insur = GetList<Renta>(r => r.Sku.Nomenklatura.Specialisation.ProductType.Alias == inss, r => r.Sku)
                 .OrderByDescending(r => r.Id)
                 .FirstOrDefault();
-            var lics = ProductTypeEnum.Insurance.ToString();
+            var lics = ProductTypeEnum.Licences.ToString();
             var licences = GetList<Renta>(r => r.Sku.Nomenklatura.Specialisation.ProductType.Alias == lics, r => r.Sku.Nomenklatura)
                 .OrderByDescending(r => r.DateCreated)
                 .GroupBy(l => l.Sku.NomenklaturaId)
