@@ -117,6 +117,15 @@ namespace BillingAPI.Controllers
 
         #region transfer
 
+        [Obsolete]
+        [HttpGet("transfer/maketransfersinsin")]
+        public DataResult<Transfer> MakeTransferSINSIN(int character1, int character2, decimal amount, string comment)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.MakeTransferSINSIN(character1, character2, amount, comment), "transfer/maketransfersinsin");
+            return result;
+        }
+
         /// <summary>
         /// Create transfer from Character1 to Character2 using sins
         /// </summary>
