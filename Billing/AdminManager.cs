@@ -113,7 +113,7 @@ namespace Billing
                 throw new BillingException("shop not found");
             }
             shop.Name = name;
-
+            shop.OwnerId = ownerId;
             shop.Wallet.Balance = balance;
             shop.Comment = comment;
             shop.Location = location;
