@@ -47,7 +47,6 @@ namespace Billing
 
         #region jobs
 
-        List<SIN> GetActiveSins(params Expression<Func<SIN, object>>[] includes);
         JobLifeStyleDto ProcessCharacterBeat(int sinId, decimal karmaCount, bool dividents1, bool dividents2, bool dividents3, JobLifeStyleDto dto);
 
         #endregion
@@ -64,15 +63,7 @@ namespace Billing
     public class BillingManager : AdminManager, IBillingManager
     {
 
-        protected int CURRENTGAME = 2;
-
-        public List<SIN> GetActiveSins(params Expression<Func<SIN, object>>[] includes)
-        {
-            var currentGame = 2;
-            //var sins = GetListAsNoTracking(s => s.Character.Model == 44043, includes);
-            var sins = GetListAsNoTracking(s => s.InGame ?? false && s.Character.Game == currentGame, includes);
-            return sins;
-        }
+       
 
         public void BreakContract(int corporation, int shop)
         {

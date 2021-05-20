@@ -21,7 +21,8 @@ namespace Billing
         List<ProductTypeDto> GetProductTypes(Expression<Func<ProductType, bool>> predicate);
         List<NomenklaturaDto> GetNomenklaturas(Expression<Func<Nomenklatura, bool>> predicate);
         List<SkuDto> GetSkus(Expression<Func<Sku, bool>> predicate);
-        List<UserDto> GetUsers(Expression<Func<SIN, bool>> predicate);
+        List<UserDto> GetUsers();
+        List<SIN> GetActiveSins(params Expression<Func<SIN, object>>[] includes);
         ShopDto CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle, int owner, List<int> specialisations, string comment = "", string location = "");
         SpecialisationDto CreateOrUpdateSpecialisation(int id, int producttype, string name);
         NomenklaturaDto CreateOrUpdateNomenklatura(int id, string name, string code, int specialisationId, int lifestyle, decimal baseprice, int baseCount, string description, string pictureurl, int externalId = 0);
@@ -38,7 +39,7 @@ namespace Billing
     public class AdminManager : BaseBillingRepository, IAdminManager
     {
         public static string UrlNotFound = "";
-
+        protected int CURRENTGAME = 2;
         public List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate)
         {
             return GetList(predicate, s => s.Owner.Sins, s => s.Wallet, s => s.Specialisations).Select(s =>
@@ -76,10 +77,17 @@ namespace Billing
             return list.Select(s => new SkuDto(s, true)).ToList();
         }
 
-        public List<UserDto> GetUsers(Expression<Func<SIN, bool>> predicate)
+        public List<UserDto> GetUsers()
         {
-            var list = GetListAsNoTracking(predicate, u => u.Character, u => u.Wallet, u => u.Passport);
+            var list = GetActiveSins(u => u.Character, u => u.Wallet, u => u.Passport); 
             return list.Select(c => new UserDto(c)).ToList();
+        }
+
+        public List<SIN> GetActiveSins(params Expression<Func<SIN, object>>[] includes)
+        {
+            var currentGame = 1;
+            var sins = GetListAsNoTracking(s => s.InGame ?? false && s.Character.Game == currentGame, includes);
+            return sins;
         }
 
         public ShopDto CreateOrUpdateShopWallet(int shopId = 0, decimal balance = 0, string name = "default shop", int lifestyle = 1, int ownerId = 0, List<int> specialisations = null, string comment = "", string location = "")
