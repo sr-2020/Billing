@@ -52,10 +52,10 @@ namespace PubSubService
 
         public virtual void Read(string message)
         {
-            //Console.WriteLine($"message {message} readed");
             T model;
             try
             {
+                Console.WriteLine($"read {SubscriptionId} message {message}");
                 model = Serializer.Deserialize<T>(message);
                 Handle(model);
             }

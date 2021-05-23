@@ -14,7 +14,7 @@ using System.Text;
 
 namespace Billing
 {
-    public interface IShopManager : IBaseRepository
+    public interface IShopManager : IAdminManager
     {
         bool HasAccessToShop(int character, int shop);
         bool HasAccessToCorporation(int character, int corporation);

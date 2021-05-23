@@ -141,7 +141,7 @@ namespace BillingAPI.Controllers
             }
             else
             {
-                result = RunAction(() => manager.MakeTransferSINSIN(character, request.SinTo, request.Amount, request.Comment), "transfer/createtransfersinsin");
+                result = RunAction(() => manager.MakeTransferSINSIN(character, request.SinTo, request.Amount, request.Comment), $"transfer/createtransfersinsin {character}=>{request.SinTo}:{request.Amount}");
             }
 
             return result;
