@@ -27,6 +27,7 @@ namespace IoC.Init
             For<IScoringManager>().Use<ScoringManager>().SetLifecycleTo(Lifecycles.Transient);
             For<ISubscribeManager>().Use<SubscribeManager>().SetLifecycleTo(Lifecycles.Transient);
             For<IAdminManager>().Use<AdminManager>().SetLifecycleTo(Lifecycles.Transient);
+            For<IAbilityManager>().Use<AbilityManager>().SetLifecycleTo(Lifecycles.Transient);
         }
     }
 }
