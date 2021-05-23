@@ -30,6 +30,7 @@ namespace Core
         void Add<T>(T entity) where T : BaseEntity;
         void AddAndSave<T>(T entity) where T : BaseEntity;
         void Delete<T>(int id) where T : BaseEntity;
+        void DeleteAndSave<T>(int id) where T : BaseEntity;
         void SaveContext();
         void RefreshContext();
     }
@@ -143,6 +144,12 @@ namespace Core
             Remove(db);
         }
 
+        public void DeleteAndSave<T>(int id) where T : BaseEntity
+        {
+            Delete<T>(id);
+            SaveContext();
+        }
+
         public virtual void Remove<T>(T entity) where T : class
         {
             Context.Set<T>().Remove(entity);
@@ -155,7 +162,7 @@ namespace Core
 
         public virtual void RemoveAndSave<T>(T entity) where T : class
         {
-            Context.Set<T>().Remove(entity);
+            Remove(entity);
             SaveContext();
         }
 

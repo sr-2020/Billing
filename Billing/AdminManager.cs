@@ -259,7 +259,7 @@ namespace Billing
             {
                 throw new Exception($"Сперва необходимо удалить номенклатуры с id {string.Join(";", nomenklaturas)}");
             }
-            Delete<Specialisation>(id);
+            DeleteAndSave<Specialisation>(id);
         }
 
         public void DeleteNomenklatura(int id)
@@ -269,7 +269,7 @@ namespace Billing
             {
                 throw new Exception($"Сперва необходимо удалить ску с id {string.Join(";", skus)}");
             }
-            Delete<Nomenklatura>(id);
+            DeleteAndSave<Nomenklatura>(id);
         }
 
         public void DeleteShop(int shopid)
@@ -298,8 +298,7 @@ namespace Billing
             var sku = Get<Sku>(s => s.Id == skuId);
             if (sku == null)
                 throw new Exception("sku not found");
-            Remove(sku);
-            SaveContext();
+            DeleteAndSave<Sku>(skuId);
         }
 
         public CorporationWallet CreateOrUpdateCorporationWallet(int corpId = 0, decimal amount = 0, string name = "unknown corporation", string logoUrl = "")
