@@ -435,11 +435,11 @@ namespace Billing
         {
             var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring, s => s.Passport.Metatype);
             var inss = ProductTypeEnum.Insurance.ToString();
-            var insur = GetList<Renta>(r => r.Sku.Nomenklatura.Specialisation.ProductType.Alias == inss, r => r.Sku)
+            var insur = GetList<Renta>(r => r.Sku.Nomenklatura.Specialisation.ProductType.Alias == inss && r.SinId == sin.Id, r => r.Sku)
                 .OrderByDescending(r => r.Id)
                 .FirstOrDefault();
             var lics = ProductTypeEnum.Licences.ToString();
-            var licences = GetList<Renta>(r => r.Sku.Nomenklatura.Specialisation.ProductType.Alias == lics, r => r.Sku.Nomenklatura)
+            var licences = GetList<Renta>(r => r.Sku.Nomenklatura.Specialisation.ProductType.Alias == lics && r.SinId == sin.Id, r => r.Sku.Nomenklatura)
                 .OrderByDescending(r => r.DateCreated)
                 .GroupBy(l => l.Sku.NomenklaturaId)
                 .Select(g => g.FirstOrDefault()?.Sku?.Name)
