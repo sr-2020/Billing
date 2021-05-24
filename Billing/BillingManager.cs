@@ -37,7 +37,7 @@ namespace Billing
         PriceShopDto GetPrice(int modelId, int shop, int sku);
         void BreakContract(int corporation, int shop);
         Contract CreateContract(int corporation, int shop);
-        RentaDto ConfirmRenta(int modelId, int priceId);
+        RentaDto ConfirmRenta(int modelId, int priceId, int count = 1);
         List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1);
         ProductType GetExtProductType(string name);
         Nomenklatura GetExtNomenklatura(string name);
@@ -155,9 +155,11 @@ namespace Billing
 
         }
 
-        public RentaDto ConfirmRenta(int modelId, int priceId)
+        public RentaDto ConfirmRenta(int modelId, int priceId, int count = 1)
         {
             var sin = BillingBlocked(modelId, s => s.Wallet, s => s.Character, s => s.Passport);
+            if (count == 0)
+                count = 1;
             var price = Get<Price>(p => p.Id == priceId,
                 p => p.Sku.Nomenklatura.Specialisation.ProductType,
                 p => p.Sku.Corporation.Wallet,
@@ -175,11 +177,13 @@ namespace Billing
             var allowed = SkuAllowed(price.ShopId, price.SkuId);
             if (allowed == null)
                 throw new BillingException("Sku недоступно для продажи в данный момент");
+            price.BasePrice *= count;
+            var finalPrice = BillingHelper.GetFinalPrice(price.BasePrice, price.Discount, price.CurrentScoring);
             if (sin.Wallet.Balance - price.FinalPrice < 0)
             {
                 throw new BillingException("Недостаточно средств");
             }
-            price.Sku.Count--;
+            price.Sku.Count -= count;
             var instantConsume = price.Sku.Nomenklatura.Specialisation.ProductType.InstantConsume;
             var renta = new Renta
             {
@@ -195,7 +199,8 @@ namespace Billing
                 HasQRWrite = instantConsume ? false : BillingHelper.HasQrWrite(price.Sku.Nomenklatura.Code),
                 PriceId = priceId,
                 Secret = price.Sku.Nomenklatura.Secret,
-                LifeStyle = price.Sku.Nomenklatura.Lifestyle
+                LifeStyle = price.Sku.Nomenklatura.Lifestyle,
+                Count = count
             };
             Add(renta);
             price.Confirmed = true;
@@ -215,7 +220,7 @@ namespace Billing
                 HasQRWrite = renta.HasQRWrite,
                 PriceId = priceId,
                 RentaId = renta.Id,
-                FinalPrice = price.FinalPrice
+                FinalPrice = finalPrice
             };
             return dto;
         }

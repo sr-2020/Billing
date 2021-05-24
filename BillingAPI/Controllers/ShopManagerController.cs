@@ -158,7 +158,7 @@ namespace BillingAPI.Controllers
         public DataResult<RentaDto> CreateRenta([FromBody] CreateRentaRequest request)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.ConfirmRenta(request.Character, request.PriceId), $"createrenta {request.Character}:{request.PriceId}");
+            var result = RunAction(() => manager.ConfirmRenta(request.Character, request.PriceId, request.Count), $"createrenta {request.Character}:{request.PriceId}:{request.Count}");
             return result;
         }
     }

@@ -60,9 +60,7 @@ namespace Billing
             var code = renta.Sku.Nomenklatura.Code;
             var name = renta.Sku.Name;
             var description = renta.Sku.Nomenklatura.Description;
-            //TODO
-            var count = 1;
-            _ereminService.WriteQR(qr, code, name, description, count, renta.BasePrice, BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring), renta.Secret, rentaId, (Lifestyles)renta.LifeStyle);
+            _ereminService.WriteQR(qr, code, name, description, renta.Count, renta.BasePrice, BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring), renta.Secret, rentaId, (Lifestyles)renta.LifeStyle);
             renta.QRRecorded = qr;
             Add(renta);
             Context.SaveChanges();

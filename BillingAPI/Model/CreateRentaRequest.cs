@@ -8,5 +8,6 @@ namespace BillingAPI.Model
     public class CreateRentaRequest : CharacterBasedRequest
     {
         public int PriceId { get; set; }
+        public int Count { get; set; }
     }
 }

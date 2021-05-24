@@ -44,5 +44,7 @@ namespace Core.Model
         public string Secret { get; set; }
         [Column("lifestyle")]
         public int LifeStyle { get; set; }
+        [Column("count")]
+        public int Count { get; set; }
     }
 }
