@@ -12,15 +12,19 @@ namespace Core
             _configuration = configuration;
         }
         static IConfiguration _configuration;
+        public static string Host = "DBHOST";
+        public static string Billing = "POSTGRESQLBILLING_DBNAME";
+        public static string BillingUser = "POSTGRESQLBILLING_USER";
+        public static string BillingPassword = "POSTGRESQLBILLING_PASSWORD";
 
-        public static string GetConnectionString(string dataBase)
+        public static string GetConnectionString()
         {
             if (_configuration == null)
                 throw new ArgumentNullException("Configuration is null");
-            var user = Environment.GetEnvironmentVariable(_configuration.GetConnectionString(dataBase + "User"));
-            var password = Environment.GetEnvironmentVariable(_configuration.GetConnectionString(dataBase + "Password"));
-            var host = Environment.GetEnvironmentVariable(_configuration.GetConnectionString("host"));
-            var db = Environment.GetEnvironmentVariable(_configuration.GetConnectionString(dataBase));
+            var user = Environment.GetEnvironmentVariable(BillingUser);
+            var password = Environment.GetEnvironmentVariable(BillingPassword);
+            var host = Environment.GetEnvironmentVariable(Host);
+            var db = Environment.GetEnvironmentVariable(Billing);
             if (string.IsNullOrEmpty(user))
                 throw new ArgumentNullException("Environment user is empty");
             if (string.IsNullOrEmpty(db))

@@ -1,4 +1,5 @@
-﻿using Serialization;
+﻿using Core;
+using Serialization;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,7 +19,8 @@ namespace PubSubService
     {
         public PubSubService(string id)
         {
-            SubscriptionId = id;
+            var env = Environment.GetEnvironmentVariable(SystemHelper.Billing);
+            SubscriptionId = $"{env}_{id}";
             _adapter = new PubSubAdapter();
         }
         private PubSubAdapter _adapter;

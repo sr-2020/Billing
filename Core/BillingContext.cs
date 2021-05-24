@@ -13,7 +13,7 @@ namespace Core
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql(SystemHelper.GetConnectionString("billing"));
+            optionsBuilder.UseNpgsql(SystemHelper.GetConnectionString());
             optionsBuilder.EnableSensitiveDataLogging();
         }
         public DbSet<BillingAbilityLog> AbilityLogs { get; set; }
