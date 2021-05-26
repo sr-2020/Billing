@@ -174,8 +174,10 @@ namespace Billing
 
         public void ApproveContract(int corporation, int shop)
         {
-            var status = (int)ContractStatusEnum.Suggested;
-            var contract = Get<Contract>(c => c.CorporationId == corporation && c.ShopId == shop && c.Status == status);
+            var statuss = (int)ContractStatusEnum.Suggested;
+            var statust = (int)ContractStatusEnum.Terminating;
+
+            var contract = Get<Contract>(c => c.CorporationId == corporation && c.ShopId == shop && (c.Status == statuss || c.Status == statust));
             if (contract == null)
             {
                 throw new BillingException("Контракт не найден");
@@ -193,7 +195,7 @@ namespace Billing
             {
                 throw new BillingException("Контракт не найден");
             }
-            if (contract.Status == (int)ContractStatusEnum.Suggested)
+            if (contract.Status == (int)ContractStatusEnum.Approved)
             {
                 contract.Status = (int)ContractStatusEnum.Terminating;
                 AddAndSave(contract);

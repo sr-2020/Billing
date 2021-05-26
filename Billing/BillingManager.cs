@@ -83,7 +83,8 @@ namespace Billing
             var newContract = new Contract
             {
                 ShopId = shop,
-                CorporationId = corporation
+                CorporationId = corporation,
+                Status = (int)ContractStatusEnum.Approved
             };
             Add(newContract);
             Context.SaveChanges();
@@ -509,7 +510,7 @@ namespace Billing
 
         public int GetModelIdBySinString(string sinString)
         {
-            var sin = Get<SIN>(s => s.Passport.Sin == sinString);
+            var sin = GetSINBySinText(sinString, s => s.Character);
             if (sin == null)
                 throw new Exception("sin not found");
             return sin.Character.Model;
@@ -546,7 +547,9 @@ namespace Billing
             var to = BillingBlocked(characterTo, s => s.Wallet);
             var from = GetMIR();
             var comment = "Перевод от международного банка";
-            return AddNewTransfer(from, to.Wallet, amount, comment);
+            var transfer = AddNewTransfer(from, to.Wallet, amount, comment);
+            SaveContext();
+            return transfer;
         }
 
         public List<SIN> GetSinsInGame()

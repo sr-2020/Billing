@@ -36,7 +36,7 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetValue(key), "settings/GetValue");
             return result;
         }
-        [HttpGet("SetValue")]
+        [HttpPost("SetValue")]
         public DataResult<SystemSettings> SetValue(string key, string value)
         {
             var manager = IocContainer.Get<ISettingsManager>();

@@ -96,22 +96,22 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        /// <summary>
-        /// Get corporation wallet. If wallet not exists, then create it
-        /// </summary>
-        /// <param name="id">0 for create new, specified for update</param>
-        /// <param name="amount">if negative then amount will not change</param>
-        /// <param name="name">Some name</param>
-        /// <param name="logoUrl">Url to picture</param>
-        /// <returns></returns>
-        [HttpPut("admin/createorupdatecorporationwallet")]
-        [AdminAuthorization]
-        public DataResult<CorporationWallet> CreateOrUpdateCorporationWallet(int id, decimal amount, string name, string logoUrl)
-        {
-            var manager = IocContainer.Get<IAdminManager>();
-            var result = RunAction(() => manager.CreateOrUpdateCorporationWallet(id, amount, name, logoUrl), $"createorupdatecorporationwallet {id}:{amount}:{name}:{logoUrl}");
-            return result;
-        }
+        ///// <summary>
+        ///// Get corporation wallet. If wallet not exists, then create it
+        ///// </summary>
+        ///// <param name="id">0 for create new, specified for update</param>
+        ///// <param name="amount">if negative then amount will not change</param>
+        ///// <param name="name">Some name</param>
+        ///// <param name="logoUrl">Url to picture</param>
+        ///// <returns></returns>
+        //[HttpPut("admin/createorupdatecorporationwallet")]
+        //[AdminAuthorization]
+        //public DataResult<CorporationWallet> CreateOrUpdateCorporationWallet(int id, decimal amount, string name, string logoUrl)
+        //{
+        //    var manager = IocContainer.Get<IAdminManager>();
+        //    var result = RunAction(() => manager.CreateOrUpdateCorporationWallet(id, amount, name, logoUrl), $"createorupdatecorporationwallet {id}:{amount}:{name}:{logoUrl}");
+        //    return result;
+        //}
 
         #endregion
 
@@ -185,10 +185,10 @@ namespace BillingAPI.Controllers
         /// <param name="enabled"></param>
         /// <returns></returns>
         [HttpGet("info/getskus")]
-        public DataResult<List<SkuDto>> GetSkus(int corporationId, int nomenklaturaId, bool? enabled)
+        public DataResult<List<SkuDto>> GetSkus(int corporationId, int? nomenklaturaId, bool? enabled)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetSkus(corporationId, nomenklaturaId, enabled), $"getskus {corporationId}:{nomenklaturaId}:{enabled}");
+            var result = RunAction(() => manager.GetSkus(corporationId, nomenklaturaId ?? 0, enabled), $"getskus {corporationId}:{nomenklaturaId ?? 0}:{enabled}");
             return result;
         }
 

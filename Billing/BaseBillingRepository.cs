@@ -231,7 +231,7 @@ namespace Billing
 
         public SIN BillingBlocked(string sinText, params Expression<Func<SIN, object>>[] includes)
         {
-            var sin = GetSINBySinText(sinText);
+            var sin = GetSINBySinText(sinText, includes);
             if (sin?.Blocked ?? true)
             {
                 throw new BillingException(BlockErrorMessage);
