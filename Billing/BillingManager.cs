@@ -139,7 +139,7 @@ namespace Billing
                         ModelId = modelId.ToString(),
                         CharacterName = r.Sin.Passport?.PersonName ?? "Unknown",
                         FinalPrice = Math.Round(BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring), 2),
-                        ProductType = r.Sku.Nomenklatura.Specialisation.Name,
+                        ProductType = r.Sku.Nomenklatura.Specialisation.ProductType.Name,
                         Shop = r.Shop.Name,
                         NomenklaturaName = r.Sku.Nomenklatura.Name,
                         SkuName = r.Sku.Name,
@@ -147,7 +147,8 @@ namespace Billing
                         RentaId = r.Id,
                         HasQRWrite = r.HasQRWrite,
                         QRRecorded = r.QRRecorded,
-                        DateCreated = r.DateCreated
+                        DateCreated = r.DateCreated,
+                        Specialisation = r.Sku.Nomenklatura.Specialisation.Name
                     }).ToList();
             sum.Rentas = list;
             sum.Sum = list.Sum(r => r.FinalPrice);
