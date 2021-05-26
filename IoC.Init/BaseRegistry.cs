@@ -1,6 +1,4 @@
 ﻿using Billing;
-using Core;
-using Jobs;
 using Scoringspace;
 using Settings;
 using StructureMap;

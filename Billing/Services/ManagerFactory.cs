@@ -1,11 +1,10 @@
-﻿using Billing;
-using IoC;
+﻿using IoC;
 using Settings;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jobs
+namespace Billing
 {
     public class ManagerFactory
     {

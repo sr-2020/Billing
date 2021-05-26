@@ -43,7 +43,7 @@ namespace Billing
             var character = GetAsNoTracking<Character>(c => c.Model == modelId);
             if (character == null)
                 throw new BillingNotFoundException($"character {modelId} not found");
-            var sin = Get<SIN>(s => s.Character.Model == modelId);
+            var sin = Get<SIN>(s => s.Character.Model == modelId, s => s.Passport);
             if (sin == null)
             {
                 sin = new SIN
@@ -68,7 +68,7 @@ namespace Billing
             scoring.CurrentFix = 0.5m * 0.5m;
             scoring.CurerentRelative = 0.5m * 0.5m;
             SaveContext();
-            InitScoring(scoring);
+            InitEco(sin);
             if (sin.PassportId == 0)
             {
                 var passport = new Passport();
@@ -78,23 +78,28 @@ namespace Billing
             return sin;
         }
 
-        protected void InitScoring(Scoring scoring)
+        private void InitEco(SIN sin)
         {
             var categories = GetList<ScoringCategory>(c => c.CategoryType > 0);
             foreach (var category in categories)
             {
-                var current = GetAsNoTracking<CurrentCategory>(c => c.CategoryId == category.Id && c.ScoringId == scoring.Id);
+                var current = GetAsNoTracking<CurrentCategory>(c => c.CategoryId == category.Id && c.ScoringId == sin.ScoringId);
                 if (current == null)
                 {
                     current = new CurrentCategory
                     {
                         CategoryId = category.Id,
-                        ScoringId = scoring.Id,
-                        Value = scoring.StartFactor ?? 1
+                        ScoringId = sin.ScoringId,
+                        Value = sin.Scoring.StartFactor ?? 1
                     };
                     Add(current);
                 }
             }
+            var transfers = GetList<Transfer>(t => t.WalletFromId == sin.WalletId || t.WalletToId == sin.WalletId);
+            RemoveRange(transfers);
+            SaveContext();
+            var rentas = GetList<Renta>(r => r.SinId == sin.Id);
+            RemoveRange(rentas);
             SaveContext();
         }
 

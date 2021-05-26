@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Jobs
+namespace Billing
 {
-    public class CharacterDto
+    public class ImportDto
     {
         public SIN Sin { get; set; }
         public CharacterModel EreminModel { get; set; }

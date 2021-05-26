@@ -39,7 +39,8 @@ namespace Billing
     public class AdminManager : BaseBillingRepository, IAdminManager
     {
         public static string UrlNotFound = "";
-        protected int CURRENTGAME = 2;
+        protected int CURRENTGAME = 1;
+
         public List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate)
         {
             return GetList(predicate, s => s.Owner.Sins, s => s.Wallet, s => s.Specialisations).Select(s =>

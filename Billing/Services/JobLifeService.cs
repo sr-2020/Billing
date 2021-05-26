@@ -1,6 +1,7 @@
 ﻿using Billing;
 using Billing.Dto;
 using Billing.Dto.Shop;
+using Billing.Services;
 using Core;
 using Core.Model;
 using Core.Primitives;
@@ -19,22 +20,12 @@ using System.Threading.Tasks;
 
 namespace Jobs
 {
-    public class JobLifeService
+    public class JobLifeService : BaseService
     {
-        public JobLifeService()
-        {
-            Factory = new ManagerFactory();
-        }
-        ManagerFactory Factory { get; set; }
-
         public const string BillingException = "Биллинг заблокирован";
 
         public string ToggleCycle(string token = "")
         {
-            if(string.IsNullOrEmpty(token))
-            {
-                token = GetCurrentToken();
-            }
             var cycle = Factory.Job.GetLastCycle(token);
             if (cycle == null)
             {
@@ -59,12 +50,8 @@ namespace Jobs
 
         public string DoBeat(BeatTypes type = BeatTypes.Test, string token = "")
         {
-            if(string.IsNullOrEmpty(token))
-            {
-                token = GetCurrentToken();
-            }
             var cycle = Factory.Job.GetLastCycle(token);
-            if (cycle == null || !cycle.IsActive)
+            if (!cycle.IsActive || cycle == null)
             {
                 return "цикл не запущен";
             }
@@ -130,9 +117,9 @@ namespace Jobs
             var sins = Factory.Billing.GetActiveSins(s => s.Wallet, s => s.Character);
             Console.WriteLine($"Обрабатывается {sins.Count} персонажей");
             var charactersLoaded = false;
-            var concurrent = new ConcurrentQueue<CharacterDto>();
-            var processedList = new List<CharacterDto>();
-            var errorList = new List<CharacterDto>();
+            var concurrent = new ConcurrentQueue<ImportDto>();
+            var processedList = new List<ImportDto>();
+            var errorList = new List<ImportDto>();
             var lsDto = new JobLifeStyleDto();
             var taskLoad = Task.Run(() =>
             {
@@ -143,7 +130,7 @@ namespace Jobs
             {
                 while (!charactersLoaded || !concurrent.IsEmpty)
                 {
-                    CharacterDto loaded;
+                    ImportDto loaded;
                     if (!concurrent.TryDequeue(out loaded))
                     {
                         Thread.Sleep(100);
@@ -201,12 +188,13 @@ namespace Jobs
             db.ForecastPlatinum = dto.ForecastPlatinum();
             var settings = IocContainer.Get<ISettingsManager>();
             var value = Serialization.Serializer.ToJSON(db);
-            var save = Serialization.Serializer.ToJSON(dto);
+            var beat = Serialization.Serializer.ToJSON(dto);
             settings.SetValue(SystemSettingsEnum.ls_dto, value);
-            return save;
+            settings.SetValue(SystemSettingsEnum.beat_characters_dto, beat);
+            return beat;
         }
 
-        private JobLifeStyleDto ProcessModelCharacter(CharacterDto character, JobLifeStyleDto dto)
+        private JobLifeStyleDto ProcessModelCharacter(ImportDto character, JobLifeStyleDto dto)
         {
             var billing = IocContainer.Get<IBillingManager>();
             var d1 = character.EreminModel.workModel.passiveAbilities?.Any(p => p.id == "dividends-1");
@@ -224,13 +212,13 @@ namespace Jobs
             return dto;
         }
 
-        private void LoadCharacters(List<SIN> sins, ConcurrentQueue<CharacterDto> concurrent)
+        private void LoadCharacters(List<SIN> sins, ConcurrentQueue<ImportDto> concurrent)
         {
             var erService = new EreminService();
             Parallel.ForEach(sins, new ParallelOptions { MaxDegreeOfParallelism = 5 }, sin =>
                 {
 
-                    var dto = new CharacterDto { Sin = sin };
+                    var dto = new ImportDto { Sin = sin };
                     try
                     {
                         dto.EreminModel = erService.GetCharacter(sin.Character.Model);
@@ -250,10 +238,7 @@ namespace Jobs
             return beat;
         }
 
-        private string GetCurrentToken()
-        {
-            return Factory.Settings.GetValue(Core.Primitives.SystemSettingsEnum.token);
-        }
+
 
         private void DoIkar(List<SIN> sins)
         {

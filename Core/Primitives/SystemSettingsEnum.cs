@@ -8,12 +8,6 @@ namespace Core.Primitives
     {
         block,
         MIR_ID,
-        bronze,
-        silver,
-        gold,
-        platinum,
-        iridium,
-        wood,
         shopwood,
         shopbronze,
         shopsilver,
@@ -37,6 +31,7 @@ namespace Core.Primitives
         dividents1_k,
         dividents2_k,
         dividents3_k,
-        ls_dto
+        ls_dto,
+        beat_characters_dto
     }
 }

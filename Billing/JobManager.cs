@@ -1,8 +1,6 @@
-﻿using Billing;
-using Core;
+﻿using Core;
 using Core.Model;
 using Core.Primitives;
-using Hangfire;
 using IoC;
 using NCrontab;
 using Settings;
@@ -14,12 +12,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Jobs
+namespace Billing
 {
     public interface IJobManager : IBaseRepository
     {
         BillingCycle GetLastCycle(string token);
         BillingBeat GetLastBeat(int cycleId, BeatTypes type);
+        BillingCycle GetLastCycle();
+        BillingBeat GetLastBeat(BeatTypes type);
         bool BlockBilling();
         bool UnblockBilling();
     }
@@ -30,6 +30,10 @@ namespace Jobs
 
         public BillingCycle GetLastCycle(string token)
         {
+            if (string.IsNullOrEmpty(token))
+            {
+                token = GetCurrentToken();
+            }
             var cycle = Query<BillingCycle>()
                 .Where(c => c.Token == token)
                 .OrderByDescending(c => c.Number)
@@ -45,6 +49,18 @@ namespace Jobs
                 .OrderByDescending(c => c.Number)
                 .FirstOrDefault();
             return beat;
+        }
+
+        public BillingCycle GetLastCycle()
+        {
+            var token = GetCurrentToken();
+            return GetLastCycle(token);
+        }
+
+        public BillingBeat GetLastBeat(BeatTypes type)
+        {
+            var cycle = GetLastCycle();
+            return GetLastBeat(cycle.Id, type);
         }
 
         public bool BlockBilling()
@@ -63,6 +79,10 @@ namespace Jobs
                 return false;
             _settings.SetValue(SystemSettingsEnum.block, "false");
             return true;
+        }
+        private string GetCurrentToken()
+        {
+            return _settings.GetValue(Core.Primitives.SystemSettingsEnum.token);
         }
     }
 }

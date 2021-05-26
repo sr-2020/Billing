@@ -6,6 +6,7 @@ using Billing;
 using Billing.Dto;
 using Billing.Dto.Shop;
 using Billing.DTO;
+using Billing.Services;
 using BillingAPI.Filters;
 using BillingAPI.Model;
 using Core.Model;
@@ -17,7 +18,7 @@ namespace BillingAPI.Controllers
 {
     [Route("")]
     [ApiController]
-    [AdminAuthorization]
+
     public class DashboardController : EvarunApiController
     {
         #region CRUD
@@ -64,6 +65,7 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("a-add-shop")]
+        [AdminAuthorization]
         public DataResult<ShopDto> AddShop([FromBody] CreateShopModel request)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -76,6 +78,7 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPatch("a-edit-shop")]
+        [AdminAuthorization]
         public DataResult<ShopDto> EditShop([FromBody] CreateShopModel request)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -88,6 +91,7 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpDelete("a-del-shop")]
+        [AdminAuthorization]
         public Result DeleteShop(int shopid)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -124,6 +128,7 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("a-add-specialisation")]
+        [AdminAuthorization]
         public DataResult<SpecialisationDto> AddSpecialisation([FromBody] CreateSpecialisationRequest request)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -136,6 +141,7 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPatch("a-edit-specialisation")]
+        [AdminAuthorization]
         public DataResult<SpecialisationDto> EditSpecialisation([FromBody] CreateSpecialisationRequest request)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -148,6 +154,7 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpDelete("a-del-specialisation")]
+        [AdminAuthorization]
         public Result DeleteSpecialisation(int specialisationid)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -254,6 +261,7 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("a-add-nomenklatura")]
+        [AdminAuthorization]
         public DataResult<NomenklaturaDto> AddNomenklatura([FromBody] CreateNomenklaturaRequest request)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -266,6 +274,7 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPatch("a-edit-nomenklatura")]
+        [AdminAuthorization]
         public DataResult<NomenklaturaDto> EditNomenklatura([FromBody] CreateNomenklaturaRequest request)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -278,6 +287,7 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("a-add-sku")]
+        [AdminAuthorization]
         public DataResult<SkuDto> AddSku([FromBody] CreateSkuRequest request)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -290,6 +300,7 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPatch("a-edit-sku")]
+        [AdminAuthorization]
         public DataResult<SkuDto> EditSku([FromBody] CreateSkuRequest request)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -302,6 +313,7 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpDelete("a-del-nomenklatura")]
+        [AdminAuthorization]
         public Result DeleteNomenklatura(int nomenklaturaId)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -314,6 +326,7 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpDelete("a-del-sku")]
+        [AdminAuthorization]
         public Result DeleteSku(int skuId)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -322,6 +335,19 @@ namespace BillingAPI.Controllers
         }
 
         #endregion
+
+        /// <summary>
+        /// GetUsers
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("a-session")]
+
+        public DataResult<SessionDto> GetBillingInfo()
+        {
+            var service = new AdminService();
+            var result = RunAction(() => service.GetSessionInfo());
+            return result;
+        }
 
         /// <summary>
         /// get Lifestyles
