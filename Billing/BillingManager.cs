@@ -209,7 +209,7 @@ namespace Billing
             SaveContext();
             ProcessBuyScoring(sin, price.Sku);
             var mir = GetMIR();
-            ProcessRenta(renta, mir, sin);
+            ProcessRenta(renta, mir, sin, true);
             SaveContext();
             if (instantConsume)
             {
@@ -309,7 +309,7 @@ namespace Billing
         /// <summary>
         /// НЕ ВЫПОЛНЯЕТСЯ SAVECONTEXT
         /// </summary>
-        private void ProcessRenta(Renta renta, Wallet mir, SIN sin)
+        private void ProcessRenta(Renta renta, Wallet mir, SIN sin, bool first = false)
         {
             if (renta?.Shop?.Wallet == null
                 || renta?.Sku?.Corporation?.Wallet == null
@@ -323,7 +323,7 @@ namespace Billing
             if (sin.Wallet.Balance > 0)
             {
                 AddNewTransfer(sin.Wallet, mir, finalPrice, $"Рентный платеж: { renta.Sku.Name} в {renta.Shop.Name}", false, renta.Id, false);
-                CloseOverdraft(renta, mir, sin);
+                CloseOverdraft(renta, mir, sin, first);
                 //close overdraft here
                 var allOverdrafts = GetList<Transfer>(t => t.Overdraft && t.WalletFromId == sin.Wallet.Id && t.RentaId > 0);
                 foreach (var overdraft in allOverdrafts)
@@ -339,11 +339,13 @@ namespace Billing
             }
         }
 
-        private void CloseOverdraft(Renta renta, Wallet mir, SIN sin)
+        private void CloseOverdraft(Renta renta, Wallet mir, SIN sin, bool first = false)
         {
             var comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
             //create KPI here
             renta.Sku.Corporation.CurrentKPI += renta.BasePrice;
+            if (first)
+                renta.Sku.Corporation.SkuSold += renta.BasePrice;
             //comission
             AddNewTransfer(mir, renta.Shop.Wallet, comission, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} от {sin.Passport.PersonName} ({sin.Passport.Sin})", false, renta.Id, false);
         }

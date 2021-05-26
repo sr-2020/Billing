@@ -20,5 +20,9 @@ namespace Core.Model
         public decimal LastKPI { get; set; }
         [Column("current_kpi")]
         public decimal CurrentKPI { get; set; }
+        [Column("sku_sold")]
+        public decimal SkuSold { get; set; }
+        [Column("sku_sold_last")]
+        public decimal LastSkuSold { get; set; }
     }
 }

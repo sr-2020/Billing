@@ -12,9 +12,13 @@ namespace Billing.Dto.Shop
             CorporationUrl = corporation.CorporationLogoUrl;
             CurrentKPI = corporation.CurrentKPI;
             LastKPI = corporation.LastKPI;
+            CurrentSkuSold = corporation.SkuSold;
+            LastSkuSold = corporation.LastSkuSold;
         }
         public string CorporationUrl { get; set; }
         public decimal CurrentKPI { get; set; }
         public decimal LastKPI { get; set; }
+        public decimal CurrentSkuSold { get; set; }
+        public decimal LastSkuSold { get; set; }
     }
 }
