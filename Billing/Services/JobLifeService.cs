@@ -63,9 +63,9 @@ namespace Jobs
             {
                 try
                 {
-                    var beat = Factory.Job.GetLastBeat(cycle.Id, type);
+                    var beat = Factory.Job.GetLastBeatAsNoTracking(cycle.Id, type);
                     var newBeat = new BillingBeat();
-                    newBeat.Number = beat != null ? beat.Number++ : 1;
+                    newBeat.Number = beat != null ? ++beat.Number : 1;
                     newBeat.StartTime = DateTime.Now;
                     newBeat.CycleId = cycle.Id;
                     newBeat.BeatType = (int)type;

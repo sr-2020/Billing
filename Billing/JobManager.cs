@@ -17,9 +17,9 @@ namespace Billing
     public interface IJobManager : IBaseRepository
     {
         BillingCycle GetLastCycle(string token);
-        BillingBeat GetLastBeat(int cycleId, BeatTypes type);
+        BillingBeat GetLastBeatAsNoTracking(int cycleId, BeatTypes type);
         BillingCycle GetLastCycle();
-        BillingBeat GetLastBeat(BeatTypes type);
+        BillingBeat GetLastBeatAsNoTracking(BeatTypes type);
         bool BlockBilling();
         bool UnblockBilling();
     }
@@ -41,10 +41,10 @@ namespace Billing
             return cycle;
         }
 
-        public BillingBeat GetLastBeat(int cycleId, BeatTypes type)
+        public BillingBeat GetLastBeatAsNoTracking(int cycleId, BeatTypes type)
         {
             var typeint = (int)type;
-            var beat = Query<BillingBeat>()
+            var beat = QueryAsNoTracking<BillingBeat>()
                 .Where(b => b.CycleId == cycleId && b.BeatType == typeint)
                 .OrderByDescending(c => c.Number)
                 .FirstOrDefault();
@@ -57,10 +57,10 @@ namespace Billing
             return GetLastCycle(token);
         }
 
-        public BillingBeat GetLastBeat(BeatTypes type)
+        public BillingBeat GetLastBeatAsNoTracking(BeatTypes type)
         {
             var cycle = GetLastCycle();
-            return GetLastBeat(cycle.Id, type);
+            return GetLastBeatAsNoTracking(cycle.Id, type);
         }
 
         public bool BlockBilling()

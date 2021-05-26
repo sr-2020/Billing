@@ -337,7 +337,7 @@ namespace BillingAPI.Controllers
         #endregion
 
         /// <summary>
-        /// GetUsers
+        /// get all information about current game session
         /// </summary>
         /// <returns></returns>
         [HttpGet("a-session")]
