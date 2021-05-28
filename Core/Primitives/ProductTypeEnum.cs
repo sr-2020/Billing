@@ -12,6 +12,7 @@ namespace Core.Primitives
         Pill,
         Magic,
         Licences,
-        EdibleFood
+        EdibleFood,
+        Charity
     }
 }

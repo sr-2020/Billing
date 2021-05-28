@@ -58,5 +58,26 @@ namespace BillingAPI.Controllers
             return result;
         }
 
+        /// <summary>
+        /// Create transfer from Character1 to Character2 using sins
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("createtransfersinsin")]
+        public DataResult<Transfer> CreateTransferSINSIN(int character, [FromBody] CreateTransferSinSinRequest request)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            DataResult<Transfer> result;
+            if (string.IsNullOrEmpty(request.SinTo))
+            {
+                result = RunAction(() => manager.MakeTransferSINSIN(character, request.CharacterTo, request.Amount, request.Comment), "transfer/createtransfersinsin");
+            }
+            else
+            {
+                result = RunAction(() => manager.MakeTransferSINSIN(character, request.SinTo, request.Amount, request.Comment), $"transfer/createtransfersinsin {character}=>{request.SinTo}:{request.Amount}");
+            }
+
+            return result;
+        }
+
     }
 }

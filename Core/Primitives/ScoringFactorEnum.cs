@@ -22,7 +22,7 @@ namespace Core.Primitives
         where_implant_install,
         worse,
         dumpshock,
-        clinical_death
-        
+        clinical_death,
+        buy_charity
     }
 }

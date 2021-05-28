@@ -363,6 +363,7 @@ namespace Billing
                     manager.OnImplantBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
                 case "Food":
+                case "EdibleFood":
                     manager = IoC.IocContainer.Get<IScoringManager>();
                     manager.OnFoodBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
@@ -374,7 +375,6 @@ namespace Billing
                     manager = IoC.IocContainer.Get<IScoringManager>();
                     manager.OnPillBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
-
                 case "Magic":
                     manager = IoC.IocContainer.Get<IScoringManager>();
                     manager.OnMagicBuy(sin, sku.Nomenklatura.Lifestyle);
@@ -383,7 +383,10 @@ namespace Billing
                     manager = IoC.IocContainer.Get<IScoringManager>();
                     manager.OnInsuranceBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
-
+                case "Charity":
+                    manager = IoC.IocContainer.Get<IScoringManager>();
+                    manager.OnInsuranceBuy(sin, sku.Nomenklatura.Lifestyle);
+                    break;
                 default:
                     manager = IoC.IocContainer.Get<IScoringManager>();
                     manager.OnOtherBuy(sin, sku.Nomenklatura.Lifestyle);

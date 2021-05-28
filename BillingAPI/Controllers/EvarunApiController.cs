@@ -48,10 +48,6 @@ namespace BillingAPI.Controllers
             {
                 return HandleException(422, ex.Message, guid, result, actionName, logmessage);
             }
-            catch (ShopException se)
-            {
-                return HandleException(418, se.Message, guid, result, actionName, logmessage);
-            }
             catch (HttpResponseException re)
             {
                 return HandleException((int)re.Response.StatusCode, re.Message, guid, result, actionName, logmessage);

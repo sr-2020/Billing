@@ -30,6 +30,7 @@ namespace Scoringspace
         void OnWeaponBuy(SIN sin, int lifestyle);
         void OnMagicBuy(SIN sin, int lifestyle);
         void OnInsuranceBuy(SIN sin, int lifestyle);
+        void OnCharityBuy(SIN sin, int lifestyle);
         void OnFoodBuy(SIN sin, int lifestyle);
         void OnImplantBuy(SIN sin, int lifestyle);
         void OnImplantInstalled(string model, string implantlifestyle, string autodoclifestyle);
@@ -44,6 +45,16 @@ namespace Scoringspace
         public void OnInsuranceBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.insurance);
+            ScoringEvent(sin.ScoringId, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
+                return value?.Value ?? 1;
+            });
+        }
+
+        public void OnCharityBuy(SIN sin, int lifestyle)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.buy_charity);
             ScoringEvent(sin.ScoringId, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);

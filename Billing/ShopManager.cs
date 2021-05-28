@@ -56,11 +56,14 @@ namespace Billing
             var qr = EreminQrService.GetPayload(qrEncoded);
             var renta = Get<Renta>(p => p.Id == rentaId && p.HasQRWrite && string.IsNullOrEmpty(p.QRRecorded), r => r.Sku.Nomenklatura);
             if (renta == null)
-                throw new ShopException($"offer {rentaId} записать на qr невозможно");
+                throw new BillingException($"offer {rentaId} записать на qr невозможно");
             var code = renta.Sku.Nomenklatura.Code;
             var name = renta.Sku.Name;
             var description = renta.Sku.Nomenklatura.Description;
             _ereminService.WriteQR(qr, code, name, description, renta.Count, renta.BasePrice, BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring), renta.Secret, rentaId, (Lifestyles)renta.LifeStyle);
+            var oldQR = Get<Renta>(r => r.QRRecorded == qr);
+            if (oldQR != null)
+                oldQR.QRRecorded = $"{qr} deleted";
             renta.QRRecorded = qr;
             Add(renta);
             Context.SaveChanges();

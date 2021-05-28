@@ -242,7 +242,7 @@ namespace Billing
         public SIN GetSINByModelId(int modelId, params Expression<Func<SIN, object>>[] includes)
         {
             if (modelId == 0)
-                throw new BillingAuthException("Нужна авторизация");
+                throw new BillingUnauthorizedException("Нужна авторизация");
             var sin = Get(s => s.Character.Model == modelId, includes);
             if (sin == null)
             {
