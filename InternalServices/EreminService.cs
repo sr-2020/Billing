@@ -127,6 +127,18 @@ namespace InternalServices
             throw new BillingException(message);
         }
 
+        public void CleanQR(string qr)
+        {
+            var eventType = "clear";
+
+            var data = new
+            {
+
+            };
+            var url = $"{URL}/qr/model/{qr}";
+            CreateEvent(data, eventType, url);
+        }
+
         public void WriteQR(string qr, string id, string name, string description, int numberOfUses, decimal basePrice, decimal rentPrice, string gmDescription, int rentaId, Lifestyles lifestyle)
         {
             var eventType = "createMerchandise";

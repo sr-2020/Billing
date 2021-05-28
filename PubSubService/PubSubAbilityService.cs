@@ -50,16 +50,16 @@ namespace PubSubService
                 case ActiveAbility.PayAndCry:
                     break;
                 case ActiveAbility.LetHim:
-                    IocContainer.Get<IAbilityManager>().LetHimPay(model?.CharacterId, model?.TargetCharacterId, model?.QrCode?.Data?.DealId);
+                    IocContainer.Get<IAbilityManager>().LetHimPay(BillingHelper.ParseId(model?.CharacterId, "characterId"), BillingHelper.ParseId(model?.TargetCharacterId, "TargetCharacterId") , BillingHelper.ParseId(model?.QrCode?.Data?.DealId, "DealId"), model?.QrCode?.ModelId);
                     break;
                 case ActiveAbility.Letme:
-                    IocContainer.Get<IAbilityManager>().LetMePay(model?.CharacterId, model?.QrCode?.Data?.DealId);
+                    IocContainer.Get<IAbilityManager>().LetMePay(BillingHelper.ParseId(model?.CharacterId, "characterId"), BillingHelper.ParseId(model?.QrCode?.Data?.DealId, "DealId"), model?.QrCode?.ModelId);
                     break;
                 case ActiveAbility.Rerent:
-                    IocContainer.Get<IAbilityManager>().Rerent(model?.QrCode?.Data?.DealId);
+                    IocContainer.Get<IAbilityManager>().Rerent(BillingHelper.ParseId(model?.CharacterId, "characterId"), BillingHelper.ParseId(model?.QrCode?.Data?.DealId, "DealId"), model?.QrCode?.ModelId);
                     break;
                 case ActiveAbility.Marauder:
-                    IocContainer.Get<IAbilityManager>().Marauder(model?.CharacterId, model?.TargetCharacterId);
+                    IocContainer.Get<IAbilityManager>().Marauder(BillingHelper.ParseId(model?.CharacterId, "characterId"), BillingHelper.ParseId(model?.TargetCharacterId, "TargetCharacterId"));
                     break;
                 default:
                     break;

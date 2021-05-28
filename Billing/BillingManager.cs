@@ -58,6 +58,11 @@ namespace Billing
         List<TransferDto> GetTransfersByRenta(int rentaID);
 
         #endregion
+
+        #region events
+        void DropInsurance(int modelId);
+        #endregion
+
     }
 
     public class BillingManager : AdminManager, IBillingManager
@@ -446,10 +451,7 @@ namespace Billing
         public BalanceDto GetBalance(int modelId)
         {
             var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring, s => s.Passport.Metatype);
-            var inss = ProductTypeEnum.Insurance.ToString();
-            var insur = GetList<Renta>(r => r.Sku.Nomenklatura.Specialisation.ProductType.Alias == inss && r.SinId == sin.Id, r => r.Sku)
-                .OrderByDescending(r => r.Id)
-                .FirstOrDefault();
+            var insur = GetInsurance(modelId, r => r.Sku); 
             var lics = ProductTypeEnum.Licences.ToString();
             var licences = GetList<Renta>(r => r.Sku.Nomenklatura.Specialisation.ProductType.Alias == lics && r.SinId == sin.Id, r => r.Sku.Nomenklatura)
                 .OrderByDescending(r => r.DateCreated)
@@ -574,6 +576,13 @@ namespace Billing
             return tranfers;
         }
 
+        public void DropInsurance(int modelId)
+        {
+            var insurance = GetInsurance(modelId);
+            insurance.Expired = true;
+            SaveContext();
+        }
+
         #region private
 
         private SIN BlockCharacter(int sinId)
@@ -662,6 +671,15 @@ namespace Billing
         private List<SIN> GetSinsInGame(params Expression<Func<SIN, object>>[] includes)
         {
             return GetList(s => (s.InGame ?? false) && s.Character.Game == CURRENTGAME, includes);
+        }
+
+        private Renta GetInsurance(int modelId, params Expression<Func<Renta, object>>[] includes)
+        {
+            var inss = ProductTypeEnum.Insurance.ToString();
+            var insurance = GetList(r => r.Sku.Nomenklatura.Specialisation.ProductType.Alias == inss && r.Sin.Character.Model == modelId && !r.Expired, includes)
+                .OrderByDescending(r => r.Id)
+                .FirstOrDefault();
+            return insurance;
         }
         #endregion
     }

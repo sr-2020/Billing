@@ -1,4 +1,5 @@
-﻿using PubSubService.Model;
+﻿using Billing;
+using PubSubService.Model;
 using Scoringspace;
 using System;
 using System.Collections.Generic;
@@ -16,27 +17,32 @@ namespace PubSubService
     {
         public PubSubHealthService() : base("billing_health_state")
         {
-
+            
         }
 
         public override void Handle(HealthModel model)
         {
             base.Handle(model);
             IScoringManager manager;
+            var modelId = BillingHelper.ParseId(model.CharacterId, "characterId");
             switch (model.StateTo)
             {
                 case "wounded":
                     manager = IoC.IocContainer.Get<IScoringManager>();
-                    manager.OnWounded(model.CharacterId);
+                    manager.OnWounded(modelId);
                     break;
                 case "clinically_dead":
                     manager = IoC.IocContainer.Get<IScoringManager>();
-                    manager.OnClinicalDeath(model.CharacterId);
+                    manager.OnClinicalDeath(modelId);
+                    var billing = IoC.IocContainer.Get<IBillingManager>();
+                    billing.DropInsurance(modelId);
                     break;
                 default:
                     break;
             }
         }
+
+
 
     }
 }

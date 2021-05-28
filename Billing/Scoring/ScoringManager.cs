@@ -20,11 +20,11 @@ namespace Scoringspace
     public interface IScoringManager
     {
         void OnLifeStyleChanged(Scoring scoring, Lifestyles from, Lifestyles to);
-        void OnPillConsumed(string model, string pillLifestyle);
-        void OnWounded(string model);
-        void OnClinicalDeath(string model);
-        void OnDumpshock(string model);
-        void OnFoodConsume(string model, string foodLifeStyle);
+        void OnPillConsumed(int model, string pillLifestyle);
+        void OnWounded(int model);
+        void OnClinicalDeath(int model);
+        void OnDumpshock(int model);
+        void OnFoodConsume(int model, string foodLifeStyle);
         void OnOtherBuy(SIN sin, int lifestyle);
         void OnPillBuy(SIN sin, int lifestyle);
         void OnWeaponBuy(SIN sin, int lifestyle);
@@ -33,7 +33,7 @@ namespace Scoringspace
         void OnCharityBuy(SIN sin, int lifestyle);
         void OnFoodBuy(SIN sin, int lifestyle);
         void OnImplantBuy(SIN sin, int lifestyle);
-        void OnImplantInstalled(string model, string implantlifestyle, string autodoclifestyle);
+        void OnImplantInstalled(int model, string implantlifestyle, string autodoclifestyle);
         void OnMetatypeChanged(SIN sin);
         ScoringDto GetFullScoring(int character);
     }
@@ -72,7 +72,7 @@ namespace Scoringspace
             });
         }
 
-        public void OnImplantInstalled(string model, string implantlifestyle, string autodoclifestyle)
+        public void OnImplantInstalled(int model, string implantlifestyle, string autodoclifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.implant_install);
             var scoring = GetScoringByModelId(model);
@@ -156,7 +156,7 @@ namespace Scoringspace
             });
         }
 
-        public void OnFoodConsume(string model, string foodLifeStyle)
+        public void OnFoodConsume(int model, string foodLifeStyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.food_consume);
             if (!BillingHelper.LifestyleIsDefined(foodLifeStyle))
@@ -172,7 +172,7 @@ namespace Scoringspace
             });
         }
 
-        public void OnPillConsumed(string model, string pillLifestyle)
+        public void OnPillConsumed(int model, string pillLifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.pill_use);
             if (!BillingHelper.LifestyleIsDefined(pillLifestyle))
@@ -188,7 +188,7 @@ namespace Scoringspace
             });
         }
 
-        public void OnWounded(string model)
+        public void OnWounded(int model)
         {
             var factorId = GetFactorId(ScoringFactorEnum.worse);
             var scoring = GetScoringByModelId(model);
@@ -199,7 +199,7 @@ namespace Scoringspace
             });
         }
 
-        public void OnClinicalDeath(string model)
+        public void OnClinicalDeath(int model)
         {
             var factorId = GetFactorId(ScoringFactorEnum.clinical_death);
             var scoring = GetScoringByModelId(model);
@@ -210,7 +210,7 @@ namespace Scoringspace
             });
         }
 
-        public void OnDumpshock(string model)
+        public void OnDumpshock(int model)
         {
             var factorId = GetFactorId(ScoringFactorEnum.dumpshock);
             var scoring = GetScoringByModelId(model);

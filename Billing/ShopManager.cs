@@ -2,6 +2,7 @@
 using Billing.Dto.Shop;
 using Billing.DTO;
 using Core;
+using Core.Exceptions;
 using Core.Model;
 using Core.Primitives;
 using InternalServices;
@@ -32,6 +33,7 @@ namespace Billing
         Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
         List<RentaDto> GetRentas(int shop);
         void WriteRenta(int rentaId, string qrEncoded);
+        void CleanRenta(string qrDecoded, Renta renta);
         int ProcessInflation(decimal k);
     }
 
@@ -56,17 +58,16 @@ namespace Billing
             var qr = EreminQrService.GetPayload(qrEncoded);
             var renta = Get<Renta>(p => p.Id == rentaId && p.HasQRWrite && string.IsNullOrEmpty(p.QRRecorded), r => r.Sku.Nomenklatura);
             if (renta == null)
-                throw new BillingException($"offer {rentaId} записать на qr невозможно");
-            var code = renta.Sku.Nomenklatura.Code;
-            var name = renta.Sku.Name;
-            var description = renta.Sku.Nomenklatura.Description;
-            _ereminService.WriteQR(qr, code, name, description, renta.Count, renta.BasePrice, BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring), renta.Secret, rentaId, (Lifestyles)renta.LifeStyle);
-            var oldQR = Get<Renta>(r => r.QRRecorded == qr);
-            if (oldQR != null)
-                oldQR.QRRecorded = $"{qr} deleted";
-            renta.QRRecorded = qr;
-            Add(renta);
-            Context.SaveChanges();
+                throw new BillingNotFoundException($"offer {rentaId} записать на qr невозможно");
+            WriteRenta(renta, qr);
+            SaveContext();
+        }
+
+        public void CleanRenta(string qrDecoded, Renta renta)
+        {
+            _ereminService.CleanQR(qrDecoded);
+            renta.QRRecorded = string.Empty;
+            SaveContext();
         }
 
         public List<RentaDto> GetRentas(int shop)
@@ -272,6 +273,15 @@ namespace Billing
 
         #region private
 
+        protected void RecalculateRenta(Renta renta, string qrDecoded, SIN newsin)
+        {
+            renta.SinId = newsin.Id;
+            renta.CurrentScoring = newsin.Scoring.CurerentRelative + newsin.Scoring.CurrentFix;
+            CleanRenta(qrDecoded, renta);
+            WriteRenta(renta, qrDecoded);
+            SaveContext();
+        }
+
         private QRDto CreateQRDto(int shop, SkuDto sku)
         {
             var qr = new QRDto();
@@ -293,7 +303,17 @@ namespace Billing
             return qr;
         }
 
-
+        private void WriteRenta(Renta renta, string qrDecoded)
+        {
+            var code = renta.Sku.Nomenklatura.Code;
+            var name = renta.Sku.Name;
+            var description = renta.Sku.Nomenklatura.Description;
+            _ereminService.WriteQR(qrDecoded, code, name, description, renta.Count, renta.BasePrice, BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring), renta.Secret, renta.Id, (Lifestyles)renta.LifeStyle);
+            var oldQR = Get<Renta>(r => r.QRRecorded == qrDecoded);
+            if (oldQR != null)
+                oldQR.QRRecorded = $"{qrDecoded} deleted";
+            renta.QRRecorded = qrDecoded;
+        }
 
         private List<SkuDto> GetSkusForShop(int shop)
         {

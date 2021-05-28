@@ -15,7 +15,7 @@ namespace PubSubService
     {
         public PubSubPillConsumptionService() : base("billing_pill_consumption")
         {
-
+            
         }
 
         public override void Handle(PillConsumptionModel model)
@@ -23,7 +23,7 @@ namespace PubSubService
             base.Handle(model);
 
             var manager = IoC.IocContainer.Get<IScoringManager>();
-            manager.OnPillConsumed(model.CharacterId, model.LifeStyle);
+            manager.OnPillConsumed(BillingHelper.ParseId(model.CharacterId, "characterId"), model.LifeStyle);
 
         }
     }

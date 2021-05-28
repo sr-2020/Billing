@@ -46,5 +46,7 @@ namespace Core.Model
         public int LifeStyle { get; set; }
         [Column("count")]
         public int Count { get; set; }
+        [Column("expired")]
+        public bool Expired { get; set; }
     }
 }

@@ -1,4 +1,6 @@
-﻿using PubSubService.Model;
+﻿using Billing;
+using PubSubService.Model;
+using Scoringspace;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,7 +21,8 @@ namespace PubSubService
         public override void Handle(FoodModel model)
         {
             base.Handle(model);
-
+            var manager = IoC.IocContainer.Get<IScoringManager>();
+            manager.OnFoodConsume(BillingHelper.ParseId(model.CharacterId, "characterId"), model.LifeStyle);
         }
 
     }

@@ -1,4 +1,5 @@
-﻿using PubSubService.Model;
+﻿using Billing;
+using PubSubService.Model;
 using Scoringspace;
 using System;
 using System.Collections.Generic;
@@ -14,14 +15,14 @@ namespace PubSubService
     {
         public PubSubDampshockService() : base("billing_dumpshock")
         {
-
+            
         }
 
         public override void Handle(BaseLocationModel model)
         {
             base.Handle(model);
             var manager = IoC.IocContainer.Get<IScoringManager>();
-            manager.OnDumpshock(model.CharacterId);
+            manager.OnDumpshock(BillingHelper.ParseId(model.CharacterId, "characterId"));
         }
 
     }

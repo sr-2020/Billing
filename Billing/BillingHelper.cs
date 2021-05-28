@@ -14,13 +14,13 @@ namespace Billing
 {
     public class BillingHelper
     {
-
-        public static int GetModelId(string model)
+        public static int ParseId(string id, string field)
         {
-            int modelId;
-            if (!int.TryParse(model, out modelId))
-                throw new BillingException("modelId is invalid");
-            return modelId;
+            if (!int.TryParse(id, out int intid))
+            {
+                throw new BillingException($"Ошибка парсинга {field} {id}");
+            }
+            return intid;
         }
 
         public static bool LifestyleIsDefined(string name)

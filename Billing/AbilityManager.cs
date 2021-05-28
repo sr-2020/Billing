@@ -8,21 +8,19 @@ using System.Text;
 
 namespace Billing
 {
-    public interface IAbilityManager : IBaseBillingRepository
+    public interface IAbilityManager : IShopManager
     {
-        void LetHimPay(string modelId, string targetId, string rentaId);
-        void LetMePay(string modelId, string rentaId);
-        void Rerent(string rentaId);
-        void Marauder(string modelId, string targetId);
+        void LetHimPay(int modelId, int targetId, int rentaId, string qrCode);
+        void LetMePay(int modelId, int rentaId, string qrCode);
+        void Rerent(int modelId, int rentaId, string qrCode);
+        void Marauder(int modelId, int targetId);
     }
 
 
-    public class AbilityManager : AdminManager, IAbilityManager
+    public class AbilityManager : ShopManager, IAbilityManager
     {
-        public void Marauder(string modelIds, string targetIds)
+        public void Marauder(int modelId, int targetId)
         {
-            var modelId = ParseId(modelIds, "modelId");
-            var targetId = ParseId(targetIds, "targetId");
             var sinFrom = BillingBlocked(modelId, s => s.Wallet, s => s.Character, s => s.Passport);
             var sinTo = BillingBlocked(targetId, s => s.Wallet, s => s.Character, s => s.Passport);
             if (!((sinFrom?.Wallet?.Balance ?? 0) > 0))
@@ -36,64 +34,49 @@ namespace Billing
             EreminPushAdapter.SendNotification(modelId, "Marauder", message);
         }
 
-        public void Rerent(string rentaIds)
+        public void Rerent(int modelId, int rentaId, string qrCode)
         {
-            var rentaId = ParseId(rentaIds, "rentaId");
-            var renta = Get<Renta>(r => r.Id == rentaId, r => r.Sin.Scoring, r => r.Sin.Character);
+            var renta = Get<Renta>(r => r.Id == rentaId && r.QRRecorded == qrCode.ToString(), r => r.Sin.Scoring, r => r.Sin.Character, r => r.Sku.Nomenklatura);
             if (renta == null)
             {
-                throw new BillingNotFoundException($"renta for {rentaId} not found");
+                ErrorNotify("Переоформить ренту", rentaId, qrCode, modelId);
             }
-            renta.CurrentScoring = renta.Sin.Scoring.CurerentRelative + renta.Sin.Scoring.CurrentFix;
-            Context.SaveChanges();
-            EreminPushAdapter.SendNotification(renta.Sin.Character.Model, "Переоформить ренту", "Рента переоформлена");
+            RecalculateRenta(renta, qrCode, renta.Sin);
+            EreminPushAdapter.SendNotification(modelId, "Переоформить ренту", "Рента переоформлена");
         }
 
-        public void LetMePay(string modelIds, string rentaIds)
+        public void LetMePay(int modelId, int rentaId, string qrCode)
         {
-            var modelId = ParseId(modelIds, "modelId");
-            var rentaId = ParseId(rentaIds, "rentaId");
             var sin = GetSINByModelId(modelId, s => s.Scoring);
             if (sin == null)
-                throw new BillingNotFoundException($"sin for {modelId} not found");
-
-            var renta = Get<Renta>(r => r.Id == rentaId);
+                throw new BillingNotFoundException($"Син с modelId {modelId} не найден");
+            var renta = Get<Renta>(r => r.Id == rentaId, r => r.Sku.Nomenklatura);
             if (renta == null)
             {
-                EreminPushAdapter.SendNotification(modelId, "Давай я заплачу", "Ошибка получения ренты");
-                throw new BillingNotFoundException($"renta for {rentaIds} not found");
+                ErrorNotify("Давай я заплачу", rentaId, qrCode, modelId);
             }
-            renta.SinId = sin.Id;
-            renta.CurrentScoring = sin.Scoring.CurerentRelative + sin.Scoring.CurrentFix;
-            Context.SaveChanges();
+            RecalculateRenta(renta, qrCode, sin);
             EreminPushAdapter.SendNotification(modelId, "Давай я заплачу", "Рента переоформлена");
         }
 
-        public void LetHimPay(string modelIds, string targetIds, string rentaIds)
+        public void LetHimPay(int modelId, int targetId, int rentaId, string qrCode)
         {
-            var modelId = ParseId(modelIds, "modelId");
-            var targetId = ParseId(targetIds, "targetId");
-            var rentaId = ParseId(rentaIds, "rentaId");
             var sin = GetSINByModelId(targetId, s => s.Scoring);
-            var renta = Get<Renta>(r => r.Id == rentaId);
+            var renta = Get<Renta>(r => r.Id == rentaId, r => r.Sku.Nomenklatura);
             if (renta == null)
             {
-                EreminPushAdapter.SendNotification(modelId, "Давай он заплатит", "Ошибка получения ренты");
-                throw new BillingNotFoundException($"renta for {rentaIds} not found");
+                ErrorNotify("Давай он заплатит", rentaId, qrCode, modelId);
             }
-            renta.SinId = sin.Id;
-            renta.CurrentScoring = sin.Scoring.CurerentRelative + sin.Scoring.CurrentFix;
-            Context.SaveChanges();
+            RecalculateRenta(renta, qrCode, sin);
             EreminPushAdapter.SendNotification(modelId, "Давай он заплатит", "Рента переоформлена");
         }
 
-        private int ParseId(string id, string field)
+        private void ErrorNotify(string subject, int rentaId, string qrCode, int modelId)
         {
-            if (!int.TryParse(id, out int intid))
-            {
-                throw new BillingException($"Ошибка парсинга {field} {id}");
-            }
-            return intid;
+            var errormessage = $"Рента {rentaId} записанная на {qrCode} не найдена";
+            EreminPushAdapter.SendNotification(modelId, subject, errormessage);
+            throw new BillingNotFoundException(errormessage);
         }
+
     }
 }

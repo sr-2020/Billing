@@ -1,4 +1,5 @@
-﻿using PubSubService.Model;
+﻿using Billing;
+using PubSubService.Model;
 using Scoringspace;
 using System;
 using System.Collections.Generic;
@@ -16,14 +17,14 @@ namespace PubSubService
     {
         public PubSubImplantInstallService() : base("billing_implant_install")
         {
-
+            
         }
 
         public override void Handle(ImplantInstallModel model)
         {
             base.Handle(model);
             var manager = IoC.IocContainer.Get<IScoringManager>();
-            manager.OnImplantInstalled(model.CharacterId, model.ImplantLifestyle, model.AutodocLifestyle);
+            manager.OnImplantInstalled(BillingHelper.ParseId(model.CharacterId, "characterId"), model.ImplantLifestyle, model.AutodocLifestyle);
         }
     }
 }
