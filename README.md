@@ -19,9 +19,10 @@ message - описание ошибки, если status = false.
 
 # Методы требуюущие авторизацию.
 Требуется  
-Cookie: Authorization=token
+Cookie: Authorization=token  
 или 
-Header: Authorization=token
+Header  
+Authorization:Bearer token
 
 Шаблон URL: https://gateway.evarun.ru/api/v1/billing/{url}
 ## Админка, требуют наличия у пользователя прав администратора. Выдаются по запросу.
