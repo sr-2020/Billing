@@ -33,7 +33,7 @@ namespace Billing
         Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
         List<RentaDto> GetRentas(int shop);
         void WriteRenta(int rentaId, string qrEncoded);
-        void CleanRenta(string qrDecoded, Renta renta);
+        void CleanRenta(Renta renta, string qrDecoded);
         int ProcessInflation(decimal k);
     }
 
@@ -63,7 +63,7 @@ namespace Billing
             SaveContext();
         }
 
-        public void CleanRenta(string qrDecoded, Renta renta)
+        public void CleanRenta(Renta renta, string qrDecoded)
         {
             _ereminService.CleanQR(qrDecoded);
             renta.QRRecorded = string.Empty;
@@ -277,8 +277,8 @@ namespace Billing
         {
             renta.SinId = newsin.Id;
             renta.CurrentScoring = newsin.Scoring.CurerentRelative + newsin.Scoring.CurrentFix;
-            CleanRenta(qrDecoded, renta);
-            WriteRenta(renta, qrDecoded);
+            //CleanRenta(qrDecoded, renta);
+            //WriteRenta(renta, qrDecoded);
             SaveContext();
         }
 

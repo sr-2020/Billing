@@ -142,7 +142,6 @@ namespace InternalServices
         public void WriteQR(string qr, string id, string name, string description, int numberOfUses, decimal basePrice, decimal rentPrice, string gmDescription, int rentaId, Lifestyles lifestyle)
         {
             var eventType = "createMerchandise";
-
             var data = new
             {
                 id,
