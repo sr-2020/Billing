@@ -84,7 +84,7 @@ nationality, status, nation, viza, pledgee, insurance, licenses - Значени
     ],
     "sum": 0
 ```
-rentas - массив рент
+rentas - массив рент.
 sum - общая сумма по рентам.
 finalPrice, dateCreated, skuName, corporation, shop - Поля которые необходимо отображать на экране подробности ренты.
 
@@ -152,6 +152,7 @@ value - значение для текущего пользователя
 factors - факторы составляющие категории
 
 * POST /createtransfersinsin
+```
 Принимаемая модель:
 {
   "characterTo": 0,
@@ -159,6 +160,7 @@ factors - факторы составляющие категории
   "comment": "string",
   "sinTo": "string"
 }
+```
 sinTo - приоритет на использования этого поля. Если оно не указано, то берется characterTo.
 characterTo - ModelId игрока которому будет выполняться перевод, не может быть равен 0 или персонажем отправителем.
 amount - размер перевода. Должен быть положительным и меньше текущего баланса.
