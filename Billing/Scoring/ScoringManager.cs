@@ -45,7 +45,7 @@ namespace Scoringspace
         public void OnInsuranceBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.insurance);
-            ScoringEvent(sin.ScoringId, factorId, (context) =>
+            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
@@ -55,7 +55,7 @@ namespace Scoringspace
         public void OnCharityBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_charity);
-            ScoringEvent(sin.ScoringId, factorId, (context) =>
+            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
@@ -65,7 +65,7 @@ namespace Scoringspace
         public void OnMetatypeChanged(SIN sin)
         {
             var factorId = GetFactorId(ScoringFactorEnum.metatype);
-            ScoringEvent(sin.ScoringId, factorId, (context) =>
+            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == sin.Passport.MetatypeId);
                 return value?.Value ?? 1;
@@ -99,7 +99,7 @@ namespace Scoringspace
         public void OnImplantBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_implant);
-            ScoringEvent(sin.ScoringId, factorId, (context) =>
+            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
@@ -109,7 +109,7 @@ namespace Scoringspace
         public void OnOtherBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_other);
-            ScoringEvent(sin.ScoringId, factorId, (context) =>
+            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
@@ -119,7 +119,7 @@ namespace Scoringspace
         public void OnPillBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_pill);
-            ScoringEvent(sin.ScoringId, factorId, (context) =>
+            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
@@ -129,7 +129,7 @@ namespace Scoringspace
         public void OnWeaponBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_weapon);
-            ScoringEvent(sin.ScoringId, factorId, (context) =>
+            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
@@ -139,7 +139,7 @@ namespace Scoringspace
         public void OnMagicBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_magic);
-            ScoringEvent(sin.ScoringId, factorId, (context) =>
+            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
@@ -149,7 +149,7 @@ namespace Scoringspace
         public void OnFoodBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_food);
-            ScoringEvent(sin.ScoringId, factorId, (context) =>
+            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;

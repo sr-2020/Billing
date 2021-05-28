@@ -13,10 +13,10 @@ namespace Core.Model
         public Character Character { get; set; }
         [ForeignKey("wallet")]
         [Column("wallet")]
-        public int WalletId { get; set; }
+        public int? WalletId { get; set; }
         public virtual Wallet Wallet { get; set; }
         [Column("scoring")]
-        public int ScoringId { get; set; }
+        public int? ScoringId { get; set; }
         public Scoring Scoring { get; set; }
         [Column("work")]
         public int? Work { get; set; }

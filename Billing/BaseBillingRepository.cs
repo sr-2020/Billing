@@ -55,7 +55,7 @@ namespace Billing
             sin.InGame = true;
             sin.OldMetaTypeId = null;
             sin.EVersion = _settings.GetValue(SystemSettingsEnum.eversion);
-            var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId, balance);
+            var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId ?? 0, balance);
             sin.Wallet = wallet;
             var scoring = Get<Scoring>(s => s.Id == sin.ScoringId);
             if (scoring == null)
@@ -89,7 +89,7 @@ namespace Billing
                     current = new CurrentCategory
                     {
                         CategoryId = category.Id,
-                        ScoringId = sin.ScoringId,
+                        ScoringId = sin.ScoringId ?? 0,
                         Value = sin.Scoring.StartFactor ?? 1
                     };
                     Add(current);
