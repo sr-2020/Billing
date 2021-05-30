@@ -26,7 +26,7 @@ namespace Billing
         ShopDto CreateOrUpdateShopWallet(int foreignKey, decimal amount, string name, int lifestyle, int owner, List<int> specialisations, string comment = "", string location = "");
         SpecialisationDto CreateOrUpdateSpecialisation(int id, int producttype, string name);
         NomenklaturaDto CreateOrUpdateNomenklatura(int id, string name, string code, int specialisationId, int lifestyle, decimal baseprice, int baseCount, string description, string pictureurl, int externalId = 0);
-        SkuDto CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled, int externalId = 0);
+        SkuDto CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled, int? skubaseprice = null, int? skubasecount = null);
         CorporationWallet CreateOrUpdateCorporationWallet(int id, decimal amount, string name, string logoUrl);
 
         void DeleteSpecialisation(int id);
@@ -207,7 +207,7 @@ namespace Billing
             return new NomenklaturaDto(nomenklatura, true);
         }
 
-        public SkuDto CreateOrUpdateSku(int id, int nomenklaturaid, int count, int corporationid, string name, bool enabled, int externalId = 0)
+        public SkuDto CreateOrUpdateSku(int id, int nomenklaturaid, int count, int corporationid, string name, bool enabled, int? skubaseprice = null, int? skubasecount = null)
         {
             Sku sku = null;
             if (id > 0)
@@ -218,6 +218,8 @@ namespace Billing
                 Add(sku);
             }
             sku.Enabled = enabled;
+            sku.SkuBasePrice = skubaseprice;
+            sku.SkuBaseCount = skubasecount;
             if (count > 0)
                 sku.Count = count;
             if (!string.IsNullOrEmpty(name))
@@ -233,10 +235,6 @@ namespace Billing
             }
 
             sku.CorporationId = corporation.Id;
-            if (externalId != 0)
-            {
-                sku.ExternalId = externalId;
-            }
             Nomenklatura nomenklatura = null;
             if (nomenklaturaid > 0)
                 nomenklatura = Get<Nomenklatura>(n => n.Id == nomenklaturaid);
@@ -370,18 +368,9 @@ namespace Billing
 
         protected Transfer MakeTransferSINSIN(SIN sinFrom, SIN sinTo, decimal amount, string comment)
         {
-            var anon = false;
-            try
-            {
-                var erService = new EreminService();
-                var anonFrom = erService.GetAnonimous(sinFrom.Character.Model);
-                var anonto = erService.GetAnonimous(sinTo.Character.Model);
-                anon = anonFrom || anonto;
-            }
-            catch (Exception e)
-            {
-
-            }
+            var anonFrom = GetAnon(sinFrom.Character.Model);
+            var anonto = GetAnon(sinTo.Character.Model);
+            var anon = anonFrom || anonto;
             var transfer = AddNewTransfer(sinFrom.Wallet, sinTo.Wallet, amount, comment, anon);
             Context.SaveChanges();
             if (transfer != null)
@@ -389,6 +378,20 @@ namespace Billing
                 EreminPushAdapter.SendNotification(sinTo.Character.Model, "Кошелек", $"Вам переведено денег {amount}");
             }
             return transfer;
+        }
+
+        protected bool GetAnon(int modelId)
+        {
+            try
+            {
+                var erService = new EreminService();
+                return erService.GetAnonimous(modelId);
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine("Ошибка получения anonimous");
+            }
+            return false;
         }
     }
 }

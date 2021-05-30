@@ -26,7 +26,6 @@ namespace Billing.DTO
             this.Description = nomenklatura.Description;
             this.PictureUrl = nomenklatura.PictureUrl;
             this.BaseCount = nomenklatura.BaseCount;
-            this.Secret = nomenklatura.Secret;
         }
         public int NomenklaturaId { get; set; }
         public string NomenklaturaName { get; set; }
@@ -37,6 +36,5 @@ namespace Billing.DTO
         public decimal BasePrice { get; set; }
         public string Description { get; set; }
         public string PictureUrl { get; set; }
-        public string Secret { get; set; }
     }
 }

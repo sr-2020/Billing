@@ -291,7 +291,7 @@ namespace BillingAPI.Controllers
         public DataResult<SkuDto> AddSku([FromBody] CreateSkuRequest request)
         {
             var manager = IocContainer.Get<IAdminManager>();
-            var result = RunAction(() => manager.CreateOrUpdateSku(0, request.NomenklaturaId, request.Count, request.Corporation, request.Name, request.Enabled));
+            var result = RunAction(() => manager.CreateOrUpdateSku(0, request.NomenklaturaId, request.Count, request.Corporation, request.Name, request.Enabled, request.SkuBasePrice, request.SkuBaseCount));
             return result;
         }
 
@@ -304,7 +304,7 @@ namespace BillingAPI.Controllers
         public DataResult<SkuDto> EditSku([FromBody] CreateSkuRequest request)
         {
             var manager = IocContainer.Get<IAdminManager>();
-            var result = RunAction(() => manager.CreateOrUpdateSku(request.Id, request.NomenklaturaId, request.Count, request.Corporation, request.Name, request.Enabled));
+            var result = RunAction(() => manager.CreateOrUpdateSku(request.Id, request.NomenklaturaId, request.Count, request.Corporation, request.Name, request.Enabled, request.SkuBasePrice, request.SkuBaseCount));
             return result;
         }
 

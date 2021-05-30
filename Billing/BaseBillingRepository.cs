@@ -111,10 +111,6 @@ namespace Billing
 
         protected string GetWalletName(Wallet wallet, bool anon, List<SIN> sinCache, List<ShopWallet> shopCache)
         {
-            if (anon)
-            {
-                return "Anonymous";
-            }
             if (wallet == null)
                 return ErrorWalletName($"Передан пустой кошелек");
             switch (wallet.WalletType)
@@ -125,7 +121,7 @@ namespace Billing
                     {
                         return ErrorWalletName($"Не найден sin для wallet {wallet.Id}");
                     }
-                    return BillingHelper.GetPassportName(sin.Passport);
+                    return BillingHelper.GetPassportName(sin.Passport, anon);
                 case (int)WalletTypes.Corporation:
                     return ErrorWalletName($"Переводы корпорациям не реализованы wallet: {wallet.Id}");
                     

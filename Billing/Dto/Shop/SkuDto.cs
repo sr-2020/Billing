@@ -21,11 +21,15 @@ namespace Billing.DTO
             this.Count = sku.Count;
             this.Enabled = sku.Enabled;
             this.CorporationId = sku.CorporationId;
+            this.SkuBaseCount = sku.SkuBaseCount;
+            this.SkuBasePrice = sku.SkuBasePrice;
         }
         public int SkuId { get; set; }
         public string SkuName { get; set; }
         public int Count { get; set; }
         public int CorporationId { get; set; }
         public bool Enabled { get; set; }
+        public int? SkuBasePrice { get; set; }
+        public int? SkuBaseCount { get; set; }
     }
 }

@@ -59,7 +59,7 @@ namespace Billing
 
         #region events
         void DropInsurance(int modelId);
-        void DropCharacter(int modelId);
+        SIN DropCharacter(int modelId);
         #endregion
 
     }
@@ -188,7 +188,8 @@ namespace Billing
             }
             price.Sku.Count -= count;
             var instantConsume = price.Sku.Nomenklatura.Specialisation.ProductType.InstantConsume;
-            var gmdescript = $"Рента по товару оформлена на {BillingHelper.GetPassportName(sin.Passport)}";
+            var anon = GetAnon(sin.Character.Model);
+            var gmdescript = $"Рента по товару оформлена на {BillingHelper.GetPassportName(sin.Passport, anon)}";
             var renta = new Renta
             {
                 BasePrice = price.BasePrice,
@@ -229,7 +230,7 @@ namespace Billing
             return dto;
         }
 
-        public JobLifeStyleDto ProcessCharacterBeat(int sinId, decimal karmaCount, bool dividents1, bool dividents2, bool dividents3, JobLifeStyleDto dto)
+        public JobLifeStyleDto ProcessCharacterBeat(int sinId, decimal karmaCount, bool dividends1, bool dividends2, bool dividends3, JobLifeStyleDto dto)
         {
             var sin = BlockCharacter(sinId);
             SaveContext();
@@ -237,19 +238,19 @@ namespace Billing
             decimal income = 0;
             decimal outcome = 0;
             //ability
-            if (dividents1)
+            if (dividends1)
             {
                 var dk1 = _settings.GetDecimalValue(SystemSettingsEnum.dividents1_k);
                 AddNewTransfer(mir, sin.Wallet, dk1, "Дивиденды *");
                 income += dk1;
             }
-            if (dividents2)
+            if (dividends2)
             {
                 var dk2 = _settings.GetDecimalValue(SystemSettingsEnum.dividents2_k);
                 AddNewTransfer(mir, sin.Wallet, dk2, "Дивиденды **");
                 income += dk2;
             }
-            if (dividents3)
+            if (dividends3)
             {
                 var dk3 = _settings.GetDecimalValue(SystemSettingsEnum.dividents3_k);
                 AddNewTransfer(mir, sin.Wallet, dk3, "Дивиденды ***");
@@ -491,8 +492,6 @@ namespace Billing
             return result;
         }
 
-
-
         public string GetSinStringByCharacter(int modelId)
         {
             var sin = GetSINByModelId(modelId, s => s.Passport);
@@ -563,7 +562,7 @@ namespace Billing
             SaveContext();
         }
 
-        public void DropCharacter(int modelId)
+        public SIN DropCharacter(int modelId)
         {
             var sin = GetSINByModelId(modelId, s => s.Wallet);
             sin.InGame = false;
@@ -586,6 +585,7 @@ namespace Billing
                 }
                 RemoveAndSave(renta);
             }
+            return sin;
         }
 
 

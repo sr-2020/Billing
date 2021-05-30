@@ -21,5 +21,9 @@ namespace Core.Model
         public bool Enabled { get; set; }
         [Column("external_id")]
         public int ExternalId { get; set; }
+        [Column("sku_base_price")]
+        public int? SkuBasePrice { get; set; }
+        [Column("sku_base_count")]
+        public int? SkuBaseCount { get; set; }
     }
 }

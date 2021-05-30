@@ -13,5 +13,7 @@ namespace BillingAPI.Model
         public int Count { get; set; }
         public int Corporation { get; set; }
         public bool Enabled { get; set; }
+        public int? SkuBasePrice { get; set; }
+        public int? SkuBaseCount { get; set; }
     }
 }

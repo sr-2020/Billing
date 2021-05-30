@@ -91,10 +91,12 @@ namespace Billing
             return new NamedEntity { Id = (int)lifestyle, Name = lifestyle.ToString() };
         }
 
-        public static string GetPassportName(Passport passport)
+        public static string GetPassportName(Passport passport, bool anon = false)
         {
             if (passport == null)
                 return string.Empty;
+            if (anon)
+                return "anonymous";
             return $"{ passport.PersonName} ({ passport.Sin})";
         }
 

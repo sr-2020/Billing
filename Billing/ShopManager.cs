@@ -97,16 +97,7 @@ namespace Billing
         public Transfer MakeTransferLegSIN(int shop, string sintext, decimal amount, string comment)
         {
             var sin = BillingBlocked(sintext, s => s.Wallet, s=>s.Character);
-            var anon = false;
-            try
-            {
-                var erService = new EreminService();
-                anon = erService.GetAnonimous(sin.Character.Model);
-            }
-            catch (Exception e)
-            {
-
-            }
+            var anon = GetAnon(sin.Character.Model);
             var shopWallet = Get<ShopWallet>(s => s.Id == shop, s => s.Wallet);
             var transfer = AddNewTransfer(shopWallet.Wallet, sin.Wallet, amount, comment, anon);
             Context.SaveChanges();
@@ -258,8 +249,9 @@ namespace Billing
         protected void RecalculateRenta(Renta renta, string qrDecoded, SIN newsin)
         {
             renta.SinId = newsin.Id;
+            var anon = GetAnon(newsin.Character.Model);
             renta.CurrentScoring = newsin.Scoring.CurerentRelative + newsin.Scoring.CurrentFix;
-            var gmdescript = $"Рента по товару переоформлена на {BillingHelper.GetPassportName(newsin.Passport)}";
+            var gmdescript = $"Рента по товару переоформлена на {BillingHelper.GetPassportName(newsin.Passport, anon)}";
             _ereminService.UpdateQR(qrDecoded, renta.BasePrice, 
                 BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring), 
                 gmdescript, 
