@@ -107,8 +107,8 @@ namespace Billing
         public List<TransferDto> GetTransfers(int shop)
         {
             var shopWallet = Get<ShopWallet>(s => s.Id == shop, s => s.Wallet);
-            var listFrom = GetList<Transfer>(t => t.WalletFromId == shopWallet.WalletId, t => t.WalletFrom, t => t.WalletTo);
-            var listTo = GetList<Transfer>(t => t.WalletToId == shopWallet.WalletId, t => t.WalletFrom, t => t.WalletTo);
+            var listFrom = GetListAsNoTracking<Transfer>(t => t.WalletFromId == shopWallet.WalletId, t => t.WalletFrom, t => t.WalletTo);
+            var listTo = GetListAsNoTracking<Transfer>(t => t.WalletToId == shopWallet.WalletId, t => t.WalletFrom, t => t.WalletTo);
             var owner = $"{shopWallet.Id} {shopWallet.Name}";
             return CreateTransfersDto(listFrom, listTo, owner);
         }

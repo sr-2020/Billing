@@ -255,6 +255,7 @@ namespace Billing
 
         public SIN GetSINBySinText(string sinText, params Expression<Func<SIN, object>>[] includes)
         {
+            sinText = sinText.ToUpper();
             var sin = Get(s => s.Passport.Sin == sinText, includes);
             if (sin == null)
             {
