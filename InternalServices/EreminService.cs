@@ -37,7 +37,7 @@ namespace InternalServices
             return false;
         }
 
-        public decimal GetDiscount(int characterId, DiscountType discountType, CorporationEnum corporation)
+        public decimal GetDiscount(int characterId, DiscountType discountType)
         {
             var model = GetCharacter(characterId);
             decimal every = 1;
@@ -49,50 +49,7 @@ namespace InternalServices
                     samurai = model?.workModel?.discounts?.weaponsArmor ?? 1;
                 every = gesheft < samurai ? gesheft : samurai;
             }
-            decimal corpDisc = 1;
-            switch (corporation)
-            {
-                case CorporationEnum.ares:
-                    corpDisc = model.workModel.discounts.ares ?? 1;
-                    break;
-                case CorporationEnum.aztechnology:
-                    corpDisc = model.workModel.discounts.aztechnology ?? 1;
-                    break;
-                case CorporationEnum.saederKrupp:
-                    corpDisc = model.workModel.discounts.saederKrupp ?? 1;
-                    break;
-                case CorporationEnum.spinradGlobal:
-                    corpDisc = model.workModel.discounts.spinradGlobal ?? 1;
-                    break;
-                case CorporationEnum.neonet1:
-                    corpDisc = model.workModel.discounts.neonet1 ?? 1;
-                    break;
-                case CorporationEnum.evo:
-                    corpDisc = model.workModel.discounts.evo ?? 1;
-                    break;
-                case CorporationEnum.horizon:
-                    corpDisc = model.workModel.discounts.horizon ?? 1;
-                    break;
-                case CorporationEnum.wuxing:
-                    corpDisc = model.workModel.discounts.wuxing ?? 1;
-                    break;
-                case CorporationEnum.russia:
-                    corpDisc = model.workModel.discounts.russia ?? 1;
-                    break;
-                case CorporationEnum.renraku:
-                    corpDisc = model.workModel.discounts.renraku ?? 1;
-                    break;
-                case CorporationEnum.mutsuhama:
-                    corpDisc = model.workModel.discounts.mutsuhama ?? 1;
-                    break;
-                case CorporationEnum.shiavase:
-                    corpDisc = model.workModel.discounts.shiavase ?? 1;
-                    break;
-                case CorporationEnum.unknown:
-                default:
-                    break;
-            }
-            return every * corpDisc;
+            return every;
         }
 
         public void ConsumeFood(int rentaId, Lifestyles lifestyle, int modelId)

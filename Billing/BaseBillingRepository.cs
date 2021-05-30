@@ -265,16 +265,22 @@ namespace Billing
 
         protected Sku SkuAllowed(int shop, int sku, params Expression<Func<Sku, object>>[] includes)
         {
-            var skuList = GetSkuList(shop, includes);
-            return skuList.FirstOrDefault(s => s.Id == sku);
+            var skuids = GetSkuIds(shop);
+            if (skuids.Contains(sku))
+                return Get(s => s.Id == sku, includes);
+            throw new BillingNotFoundException($"sku {sku} для {shop} не найдено");
         }
 
         protected List<Sku> GetSkuList(int shopId, params Expression<Func<Sku, object>>[] includes)
         {
-            var skuids = ExecuteQuery<int>($"SELECT * FROM get_sku({shopId})");
+            var skuids = GetSkuIds(shopId);
             var result = GetList(s => skuids.Contains(s.Id), includes);
-            //TODO filter by contractlimit
             return result;
+        }
+
+        private List<int> GetSkuIds(int shopId)
+        {
+            return ExecuteQuery<int>($"SELECT * FROM get_sku({shopId})");
         }
 
         private int GetMIRId()

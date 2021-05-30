@@ -102,7 +102,7 @@ namespace Billing
 
         public static decimal GetFinalPrice(decimal basePrice, decimal discount, decimal scoring)
         {
-            return BillingHelper.Round((basePrice * discount) / scoring);
+            return Round((basePrice * discount) / scoring);
         }
 
         public static decimal CalculateComission(decimal basePrice, decimal comission)

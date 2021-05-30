@@ -411,9 +411,7 @@ namespace Billing
         public PriceShopDto GetPrice(int modelId, int shopid, int skuid)
         {
             var sin = BillingBlocked(modelId, s => s.Scoring, s => s.Character);
-            var sku = SkuAllowed(shopid, skuid);
-            if (sku == null)
-                throw new BillingException("sku недоступен для продажи");
+            var sku = SkuAllowed(shopid, skuid, s => s.Corporation, s => s.Nomenklatura.Specialisation.ProductType);
             var shop = GetAsNoTracking<ShopWallet>(s => s.Id == shopid);
             if (shop == null || sin == null)
                 throw new Exception("some went wrong");
@@ -604,19 +602,6 @@ namespace Billing
             sin.Blocked = false;
         }
 
-        private CorporationEnum GetCorporationForSku(Sku sku)
-        {
-            var corporation = sku.Corporation;
-            if (corporation == null)
-                corporation = Get<CorporationWallet>(w => w.Id == sku.CorporationId);
-            foreach (CorporationEnum corEnum in Enum.GetValues(typeof(CorporationEnum)))
-            {
-                if (corEnum.ToString() == corporation.Alias)
-                    return corEnum;
-            }
-            return CorporationEnum.unknown;
-        }
-
         private DiscountType GetDiscountTypeForSku(Sku sku)
         {
             if (sku == null)
@@ -647,7 +632,9 @@ namespace Billing
             try
             {
                 var eService = new EreminService();
-                discount = eService.GetDiscount(sin.Character.Model, GetDiscountTypeForSku(sku), GetCorporationForSku(sku));
+                discount = eService.GetDiscount(sin.Character.Model, BillingHelper.GetDiscountType(sku.Nomenklatura.Specialisation.ProductType.DiscountType));
+                if (sin.Passport.Mortgagee == sku.Corporation.Alias)
+                    discount *= 0.9m;
             }
             catch
             {
