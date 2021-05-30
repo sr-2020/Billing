@@ -29,11 +29,10 @@ namespace Billing
         void TerminateContract(int corporation, int shop);
         string GetCharacterName(int modelId);
         List<TransferDto> GetTransfers(int shop);
-        Transfer MakeTransferLegSIN(int legFrom, int sinTo, decimal amount, string comment);
+        Transfer MakeTransferLegSIN(int legFrom, string sinTo, decimal amount, string comment);
         Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
         List<RentaDto> GetRentas(int shop);
         void WriteRenta(int rentaId, string qrEncoded);
-        void CleanRenta(Renta renta, string qrDecoded);
         int ProcessInflation(decimal k);
     }
 
@@ -60,13 +59,6 @@ namespace Billing
             if (renta == null)
                 throw new BillingNotFoundException($"offer {rentaId} записать на qr невозможно");
             WriteRenta(renta, qr);
-            SaveContext();
-        }
-
-        public void CleanRenta(Renta renta, string qrDecoded)
-        {
-            _ereminService.CleanQR(qrDecoded);
-            renta.QRRecorded = string.Empty;
             SaveContext();
         }
 
@@ -102,14 +94,14 @@ namespace Billing
             return transfer;
         }
 
-        public Transfer MakeTransferLegSIN(int shop, int character, decimal amount, string comment)
+        public Transfer MakeTransferLegSIN(int shop, string sintext, decimal amount, string comment)
         {
-            var sin = BillingBlocked(character, s => s.Wallet);
+            var sin = BillingBlocked(sintext, s => s.Wallet, s=>s.Character);
             var anon = false;
             try
             {
                 var erService = new EreminService();
-                anon = erService.GetAnonimous(character);
+                anon = erService.GetAnonimous(sin.Character.Model);
             }
             catch (Exception e)
             {
@@ -125,19 +117,9 @@ namespace Billing
         {
             var shopWallet = Get<ShopWallet>(s => s.Id == shop, s => s.Wallet);
             var listFrom = GetList<Transfer>(t => t.WalletFromId == shopWallet.WalletId, t => t.WalletFrom, t => t.WalletTo);
-
-            var allList = new List<TransferDto>();
-            var owner = GetWalletName(shopWallet.Wallet, false);
-            if (listFrom != null)
-                allList.AddRange(listFrom
-                    .Select(s => CreateTransferDto(s, TransferType.Outcoming, 0, owner))
-                    .ToList());
             var listTo = GetList<Transfer>(t => t.WalletToId == shopWallet.WalletId, t => t.WalletFrom, t => t.WalletTo);
-            if (listTo != null)
-                allList.AddRange(listTo
-                    .Select(s => CreateTransferDto(s, TransferType.Incoming, 0, owner))
-                    .ToList());
-            return allList.OrderByDescending(t => t.OperationTime).ToList();
+            var owner = $"{shopWallet.Id} {shopWallet.Name}";
+            return CreateTransfersDto(listFrom, listTo, owner);
         }
 
         public OrganisationViewModel GetAvailableOrganisations(int modelId)
@@ -277,8 +259,12 @@ namespace Billing
         {
             renta.SinId = newsin.Id;
             renta.CurrentScoring = newsin.Scoring.CurerentRelative + newsin.Scoring.CurrentFix;
-            //CleanRenta(qrDecoded, renta);
-            //WriteRenta(renta, qrDecoded);
+            var gmdescript = $"Рента по товару переоформлена на {BillingHelper.GetPassportName(newsin.Passport)}";
+            _ereminService.UpdateQR(qrDecoded, renta.BasePrice, 
+                BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring), 
+                gmdescript, 
+                renta.Id, 
+                BillingHelper.GetLifestyle(renta.LifeStyle));
             SaveContext();
         }
 

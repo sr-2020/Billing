@@ -36,7 +36,7 @@ namespace Billing
 
         public void Rerent(int modelId, int rentaId, string qrCode)
         {
-            var renta = Get<Renta>(r => r.Id == rentaId && r.QRRecorded == qrCode.ToString(), r => r.Sin.Scoring, r => r.Sin.Character, r => r.Sku.Nomenklatura);
+            var renta = Get<Renta>(r => r.Id == rentaId && r.QRRecorded == qrCode.ToString(), r => r.Sin.Scoring, r => r.Sin.Passport, r => r.Sku.Nomenklatura);
             if (renta == null)
             {
                 ErrorNotify("Переоформить ренту", rentaId, qrCode, modelId);
@@ -47,7 +47,7 @@ namespace Billing
 
         public void LetMePay(int modelId, int rentaId, string qrCode)
         {
-            var sin = GetSINByModelId(modelId, s => s.Scoring);
+            var sin = GetSINByModelId(modelId, s => s.Scoring, s => s.Passport);
             if (sin == null)
                 throw new BillingNotFoundException($"Син с modelId {modelId} не найден");
             var renta = Get<Renta>(r => r.Id == rentaId, r => r.Sku.Nomenklatura);
@@ -61,7 +61,7 @@ namespace Billing
 
         public void LetHimPay(int modelId, int targetId, int rentaId, string qrCode)
         {
-            var sin = GetSINByModelId(targetId, s => s.Scoring);
+            var sin = GetSINByModelId(targetId, s => s.Scoring, s => s.Passport);
             var renta = Get<Renta>(r => r.Id == rentaId, r => r.Sku.Nomenklatura);
             if (renta == null)
             {

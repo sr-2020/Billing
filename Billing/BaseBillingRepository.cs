@@ -103,30 +103,36 @@ namespace Billing
             SaveContext();
         }
 
-        protected string GetWalletName(Wallet wallet, bool anon)
+        private string ErrorWalletName(string message)
+        {
+            Console.Error.WriteLine(message);
+            return string.Empty;
+        }
+
+        protected string GetWalletName(Wallet wallet, bool anon, List<SIN> sinCache, List<ShopWallet> shopCache)
         {
             if (anon)
             {
                 return "Anonymous";
             }
             if (wallet == null)
-                return string.Empty;
+                return ErrorWalletName($"Передан пустой кошелек");
             switch (wallet.WalletType)
             {
                 case (int)WalletTypes.Character:
-                    var sin = GetAsNoTracking<SIN>(s => s.WalletId == wallet.Id, s => s.Character, s => s.Passport);
+                    var sin = sinCache.FirstOrDefault(s => s.WalletId == wallet.Id);
                     if (sin == null)
-                        return string.Empty;
-                    return $"{sin.Character.Model} {sin.Passport.PersonName} {sin.Passport.Sin}";
+                    {
+                        return ErrorWalletName($"Не найден sin для wallet {wallet.Id}");
+                    }
+                    return BillingHelper.GetPassportName(sin.Passport);
                 case (int)WalletTypes.Corporation:
-                    var corp = GetAsNoTracking<CorporationWallet>(c => c.WalletId == wallet.Id);
-                    if (corp == null)
-                        return string.Empty;
-                    return $"{corp.Id}";
+                    return ErrorWalletName($"Переводы корпорациям не реализованы wallet: {wallet.Id}");
+                    
                 case (int)WalletTypes.Shop:
-                    var shop = GetAsNoTracking<ShopWallet>(c => c.WalletId == wallet.Id);
+                    var shop = shopCache.FirstOrDefault(s=>s.WalletId == wallet.Id);
                     if (shop == null)
-                        return string.Empty;
+                        return ErrorWalletName($"Не найден shop для wallet {wallet.Id}");
                     return $"{shop.Id} {shop.Name}";
                 case (int)WalletTypes.MIR:
                     return "MIR";
@@ -138,19 +144,19 @@ namespace Billing
         /// <summary>
         /// TODO need caching
         /// </summary>
-        protected TransferDto CreateTransferDto(Transfer transfer, TransferType type, int modelId = 0, string owner = "владелец кошелька")
+        protected TransferDto CreateTransferDto(Transfer transfer, TransferType type, List<SIN> sinCache, List<ShopWallet> shopCache, string owner = "владелец кошелька")
         {
             bool anon = transfer.Anonymous;
             return new TransferDto
             {
-                ModelId = modelId.ToString(),
+                ModelId = "закрыто",
                 Comment = transfer.Comment,
                 TransferType = type.ToString(),
                 Amount = BillingHelper.Round(transfer.Amount),
                 NewBalance = type == TransferType.Incoming ? transfer.NewBalanceTo : transfer.NewBalanceFrom,
                 OperationTime = transfer.OperationTime,
-                From = type == TransferType.Incoming ? GetWalletName(transfer.WalletFrom, anon) : owner,
-                To = type == TransferType.Incoming ? owner : GetWalletName(transfer.WalletTo, anon),
+                From = type == TransferType.Incoming ? GetWalletName(transfer.WalletFrom, anon, sinCache, shopCache) : owner,
+                To = type == TransferType.Incoming ? owner : GetWalletName(transfer.WalletTo, anon, sinCache, shopCache),
                 Anonimous = transfer.Anonymous,
                 Id = transfer.Id,
                 Overdraft = transfer.Overdraft,

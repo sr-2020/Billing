@@ -48,7 +48,7 @@ namespace Jobs
             return $"Цикл {cycle.Token}_{cycle.Number} {(cycle.IsActive ? "стартовал" : "остановлен")}";
         }
 
-        public string DoBeat(BeatTypes type = BeatTypes.Test, string token = "")
+        public string DoBeat(BeatTypes type = BeatTypes.Test, string token = "", bool wait = false)
         {
             var cycle = Factory.Job.GetLastCycle(token);
             if (!cycle.IsActive || cycle == null)
@@ -59,7 +59,7 @@ namespace Jobs
             {
                 throw new BillingException(BillingException);
             }
-            Task.Run(() =>
+            var task = Task.Run(() =>
             {
                 try
                 {
@@ -106,8 +106,11 @@ namespace Jobs
                         throw new Exception("Биллинг был разблокирован раньше времени");
                     }
                 }
-
             });
+            if(wait)
+            {
+                task.Wait();
+            }
             return $"Пересчет для {cycle.Token}_{cycle.Number} запущен ";
         }
 

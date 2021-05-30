@@ -139,6 +139,21 @@ namespace InternalServices
             CreateEvent(data, eventType, url);
         }
 
+        public void UpdateQR(string qr, decimal basePrice, decimal rentPrice, string gmDescription, int rentaId, Lifestyles lifestyle)
+        {
+            var eventType = "updateMerchandise";
+            var data = new
+            {
+                basePrice,
+                rentPrice,
+                gmDescription,
+                dealId = rentaId.ToString(),
+                lifestyle = lifestyle.ToString()
+            };
+            var url = $"{URL}/qr/model/{qr}";
+            CreateEvent(data, eventType, url);
+        }
+
         public void WriteQR(string qr, string id, string name, string description, int numberOfUses, decimal basePrice, decimal rentPrice, string gmDescription, int rentaId, Lifestyles lifestyle)
         {
             var eventType = "createMerchandise";

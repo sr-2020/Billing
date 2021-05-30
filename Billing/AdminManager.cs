@@ -35,6 +35,7 @@ namespace Billing
         void DeleteSku(int skuId);
         Transfer MakeTransferSINSIN(int characterFrom, string sinTo, decimal amount, string comment);
         Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment);
+        void CleanRenta(Renta renta, string qrDecoded);
     }
     public class AdminManager : BaseBillingRepository, IAdminManager
     {
@@ -341,6 +342,32 @@ namespace Billing
             return MakeTransferSINSIN(d1, d2, amount, comment);
         }
 
+        public void CleanRenta(Renta renta, string qrDecoded)
+        {
+            var ereminService = new EreminService();
+            ereminService.CleanQR(qrDecoded);
+            renta.QRRecorded = string.Empty;
+            SaveContext();
+        }
+
+        protected List<TransferDto> CreateTransfersDto(List<Transfer> listFrom, List<Transfer> listTo, string owner)
+        {
+            var walletdtos = listFrom.GroupBy(t => new { t.WalletToId, t.WalletTo.WalletType }).Select(t => new WalletDto { WalletId = t.Key.WalletToId, WalletType = (WalletTypes)t.Key.WalletType }).ToList();
+            walletdtos.AddRange(listTo.GroupBy(t => new { t.WalletFromId, t.WalletFrom.WalletType }).Select(t => new WalletDto { WalletId = t.Key.WalletFromId, WalletType = (WalletTypes)t.Key.WalletType }));
+            var sinIds = walletdtos.Where(w => w.WalletType == WalletTypes.Character).Select(w => w.WalletId).ToList();
+            var sins = GetListAsNoTracking<SIN>(s => sinIds.Contains(s.WalletId ?? 0), s => s.Passport);
+            var shopIds = walletdtos.Where(w => w.WalletType == WalletTypes.Shop).Select(w => w.WalletId).ToList();
+            var shops = GetListAsNoTracking<ShopWallet>(s => shopIds.Contains(s.WalletId ?? 0));
+            var allList = new List<TransferDto>();
+            allList.AddRange(listFrom
+                .Select(s => CreateTransferDto(s, TransferType.Outcoming, sins, shops, owner))
+                .ToList());
+            allList.AddRange(listTo
+                .Select(s => CreateTransferDto(s, TransferType.Incoming, sins, shops, owner))
+                .ToList());
+            return allList.OrderBy(t => t.OperationTime).ToList();
+        }
+
         protected Transfer MakeTransferSINSIN(SIN sinFrom, SIN sinTo, decimal amount, string comment)
         {
             var anon = false;
@@ -363,7 +390,5 @@ namespace Billing
             }
             return transfer;
         }
-
     }
-
 }

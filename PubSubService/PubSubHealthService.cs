@@ -23,19 +23,24 @@ namespace PubSubService
         public override void Handle(HealthModel model)
         {
             base.Handle(model);
-            IScoringManager manager;
+            IScoringManager scoring;
+            IBillingManager billing;
             var modelId = BillingHelper.ParseId(model.CharacterId, "characterId");
             switch (model.StateTo)
             {
                 case "wounded":
-                    manager = IoC.IocContainer.Get<IScoringManager>();
-                    manager.OnWounded(modelId);
+                    scoring = IoC.IocContainer.Get<IScoringManager>();
+                    scoring.OnWounded(modelId);
                     break;
                 case "clinically_dead":
-                    manager = IoC.IocContainer.Get<IScoringManager>();
-                    manager.OnClinicalDeath(modelId);
-                    var billing = IoC.IocContainer.Get<IBillingManager>();
+                    scoring = IoC.IocContainer.Get<IScoringManager>();
+                    scoring.OnClinicalDeath(modelId);
+                    billing = IoC.IocContainer.Get<IBillingManager>();
                     billing.DropInsurance(modelId);
+                    break;
+                case "biologically_dead":
+                    billing = IoC.IocContainer.Get<IBillingManager>();
+                    billing.DropCharacter(modelId);
                     break;
                 default:
                     break;

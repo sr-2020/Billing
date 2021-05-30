@@ -55,21 +55,17 @@ namespace Billing
 
         List<SIN> GetSinsInGame();
         List<CharacterDto> GetCharactersInGame();
-        List<TransferDto> GetTransfersByRenta(int rentaID);
-
         #endregion
 
         #region events
         void DropInsurance(int modelId);
+        void DropCharacter(int modelId);
         #endregion
 
     }
 
     public class BillingManager : AdminManager, IBillingManager
     {
-
-
-
         public void BreakContract(int corporation, int shop)
         {
             var contract = Get<Contract>(c => c.CorporationId == corporation && c.ShopId == shop);
@@ -192,6 +188,7 @@ namespace Billing
             }
             price.Sku.Count -= count;
             var instantConsume = price.Sku.Nomenklatura.Specialisation.ProductType.InstantConsume;
+            var gmdescript = $"Рента по товару оформлена на {BillingHelper.GetPassportName(sin.Passport)}";
             var renta = new Renta
             {
                 BasePrice = price.BasePrice,
@@ -205,7 +202,7 @@ namespace Billing
                 Shop = price.Shop,
                 HasQRWrite = instantConsume ? false : BillingHelper.HasQrWrite(price.Sku.Nomenklatura.Code),
                 PriceId = priceId,
-                Secret = price.Sku.Nomenklatura.Secret,
+                Secret = gmdescript,
                 LifeStyle = price.Sku.Nomenklatura.Lifestyle,
                 Count = count
             };
@@ -451,7 +448,7 @@ namespace Billing
         public BalanceDto GetBalance(int modelId)
         {
             var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring, s => s.Passport.Metatype);
-            var insur = GetInsurance(modelId, r => r.Sku); 
+            var insur = GetInsurance(modelId, r => r.Sku);
             var lics = ProductTypeEnum.Licences.ToString();
             var licences = GetList<Renta>(r => r.Sku.Nomenklatura.Specialisation.ProductType.Alias == lics && r.SinId == sin.Id, r => r.Sku.Nomenklatura)
                 .OrderByDescending(r => r.DateCreated)
@@ -484,28 +481,17 @@ namespace Billing
         public TransferSum GetTransfers(int modelId)
         {
             var result = new TransferSum();
-            var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Character);
+            var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Passport);
             if (sin == null)
                 throw new BillingException("sin not found");
-
-            
-            var listFrom = GetList<Transfer>(t => t.WalletFromId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
-            var allList = new List<TransferDto>();
-            var owner = GetWalletName(sin.Wallet, false);
-
-
-            if (listFrom != null)
-                allList.AddRange(listFrom
-                    .Select(s => CreateTransferDto(s, TransferType.Outcoming, modelId, owner))
-                    .ToList());
-            var listTo = GetList<Transfer>(t => t.WalletToId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
-            if (listTo != null)
-                allList.AddRange(listTo
-                    .Select(s => CreateTransferDto(s, TransferType.Incoming, modelId, owner))
-                    .ToList());
-            result.Transfers = allList.OrderBy(t => t.OperationTime).ToList();
+            var listFrom = GetListAsNoTracking<Transfer>(t => t.WalletFromId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
+            var listTo = GetListAsNoTracking<Transfer>(t => t.WalletToId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
+            var owner = BillingHelper.GetPassportName(sin.Passport);
+            result.Transfers = CreateTransfersDto(listFrom, listTo, owner);
             return result;
         }
+
+
 
         public string GetSinStringByCharacter(int modelId)
         {
@@ -570,18 +556,39 @@ namespace Billing
             return result;
         }
 
-        public List<TransferDto> GetTransfersByRenta(int rentaID)
-        {
-            var tranfers = GetListAsNoTracking<Transfer>(t => t.RentaId == rentaID).Select(s => CreateTransferDto(s, TransferType.Outcoming)).ToList();
-            return tranfers;
-        }
-
         public void DropInsurance(int modelId)
         {
             var insurance = GetInsurance(modelId);
             insurance.Expired = true;
             SaveContext();
         }
+
+        public void DropCharacter(int modelId)
+        {
+            var sin = GetSINByModelId(modelId, s => s.Wallet);
+            sin.InGame = false;
+            var transfers = GetList<Transfer>(t => t.WalletFromId == sin.WalletId || t.WalletToId == sin.WalletId);
+            var rents = GetList<Renta>(r => r.SinId == sin.Id);
+            RemoveRange(transfers);
+            SaveContext();
+            foreach (var renta in rents)
+            {
+                if (!string.IsNullOrEmpty(renta.QRRecorded))
+                {
+                    try
+                    {
+                        CleanRenta(renta, renta.QRRecorded);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.Error.WriteLine(e.ToString());
+                    }
+                }
+                RemoveAndSave(renta);
+            }
+        }
+
+
 
         #region private
 

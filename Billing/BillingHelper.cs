@@ -91,6 +91,13 @@ namespace Billing
             return new NamedEntity { Id = (int)lifestyle, Name = lifestyle.ToString() };
         }
 
+        public static string GetPassportName(Passport passport)
+        {
+            if (passport == null)
+                return string.Empty;
+            return $"{ passport.PersonName} ({ passport.Sin})";
+        }
+
         public static decimal GetFinalPrice(decimal basePrice, decimal discount, decimal scoring)
         {
             return BillingHelper.Round((basePrice * discount) / scoring);
