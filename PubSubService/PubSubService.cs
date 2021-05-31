@@ -63,7 +63,7 @@ namespace PubSubService
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Console.Error.WriteLine(e.ToString());
             }
         }
 

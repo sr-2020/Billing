@@ -556,8 +556,11 @@ namespace Billing
         public void DropInsurance(int modelId)
         {
             var insurance = GetInsurance(modelId);
-            insurance.Expired = true;
-            SaveContext();
+            if (insurance != null)
+            {
+                insurance.Expired = true;
+                SaveContext();
+            }
         }
 
         public SIN DropCharacter(int modelId)

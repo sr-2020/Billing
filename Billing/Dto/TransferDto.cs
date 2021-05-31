@@ -18,9 +18,10 @@ namespace Billing.DTO
     public class TransferDto
     {
         public int Id { get; set; }
+        [Display(Name = "Овердрафт")]
         public bool Overdraft { get; set; }
+        [Display(Name = "Рента(если есть)")]
         public int? RentaId { get; set; }
-        [Display(Name ="SIN")]
         public string ModelId { get; set; }
         public string TransferType { get; set; }
         public decimal NewBalance { get; set; }

@@ -34,17 +34,11 @@ namespace BillingAPI.Controllers
         [HttpGet("test")]
         public ActionResult Test()
         {
-            //Console.WriteLine("test started");
-            //Task.Run(() =>
-            //{
-            //    Console.WriteLine("task started");
-            //    var manager = IocContainer.Get<IJobManager>();
-            //    var result = RunAction(() => manager.(), $"period");
-            //    Thread.Sleep(1000);
-            //    Console.WriteLine("task ended");
-            //});
-            //Console.WriteLine("test ended");
-            return new JsonResult("sadasd");
+            var manager = new ExcelManager();
+            var memStream = manager.LoadTransfers();
+            byte[] fileBytes = memStream.ToArray();
+            string fileName = "transfers.xlsx";
+            return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
         }
         [HttpGet("testid")]
         public ActionResult TestId(int character)
