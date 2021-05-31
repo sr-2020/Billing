@@ -1,5 +1,5 @@
 app:
   postgres:
     dbHost: postgres13
-    dbnameBilling: rc_sr2020
+    dbnameBilling: sr2020
     
