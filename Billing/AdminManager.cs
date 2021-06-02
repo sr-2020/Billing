@@ -326,6 +326,7 @@ namespace Billing
             SaveContext();
             return corporation;
         }
+
         public Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment)
         {
             var d1 = BillingBlocked(characterFrom, s => s.Wallet, s => s.Character);

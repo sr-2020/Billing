@@ -21,7 +21,7 @@ namespace Scoringspace
     {
         void OnLifeStyleChanged(Scoring scoring, Lifestyles from, Lifestyles to);
         void OnPillConsumed(int model, string pillLifestyle);
-        void OnWounded(int model);
+        Task OnWounded(int model);
         void OnClinicalDeath(int model);
         void OnDumpshock(int model);
         void OnFoodConsume(int model, string foodLifeStyle);
@@ -47,7 +47,7 @@ namespace Scoringspace
         public void OnInsuranceBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.insurance);
-            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
@@ -56,7 +56,7 @@ namespace Scoringspace
         public void OnMatrixBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_matrix);
-            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
@@ -65,7 +65,7 @@ namespace Scoringspace
         public void OnDroneBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_drone);
-            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
@@ -74,7 +74,7 @@ namespace Scoringspace
         public void OnCharityBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_charity);
-            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
@@ -84,7 +84,7 @@ namespace Scoringspace
         public void OnMetatypeChanged(SIN sin)
         {
             var factorId = GetFactorId(ScoringFactorEnum.metatype);
-            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == sin.Passport.MetatypeId);
                 return value?.Value ?? 1;
@@ -100,14 +100,14 @@ namespace Scoringspace
                 return;
             }
             var lifestyle = BillingHelper.GetLifestyle(implantlifestyle);
-            ScoringEvent(scoring.Id, factorId, (context) =>
+            RaiseScoringEvent(scoring.Id, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == (int)lifestyle);
                 return value?.Value ?? 1;
             });
             factorId = GetFactorId(ScoringFactorEnum.where_implant_install);
             lifestyle = BillingHelper.GetLifestyle(autodoclifestyle);
-            ScoringEvent(scoring.Id, factorId, (context) =>
+            RaiseScoringEvent(scoring.Id, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == (int)lifestyle);
                 return value?.Value ?? 1;
@@ -118,7 +118,7 @@ namespace Scoringspace
         public void OnImplantBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_implant);
-            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
@@ -128,7 +128,7 @@ namespace Scoringspace
         public void OnOtherBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_other);
-            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
@@ -138,7 +138,7 @@ namespace Scoringspace
         public void OnPillBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_pill);
-            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
@@ -148,7 +148,7 @@ namespace Scoringspace
         public void OnWeaponBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_weapon);
-            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
@@ -158,7 +158,7 @@ namespace Scoringspace
         public void OnMagicBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_magic);
-            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
@@ -168,7 +168,7 @@ namespace Scoringspace
         public void OnFoodBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_food);
-            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
@@ -184,7 +184,7 @@ namespace Scoringspace
             }
             var lifestyle = BillingHelper.GetLifestyle(foodLifeStyle);
             var scoring = GetScoringByModelId(model);
-            ScoringEvent(scoring.Id, factorId, (context) =>
+            RaiseScoringEvent(scoring.Id, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == (int)lifestyle);
                 return value?.Value ?? 1;
@@ -200,18 +200,18 @@ namespace Scoringspace
             }
             var lifestyle = BillingHelper.GetLifestyle(pillLifestyle);
             var scoring = GetScoringByModelId(model);
-            ScoringEvent(scoring.Id, factorId, (context) =>
+            RaiseScoringEvent(scoring.Id, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == (int)lifestyle);
                 return value?.Value ?? 1;
             });
         }
 
-        public void OnWounded(int model)
+        public async Task OnWounded(int model)
         {
             var factorId = GetFactorId(ScoringFactorEnum.worse);
             var scoring = GetScoringByModelId(model);
-            ScoringEvent(scoring.Id, factorId, (context) =>
+            await RaiseScoringEvent(scoring.Id, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == 1);
                 return value?.Value ?? 1;
@@ -222,7 +222,7 @@ namespace Scoringspace
         {
             var factorId = GetFactorId(ScoringFactorEnum.clinical_death);
             var scoring = GetScoringByModelId(model);
-            ScoringEvent(scoring.Id, factorId, (context) =>
+            RaiseScoringEvent(scoring.Id, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == 1);
                 return value?.Value ?? 1;
@@ -233,7 +233,7 @@ namespace Scoringspace
         {
             var factorId = GetFactorId(ScoringFactorEnum.dumpshock);
             var scoring = GetScoringByModelId(model);
-            ScoringEvent(scoring.Id, factorId, (context) =>
+            RaiseScoringEvent(scoring.Id, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == 1);
                 return value?.Value ?? 1;
@@ -243,22 +243,13 @@ namespace Scoringspace
         public void OnLifeStyleChanged(Scoring scoring, Lifestyles from, Lifestyles to)
         {
             var factorId = GetFactorId(ScoringFactorEnum.ls_change);
-            ScoringEvent(scoring.Id, factorId, (context) =>
+            RaiseScoringEvent(scoring.Id, factorId, (context) =>
              {
                  var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == ScoringHelper.GetEventNumberLifestyle(from, to));
                  return value?.Value ?? 1;
              });
         }
         #endregion
-        public void OnTest(int scoringId)
-        {
-            var factorId = GetFactorId(ScoringFactorEnum.test);
-            ScoringEvent(scoringId, 1, (context) =>
-            {
-                Thread.Sleep(10000);
-                return 0;
-            });
-        }
 
         public ScoringDto GetFullScoring(int character)
         {
@@ -307,9 +298,9 @@ namespace Scoringspace
 
         #region mathematic
 
-        private void ScoringEvent(int scoringId, int factorId, Func<BillingContext, decimal> action)
+        private Task RaiseScoringEvent(int scoringId, int factorId, Func<BillingContext, decimal> action)
         {
-            Task.Run(() =>
+            return Task.Run(() =>
             {
                 try
                 {
@@ -352,8 +343,6 @@ namespace Scoringspace
                             var newValue = CalculateFactor((double)lifestyle, (double)curFactor.Value);
                             curFactor.Value = newValue;
                             Add(curFactor, context);
-
-
                             var curFactors = context.Set<CurrentFactor>().AsNoTracking().Include(f => f.ScoringFactor).Where(f => f.CurrentCategoryId == curCategory.Id).ToList();
                             var factorsCount = curFactors.Count;
                             if (factorsCount == 0)
@@ -396,7 +385,7 @@ namespace Scoringspace
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.Message);
+                    Console.Error.WriteLine(e.ToString());
                 }
             });
         }
