@@ -115,6 +115,11 @@ namespace Billing
             return !string.IsNullOrEmpty(code);
         }
 
+        public static string GetGmDescription(Passport passport, Sku sku, bool anon)
+        {
+            return $"Рента по товару {sku.Name} оформлена на {GetPassportName(passport, anon)}";
+        }
+
         public static bool IsAdmin(int character)
         {
             var manager = IocContainer.Get<ISettingsManager>();

@@ -251,7 +251,7 @@ namespace Billing
             renta.SinId = newsin.Id;
             var anon = GetAnon(newsin.Character.Model);
             renta.CurrentScoring = newsin.Scoring.CurerentRelative + newsin.Scoring.CurrentFix;
-            var gmdescript = $"Рента по товару переоформлена на {BillingHelper.GetPassportName(newsin.Passport, anon)}";
+            var gmdescript = BillingHelper.GetGmDescription(newsin.Passport, renta.Sku, anon);
             _ereminService.UpdateQR(qrDecoded, renta.BasePrice, 
                 BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring), 
                 gmdescript, 

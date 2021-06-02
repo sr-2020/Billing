@@ -189,7 +189,7 @@ namespace Billing
             price.Sku.Count -= count;
             var instantConsume = price.Sku.Nomenklatura.Specialisation.ProductType.InstantConsume;
             var anon = GetAnon(sin.Character.Model);
-            var gmdescript = $"Рента по товару оформлена на {BillingHelper.GetPassportName(sin.Passport, anon)}";
+            var gmdescript = BillingHelper.GetGmDescription(sin.Passport, price.Sku, anon);
             var renta = new Renta
             {
                 BasePrice = price.BasePrice,
