@@ -21,7 +21,7 @@ namespace BillingAPI.Controllers
         public DataResult<ScoringDto> GetScoring(int character)
         {
             var manager = IocContainer.Get<IScoringManager>();
-            return RunAction(()=> manager.GetFullScoring(character));
+            return RunAction(()=> manager.GetFullScoring(character), $"get full scoring {character}");
         }
 
     }

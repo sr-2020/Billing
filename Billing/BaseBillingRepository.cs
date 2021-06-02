@@ -84,7 +84,7 @@ namespace Billing
             var categories = GetList<ScoringCategory>(c => c.CategoryType > 0);
             foreach (var category in categories)
             {
-                var current = GetAsNoTracking<CurrentCategory>(c => c.CategoryId == category.Id && c.ScoringId == sin.ScoringId);
+                var current = Get<CurrentCategory>(c => c.CategoryId == category.Id && c.ScoringId == sin.ScoringId);
                 if (current == null)
                 {
                     current = new CurrentCategory
@@ -94,6 +94,11 @@ namespace Billing
                         Value = sin.Scoring.StartFactor ?? 1
                     };
                     Add(current);
+                }
+                else
+                {
+                    var factors = GetList<CurrentFactor>(c => c.CurrentCategoryId == current.Id);
+                    RemoveRange(factors);
                 }
             }
             var transfers = GetList<Transfer>(t => t.WalletFromId == sin.WalletId || t.WalletToId == sin.WalletId);
@@ -250,6 +255,10 @@ namespace Billing
             if (sin == null)
             {
                 throw new BillingNotFoundException($"sin for modelId {modelId} not found");
+            }
+            if(!(sin.InGame ?? false))
+            {
+                throw new BillingException($"Персонаж {modelId} отключен");
             }
             return sin;
         }
