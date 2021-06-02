@@ -23,6 +23,8 @@ namespace Core.Primitives
         worse,
         dumpshock,
         clinical_death,
-        buy_charity
+        buy_charity,
+        buy_drone,
+        buy_matrix
     }
 }

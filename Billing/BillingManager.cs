@@ -390,6 +390,10 @@ namespace Billing
                     manager = IoC.IocContainer.Get<IScoringManager>();
                     manager.OnInsuranceBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
+                case "drone":
+                    break;
+                case "matrix":
+                    break;
                 default:
                     manager = IoC.IocContainer.Get<IScoringManager>();
                     manager.OnOtherBuy(sin, sku.Nomenklatura.Lifestyle);

@@ -13,6 +13,8 @@ namespace Core.Primitives
         Magic,
         Licences,
         EdibleFood,
-        Charity
+        Charity,
+        drone,
+        matrix
     }
 }

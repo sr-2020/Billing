@@ -26,6 +26,8 @@ namespace Scoringspace
         void OnDumpshock(int model);
         void OnFoodConsume(int model, string foodLifeStyle);
         void OnOtherBuy(SIN sin, int lifestyle);
+        void OnMatrixBuy(SIN sin, int lifestyle);
+        void OnDroneBuy(SIN sin, int lifestyle);
         void OnPillBuy(SIN sin, int lifestyle);
         void OnWeaponBuy(SIN sin, int lifestyle);
         void OnMagicBuy(SIN sin, int lifestyle);
@@ -51,7 +53,24 @@ namespace Scoringspace
                 return value?.Value ?? 1;
             });
         }
-
+        public void OnMatrixBuy(SIN sin, int lifestyle)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.buy_matrix);
+            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
+                return value?.Value ?? 1;
+            });
+        }
+        public void OnDroneBuy(SIN sin, int lifestyle)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.buy_drone);
+            ScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
+                return value?.Value ?? 1;
+            });
+        }
         public void OnCharityBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_charity);
