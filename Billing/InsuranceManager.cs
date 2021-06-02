@@ -33,7 +33,7 @@ namespace Billing
                 ShopName = "Страховка отсутствует",
                 PersonName = $"{sin.Passport?.PersonName}"
             };
-            var lastIns = GetInsurance(modelId, r => r.Sku.Nomenklatura);
+            var lastIns = GetInsurance(modelId, r => r.Sku.Nomenklatura, r => r.Shop);
             if (lastIns != null)
             {
                 insurance.SkuId = lastIns.SkuId;
