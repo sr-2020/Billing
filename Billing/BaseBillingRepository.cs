@@ -85,21 +85,20 @@ namespace Billing
             foreach (var category in categories)
             {
                 var current = Get<CurrentCategory>(c => c.CategoryId == category.Id && c.ScoringId == sin.ScoringId);
-                if (current == null)
-                {
-                    current = new CurrentCategory
-                    {
-                        CategoryId = category.Id,
-                        ScoringId = sin.ScoringId ?? 0,
-                        Value = sin.Scoring.StartFactor ?? 1
-                    };
-                    Add(current);
-                }
-                else
+
+                if (current != null)
                 {
                     var factors = GetList<CurrentFactor>(c => c.CurrentCategoryId == current.Id);
                     RemoveRange(factors);
+                    Remove(current);
                 }
+                current = new CurrentCategory
+                {
+                    CategoryId = category.Id,
+                    ScoringId = sin.ScoringId ?? 0,
+                    Value = sin.Scoring.StartFactor ?? 1
+                };
+                Add(current);
             }
             var transfers = GetList<Transfer>(t => t.WalletFromId == sin.WalletId || t.WalletToId == sin.WalletId);
             RemoveRange(transfers);
@@ -130,9 +129,9 @@ namespace Billing
                     return BillingHelper.GetPassportName(sin.Passport, anon);
                 case (int)WalletTypes.Corporation:
                     return ErrorWalletName($"Переводы корпорациям не реализованы wallet: {wallet.Id}");
-                    
+
                 case (int)WalletTypes.Shop:
-                    var shop = shopCache.FirstOrDefault(s=>s.WalletId == wallet.Id);
+                    var shop = shopCache.FirstOrDefault(s => s.WalletId == wallet.Id);
                     if (shop == null)
                         return ErrorWalletName($"Не найден shop для wallet {wallet.Id}");
                     return $"{shop.Id} {shop.Name}";
@@ -256,7 +255,7 @@ namespace Billing
             {
                 throw new BillingNotFoundException($"sin for modelId {modelId} not found");
             }
-            if(!(sin.InGame ?? false))
+            if (!(sin.InGame ?? false))
             {
                 throw new BillingException($"Персонаж {modelId} отключен");
             }

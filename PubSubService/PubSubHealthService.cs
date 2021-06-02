@@ -42,6 +42,13 @@ namespace PubSubService
                     billing = IoC.IocContainer.Get<IBillingManager>();
                     billing.DropCharacter(modelId);
                     break;
+                case "healthy":
+                    if(model.StateFrom == "biologically_dead")
+                    {
+                        billing = IoC.IocContainer.Get<IBillingManager>();
+                        billing.RestoreCharacter(modelId);
+                    }
+                    break;
                 default:
                     break;
             }

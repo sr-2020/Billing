@@ -60,6 +60,7 @@ namespace Billing
         #region events
         void DropInsurance(int modelId);
         SIN DropCharacter(int modelId);
+        SIN RestoreCharacter(int modelId);
         #endregion
 
     }
@@ -592,8 +593,13 @@ namespace Billing
             }
             return sin;
         }
-
-
+        public SIN RestoreCharacter(int modelId)
+        {
+            var sin = GetSINByModelId(modelId);
+            sin.InGame = false;
+            SaveContext();
+            return sin;
+        }
 
         #region private
 
