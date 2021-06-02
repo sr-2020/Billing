@@ -59,25 +59,5 @@ namespace BillingAPI.Controllers
             return new JsonResult("success");
         }
 
-        /// <summary>
-        /// Пересчитать ренты
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("testscoring")]
-        public ActionResult TestScoring()
-        {
-            var manager = IocContainer.Get<ScoringManager>();
-            var random = new Random();
-            var rnd = random.Next(1, 3);
-            if (rnd == 1)
-                manager.OnTest(1677);
-            else
-            {
-                manager.OnTest(1681);
-            }
-
-            return new JsonResult("success");
-        }
-
     }
 }
