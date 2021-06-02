@@ -65,9 +65,9 @@ namespace Billing
                 sin.Scoring = scoring;
                 Add(scoring);
             }
-            scoring.StartFactor = 0.5m;
-            scoring.CurrentFix = 0.5m * 0.5m;
-            scoring.CurerentRelative = 0.5m * 0.5m;
+            scoring.StartFactor = 1;
+            scoring.CurrentFix = 0.5m;
+            scoring.CurerentRelative = 0.5m;
             SaveContext();
             InitEco(sin);
             if (sin.PassportId == 0)
