@@ -19,24 +19,24 @@ namespace Scoringspace
 {
     public interface IScoringManager
     {
-        void OnLifeStyleChanged(Scoring scoring, Lifestyles from, Lifestyles to);
-        void OnPillConsumed(int model, string pillLifestyle);
+        Task OnLifeStyleChanged(Scoring scoring, Lifestyles from, Lifestyles to);
+        Task OnPillConsumed(int model, string pillLifestyle);
         Task OnWounded(int model);
-        void OnClinicalDeath(int model);
-        void OnDumpshock(int model);
-        void OnFoodConsume(int model, string foodLifeStyle);
-        void OnOtherBuy(SIN sin, int lifestyle);
-        void OnMatrixBuy(SIN sin, int lifestyle);
-        void OnDroneBuy(SIN sin, int lifestyle);
-        void OnPillBuy(SIN sin, int lifestyle);
-        void OnWeaponBuy(SIN sin, int lifestyle);
-        void OnMagicBuy(SIN sin, int lifestyle);
-        void OnInsuranceBuy(SIN sin, int lifestyle);
-        void OnCharityBuy(SIN sin, int lifestyle);
-        void OnFoodBuy(SIN sin, int lifestyle);
-        void OnImplantBuy(SIN sin, int lifestyle);
-        void OnImplantInstalled(int model, string implantlifestyle, string autodoclifestyle);
-        void OnMetatypeChanged(SIN sin);
+        Task OnClinicalDeath(int model);
+        Task OnDumpshock(int model);
+        Task OnFoodConsume(int model, string foodLifeStyle);
+        Task OnOtherBuy(SIN sin, int lifestyle);
+        Task OnMatrixBuy(SIN sin, int lifestyle);
+        Task OnDroneBuy(SIN sin, int lifestyle);
+        Task OnPillBuy(SIN sin, int lifestyle);
+        Task OnWeaponBuy(SIN sin, int lifestyle);
+        Task OnMagicBuy(SIN sin, int lifestyle);
+        Task OnInsuranceBuy(SIN sin, int lifestyle);
+        Task OnCharityBuy(SIN sin, int lifestyle);
+        Task OnFoodBuy(SIN sin, int lifestyle);
+        Task OnImplantBuy(SIN sin, int lifestyle);
+        Task OnImplantInstalled(int model, string implantlifestyle, string autodoclifestyle);
+        Task OnMetatypeChanged(SIN sin);
         ScoringDto GetFullScoring(int character);
     }
 
@@ -44,54 +44,54 @@ namespace Scoringspace
     {
         #region implementation
 
-        public void OnInsuranceBuy(SIN sin, int lifestyle)
+        public async Task OnInsuranceBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.insurance);
-            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            await RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
             });
         }
-        public void OnMatrixBuy(SIN sin, int lifestyle)
+        public async Task OnMatrixBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_matrix);
-            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            await RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
             });
         }
-        public void OnDroneBuy(SIN sin, int lifestyle)
+        public async Task OnDroneBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_drone);
-            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            await RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
             });
         }
-        public void OnCharityBuy(SIN sin, int lifestyle)
+        public async Task OnCharityBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_charity);
-            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            await RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
             });
         }
 
-        public void OnMetatypeChanged(SIN sin)
+        public async Task OnMetatypeChanged(SIN sin)
         {
             var factorId = GetFactorId(ScoringFactorEnum.metatype);
-            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            await RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == sin.Passport.MetatypeId);
                 return value?.Value ?? 1;
             });
         }
 
-        public void OnImplantInstalled(int model, string implantlifestyle, string autodoclifestyle)
+        public async Task OnImplantInstalled(int model, string implantlifestyle, string autodoclifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.implant_install);
             var scoring = GetScoringByModelId(model);
@@ -100,14 +100,14 @@ namespace Scoringspace
                 return;
             }
             var lifestyle = BillingHelper.GetLifestyle(implantlifestyle);
-            RaiseScoringEvent(scoring.Id, factorId, (context) =>
+            await RaiseScoringEvent(scoring.Id, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == (int)lifestyle);
                 return value?.Value ?? 1;
             });
             factorId = GetFactorId(ScoringFactorEnum.where_implant_install);
             lifestyle = BillingHelper.GetLifestyle(autodoclifestyle);
-            RaiseScoringEvent(scoring.Id, factorId, (context) =>
+            await RaiseScoringEvent(scoring.Id, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == (int)lifestyle);
                 return value?.Value ?? 1;
@@ -115,67 +115,67 @@ namespace Scoringspace
 
         }
 
-        public void OnImplantBuy(SIN sin, int lifestyle)
+        public async Task OnImplantBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_implant);
-            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            await RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
             });
         }
 
-        public void OnOtherBuy(SIN sin, int lifestyle)
+        public async Task OnOtherBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_other);
-            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            await RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
             });
         }
 
-        public void OnPillBuy(SIN sin, int lifestyle)
+        public async Task OnPillBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_pill);
-            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            await RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
             });
         }
 
-        public void OnWeaponBuy(SIN sin, int lifestyle)
+        public async Task OnWeaponBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_weapon);
-            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            await RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
             });
         }
 
-        public void OnMagicBuy(SIN sin, int lifestyle)
+        public async Task OnMagicBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_magic);
-            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            await RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
             });
         }
 
-        public void OnFoodBuy(SIN sin, int lifestyle)
+        public async Task OnFoodBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_food);
-            RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            await RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
                 return value?.Value ?? 1;
             });
         }
 
-        public void OnFoodConsume(int model, string foodLifeStyle)
+        public async Task OnFoodConsume(int model, string foodLifeStyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.food_consume);
             if (!BillingHelper.LifestyleIsDefined(foodLifeStyle))
@@ -184,14 +184,14 @@ namespace Scoringspace
             }
             var lifestyle = BillingHelper.GetLifestyle(foodLifeStyle);
             var scoring = GetScoringByModelId(model);
-            RaiseScoringEvent(scoring.Id, factorId, (context) =>
+            await RaiseScoringEvent(scoring.Id, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == (int)lifestyle);
                 return value?.Value ?? 1;
             });
         }
 
-        public void OnPillConsumed(int model, string pillLifestyle)
+        public async Task OnPillConsumed(int model, string pillLifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.pill_use);
             if (!BillingHelper.LifestyleIsDefined(pillLifestyle))
@@ -200,7 +200,7 @@ namespace Scoringspace
             }
             var lifestyle = BillingHelper.GetLifestyle(pillLifestyle);
             var scoring = GetScoringByModelId(model);
-            RaiseScoringEvent(scoring.Id, factorId, (context) =>
+            await RaiseScoringEvent(scoring.Id, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == (int)lifestyle);
                 return value?.Value ?? 1;
@@ -218,32 +218,32 @@ namespace Scoringspace
             });
         }
 
-        public void OnClinicalDeath(int model)
+        public async Task OnClinicalDeath(int model)
         {
             var factorId = GetFactorId(ScoringFactorEnum.clinical_death);
             var scoring = GetScoringByModelId(model);
-            RaiseScoringEvent(scoring.Id, factorId, (context) =>
+            await RaiseScoringEvent(scoring.Id, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == 1);
                 return value?.Value ?? 1;
             });
         }
 
-        public void OnDumpshock(int model)
+        public async Task OnDumpshock(int model)
         {
             var factorId = GetFactorId(ScoringFactorEnum.dumpshock);
             var scoring = GetScoringByModelId(model);
-            RaiseScoringEvent(scoring.Id, factorId, (context) =>
+            await RaiseScoringEvent(scoring.Id, factorId, (context) =>
             {
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == 1);
                 return value?.Value ?? 1;
             });
         }
 
-        public void OnLifeStyleChanged(Scoring scoring, Lifestyles from, Lifestyles to)
+        public async Task OnLifeStyleChanged(Scoring scoring, Lifestyles from, Lifestyles to)
         {
             var factorId = GetFactorId(ScoringFactorEnum.ls_change);
-            RaiseScoringEvent(scoring.Id, factorId, (context) =>
+            await RaiseScoringEvent(scoring.Id, factorId, (context) =>
              {
                  var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == ScoringHelper.GetEventNumberLifestyle(from, to));
                  return value?.Value ?? 1;
@@ -334,7 +334,6 @@ namespace Scoringspace
                                 {
                                     ScoringFactorId = factorId,
                                     CurrentCategoryId = curCategory.Id,
-                                    //ScoringId = scoringId,
                                     Value = scoring.StartFactor ?? 1
                                 };
                                 Add(curFactor, context);

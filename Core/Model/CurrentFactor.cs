@@ -12,10 +12,6 @@ namespace Core.Model
         [Column("scoring_factor")]
         public int ScoringFactorId { get; set; }
         public ScoringFactor ScoringFactor { get; set; }
-        //[ForeignKey("scoring")]
-        //[Column("scoring")]
-        //public int ScoringId { get; set; }
-        //public Scoring Scoring { get; set; }
         [ForeignKey("current_category")]
         [Column("current_category")]
         public int CurrentCategoryId { get; set; }
