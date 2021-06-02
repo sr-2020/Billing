@@ -670,7 +670,7 @@ namespace Billing
             return GetList(s => (s.InGame ?? false) && s.Character.Game == CURRENTGAME, includes);
         }
 
-        private Renta GetInsurance(int modelId, params Expression<Func<Renta, object>>[] includes)
+        protected Renta GetInsurance(int modelId, params Expression<Func<Renta, object>>[] includes)
         {
             var inss = ProductTypeEnum.Insurance.ToString();
             var insurance = GetList(r => r.Sku.Nomenklatura.Specialisation.ProductType.Alias == inss && r.Sin.Character.Model == modelId && !r.Expired, includes)
