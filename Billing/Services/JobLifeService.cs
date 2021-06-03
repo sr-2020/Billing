@@ -116,7 +116,7 @@ namespace Jobs
 
         private JobLifeDto DoCharactersBeat(JobLifeDto beat)
         {
-            Console.WriteLine("Запущен пересчет");
+            Console.WriteLine("Запущен пересчет персонажей");
             var sins = Factory.Billing.GetActiveSins(s => s.Wallet, s => s.Character);
             Console.WriteLine($"Обрабатывается {sins.Count} персонажей");
             var charactersLoaded = false;
@@ -237,6 +237,11 @@ namespace Jobs
 
         private JobLifeDto DoItemsBeat(JobLifeDto beat)
         {
+            Console.WriteLine("Запущен пересчет товаров");
+            //Получить список sku с номенклатурами
+
+            //изменить цену и количество на каждую ску
+
 
             return beat;
         }

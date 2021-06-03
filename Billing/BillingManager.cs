@@ -137,22 +137,8 @@ namespace Billing
                 r => r.Sin.Passport,
                 r => r.Sin.Character)
                 .Select(r =>
-                    new RentaDto
-                    {
-                        ModelId = modelId.ToString(),
-                        CharacterName = r.Sin.Passport?.PersonName ?? "Unknown",
-                        FinalPrice = Math.Round(BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring), 2),
-                        ProductType = r.Sku.Nomenklatura.Specialisation.ProductType.Name,
-                        Shop = r.Shop.Name,
-                        NomenklaturaName = r.Sku.Nomenklatura.Name,
-                        SkuName = r.Sku.Name,
-                        Corporation = r.Sku.Corporation.Name,
-                        RentaId = r.Id,
-                        HasQRWrite = r.HasQRWrite,
-                        QRRecorded = r.QRRecorded,
-                        DateCreated = r.DateCreated,
-                        Specialisation = r.Sku.Nomenklatura.Specialisation.Name
-                    }).ToList();
+                    new RentaDto(r))
+                    .ToList();
             sum.Rentas = list;
             sum.Sum = list.Sum(r => r.FinalPrice);
             return sum;
@@ -221,13 +207,7 @@ namespace Billing
                 erService.ConsumeFood(renta.Id, (Lifestyles)renta.LifeStyle, modelId);
             }
             EreminPushAdapter.SendNotification(modelId, "Покупка совершена", $"Вы купили {price.Sku.Name}");
-            var dto = new RentaDto
-            {
-                HasQRWrite = renta.HasQRWrite,
-                PriceId = priceId,
-                RentaId = renta.Id,
-                FinalPrice = finalPrice
-            };
+            var dto = new RentaDto(renta);
             return dto;
         }
 
@@ -415,7 +395,7 @@ namespace Billing
 
         public PriceShopDto GetPrice(int modelId, int shopid, int skuid)
         {
-            var sin = BillingBlocked(modelId, s => s.Scoring, s => s.Character);
+            var sin = BillingBlocked(modelId, s => s.Scoring, s => s.Passport);
             var sku = SkuAllowed(shopid, skuid, s => s.Corporation, s => s.Nomenklatura.Specialisation.ProductType);
             var shop = GetAsNoTracking<ShopWallet>(s => s.Id == shopid);
             if (shop == null || sin == null)
@@ -644,8 +624,7 @@ namespace Billing
             decimal discount;
             try
             {
-                var eService = new EreminService();
-                discount = eService.GetDiscount(sin.Character.Model, BillingHelper.GetDiscountType(sku.Nomenklatura.Specialisation.ProductType.DiscountType));
+                discount = 1;
                 if (sin.Passport.Mortgagee == sku.Corporation.Alias)
                     discount *= 0.9m;
             }

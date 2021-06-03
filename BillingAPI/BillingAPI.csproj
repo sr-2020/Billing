@@ -32,7 +32,6 @@
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\FileHelper\FileHelper.csproj" />
     <ProjectReference Include="..\IoC.Init\IoC.Init.csproj" />
-    <ProjectReference Include="..\Jobs\Jobs.csproj" />
     <ProjectReference Include="..\PubSubService\PubSubService.csproj" />
     <ProjectReference Include="..\Settings\Settings.csproj" />
   </ItemGroup>

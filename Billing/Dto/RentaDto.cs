@@ -9,6 +9,25 @@ namespace Billing.DTO
 {
     public class RentaDto
     {
+        public RentaDto(Renta renta)
+        {
+            HasQRWrite = renta.HasQRWrite;
+            PriceId = renta.PriceId;
+            RentaId = renta.Id;
+            FinalPrice = BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
+            BasePrice = renta.BasePrice;
+            Discount = renta.Discount;
+            Scoring = renta.CurrentScoring;
+            CharacterName = renta.Sin?.Passport?.PersonName ?? "Unknown";
+            ProductType = renta.Sku?.Nomenklatura?.Specialisation?.ProductType?.Name;
+            Shop = renta.Shop?.Name;
+            NomenklaturaName = renta.Sku?.Nomenklatura?.Name;
+            SkuName = renta.Sku?.Name;
+            Corporation = renta.Sku?.Corporation?.Name;
+            QRRecorded = renta.QRRecorded;
+            DateCreated = renta.DateCreated;
+            Specialisation = renta.Sku?.Nomenklatura?.Specialisation?.Name;
+        }
         [Display(Name = "SIN")]
         public string ModelId { get; set; }
         [Display(Name = "Имя персонажа")]
@@ -27,9 +46,11 @@ namespace Billing.DTO
         [Display(Name = "Записанный QR")]
         public string QRRecorded { get; set; }
         public int PriceId { get; set; }
-
         [Display(Name = "Дата создания")]
         public DateTime DateCreated { get; set; }
+        public decimal BasePrice { get; set; }
+        public decimal Discount { get; set; }
+        public decimal Scoring { get; set; }
     }
 
     public class RentaSumDto

@@ -67,22 +67,7 @@ namespace Billing
             var list = GetList<Renta>(r => r.ShopId == shop, r => r.Sku.Nomenklatura.Specialisation.ProductType, r => r.Sku.Corporation, r => r.Shop, r => r.Sin.Passport);
             return list.OrderByDescending(r => r.DateCreated)
                     .Select(r =>
-                    new RentaDto
-                    {
-                        FinalPrice = BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring),
-                        ProductType = r.Sku.Nomenklatura.Specialisation.ProductType.Name,
-                        Specialisation = r.Sku.Nomenklatura.Specialisation.Name,
-                        Shop = r.Shop.Name,
-                        NomenklaturaName = r.Sku.Nomenklatura.Name,
-                        SkuName = r.Sku.Name,
-                        Corporation = r.Sku.Corporation.Name,
-                        HasQRWrite = r.HasQRWrite,
-                        QRRecorded = r.QRRecorded,
-                        PriceId = r.PriceId,
-                        RentaId = r.Id,
-                        DateCreated = r.DateCreated,
-                        CharacterName = r.Sin.Passport.PersonName
-                    }).ToList();
+                    new RentaDto(r)).ToList();
         }
 
         public Transfer MakeTransferLegLeg(int shopFrom, int shopTo, decimal amount, string comment)
