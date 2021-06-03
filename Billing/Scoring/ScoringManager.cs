@@ -102,14 +102,16 @@ namespace Scoringspace
             var lifestyle = BillingHelper.GetLifestyle(implantlifestyle);
             await RaiseScoringEvent(scoring.Id, factorId, (context) =>
             {
-                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == (int)lifestyle);
+                var ls = (int)lifestyle;
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == ls);
                 return value?.Value ?? 1;
             });
             factorId = GetFactorId(ScoringFactorEnum.where_implant_install);
             lifestyle = BillingHelper.GetLifestyle(autodoclifestyle);
             await RaiseScoringEvent(scoring.Id, factorId, (context) =>
             {
-                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == (int)lifestyle);
+                var ls = (int)lifestyle;
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == ls);
                 return value?.Value ?? 1;
             });
 
@@ -186,7 +188,8 @@ namespace Scoringspace
             var scoring = GetScoringByModelId(model);
             await RaiseScoringEvent(scoring.Id, factorId, (context) =>
             {
-                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == (int)lifestyle);
+                var ls = (int)lifestyle;
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == ls);
                 return value?.Value ?? 1;
             });
         }
@@ -202,7 +205,8 @@ namespace Scoringspace
             var scoring = GetScoringByModelId(model);
             await RaiseScoringEvent(scoring.Id, factorId, (context) =>
             {
-                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == (int)lifestyle);
+                var ls = (int)lifestyle;
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == ls);
                 return value?.Value ?? 1;
             });
         }

@@ -13,6 +13,8 @@ namespace PubSubService
         void Run();
         void Read(string message);
         void Stop();
+        bool IsRunning { get; set; }
+        string SubscriptionId { get; set; }
     }
 
     public class PubSubService<T>: IPubSubService
