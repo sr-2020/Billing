@@ -341,7 +341,6 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("a-session")]
-
         public DataResult<SessionDto> GetBillingInfo()
         {
             var service = new AdminService();

@@ -1,5 +1,6 @@
 ﻿using Billing;
 using Billing.Dto;
+using Billing.Dto.Shop;
 using Billing.DTO;
 using BillingAPI.Filters;
 using BillingAPI.Model;
@@ -17,7 +18,101 @@ namespace BillingAPI.Controllers
     [ApiController]
     public class BillingPublicController : EvarunApiController
     {
+        /// <summary>
+        /// GetUsers
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("users")]
 
+        public DataResult<List<UserDto>> GetUsers()
+        {
+            var manager = IocContainer.Get<IAdminManager>();
+            var result = RunAction(() => manager.GetUsers());
+            return result;
+        }
+
+        /// <summary>
+        /// GetShops
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("shops")]
+        public DataResult<List<ShopDto>> GetShops()
+        {
+            var manager = IocContainer.Get<IAdminManager>();
+            var result = RunAction(() => manager.GetShops(s => true));
+            return result;
+        }
+
+        /// <summary>
+        /// GetSpecialisations
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("specialisations")]
+        public DataResult<List<SpecialisationDto>> GetSpecialisations()
+        {
+            var manager = IocContainer.Get<IAdminManager>();
+            var result = RunAction(() => manager.GetSpecialisations(s => true));
+            return result;
+        }
+
+        /// <summary>
+        /// get corporations
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("corporations")]
+        public DataResult<List<CorporationDto>> GetCorporations()
+        {
+            var manager = IocContainer.Get<IAdminManager>();
+            var result = RunAction(() => manager.GetCorporations(r => true));
+            return result;
+        }
+
+        /// <summary>
+        /// get producttypes
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("producttypes")]
+        public DataResult<List<ProductTypeDto>> GetProductTypes()
+        {
+            var manager = IocContainer.Get<IAdminManager>();
+            var result = RunAction(() => manager.GetProductTypes(p => true));
+            return result;
+        }
+
+        /// <summary>
+        /// get nomenklaturas
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("nomenklaturas")]
+        public DataResult<List<NomenklaturaDto>> GetNomenklaturas()
+        {
+            var manager = IocContainer.Get<IAdminManager>();
+            var result = RunAction(() => manager.GetNomenklaturas(p => true));
+            return result;
+        }
+
+        /// <summary>
+        /// get skus
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("skus")]
+        public DataResult<List<SkuDto>> GetSkus()
+        {
+            var manager = IocContainer.Get<IAdminManager>();
+            var result = RunAction(() => manager.GetSkus(p => true));
+            return result;
+        }
+        /// <summary>
+        /// get Lifestyles
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("lifestyles")]
+        public DataResult<List<NamedEntity>> GetLifeStyles()
+        {
+            var ls = BillingHelper.GetLifestyles();
+            var result = RunAction(() => ls);
+            return result;
+        }
 
         /// <summary>
         /// Get base info for current character
