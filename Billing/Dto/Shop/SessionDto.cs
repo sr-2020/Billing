@@ -75,14 +75,14 @@ namespace Billing.Dto.Shop
             public decimal ForecastPlatinum { get; set; }
             public LifeStyleDto(LifeStyleAppDto appdto)
             {
-                Bronze = appdto.Bronze;
-                Silver = appdto.Silver;
-                Gold = appdto.Gold;
-                Platinum = appdto.Platinum;
-                ForecastBronze = appdto.ForecastBronze;
-                ForecastSilver = appdto.ForecastSilver;
-                ForecastGold = appdto.ForecastGold;
-                ForecastPlatinum = appdto.ForecastPlatinum;
+                Bronze = BillingHelper.Round(appdto.Bronze);
+                Silver = BillingHelper.Round(appdto.Silver);
+                Gold = BillingHelper.Round(appdto.Gold);
+                Platinum = BillingHelper.Round(appdto.Platinum);
+                ForecastBronze = BillingHelper.Round(appdto.ForecastBronze);
+                ForecastSilver = BillingHelper.Round(appdto.ForecastSilver);
+                ForecastGold = BillingHelper.Round(appdto.ForecastGold);
+                ForecastPlatinum = BillingHelper.Round(appdto.ForecastPlatinum);
             }
         }
     }
