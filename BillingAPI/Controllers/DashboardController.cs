@@ -341,10 +341,10 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("a-session")]
-        public DataResult<SessionDto> GetBillingInfo()
+        public DataResult<SessionDto> GetBillingInfo(int character)
         {
             var service = new AdminService();
-            var result = RunAction(() => service.GetSessionInfo());
+            var result = RunAction(() => service.GetSessionInfo(character));
             return result;
         }
 

@@ -9,7 +9,7 @@ namespace Billing.Services
 {
     public class AdminService : BaseService
     {
-        public SessionDto GetSessionInfo()
+        public SessionDto GetSessionInfo(int character)
         {
             var result = new SessionDto();
             var ls = BillingHelper.GetLifeStyleDto();
@@ -21,6 +21,8 @@ namespace Billing.Services
             var lsDto = Serialization.Serializer.Deserialize<JobLifeStyleDto>(jsoncharacters);
             result.BeatCharacters = new SessionDto.BeatCharactersDto(beatCharacters, lsDto);
             result.Deploy = Environment.GetEnvironmentVariable(SystemHelper.Billing);
+            var sin = Factory.Billing.GetSINByModelId(character, s=>s.Passport);
+            result.PersonName = BillingHelper.GetPassportName(sin.Passport);
             return result;
         }
 

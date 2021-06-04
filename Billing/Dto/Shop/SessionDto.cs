@@ -10,6 +10,7 @@ namespace Billing.Dto.Shop
         public CycleDto Cycle { get; set; }
         public LifeStyleDto LifeStyle { get; set; }
         public string Deploy { get; set; }
+        public string PersonName { get; set; }
         public class CycleDto 
         { 
             public string Token { get; set; }
