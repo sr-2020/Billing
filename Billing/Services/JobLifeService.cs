@@ -26,15 +26,13 @@ namespace Jobs
 
         public string ToggleCycle(string token = "")
         {
-            var cycle = Factory.Job.GetLastCycle(token);
-            if (cycle == null)
+            if (string.IsNullOrEmpty(token))
             {
-                cycle = new BillingCycle()
-                {
-                    Number = 1
-                };
+                token = Factory.Job.GetCurrentToken();
             }
-            else if (cycle.IsActive == false)
+            var cycle = Factory.Job.GetLastCycle(token);
+
+            if (cycle.IsActive == false)
             {
                 cycle = new BillingCycle
                 {

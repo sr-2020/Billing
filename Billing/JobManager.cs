@@ -19,6 +19,7 @@ namespace Billing
         BillingCycle GetLastCycle(string token);
         BillingBeat GetLastBeatAsNoTracking(int cycleId, BeatTypes type);
         BillingCycle GetLastCycle();
+        string GetCurrentToken();
         BillingBeat GetLastBeatAsNoTracking(BeatTypes type);
         bool BlockBilling();
         bool UnblockBilling();
@@ -38,6 +39,15 @@ namespace Billing
                 .Where(c => c.Token == token)
                 .OrderByDescending(c => c.Number)
                 .FirstOrDefault();
+            if(cycle == null)
+            {
+                return new BillingCycle
+                {
+                    IsActive = false,
+                    Number = 0,
+                    Token = token
+                };
+            }
             return cycle;
         }
 
@@ -80,7 +90,7 @@ namespace Billing
             _settings.SetValue(SystemSettingsEnum.block, "false");
             return true;
         }
-        private string GetCurrentToken()
+        public string GetCurrentToken()
         {
             return _settings.GetValue(Core.Primitives.SystemSettingsEnum.token);
         }
