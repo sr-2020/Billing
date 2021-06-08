@@ -14,6 +14,11 @@ namespace Billing
 {
     public class BillingHelper
     {
+        public static decimal GetFullScoring(Scoring scoring)
+        {
+            return scoring.CurerentRelative + scoring.CurrentFix;
+        }
+
         public static int ParseId(string id, string field)
         {
             if (!int.TryParse(id, out int intid))

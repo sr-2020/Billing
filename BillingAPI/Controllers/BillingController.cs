@@ -20,18 +20,6 @@ namespace BillingAPI.Controllers
     public class BillingController : EvarunApiController
     {
         #region refactored
-        /// <summary>
-        /// Get base info for current character
-        /// </summary>
-        /// <param name="characterId"></param>
-        /// <returns></returns>
-        [HttpGet("info/getbalance")]
-        public DataResult<BalanceDtoOld> GetBalance(int characterId)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetBalanceOld(characterId), $"GetBalance {characterId}");
-            return result;
-        }
 
         [HttpGet("getshop")]
         [AdminAuthorization]

@@ -344,7 +344,7 @@ namespace Billing
         public void CleanRenta(Renta renta, string qrDecoded)
         {
             var ereminService = new EreminService();
-            ereminService.CleanQR(qrDecoded);
+            ereminService.CleanQR(qrDecoded).GetAwaiter().GetResult();
             renta.QRRecorded = string.Empty;
             SaveContext();
         }

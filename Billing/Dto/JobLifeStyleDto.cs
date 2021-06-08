@@ -7,6 +7,9 @@ namespace Billing.Dto
 {
     public class JobLifeStyleDto
     {
+        public decimal ScoringComposition { get; set; }
+        public decimal ScoringMin { get; set; }
+        public decimal ScoringMax { get; set; }
         public decimal SumAll { get; set; }
         public decimal ForecastSumAll { get; set; }
         public decimal? Min { get; set; }
@@ -15,6 +18,7 @@ namespace Billing.Dto
         public decimal? ForecastMax { get; set; }
         public decimal SumRents { get; set; }
         public decimal SumKarma { get; set; }
+        public decimal SumDividends { get; set; }
         public int Insolvent { get; set; }
         public int Irridium { get; set; }
         public int Count { get; set; } 

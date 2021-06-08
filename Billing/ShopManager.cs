@@ -241,7 +241,7 @@ namespace Billing
                 BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring), 
                 gmdescript, 
                 renta.Id, 
-                BillingHelper.GetLifestyle(renta.LifeStyle));
+                BillingHelper.GetLifestyle(renta.LifeStyle)).GetAwaiter().GetResult();
             SaveContext();
         }
 
@@ -271,7 +271,7 @@ namespace Billing
             var code = renta.Sku.Nomenklatura.Code;
             var name = renta.Sku.Name;
             var description = renta.Sku.Nomenklatura.Description;
-            _ereminService.WriteQR(qrDecoded, code, name, description, renta.Count, renta.BasePrice, BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring), renta.Secret, renta.Id, (Lifestyles)renta.LifeStyle);
+            _ereminService.WriteQR(qrDecoded, code, name, description, renta.Count, renta.BasePrice, BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring), renta.Secret, renta.Id, (Lifestyles)renta.LifeStyle).GetAwaiter().GetResult();
             var oldQR = Get<Renta>(r => r.QRRecorded == qrDecoded);
             if (oldQR != null)
                 oldQR.QRRecorded = $"{qrDecoded} deleted";

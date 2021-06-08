@@ -52,7 +52,7 @@ namespace InternalServices
             return every;
         }
 
-        public void ConsumeFood(int rentaId, Lifestyles lifestyle, int modelId)
+        public async Task ConsumeFood(int rentaId, Lifestyles lifestyle, int modelId)
         {
             var eventType = "consumeFood";
             var id = "food";
@@ -64,10 +64,10 @@ namespace InternalServices
 
             };
             var url = $"{URL}/character/model/{modelId}";
-            CreateEvent(data, eventType, url);
+            await CreateEvent(data, eventType, url);
         }
 
-        private async void CreateEvent(dynamic data, string eventType, string url)
+        private async Task CreateEvent(dynamic data, string eventType, string url)
         {
             var client = new HttpClient();
             var body = new
@@ -77,14 +77,22 @@ namespace InternalServices
             };
             var json = Serializer.ToJSON(body);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync(url, content);
-            if (response.StatusCode == System.Net.HttpStatusCode.OK || response.StatusCode == System.Net.HttpStatusCode.Created)
-                return;
-            var message = await response.Content.ReadAsStringAsync();
-            throw new BillingException(message);
+            try
+            {
+                var response = await client.PostAsync(url, content);
+                if (response.StatusCode == System.Net.HttpStatusCode.OK || response.StatusCode == System.Net.HttpStatusCode.Created)
+                    return;
+                var message = await response.Content.ReadAsStringAsync();
+                throw new BillingException(message);
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e.ToString());
+                throw;
+            }
         }
 
-        public void CleanQR(string qr)
+        public async Task CleanQR(string qr)
         {
             var eventType = "clear";
 
@@ -93,10 +101,10 @@ namespace InternalServices
 
             };
             var url = $"{URL}/qr/model/{qr}";
-            CreateEvent(data, eventType, url);
+            await CreateEvent(data, eventType, url);
         }
 
-        public void UpdateQR(string qr, decimal basePrice, decimal rentPrice, string gmDescription, int rentaId, Lifestyles lifestyle)
+        public async Task UpdateQR(string qr, decimal basePrice, decimal rentPrice, string gmDescription, int rentaId, Lifestyles lifestyle)
         {
             var eventType = "updateMerchandise";
             var data = new
@@ -108,10 +116,10 @@ namespace InternalServices
                 lifestyle = lifestyle.ToString()
             };
             var url = $"{URL}/qr/model/{qr}";
-            CreateEvent(data, eventType, url);
+            await CreateEvent(data, eventType, url);
         }
 
-        public void WriteQR(string qr, string id, string name, string description, int numberOfUses, decimal basePrice, decimal rentPrice, string gmDescription, int rentaId, Lifestyles lifestyle)
+        public async Task WriteQR(string qr, string id, string name, string description, int numberOfUses, decimal basePrice, decimal rentPrice, string gmDescription, int rentaId, Lifestyles lifestyle)
         {
             var eventType = "createMerchandise";
             var data = new
@@ -127,7 +135,7 @@ namespace InternalServices
                 lifestyle = lifestyle.ToString()
             };
             var url = $"{URL}/qr/model/{qr}";
-            CreateEvent(data, eventType, url);
+            await CreateEvent(data, eventType, url);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace BillingAPI.Filters
     public class ShopAuthorizationAttribute : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
-        {
+       {
             var manager = IocContainer.Get<IShopManager>();
             var character = 0;
             var shop = 0;

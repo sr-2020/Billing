@@ -27,7 +27,6 @@ namespace Billing
         string GetSinStringByCharacter(int modelId);
         int GetModelIdBySinString(string sinString);
         TransferSum GetTransfers(int modelId);
-        BalanceDtoOld GetBalanceOld(int modelId);
         BalanceDto GetBalance(int modelId);
         RentaSumDto GetRentas(int modelId);
         #endregion
@@ -204,7 +203,7 @@ namespace Billing
             if (instantConsume)
             {
                 var erService = new EreminService();
-                erService.ConsumeFood(renta.Id, (Lifestyles)renta.LifeStyle, modelId);
+                erService.ConsumeFood(renta.Id, (Lifestyles)renta.LifeStyle, modelId).GetAwaiter().GetResult();
             }
             EreminPushAdapter.SendNotification(modelId, "Покупка совершена", $"Вы купили {price.Sku.Name}");
             var dto = new RentaDto(renta);
@@ -213,7 +212,7 @@ namespace Billing
 
         public JobLifeStyleDto ProcessCharacterBeat(int sinId, decimal karmaCount, bool dividends1, bool dividends2, bool dividends3, JobLifeStyleDto dto)
         {
-            var sin = BlockCharacter(sinId);
+            var sin = BlockCharacter(sinId, s => s.Wallet, s => s.Character, s => s.Passport, s => s.Scoring);
             SaveContext();
             var mir = GetMIR();
             decimal income = 0;
@@ -224,25 +223,30 @@ namespace Billing
                 var dk1 = _settings.GetDecimalValue(SystemSettingsEnum.dividents1_k);
                 AddNewTransfer(mir, sin.Wallet, dk1, "Дивиденды *");
                 income += dk1;
+                dto.SumDividends += dk1;
             }
             if (dividends2)
             {
                 var dk2 = _settings.GetDecimalValue(SystemSettingsEnum.dividents2_k);
                 AddNewTransfer(mir, sin.Wallet, dk2, "Дивиденды **");
                 income += dk2;
+                dto.SumDividends += dk2;
             }
             if (dividends3)
             {
                 var dk3 = _settings.GetDecimalValue(SystemSettingsEnum.dividents3_k);
                 AddNewTransfer(mir, sin.Wallet, dk3, "Дивиденды ***");
                 income += dk3;
+                dto.SumDividends += dk3;
             }
+            dto.SumDividends += income;
             //karma
             if (karmaCount > 0)
             {
                 var k = _settings.GetDecimalValue(SystemSettingsEnum.karma_k);
                 var karmasum = k * karmaCount;
                 income += karmasum;
+                dto.SumKarma += karmasum;
                 AddNewTransfer(mir, sin.Wallet, karmasum, "пассивный доход");
             }
             //rentas
@@ -252,17 +256,34 @@ namespace Billing
                 ProcessRenta(renta, mir, sin);
             }
             //scoring
-
+            //todo metatype and insurance
+            AddScoring(sin.Scoring, dto);
             //forecast
             outcome -= rentas.Sum(r => BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring));
+            //todo add scoring here
             sin.Wallet.IncomeOutcome = income - outcome;
-            dto = CalculateLifeStyle(sin.Wallet, dto, income, outcome);
+            dto = AddLifeStyle(sin.Wallet, dto);
             UnblockCharacter(sin);
             SaveContext();
             return dto;
         }
 
-        private JobLifeStyleDto CalculateLifeStyle(Wallet wallet, JobLifeStyleDto dto, decimal income, decimal outcome)
+        private JobLifeStyleDto AddScoring(Scoring scoring, JobLifeStyleDto dto)
+        {
+            var scoringvalue = BillingHelper.GetFullScoring(scoring);
+            dto.ScoringComposition *= scoringvalue;
+            if (dto.ScoringMin == 0 || scoringvalue < dto.ScoringMin)
+            {
+                dto.ScoringMin = scoringvalue;
+            }
+            if (dto.ScoringMax == 0 || scoringvalue > dto.ScoringMax)
+            {
+                dto.ScoringMax = scoringvalue;
+            }
+            return dto;
+        }
+
+        private JobLifeStyleDto AddLifeStyle(Wallet wallet, JobLifeStyleDto dto)
         {
             if (wallet.IsIrridium)
             {
@@ -284,8 +305,6 @@ namespace Billing
             if (dto.ForecastMax == null || ((dto.ForecastMax ?? 0) < forecast))
                 dto.ForecastMax = forecast;
             dto.SumAll += wallet.Balance;
-            dto.SumKarma += income;
-            dto.SumRents += outcome;
             dto.ForecastSumAll += forecast;
             return dto;
         }
@@ -403,30 +422,6 @@ namespace Billing
             var price = CreateNewPrice(sku, shop, sin);
             var dto = new PriceShopDto(new PriceDto(price, true), sku.Corporation);
             return dto;
-        }
-
-        public BalanceDtoOld GetBalanceOld(int modelId)
-        {
-            var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Scoring, s => s.Passport.Metatype);
-            var lifestyle = BillingHelper.GetLifeStyleDto();
-            var balance = new BalanceDtoOld
-            {
-                ModelId = modelId,
-                CurrentBalance = BillingHelper.Round(sin.Wallet.Balance),
-                CurrentScoring = sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative,
-                SIN = sin.Passport.Sin,
-                ForecastLifeStyle = lifestyle.GetForecastLifeStyle(sin.Wallet).ToString(),
-                LifeStyle = lifestyle.GetLifeStyle(sin.Wallet).ToString(),
-                PersonName = sin.Passport.PersonName,
-                Metatype = sin.Passport.Metatype?.Name ?? "неизвестно",
-                Citizenship = sin.Passport.Citizenship ?? "неизвестно",
-                Nationality = "устарело на Амуре",
-                Status = "устарело на Амуре",
-                Nation = "устарело на Амуре",
-                Viza = sin.Passport.Viza ?? "неизвестно",
-                Pledgee = sin.Passport.Mortgagee ?? "неизвестно"
-            };
-            return balance;
         }
 
         public BalanceDto GetBalance(int modelId)
@@ -583,9 +578,9 @@ namespace Billing
 
         #region private
 
-        private SIN BlockCharacter(int sinId)
+        private SIN BlockCharacter(int sinId, params Expression<Func<SIN, object>>[] includes)
         {
-            var sin = Get<SIN>(s => s.Id == sinId, s => s.Wallet, s => s.Character, s => s.Passport);
+            var sin = Get(s => s.Id == sinId, includes);
             sin.Blocked = true;
             return sin;
         }
