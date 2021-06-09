@@ -20,8 +20,8 @@ namespace Billing
     {
         public void Marauder(int modelId, int targetId)
         {
-            var sinFrom = BillingBlocked(modelId, s => s.Wallet, s => s.Character, s => s.Passport);
-            var sinTo = BillingBlocked(targetId, s => s.Wallet, s => s.Character, s => s.Passport);
+            var sinFrom = BillingBlocked(targetId, s => s.Wallet, s => s.Character, s => s.Passport);
+            var sinTo = BillingBlocked(modelId, s => s.Wallet, s => s.Character, s => s.Passport);
             if (!((sinFrom?.Wallet?.Balance ?? 0) > 0))
             {
                 EreminPushAdapter.SendNotification(modelId, "Marauder", "у цели недостаточно средств для грабежа");
