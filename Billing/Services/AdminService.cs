@@ -9,6 +9,20 @@ namespace Billing.Services
 {
     public class AdminService : BaseService
     {
+
+        public FullUserDto GetFullUser(int modelid)
+        {
+            var user = new FullUserDto
+            {
+                Sin = Factory.Billing.GetBalance(modelid),
+                Transfers = Factory.Billing.GetTransfers(modelid),
+                Rents = Factory.Billing.GetRentas(modelid),
+                Scoring = Factory.Scoring.GetFullScoring(modelid),
+                IsAdmin = BillingHelper.IsAdmin(modelid)
+            };
+            return user;
+    }
+
         public SessionDto GetSessionInfo(int character)
         {
             var result = new SessionDto();

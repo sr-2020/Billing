@@ -2,6 +2,7 @@
 using Billing.Dto;
 using Billing.Dto.Shop;
 using Billing.DTO;
+using Billing.Services;
 using BillingAPI.Filters;
 using BillingAPI.Model;
 using Core.Model;
@@ -23,13 +24,13 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("users")]
-
         public DataResult<List<UserDto>> GetUsers()
         {
             var manager = IocContainer.Get<IAdminManager>();
             var result = RunAction(() => manager.GetUsers());
             return result;
         }
+
 
         /// <summary>
         /// GetShops

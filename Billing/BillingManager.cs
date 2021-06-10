@@ -521,7 +521,10 @@ namespace Billing
             SaveContext();
             return transfer;
         }
-
+        public FullUserDto GetFullUser(int modelid)
+        {
+            return new FullUserDto();
+        }
         public List<SIN> GetSinsInGame()
         {
             return GetSinsInGame(s => s.Character, s => s.Wallet, s => s.Scoring, s => s.Passport);

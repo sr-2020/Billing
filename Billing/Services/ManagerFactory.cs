@@ -1,4 +1,5 @@
 ﻿using IoC;
+using Scoringspace;
 using Settings;
 using System;
 using System.Collections.Generic;
@@ -13,5 +14,7 @@ namespace Billing
         public IBillingManager Billing => _lazyBilling.Value;
         private Lazy<IJobManager> _lazyJob { get; set; } = new Lazy<IJobManager>(IocContainer.Get<IJobManager>);
         public IJobManager Job => _lazyJob.Value;
+        private Lazy<IScoringManager> _lazyScoring { get; set; } = new Lazy<IScoringManager>(IocContainer.Get<ScoringManager>);
+        public IScoringManager Scoring => _lazyScoring.Value;
     }
 }
