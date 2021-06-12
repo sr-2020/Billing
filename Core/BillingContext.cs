@@ -23,6 +23,7 @@ namespace Core
         public DbSet<Character> Character { get; set; }
         public DbSet<Contract> Contract { get; set; }
         public DbSet<CorporationWallet> CorporationWallet { get; set; }
+        public DbSet<CorporationSpecialisation> CorporationSpecialisation { get; set; }
         public DbSet<CurrentCategory> CurrentCategory { get; set; }
         public DbSet<CurrentFactor> CurrentFactor { get; set; }
         public DbSet<ScoringEventLifestyle> EventLifestyle { get; set; }

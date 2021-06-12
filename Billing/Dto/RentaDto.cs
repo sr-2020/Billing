@@ -57,6 +57,5 @@ namespace Billing.DTO
     {
         public List<RentaDto> Rentas { get; set; }
         public decimal Sum { get; set; }
-
     }
 }

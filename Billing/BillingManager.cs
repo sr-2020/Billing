@@ -593,43 +593,22 @@ namespace Billing
             sin.Blocked = false;
         }
 
-        private DiscountType GetDiscountTypeForSku(Sku sku)
-        {
-            if (sku == null)
-                throw new Exception("sku not found");
-            var nomenklatura = sku.Nomenklatura;
-            if (nomenklatura == null)
-                nomenklatura = Get<Nomenklatura>(n => n.Id == sku.NomenklaturaId);
-            if (nomenklatura == null)
-                throw new Exception("Nomenklatura not found");
-            var producttype = nomenklatura?.Specialisation?.ProductType;
-            if (producttype == null)
-            {
-                var specialisation = Get<Specialisation>(s => s.Id == nomenklatura.SpecialisationId);
-                if (specialisation == null)
-                {
-                    throw new Exception("Specialisation not found");
-                }
-                producttype = Get<ProductType>(p => p.Id == specialisation.ProductTypeId);
-            }
-            if (producttype == null)
-                throw new Exception("ProductType not found");
-            return BillingHelper.GetDiscountType(producttype.DiscountType);
-        }
-
         private Price CreateNewPrice(Sku sku, ShopWallet shop, SIN sin)
         {
-            decimal discount;
+            decimal discount = 1;
+            if (sin.Passport.Mortgagee == sku.Corporation.Alias)
+                discount *= 0.9m;
+            decimal modeldiscount;
             try
             {
-                discount = 1;
-                if (sin.Passport.Mortgagee == sku.Corporation.Alias)
-                    discount *= 0.9m;
+                var eService = new EreminService();
+                modeldiscount = eService.GetDiscount(sin.Character.Model, BillingHelper.GetDiscountType(sku.Nomenklatura.Specialisation.ProductType.DiscountType));
             }
             catch
             {
-                discount = 1;
+                modeldiscount = 1;
             }
+            discount *= modeldiscount;
             var currentScoring = sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative;
             if (currentScoring == 0)
             {
@@ -645,7 +624,7 @@ namespace Billing
                 Discount = discount,
                 Sin = sin,
                 ShopComission = shop.Commission,
-                FinalPrice = BillingHelper.GetFinalPrice(sku.Nomenklatura.BasePrice, discount, currentScoring)
+                FinalPrice = BillingHelper.GetFinalPrice(sku.SkuBasePrice ?? sku.Nomenklatura.BasePrice, discount, currentScoring)
             };
             Add(price);
             Context.SaveChanges();

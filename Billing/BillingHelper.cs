@@ -105,6 +105,11 @@ namespace Billing
             return $"{ passport.PersonName} ({ passport.Sin})";
         }
 
+        public static decimal GetFinalPrice(Sku sku, decimal discount, decimal scoring)
+        {
+            return GetFinalPrice(sku.SkuBasePrice ?? sku.Nomenklatura.BasePrice, discount, scoring);
+        }
+
         public static decimal GetFinalPrice(decimal basePrice, decimal discount, decimal scoring)
         {
             return Round((basePrice * discount) / scoring);
