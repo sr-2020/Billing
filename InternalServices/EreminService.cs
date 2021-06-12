@@ -12,12 +12,19 @@ namespace InternalServices
 {
     public class EreminService
     {
-        const string URL = "https://models-manager.evarun.ru";
+        string _URL;
+
+        public EreminService()
+        {
+            var url = Environment.GetEnvironmentVariable("MODELS_MANAGER_URL");
+            if (string.IsNullOrEmpty(url))
+                url = "https://models-manager.evarun.ru";
+        }
 
         public CharacterModel GetCharacter(int characterId)
         {
             var client = new HttpClient();
-            var url = $"{URL}/character/model/{characterId}";
+            var url = $"{_URL}/character/model/{characterId}";
             var response = client.GetAsync(url).Result;
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {
@@ -63,7 +70,7 @@ namespace InternalServices
                 lifestyle = lifestyle.ToString(),
 
             };
-            var url = $"{URL}/character/model/{modelId}";
+            var url = $"{_URL}/character/model/{modelId}";
             await CreateEvent(data, eventType, url);
         }
 
@@ -100,7 +107,7 @@ namespace InternalServices
             {
 
             };
-            var url = $"{URL}/qr/model/{qr}";
+            var url = $"{_URL}/qr/model/{qr}";
             await CreateEvent(data, eventType, url);
         }
 
@@ -115,7 +122,7 @@ namespace InternalServices
                 dealId = rentaId.ToString(),
                 lifestyle = lifestyle.ToString()
             };
-            var url = $"{URL}/qr/model/{qr}";
+            var url = $"{_URL}/qr/model/{qr}";
             await CreateEvent(data, eventType, url);
         }
 
@@ -134,7 +141,7 @@ namespace InternalServices
                 dealId = rentaId.ToString(),
                 lifestyle = lifestyle.ToString()
             };
-            var url = $"{URL}/qr/model/{qr}";
+            var url = $"{_URL}/qr/model/{qr}";
             await CreateEvent(data, eventType, url);
         }
     }

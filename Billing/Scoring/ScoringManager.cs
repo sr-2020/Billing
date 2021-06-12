@@ -17,7 +17,7 @@ using System.Transactions;
 
 namespace Scoringspace
 {
-    public interface IScoringManager
+    public interface IScoringManager: IBaseBillingRepository
     {
         Task OnLifeStyleChanged(Scoring scoring, Lifestyles from, Lifestyles to);
         Task OnPillConsumed(int model, string pillLifestyle);
@@ -40,7 +40,7 @@ namespace Scoringspace
         ScoringDto GetFullScoring(int character);
     }
 
-    public class ScoringManager : BaseEntityRepository, IScoringManager
+    public class ScoringManager : BaseBillingRepository, IScoringManager
     {
         #region implementation
 
@@ -257,12 +257,12 @@ namespace Scoringspace
 
         public ScoringDto GetFullScoring(int character)
         {
-            var sin = Get<SIN>(s => s.Character.Model == character, s => s.Scoring);
+            var scoring = GetScoringByModelId(character);
             var fixenum = (int)ScoringCategoryType.Fix;
             var relativenum = (int)ScoringCategoryType.Relative;
 
-            var fixFactors = GetList<CurrentFactor>(f => f.CurrentCategory.Category.CategoryType == fixenum && f.CurrentCategory.ScoringId == sin.ScoringId, f => f.ScoringFactor, f => f.CurrentCategory.Category);
-            var relativFactors = GetList<CurrentFactor>(f => f.CurrentCategory.Category.CategoryType == relativenum && f.CurrentCategory.ScoringId == sin.ScoringId, f => f.ScoringFactor, f => f.CurrentCategory.Category);
+            var fixFactors = GetList<CurrentFactor>(f => f.CurrentCategory.Category.CategoryType == fixenum && f.CurrentCategory.ScoringId == scoring.Id, f => f.ScoringFactor, f => f.CurrentCategory.Category);
+            var relativFactors = GetList<CurrentFactor>(f => f.CurrentCategory.Category.CategoryType == relativenum && f.CurrentCategory.ScoringId == scoring.Id, f => f.ScoringFactor, f => f.CurrentCategory.Category);
             var fixCategories = fixFactors
                 .GroupBy(f => f.ScoringFactor.Category)
                 .Select(g => new ScoringCategoryDto
@@ -293,8 +293,8 @@ namespace Scoringspace
             return new ScoringDto
             {
                 Character = character,
-                CurrentFix = Math.Round(sin.Scoring.CurrentFix, 2),
-                CurrentRelative = Math.Round(sin.Scoring.CurerentRelative, 2),
+                CurrentFix = Math.Round(scoring.CurrentFix, 2),
+                CurrentRelative = Math.Round(scoring.CurerentRelative, 2),
                 FixCategories = fixCategories,
                 RelativeCategories = relativCategories
             };
@@ -434,7 +434,7 @@ namespace Scoringspace
 
         private Scoring GetScoringByModelId(int modelId)
         {
-            var sin = Get<SIN>(s => s.Character.Model == modelId, s => s.Scoring);
+            var sin = GetSINByModelId(modelId, s => s.Scoring);
             if (sin.Scoring == null)
                 throw new Exception("scoring not found");
             return sin.Scoring;

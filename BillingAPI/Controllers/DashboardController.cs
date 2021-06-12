@@ -28,7 +28,6 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("a-users")]
-        
         public DataResult<List<UserDto>> GetUsers()
         {
             var manager = IocContainer.Get<IAdminManager>();
