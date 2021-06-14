@@ -15,7 +15,7 @@ namespace Core.Model
         [ForeignKey("specialisation")]
         [Column("specialisation")]
         public int SpecialisationId { get; set; }
-        public CorporationWallet Specialisation { get; set; }
+        public Specialisation Specialisation { get; set; }
         [Column("ratio")]
         public int Ratio { get; set; }
     }
