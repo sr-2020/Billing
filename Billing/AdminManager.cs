@@ -346,6 +346,7 @@ namespace Billing
             var ereminService = new EreminService();
             ereminService.CleanQR(qrDecoded).GetAwaiter().GetResult();
             renta.QRRecorded = string.Empty;
+            renta.Expired = true;
             SaveContext();
         }
 
