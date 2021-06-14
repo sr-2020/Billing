@@ -591,7 +591,7 @@ namespace Billing
         }
         public SIN RestoreCharacter(int modelId)
         {
-            var sin = GetSINByModelId(modelId);
+            var sin = GetDisabledByModelId(modelId);
             sin.InGame = true;
             SaveContext();
             return sin;

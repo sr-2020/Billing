@@ -256,6 +256,18 @@ namespace Billing
             return sin;
         }
 
+        public SIN GetDisabledByModelId(int modelId, params Expression<Func<SIN, object>>[] includes)
+        {
+            if (modelId == 0)
+                throw new BillingUnauthorizedException("Нужна авторизация");
+            var sin = Get(s => s.Character.Model == modelId, includes);
+            if (sin == null)
+            {
+                throw new BillingNotFoundException($"sin for modelId {modelId} not found");
+            }
+            return sin;
+        }
+
         public SIN GetSINByModelId(int modelId, params Expression<Func<SIN, object>>[] includes)
         {
             if (modelId == 0)
