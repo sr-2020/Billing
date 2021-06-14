@@ -247,47 +247,11 @@ namespace Jobs
                 foreach (var sku in skus)
                 {
                     sku.Count = sku.SkuBaseCount ?? sku.Nomenklatura.BaseCount;
-                    
                 }
-
                 Factory.Billing.SaveContext();
                 Console.WriteLine($"Корпорация {corporation.Name} обработана");
             }
             return beat;
-        }
-
-        private void DoIkar(List<SIN> sins)
-        {
-            //var k = _settingManager.GetDecimalValue(Core.Primitives.SystemSettingsEnum.ikar_k);
-            //var count = Billing.ProcessIkar(sins, k);
-            //Console.WriteLine($"Пересчет ИКАР завершен, начислено для {count} персонажей с коэффициентом {k}");
-            //CurrentBeat.SuccessIkar = true;
-        }
-
-        private void DoScoring(List<SIN> sins)
-        {
-            //var metatype_count = 0;
-            ////TODO пересчет по скорингу
-            //foreach (var sin in sins)
-            //{
-            //    if (sin.OldMetaTypeId != sin.MetatypeId)
-            //    {
-            //        Scoring.OnMetatypeChanged(sin);
-            //        sin.OldMetaTypeId = sin.MetatypeId;
-            //        metatype_count++;
-            //    }
-            //}
-            //Billing.SaveContext();
-            //Console.WriteLine($"Пересчет скоринга успешен, метатип пересчитан для {metatype_count} синов");
-            //CurrentBeat.SuccessScoring = true;
-        }
-
-        private string DoRentas()
-        {
-            //var rentasCount = Billing.ProcessRentas(sins);
-            //Console.WriteLine($"Пересчет рент завершен, обработано {rentasCount} рент");
-            //CurrentBeat.SuccessRent = true;
-            return $"";
         }
 
         private void LogException(Exception e)

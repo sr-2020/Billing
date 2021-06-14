@@ -175,5 +175,16 @@ namespace BillingAPI.Controllers
             return result;
         }
 
+        /// <summary>
+        /// GetUser 
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("user")]
+        public DataResult<FullUserDto> GetUser(int character)
+        {
+            var service = new AdminService();
+            var result = RunAction(() => service.GetFullUser(character));
+            return result;
+        }
     }
 }
