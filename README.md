@@ -152,6 +152,8 @@ weight - вес категорий.
 value - значение для текущего пользователя.  
 factors - факторы составляющие категории.  
 
+* GET user - получение моделей возвращаемых методами sin, transfers rentas и scoring в одном.
+
 * POST /createtransfersinsin
 Принимаемая модель:
 ```
