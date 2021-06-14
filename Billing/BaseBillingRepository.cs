@@ -44,14 +44,10 @@ namespace Billing
             var character = GetAsNoTracking<Character>(c => c.Model == modelId);
             if (character == null)
                 throw new BillingNotFoundException($"character {modelId} not found");
-            var sin = Get<SIN>(s => s.Character.Model == modelId, s => s.Passport);
+            var sin = Get<SIN>(s => s.Character.Model == modelId, s => s.Passport, s=>s.Character);
             if (sin == null)
             {
-                sin = new SIN
-                {
-                    CharacterId = character.Id,
-                };
-                AddAndSave(sin);
+                throw new BillingNotFoundException($"character {modelId} not found");
             }
             sin.InGame = true;
             sin.OldMetaTypeId = null;
@@ -82,7 +78,7 @@ namespace Billing
             try
             {
                 var service = new EreminService();
-                service.GetCharacter(sin.CharacterId);
+                service.GetCharacter(sin.Character.Model);
                 sin.EVersion = "2";
             }
             catch (Exception e)
