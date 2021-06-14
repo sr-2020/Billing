@@ -11,8 +11,11 @@ namespace Billing.Dto.Shop
         public LifeStyleDto LifeStyle { get; set; }
         public string Deploy { get; set; }
         public string PersonName { get; set; }
-        public class CycleDto 
-        { 
+        public BeatCharactersDto BeatCharacters { get; set; }
+        public BeatItemsDto BeatItems { get; set; }
+
+        public class CycleDto
+        {
             public string Token { get; set; }
             public int Number { get; set; }
             public bool IsActive { get; set; }
@@ -24,7 +27,6 @@ namespace Billing.Dto.Shop
             }
         }
 
-        public BeatCharactersDto BeatCharacters { get; set; }
         public class BeatCharactersDto
         {
             public int Number { get; set; }
@@ -61,6 +63,11 @@ namespace Billing.Dto.Shop
                 Irridium = ls.Irridium;
                 Count = ls.Count;
             }
+        }
+
+        public class BeatItemsDto
+        {
+
         }
 
         public class LifeStyleDto

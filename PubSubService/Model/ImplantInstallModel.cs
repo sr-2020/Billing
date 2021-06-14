@@ -9,5 +9,8 @@ namespace PubSubService.Model
         public string Id { get; set; }
         public string ImplantLifestyle { get; set; }
         public string AutodocLifestyle { get; set; }
+        public string AutodocQrId { get; set; }
+        public string Installer { get; set; }
+        public string AbilityId { get; set; }
     }
 }

@@ -255,8 +255,25 @@ namespace Billing
             {
                 ProcessRenta(renta, mir, sin);
             }
-            //scoring
-            //todo metatype and insurance
+            //metatype
+            if (sin.Passport.MetatypeId != sin.OldMetaTypeId)
+            {
+                var scoring = IoC.IocContainer.Get<IScoringManager>();
+                scoring.OnMetatypeChanged(sin);
+                sin.OldMetaTypeId = sin.Passport.MetatypeId;
+            }
+            //insurance
+            var insurance = GetInsurance(sin.CharacterId);
+            if (insurance?.LifeStyle != sin.OldInsurance)
+            {
+                if ((insurance?.LifeStyle ?? 0) > 0 != (sin.OldInsurance ?? 0) > 0)
+                {
+                    var scoring = IoC.IocContainer.Get<IScoringManager>();
+                    scoring.OnInsuranceChanged(sin, (insurance?.LifeStyle ?? 0) > 0);
+                }
+                sin.OldInsurance = insurance?.LifeStyle;
+            }
+
             AddScoring(sin.Scoring, dto);
             //forecast
             outcome -= rentas.Sum(r => BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring));
@@ -521,6 +538,7 @@ namespace Billing
             SaveContext();
             return transfer;
         }
+
         public FullUserDto GetFullUser(int modelid)
         {
             return new FullUserDto();

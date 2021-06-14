@@ -1,6 +1,8 @@
 ﻿using Billing;
 using Billing.Dto;
+using Billing.Dto.Scoring;
 using Core;
+using Core.Exceptions;
 using Core.Model;
 using Core.Primitives;
 using Dapper;
@@ -32,12 +34,25 @@ namespace Scoringspace
         Task OnWeaponBuy(SIN sin, int lifestyle);
         Task OnMagicBuy(SIN sin, int lifestyle);
         Task OnInsuranceBuy(SIN sin, int lifestyle);
+        Task OnInsuranceChanged(SIN sin, bool hasInsurance);
         Task OnCharityBuy(SIN sin, int lifestyle);
         Task OnFoodBuy(SIN sin, int lifestyle);
         Task OnImplantBuy(SIN sin, int lifestyle);
         Task OnImplantInstalled(int model, string implantlifestyle, string autodoclifestyle);
+        Task OnImplantUninstalled(int model, string autodoclifestyle);
+        Task OnImplantDeletedBlack(int model);
+        Task OnImplantDeletedActive(int model);
         Task OnMetatypeChanged(SIN sin);
         ScoringDto GetFullScoring(int character);
+        ScoringCategoryDto AddScoringCategory(string categoryName, bool relative, decimal weight);
+        void DeleteScoringCategory(int id);
+        ScoringCategoryDto UpdateCategoryWeight(int id, decimal weight);
+        ScoringFactorDto UpdateFactorCategory(int factorId, int categoryId);
+        List<ScoringCategoryDto> GetScoringCategories(bool relative);
+        List<ScoringFactorDto> GetScoringFactors(int categoryId);
+        List<ScoringEventLifeStyleDto> GetFactorEvents(int factorId);
+        ScoringEventLifeStyleDto AddScoringEvent(int factorId, int lifestyle, decimal value);
+        void DeleleteScoringEvent(int factorId, int lifestyle);
     }
 
     public class ScoringManager : BaseBillingRepository, IScoringManager
@@ -53,6 +68,18 @@ namespace Scoringspace
                 return value?.Value ?? 1;
             });
         }
+
+        public async Task OnInsuranceChanged(SIN sin, bool hasInsurance)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.insurance_change);
+            await RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
+            {
+                var eventn = hasInsurance ? 1 : 0;
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == eventn);
+                return value?.Value ?? 1;
+            });
+        }
+
         public async Task OnMatrixBuy(SIN sin, int lifestyle)
         {
             var factorId = GetFactorId(ScoringFactorEnum.buy_matrix);
@@ -115,6 +142,41 @@ namespace Scoringspace
                 return value?.Value ?? 1;
             });
 
+        }
+
+        public async Task OnImplantUninstalled(int model, string autodoclifestyle)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.implant_uninstalled);
+            var scoring = GetScoringByModelId(model);
+            var lifestyle = BillingHelper.GetLifestyle(autodoclifestyle);
+            await RaiseScoringEvent(scoring.Id, factorId, (context) =>
+            {
+                var ls = (int)lifestyle;
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == ls);
+                return value?.Value ?? 1;
+            });
+        }
+
+        public async Task OnImplantDeletedBlack(int model)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.implant_deleted);
+            var scoring = GetScoringByModelId(model);
+            await RaiseScoringEvent(scoring.Id, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == 2);
+                return value?.Value ?? 1;
+            });
+        }
+
+        public async Task OnImplantDeletedActive(int model)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.implant_deleted);
+            var scoring = GetScoringByModelId(model);
+            await RaiseScoringEvent(scoring.Id, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == 1);
+                return value?.Value ?? 1;
+            });
         }
 
         public async Task OnImplantBuy(SIN sin, int lifestyle)
@@ -265,28 +327,22 @@ namespace Scoringspace
             var relativFactors = GetList<CurrentFactor>(f => f.CurrentCategory.Category.CategoryType == relativenum && f.CurrentCategory.ScoringId == scoring.Id, f => f.ScoringFactor, f => f.CurrentCategory.Category);
             var fixCategories = fixFactors
                 .GroupBy(f => f.ScoringFactor.Category)
-                .Select(g => new ScoringCategoryDto
+                .Select(g => new ScoringCategoryDto(g.Key)
                 {
-                    Name = g.Key.Name,
                     Value = Math.Round(g.FirstOrDefault()?.CurrentCategory?.Value ?? 0, 2),
-                    Weight = g.Key.Weight,
-                    Factors = g.Select(f => new ScoringFactorDto
+                    Factors = g.Select(f => new ScoringFactorDto(f.ScoringFactor)
                     {
                         Value = Math.Round(f.Value, 2),
-                        Name = f.ScoringFactor.Name
                     }).ToList()
                 }).ToList();
             var relativCategories = relativFactors
                 .GroupBy(f => f.ScoringFactor.Category)
-                .Select(g => new ScoringCategoryDto
+                .Select(g => new ScoringCategoryDto(g.Key)
                 {
-                    Name = g.Key.Name,
                     Value = Math.Round(g.FirstOrDefault()?.CurrentCategory?.Value ?? 0, 2),
-                    Weight = g.Key.Weight,
-                    Factors = g.Select(f => new ScoringFactorDto
+                    Factors = g.Select(f => new ScoringFactorDto(f.ScoringFactor)
                     {
                         Value = Math.Round(f.Value, 2),
-                        Name = f.ScoringFactor.Name,
                     }).ToList()
                 }).ToList();
 
@@ -298,6 +354,71 @@ namespace Scoringspace
                 FixCategories = fixCategories,
                 RelativeCategories = relativCategories
             };
+        }
+
+        public ScoringCategoryDto AddScoringCategory(string categoryName, bool relative, decimal weight)
+        {
+            var sc = new ScoringCategory
+            {
+                CategoryType = relative ? (int)ScoringCategoryType.Relative : (int)ScoringCategoryType.Fix,
+                Name = categoryName,
+                Weight = weight
+            };
+            AddAndSave(sc);
+            return new ScoringCategoryDto(sc);
+        }
+
+        public ScoringCategoryDto UpdateCategoryWeight(int id, decimal weight)
+        {
+            var sc = Get<ScoringCategory>(c => c.Id == id);
+            if (sc == null)
+                throw new BillingNotFoundException($"категория {id} не найдена");
+            sc.Weight = weight;
+            SaveContext();
+            return new ScoringCategoryDto(sc);
+        }
+
+        public ScoringFactorDto UpdateFactorCategory(int factorId, int categoryId)
+        {
+            var sf = Get<ScoringFactor>(c => c.Id == factorId);
+            if (sf == null)
+                throw new BillingNotFoundException($"фактор {sf} не найдена");
+            sf.CategoryId = categoryId;
+            SaveContext();
+            return new ScoringFactorDto(sf);
+        }
+
+        public List<ScoringCategoryDto> GetScoringCategories(bool relative)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<ScoringFactorDto> GetScoringFactors(int categoryId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<ScoringEventLifeStyleDto> GetFactorEvents(int factorId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ScoringEventLifeStyleDto AddScoringEvent(int factorId, int lifestyle, decimal value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleleteScoringEvent(int factorId, int lifestyle)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DeleteScoringCategory(int id)
+        {
+            var sc = Get<ScoringCategory>(c => c.Id == id);
+            if (sc == null)
+                throw new BillingNotFoundException($"категория {id} не найдена");
+            RemoveAndSave(sc);
         }
 
         #region mathematic
@@ -439,6 +560,8 @@ namespace Scoringspace
                 throw new Exception("scoring not found");
             return sin.Scoring;
         }
+
+
 
         #endregion
     }

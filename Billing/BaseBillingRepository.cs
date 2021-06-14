@@ -55,7 +55,8 @@ namespace Billing
             }
             sin.InGame = true;
             sin.OldMetaTypeId = null;
-            sin.EVersion = _settings.GetValue(SystemSettingsEnum.eversion);
+            sin.OldInsurance = null;
+            sin.EVersion = "0";
             var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId ?? 0, balance);
             sin.Wallet = wallet;
             var scoring = Get<Scoring>(s => s.Id == sin.ScoringId);
@@ -76,6 +77,19 @@ namespace Billing
                 sin.Passport = passport;
                 AddAndSave(passport);
             }
+            sin.EVersion = "1";
+            //проверяем, что персонаж присутствует во внешней системе
+            try
+            {
+                var service = new EreminService();
+                service.GetCharacter(sin.CharacterId);
+                sin.EVersion = "2";
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e.ToString());
+            }
+            SaveContext();
             return sin;
         }
 

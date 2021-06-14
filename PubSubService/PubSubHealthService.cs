@@ -35,18 +35,24 @@ namespace PubSubService
                 case "clinically_dead":
                     scoring = IoC.IocContainer.Get<IScoringManager>();
                     scoring.OnClinicalDeath(modelId);
-                    billing = IoC.IocContainer.Get<IBillingManager>();
-                    billing.DropInsurance(modelId);
                     break;
                 case "biologically_dead":
                     billing = IoC.IocContainer.Get<IBillingManager>();
                     billing.DropCharacter(modelId);
                     break;
                 case "healthy":
-                    if(model.StateFrom == "biologically_dead")
+                    switch (model.StateFrom)
                     {
-                        billing = IoC.IocContainer.Get<IBillingManager>();
-                        billing.RestoreCharacter(modelId);
+                        case "clinically_dead":
+                            billing = IoC.IocContainer.Get<IBillingManager>();
+                            billing.DropInsurance(modelId);
+                            break;
+                        case "biologically_dead":
+                            billing = IoC.IocContainer.Get<IBillingManager>();
+                            billing.RestoreCharacter(modelId);
+                            break;
+                        default:
+                            break;
                     }
                     break;
                 default:

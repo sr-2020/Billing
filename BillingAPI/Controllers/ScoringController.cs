@@ -24,5 +24,7 @@ namespace BillingAPI.Controllers
             return RunAction(()=> manager.GetFullScoring(character), $"get full scoring {character}");
         }
 
+
+
     }
 }

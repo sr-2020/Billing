@@ -20,6 +20,7 @@ namespace PubSubService
         {
 
         }
+
         public override void Handle(AbilityModel model)
         {
             base.Handle(model);
@@ -33,7 +34,6 @@ namespace PubSubService
                 {
                     Console.Error.WriteLine(e.ToString());
                 }
-
             }
         }
 
@@ -65,6 +65,5 @@ namespace PubSubService
                     break;
             }
         }
-
     }
 }

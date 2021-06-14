@@ -34,5 +34,7 @@ namespace Core.Model
         [ForeignKey("passport")]
         public int? PassportId { get; set; }
         public Passport Passport { get; set; }
+        [Column("insurance_last")]
+        public int? OldInsurance { get; set; }
     }
 }

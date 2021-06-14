@@ -18,6 +18,7 @@ namespace Core.Primitives
         buy_implant,
         metatype,
         insurance,
+        insurance_change,
         pill_use,
         where_implant_install,
         worse,
@@ -25,6 +26,8 @@ namespace Core.Primitives
         clinical_death,
         buy_charity,
         buy_drone,
-        buy_matrix
+        buy_matrix,
+        implant_uninstalled,
+        implant_deleted
     }
 }

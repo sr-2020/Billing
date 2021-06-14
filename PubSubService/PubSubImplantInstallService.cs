@@ -23,8 +23,11 @@ namespace PubSubService
         public override void Handle(ImplantInstallModel model)
         {
             base.Handle(model);
-            var manager = IoC.IocContainer.Get<IScoringManager>();
-            manager.OnImplantInstalled(BillingHelper.ParseId(model.CharacterId, "characterId"), model.ImplantLifestyle, model.AutodocLifestyle);
+            if(model.AbilityId == "autodoc")
+            {
+                var manager = IoC.IocContainer.Get<IScoringManager>();
+                manager.OnImplantInstalled(BillingHelper.ParseId(model.CharacterId, "characterId"), model.ImplantLifestyle, model.AutodocLifestyle);
+            }
         }
     }
 }

@@ -9,7 +9,6 @@ namespace Billing.Services
 {
     public class AdminService : BaseService
     {
-
         public FullUserDto GetFullUser(int modelid)
         {
             var user = new FullUserDto
@@ -21,7 +20,7 @@ namespace Billing.Services
                 IsAdmin = BillingHelper.IsAdmin(modelid)
             };
             return user;
-    }
+        }
 
         public SessionDto GetSessionInfo(int character)
         {
