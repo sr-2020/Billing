@@ -105,7 +105,7 @@ namespace Jobs
                     }
                 }
             });
-            if(wait)
+            if (wait)
             {
                 task.Wait();
             }
@@ -218,7 +218,6 @@ namespace Jobs
             var erService = new EreminService();
             Parallel.ForEach(sins, new ParallelOptions { MaxDegreeOfParallelism = 5 }, sin =>
                 {
-
                     var dto = new ImportDto { Sin = sin };
                     try
                     {
@@ -236,18 +235,26 @@ namespace Jobs
         private JobLifeDto DoItemsBeat(JobLifeDto beat)
         {
             Console.WriteLine("Запущен пересчет товаров");
-            //Получить список sku с номенклатурами
             //Получить список корпораций с специализациями
+            var corporations = Factory.Billing.GetList<CorporationWallet>(c => true, c => c.Specialisations);
+            foreach (var corporation in corporations)
+            {
+                corporation.LastSkuSold = corporation.SkuSold;
+                corporation.SkuSold = 0;
+                corporation.LastKPI = corporation.CurrentKPI;
+                corporation.CurrentKPI = 0;
+                var skus = Factory.Billing.GetList<Sku>(s => s.CorporationId == corporation.Id, s => s.Nomenklatura.Specialisation);
+                foreach (var sku in skus)
+                {
+                    sku.Count = sku.SkuBaseCount ?? sku.Nomenklatura.BaseCount;
+                    
+                }
 
-
-            //изменить цену и количество на каждую ску
-
-            
-
+                Factory.Billing.SaveContext();
+                Console.WriteLine($"Корпорация {corporation.Name} обработана");
+            }
             return beat;
         }
-
-
 
         private void DoIkar(List<SIN> sins)
         {

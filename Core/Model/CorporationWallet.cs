@@ -24,5 +24,6 @@ namespace Core.Model
         public decimal SkuSold { get; set; }
         [Column("sku_sold_last")]
         public decimal LastSkuSold { get; set; }
+        public virtual List<CorporationSpecialisation> Specialisations { get; set; }
     }
 }

@@ -176,7 +176,7 @@ namespace BillingAPI.Controllers
         public DataResult<List<SkuDto>> GetSkus(int corporationId, int? nomenklaturaId, bool? enabled)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetSkus(corporationId, nomenklaturaId ?? 0, enabled), $"getskus {corporationId}:{nomenklaturaId ?? 0}:{enabled}");
+            var result = RunAction(() => manager.GetSkuDtos(corporationId, nomenklaturaId ?? 0, enabled), $"getskus {corporationId}:{nomenklaturaId ?? 0}:{enabled}");
             return result;
         }
 
@@ -201,7 +201,7 @@ namespace BillingAPI.Controllers
         public DataResult<List<CorporationDto>> GetCorps()
         {
             var manager = IocContainer.Get<IAdminManager>();
-            var result = RunAction(() => manager.GetCorporations(s => true), "getcorps");
+            var result = RunAction(() => manager.GetCorporationDtos(s => true), "getcorps");
             return result;
         }
 

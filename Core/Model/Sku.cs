@@ -25,5 +25,7 @@ namespace Core.Model
         public int? SkuBasePrice { get; set; }
         [Column("sku_base_count")]
         public int? SkuBaseCount { get; set; }
+        [Column("price")]
+        public decimal Price { get; set; }
     }
 }

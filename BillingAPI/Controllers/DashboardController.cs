@@ -181,7 +181,7 @@ namespace BillingAPI.Controllers
         public DataResult<List<CorporationDto>> GetCorporations()
         {
             var manager = IocContainer.Get<IAdminManager>();
-            var result = RunAction(() => manager.GetCorporations(r => true));
+            var result = RunAction(() => manager.GetCorporationDtos(r => true));
             return result;
         }
 
@@ -194,7 +194,7 @@ namespace BillingAPI.Controllers
         public DataResult<CorporationDto> GetCorporation(int corporationId)
         {
             var manager = IocContainer.Get<IAdminManager>();
-            var result = RunAction(() => manager.GetCorporations(r => r.Id == corporationId).FirstOrDefault());
+            var result = RunAction(() => manager.GetCorporationDtos(r => r.Id == corporationId).FirstOrDefault());
             return result;
         }
 

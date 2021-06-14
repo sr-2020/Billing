@@ -107,7 +107,10 @@ namespace Billing
 
         public static decimal GetFinalPrice(Sku sku, decimal discount, decimal scoring)
         {
-            return GetFinalPrice(sku.SkuBasePrice ?? sku.Nomenklatura.BasePrice, discount, scoring);
+            var price = sku.Price;
+            if (price == 0)
+                price = sku.SkuBasePrice ?? sku.Nomenklatura.BasePrice;
+            return GetFinalPrice(price, discount, scoring);
         }
 
         public static decimal GetFinalPrice(decimal basePrice, decimal discount, decimal scoring)

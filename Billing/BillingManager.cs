@@ -37,7 +37,7 @@ namespace Billing
         void BreakContract(int corporation, int shop);
         Contract CreateContract(int corporation, int shop);
         RentaDto ConfirmRenta(int modelId, int priceId, int count = 1);
-        List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1);
+        List<SkuDto> GetSkuDtos(int corporationId, int nomenklaturaId, bool? enabled, int id = -1);
         ProductType GetExtProductType(string name);
         Nomenklatura GetExtNomenklatura(string name);
         Sku GetExtSku(string name);
@@ -113,7 +113,7 @@ namespace Billing
             return GetAsNoTracking<Sku>(p => p.Name == name);
         }
 
-        public List<SkuDto> GetSkus(int corporationId, int nomenklaturaId, bool? enabled, int id = -1)
+        public List<SkuDto> GetSkuDtos(int corporationId, int nomenklaturaId, bool? enabled, int id = -1)
         {
             var list = GetSkus(s => (s.CorporationId == corporationId || corporationId == 0)
                 && (s.NomenklaturaId == nomenklaturaId || nomenklaturaId == 0)

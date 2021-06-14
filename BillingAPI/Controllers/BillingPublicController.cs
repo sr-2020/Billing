@@ -64,7 +64,7 @@ namespace BillingAPI.Controllers
         public DataResult<List<CorporationDto>> GetCorporations()
         {
             var manager = IocContainer.Get<IAdminManager>();
-            var result = RunAction(() => manager.GetCorporations(r => true));
+            var result = RunAction(() => manager.GetCorporationDtos(r => true));
             return result;
         }
 

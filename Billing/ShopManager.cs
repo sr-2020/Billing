@@ -108,7 +108,7 @@ namespace Billing
             };
             var sin = GetSINByModelId(modelId);
             model.Shops = GetShops(s => s.OwnerId == sin.Id || isAdmin);
-            model.Corporations = GetCorporations(s => s.OwnerId == sin.Id || isAdmin);
+            model.Corporations = GetCorporationDtos(s => s.OwnerId == sin.Id || isAdmin);
             return model;
         }
 
