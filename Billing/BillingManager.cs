@@ -592,7 +592,7 @@ namespace Billing
         public SIN RestoreCharacter(int modelId)
         {
             var sin = GetSINByModelId(modelId);
-            sin.InGame = false;
+            sin.InGame = true;
             SaveContext();
             return sin;
         }
