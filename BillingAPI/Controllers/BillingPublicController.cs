@@ -217,7 +217,7 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("a-scoringcategories")]
-        public DataResult<List<ScoringCategoryDto>> GetScoringCategories(bool relative)
+        public DataResult<List<ScoringCategoryDto>> GetScoringCategories(bool? relative)
         {
             var manager = IocContainer.Get<IScoringManager>();
             return RunAction(() => manager.GetScoringCategories(relative));

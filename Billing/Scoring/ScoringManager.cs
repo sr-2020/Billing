@@ -19,7 +19,7 @@ using System.Transactions;
 
 namespace Scoringspace
 {
-    public interface IScoringManager: IBaseBillingRepository
+    public interface IScoringManager : IBaseBillingRepository
     {
         Task OnLifeStyleChanged(Scoring scoring, Lifestyles from, Lifestyles to);
         Task OnPillConsumed(int model, string pillLifestyle);
@@ -48,7 +48,7 @@ namespace Scoringspace
         void DeleteScoringCategory(int id);
         ScoringCategoryDto UpdateCategoryWeight(int id, decimal weight);
         ScoringFactorDto UpdateFactorCategory(int factorId, int categoryId);
-        List<ScoringCategoryDto> GetScoringCategories(bool relative);
+        List<ScoringCategoryDto> GetScoringCategories(bool? relative);
         List<ScoringFactorDto> GetScoringFactors(int categoryId);
         List<ScoringEventLifeStyleDto> GetFactorEvents(int factorId);
         ScoringEventLifeStyleDto AddScoringEvent(int factorId, int lifestyle, decimal value);
@@ -388,29 +388,52 @@ namespace Scoringspace
             return new ScoringFactorDto(sf);
         }
 
-        public List<ScoringCategoryDto> GetScoringCategories(bool relative)
+        public List<ScoringCategoryDto> GetScoringCategories(bool? relative)
         {
-            throw new NotImplementedException();
+            var all = true;
+            int type = 0;
+            if (relative.HasValue)
+            {
+                all = false;
+                type = relative.Value ? (int)ScoringCategoryType.Relative : (int)ScoringCategoryType.Fix;
+            }
+            var list = GetList<ScoringCategory>(sc => all || sc.CategoryType == type);
+            return list.Select(s => new ScoringCategoryDto(s)).ToList();
         }
 
         public List<ScoringFactorDto> GetScoringFactors(int categoryId)
         {
-            throw new NotImplementedException();
+            var list = GetList<ScoringFactor>(sf => sf.CategoryId == categoryId).Select(s => new ScoringFactorDto(s)).ToList();
+            return list;
         }
 
         public List<ScoringEventLifeStyleDto> GetFactorEvents(int factorId)
         {
-            throw new NotImplementedException();
+            var list = GetList<ScoringEventLifestyle>(se => se.ScoringFactorId == factorId).Select(se => new ScoringEventLifeStyleDto(se)).ToList();
+            return list;
         }
 
         public ScoringEventLifeStyleDto AddScoringEvent(int factorId, int lifestyle, decimal value)
         {
-            throw new NotImplementedException();
+            var eventls = Get<ScoringEventLifestyle>(se => se.ScoringFactorId == factorId && se.EventNumber == lifestyle);
+            if (eventls != null)
+                throw new BillingException("eventlifestyle уже заведен");
+            var newevent = new ScoringEventLifestyle
+            {
+                EventNumber = lifestyle,
+                ScoringFactorId = factorId,
+                Value = value
+            };
+            AddAndSave(newevent);
+            return new ScoringEventLifeStyleDto(newevent);
         }
 
         public void DeleleteScoringEvent(int factorId, int lifestyle)
         {
-            throw new NotImplementedException();
+            var eventls = Get<ScoringEventLifestyle>(se => se.ScoringFactorId == factorId && se.EventNumber == lifestyle);
+            if (eventls == null)
+                throw new BillingException("eventlifestyle не найден");
+            RemoveAndSave(eventls);
         }
 
         public void DeleteScoringCategory(int id)
