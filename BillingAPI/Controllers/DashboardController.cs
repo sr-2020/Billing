@@ -42,10 +42,10 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("a-user")]
-        public DataResult<FullUserDto> GetUser(int model)
+        public DataResult<FullUserDto> GetUser(int modelId)
         {
             var service = new AdminService();
-            var result = RunAction(() => service.GetFullUser(model));
+            var result = RunAction(() => service.GetFullUser(modelId));
             return result;
         }
 

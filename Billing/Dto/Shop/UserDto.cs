@@ -14,7 +14,6 @@ namespace Billing.Dto.Shop
             Name = sin.Passport?.PersonName;
             if (sin.Character != null)
             {
-                Id = sin.Character.Id;
                 ModelId = sin.Character.Model.ToString();
             }
             else
@@ -23,7 +22,6 @@ namespace Billing.Dto.Shop
             }
             Balance = sin.Wallet?.Balance ?? 0;
         }
-        public int? Id { get; set; }
         public string Name { get; set; }
         public string ModelId { get; set; }
         public decimal Balance { get; set; }
