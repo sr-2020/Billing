@@ -11,8 +11,6 @@ namespace Billing.Dto.Shop
         {
             Id = organisation.Id;
             Name = organisation.Name;
-            if (organisation.Owner == null)
-                return;
             Owner = organisation.OwnerId ?? 0;
         }
         public int Id { get; set; }

@@ -18,7 +18,7 @@ namespace Billing
     public interface IBaseBillingRepository : IBaseRepository
     {
         SIN CreateOrUpdatePhysicalWallet(int modelId, decimal balance = 1);
-        SIN InitCharacter(int modelId);
+        BalanceDto InitCharacter(int modelId);
         SIN GetSINByModelId(int modelId, params Expression<Func<SIN, object>>[] includes);
         SIN GetSINBySinText(string sinText, params Expression<Func<SIN, object>>[] includes);
         SIN BillingBlocked(int modelId, params Expression<Func<SIN, object>>[] includes);
@@ -30,11 +30,12 @@ namespace Billing
         protected ISettingsManager _settings = IocContainer.Get<ISettingsManager>();
         private string BlockErrorMessage = $"В данный момент ведется пересчет рентных платежей, попробуйте повторить чуть позже";
 
-        public SIN InitCharacter(int modelId)
+        public BalanceDto InitCharacter(int modelId)
         {
             var settings = IoC.IocContainer.Get<ISettingsManager>();
             var defaultbalance = settings.GetDecimalValue(SystemSettingsEnum.defaultbalance);
-            return CreateOrUpdatePhysicalWallet(modelId, defaultbalance);
+            var sin = CreateOrUpdatePhysicalWallet(modelId, defaultbalance);
+            return new BalanceDto(sin);
         }
 
         public SIN CreateOrUpdatePhysicalWallet(int modelId, decimal balance = 1)

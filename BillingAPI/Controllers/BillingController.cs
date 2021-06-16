@@ -63,18 +63,17 @@ namespace BillingAPI.Controllers
         }
 
         /// <summary>
-        /// 
+        /// InitCharacter
         /// </summary>
-        /// <param name="modelid"></param>
-        /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("admin/initcharacter/{modelid}")]
-        public DataResult<SIN> InitCharacter(int modelid, [FromBody] InitCharacterRequest request)
+        public DataResult<BalanceDto> InitCharacter(int modelid)
         {
             var manager = IocContainer.Get<IBillingManager>();
             var result = RunAction(() => manager.InitCharacter(modelid), $"InitCharacter: {modelid}");
             return result;
         }
+
         [HttpPost("createtransfermir")]
         [AdminAuthorization]
         public DataResult<Transfer> CreateTransferMIR([FromBody] CreateTransferSinSinRequest request)

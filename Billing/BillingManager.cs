@@ -452,22 +452,11 @@ namespace Billing
                 .Select(g => g.FirstOrDefault()?.Sku?.Name)
                 .ToList();
             var lifestyle = BillingHelper.GetLifeStyleDto();
-            var balance = new BalanceDto
+            var balance = new BalanceDto(sin)
             {
                 ModelId = modelId,
-                CurrentBalance = BillingHelper.Round(sin.Wallet.Balance),
-                CurrentScoring = Math.Round(sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative, 2),
-                SIN = sin.Passport.Sin,
                 LifeStyle = lifestyle.GetLifeStyle(sin.Wallet).ToString(),
                 ForecastLifeStyle = lifestyle.GetForecastLifeStyle(sin.Wallet).ToString(),
-                PersonName = sin.Passport.PersonName,
-                Metatype = sin.Passport.Metatype?.Name ?? "неизвестно",
-                Citizenship = sin.Passport.Citizenship ?? "неизвестно",
-                Nationality = "устарело на Амуре",
-                Status = "устарело на Амуре",
-                Nation = "устарело на Амуре",
-                Viza = sin.Passport.Viza ?? "неизвестно",
-                Pledgee = sin.Passport.Mortgagee ?? "неизвестно",
                 Insurance = insur?.Sku?.Name ?? "нет страховки",
                 Licenses = licences
             };
