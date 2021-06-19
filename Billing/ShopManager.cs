@@ -238,7 +238,7 @@ namespace Billing
             renta.CurrentScoring = newsin.Scoring.CurerentRelative + newsin.Scoring.CurrentFix;
             var gmdescript = BillingHelper.GetGmDescription(newsin.Passport, renta.Sku, anon);
             _ereminService.UpdateQR(qrDecoded, renta.BasePrice, 
-                BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring), 
+                BillingHelper.GetFinalPrice(renta), 
                 gmdescript, 
                 renta.Id, 
                 BillingHelper.GetLifestyle(renta.LifeStyle)).GetAwaiter().GetResult();
@@ -271,7 +271,7 @@ namespace Billing
             var code = renta.Sku.Nomenklatura.Code;
             var name = renta.Sku.Name;
             var description = renta.Sku.Nomenklatura.Description;
-            _ereminService.WriteQR(qrDecoded, code, name, description, renta.Count, renta.BasePrice, BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring), renta.Secret, renta.Id, (Lifestyles)renta.LifeStyle).GetAwaiter().GetResult();
+            _ereminService.WriteQR(qrDecoded, code, name, description, renta.Count, renta.BasePrice, BillingHelper.GetFinalPrice(renta), renta.Secret, renta.Id, (Lifestyles)renta.LifeStyle).GetAwaiter().GetResult();
             var oldQR = Get<Renta>(r => r.QRRecorded == qrDecoded);
             if (oldQR != null)
                 oldQR.QRRecorded = $"{qrDecoded} deleted";

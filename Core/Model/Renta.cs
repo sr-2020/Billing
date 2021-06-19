@@ -16,8 +16,6 @@ namespace Core.Model
         [Column("shop")]
         public int ShopId { get; set; }
         public virtual ShopWallet Shop { get; set; }
-        //[Column("character")]
-        //public int CharacterId { get; set; }
         [ForeignKey("sin")]
         [Column("sin")]
         public int SinId { get; set; }
@@ -48,5 +46,7 @@ namespace Core.Model
         public int Count { get; set; }
         [Column("expired")]
         public bool Expired { get; set; }
+        [Column("full_price")]
+        public bool FullPrice { get; set; }
     }
 }

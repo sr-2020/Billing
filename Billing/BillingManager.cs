@@ -167,7 +167,7 @@ namespace Billing
             if (allowed == null)
                 throw new BillingException("Sku недоступно для продажи в данный момент");
             price.BasePrice *= count;
-            var finalPrice = BillingHelper.GetFinalPrice(price.BasePrice, price.Discount, price.CurrentScoring);
+            var finalPrice = BillingHelper.GetFinalPrice(price);
             if (sin.Wallet.Balance - price.FinalPrice < 0)
             {
                 throw new BillingException("Недостаточно средств");
@@ -191,7 +191,8 @@ namespace Billing
                 PriceId = priceId,
                 Secret = gmdescript,
                 LifeStyle = price.Sku.Nomenklatura.Lifestyle,
-                Count = count
+                Count = count,
+                FullPrice = price.Sku.Nomenklatura.Specialisation.ProductType.Alias == ProductTypeEnum.Charity.ToString()
             };
             Add(renta);
             price.Confirmed = true;
@@ -276,7 +277,7 @@ namespace Billing
 
             AddScoring(sin.Scoring, dto);
             //forecast
-            outcome -= rentas.Sum(r => BillingHelper.GetFinalPrice(r.BasePrice, r.Discount, r.CurrentScoring));
+            outcome -= rentas.Sum(r => BillingHelper.GetFinalPrice(r));
             //todo add scoring here
             sin.Wallet.IncomeOutcome = income - outcome;
             dto = AddLifeStyle(sin.Wallet, dto);
@@ -338,7 +339,7 @@ namespace Billing
             {
                 throw new Exception("Ошибка загрузки моделей по ренте");
             }
-            var finalPrice = BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
+            var finalPrice = BillingHelper.GetFinalPrice(renta);
             //если баланс положительный
             if (sin.Wallet.Balance > 0)
             {
@@ -361,7 +362,15 @@ namespace Billing
 
         private void CloseOverdraft(Renta renta, Wallet mir, SIN sin, bool first = false)
         {
-            var comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
+            decimal comission;
+            if (renta.FullPrice)
+            {
+                comission = BillingHelper.GetFinalPrice(renta);
+            }
+            else
+            {
+                comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
+            }
             //create KPI here
             renta.Sku.Corporation.CurrentKPI += renta.BasePrice;
             if (first)
@@ -631,7 +640,7 @@ namespace Billing
                 Discount = discount,
                 Sin = sin,
                 ShopComission = shop.Commission,
-                FinalPrice = BillingHelper.GetFinalPrice(sku.SkuBasePrice ?? sku.Nomenklatura.BasePrice, discount, currentScoring)
+                FinalPrice = BillingHelper.GetFinalPrice(sku, discount, currentScoring)
             };
             Add(price);
             Context.SaveChanges();

@@ -113,9 +113,19 @@ namespace Billing
             return GetFinalPrice(price, discount, scoring);
         }
 
-        public static decimal GetFinalPrice(decimal basePrice, decimal discount, decimal scoring)
+        public static decimal GetFinalPrice(Price price) 
         {
-            return Round((basePrice * discount) / scoring);
+            return GetFinalPrice(price.BasePrice, price.Discount, price.CurrentScoring);
+        }
+
+        public static decimal GetFinalPrice(Renta renta) 
+        {
+            return GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
+        }
+
+        private static decimal GetFinalPrice(decimal price, decimal discount, decimal scoring)
+        {
+            return Round((price * discount) / scoring);
         }
 
         public static decimal CalculateComission(decimal basePrice, decimal comission)

@@ -14,7 +14,7 @@ namespace Billing.DTO
             HasQRWrite = renta.HasQRWrite;
             PriceId = renta.PriceId;
             RentaId = renta.Id;
-            FinalPrice = BillingHelper.GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
+            FinalPrice = BillingHelper.GetFinalPrice(renta);
             BasePrice = renta.BasePrice;
             Discount = renta.Discount;
             Scoring = renta.CurrentScoring;

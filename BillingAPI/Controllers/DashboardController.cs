@@ -141,7 +141,6 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("a-add-specialisation")]
-        //[AdminAuthorization]
         public DataResult<SpecialisationDto> AddSpecialisation([FromBody] CreateSpecialisationRequest request)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -154,7 +153,6 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPatch("a-edit-specialisation")]
-        //[AdminAuthorization]
         public DataResult<SpecialisationDto> EditSpecialisation([FromBody] CreateSpecialisationRequest request)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -167,7 +165,6 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpDelete("a-del-specialisation")]
-        //[AdminAuthorization]
         public Result DeleteSpecialisation(int specialisationid)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -274,7 +271,6 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("a-add-nomenklatura")]
-        //[AdminAuthorization]
         public DataResult<NomenklaturaDto> AddNomenklatura([FromBody] CreateNomenklaturaRequest request)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -287,7 +283,6 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPatch("a-edit-nomenklatura")]
-        //[AdminAuthorization]
         public DataResult<NomenklaturaDto> EditNomenklatura([FromBody] CreateNomenklaturaRequest request)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -300,7 +295,6 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("a-add-sku")]
-        //[AdminAuthorization]
         public DataResult<SkuDto> AddSku([FromBody] CreateSkuRequest request)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -313,7 +307,6 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPatch("a-edit-sku")]
-        //[AdminAuthorization]
         public DataResult<SkuDto> EditSku([FromBody] CreateSkuRequest request)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -326,7 +319,6 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpDelete("a-del-nomenklatura")]
-        //[AdminAuthorization]
         public Result DeleteNomenklatura(int nomenklaturaId)
         {
             var manager = IocContainer.Get<IAdminManager>();
@@ -339,7 +331,6 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpDelete("a-del-sku")]
-        //[AdminAuthorization]
         public Result DeleteSku(int skuId)
         {
             var manager = IocContainer.Get<IAdminManager>();
