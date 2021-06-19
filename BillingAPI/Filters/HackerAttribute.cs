@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BillingAPI.Controllers
+namespace BillingAPI.Filters
 {
-    public class HackerController
+    public class HackerAttribute
     {
-        string _secret = "8eaaf947d4b4";
     }
 }

@@ -81,6 +81,25 @@ namespace Billing
                 return Lifestyles.Wood;
         }
 
+        public static Lifestyles GetLifestyleFromJoin(string fieldValue)
+        {
+            switch (fieldValue)
+            {
+                case "Иридий":
+                    return Lifestyles.Iridium;
+                case "Дерево":
+                    return Lifestyles.Wood;
+                case "Бронза":
+                    return Lifestyles.Bronze;
+                case "Серебро":
+                    return Lifestyles.Silver;
+
+                default:
+                    break;
+            }
+            return Lifestyles.Wood;
+        }
+
         public static List<NamedEntity> GetLifestyles()
         {
             var ls = new List<NamedEntity>();
@@ -123,11 +142,6 @@ namespace Billing
             return GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
         }
 
-        private static decimal GetFinalPrice(decimal price, decimal discount, decimal scoring)
-        {
-            return Round((price * discount) / scoring);
-        }
-
         public static decimal CalculateComission(decimal basePrice, decimal comission)
         {
             return basePrice * (comission / 100);
@@ -161,6 +175,9 @@ namespace Billing
                 return false;
             }
         }
-
+        private static decimal GetFinalPrice(decimal price, decimal discount, decimal scoring)
+        {
+            return Round((price * discount) / scoring);
+        }
     }
 }

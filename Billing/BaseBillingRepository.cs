@@ -17,7 +17,6 @@ namespace Billing
 {
     public interface IBaseBillingRepository : IBaseRepository
     {
-        SIN CreateOrUpdatePhysicalWallet(int modelId, decimal balance = 1);
         BalanceDto InitCharacter(int modelId);
         SIN GetSINByModelId(int modelId, params Expression<Func<SIN, object>>[] includes);
         SIN GetSINBySinText(string sinText, params Expression<Func<SIN, object>>[] includes);
@@ -32,29 +31,51 @@ namespace Billing
 
         public BalanceDto InitCharacter(int modelId)
         {
-            var settings = IoC.IocContainer.Get<ISettingsManager>();
-            var defaultbalance = settings.GetDecimalValue(SystemSettingsEnum.defaultbalance);
-            var sin = CreateOrUpdatePhysicalWallet(modelId, defaultbalance);
-            return new BalanceDto(sin);
-        }
-
-        public SIN CreateOrUpdatePhysicalWallet(int modelId, decimal balance = 1)
-        {
             if (modelId == 0)
                 throw new BillingNotFoundException($"character {modelId} not found");
             var character = GetAsNoTracking<Character>(c => c.Model == modelId);
             if (character == null)
                 throw new BillingNotFoundException($"character {modelId} not found");
-            var sin = Get<SIN>(s => s.Character.Model == modelId, s => s.Passport, s=>s.Character);
+            var sin = Get<SIN>(s => s.Character.Model == modelId, s => s.Passport, s => s.Character);
             if (sin == null)
-            {
                 throw new BillingNotFoundException($"character {modelId} not found");
+            if (sin.PassportId == 0)
+                throw new BillingNotFoundException($"Не найден пасспорт при инициализации персонажа {modelId}");
+            sin.EVersion = "1";
+            SaveContext();
+            InitEcoFirstStage(sin);
+            //проверяем, что персонаж присутствует во внешней системе
+            try
+            {
+                var service = new EreminService();
+                service.GetCharacter(sin.Character.Model);
+                sin.EVersion = "3";
+                SaveContext();
             }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e.ToString());
+                throw;
+            }
+            try
+            {
+                InitEcoSecondStage(sin);
+            }
+            catch (Exception e2)
+            {
+                Console.Error.WriteLine(e2.ToString());
+                throw;
+            }
+            return new BalanceDto(sin);
+        }
+
+        private void InitEcoFirstStage(SIN sin)
+        {
             sin.InGame = true;
             sin.OldMetaTypeId = null;
             sin.OldInsurance = null;
-            sin.EVersion = "0";
-            var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId ?? 0, balance);
+            var defaultbalance = _settings.GetDecimalValue(SystemSettingsEnum.defaultbalance);
+            var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId ?? 0, defaultbalance);
             sin.Wallet = wallet;
             var scoring = Get<Scoring>(s => s.Id == sin.ScoringId);
             if (scoring == null)
@@ -66,37 +87,10 @@ namespace Billing
             scoring.StartFactor = 1;
             scoring.CurrentFix = 0.5m;
             scoring.CurerentRelative = 0.5m;
-            SaveContext();
-            InitEco(sin);
-            if (sin.PassportId == 0)
-            {
-                var passport = new Passport();
-                sin.Passport = passport;
-                AddAndSave(passport);
-            }
-            sin.EVersion = "1";
-            //проверяем, что персонаж присутствует во внешней системе
-            try
-            {
-                var service = new EreminService();
-                service.GetCharacter(sin.Character.Model);
-                sin.EVersion = "2";
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine(e.ToString());
-            }
-            SaveContext();
-            return sin;
-        }
-
-        private void InitEco(SIN sin)
-        {
             var categories = GetList<ScoringCategory>(c => c.CategoryType > 0);
             foreach (var category in categories)
             {
                 var current = Get<CurrentCategory>(c => c.CategoryId == category.Id && c.ScoringId == sin.ScoringId);
-
                 if (current != null)
                 {
                     var factors = GetList<CurrentFactor>(c => c.CurrentCategoryId == current.Id);
@@ -116,6 +110,59 @@ namespace Billing
             SaveContext();
             var rentas = GetList<Renta>(r => r.SinId == sin.Id);
             RemoveRange(rentas);
+            sin.EVersion = "2";
+            SaveContext();
+        }
+
+        private void InitEcoSecondStage(SIN sin)
+        {
+            if ((sin.Passport.MetatypeId ?? 0) > 5)
+            {
+                sin.EVersion = "4";
+                SaveContext();
+                return;
+            }
+            var joinchacter = Get<JoinCharacter>(jc => jc.CharacterId == sin.CharacterId);
+            var fields = GetList<JoinFieldValue>(jfv => jfv.JoinCharacterId == joinchacter.Id, jfv => jfv.JoinField);
+            var insurance = fields.FirstOrDefault(f => f.JoinField.Name == "Страховка");
+            var lifestyle = Lifestyles.Wood;
+            CorporationWallet citizen;
+            ShopWallet shop;
+            Sku sku;
+            if (insurance != null)
+            {
+                lifestyle = BillingHelper.GetLifestyleFromJoin(insurance.Value);
+            }
+            var ls = (int)lifestyle;
+            var pt = ProductTypeEnum.Insurance.ToString();
+            if (lifestyle == Lifestyles.Iridium)
+            {
+                citizen = Get<CorporationWallet>(c => c.Alias == "JoyCorp");
+                shop = Get<ShopWallet>(s => s.Name == "А-Мур");
+                sin.Wallet.IsIrridium = true;
+            }
+            else
+            {
+                citizen = Get<CorporationWallet>(c => c.Alias == sin.Passport.Citizenship);
+                if (citizen.Alias == "Россия")
+                {
+                    shop = Get<ShopWallet>(s => s.Name == "Мэрия г. Иркутск");
+                }
+                else
+                {
+                    shop = Get<ShopWallet>(s => s.Name == "CrashCart");
+                }
+            }
+            sku = Get<Sku>(s => s.CorporationId == citizen.Id && s.Nomenklatura.Specialisation.ProductType.Alias == pt && s.Nomenklatura.Lifestyle == ls, s => s.Nomenklatura.Specialisation.ProductType, s => s.Corporation);
+            if (citizen == null)
+                throw new BillingNotFoundException("Гражданство при инициализации не найдено");
+            if (sku == null)
+                throw new BillingNotFoundException("Страховка при инициализации не найдена");
+            if (shop == null)
+                throw new BillingNotFoundException("Магазин стартовой страховки не найден");
+            var price = CreateNewPrice(sku, shop, sin);
+            var renta = CreateRenta(sin.Character.Model, price.Id, 1);
+            sin.EVersion = "4";
             SaveContext();
         }
 
@@ -151,6 +198,123 @@ namespace Billing
                 default:
                     return string.Empty;
             }
+        }
+
+        protected Renta CreateRenta(int modelId, int priceId, int count = 1)
+        {
+            var sin = BillingBlocked(modelId, s => s.Wallet, s => s.Character, s => s.Passport);
+            if (count == 0)
+                count = 1;
+            var price = Get<Price>(p => p.Id == priceId,
+                p => p.Sku.Nomenklatura.Specialisation.ProductType,
+                p => p.Sku.Corporation.Wallet,
+                s => s.Shop.Wallet,
+                s => s.Sin.Character);
+            if (price == null)
+                throw new BillingException("Персональное предложение не найдено");
+            if (price.Confirmed)
+                throw new Exception("Персональным предложением уже воспользовались");
+            if (price.Sin.Character.Model != modelId)
+                throw new Exception("Персональное предложение заведено на другого персонажа");
+            var dateTill = price.DateCreated.AddMinutes(_settings.GetIntValue(SystemSettingsEnum.price_minutes));
+            if (dateTill < DateTime.Now)
+                throw new BillingException($"Персональное предложение больше не действительно, оно истекло {dateTill:HH:mm:ss}");
+            var allowed = SkuAllowed(price.ShopId, price.SkuId);
+            if (allowed == null)
+                throw new BillingException("Sku недоступно для продажи в данный момент");
+            price.BasePrice *= count;
+            var finalPrice = BillingHelper.GetFinalPrice(price);
+            if (sin.Wallet.Balance - price.FinalPrice < 0)
+            {
+                throw new BillingException("Недостаточно средств");
+            }
+            price.Sku.Count -= count;
+            var instantConsume = price.Sku.Nomenklatura.Specialisation.ProductType.InstantConsume;
+            var anon = GetAnon(sin.Character.Model);
+            var gmdescript = BillingHelper.GetGmDescription(sin.Passport, price.Sku, anon);
+            var renta = new Renta
+            {
+                BasePrice = price.BasePrice,
+                Sin = sin,
+                CurrentScoring = price.CurrentScoring,
+                Sku = price.Sku,
+                DateCreated = DateTime.Now.ToUniversalTime(),
+                Discount = price.Discount,
+                ShopComission = price.ShopComission,
+                ShopId = price.ShopId,
+                Shop = price.Shop,
+                HasQRWrite = instantConsume ? false : BillingHelper.HasQrWrite(price.Sku.Nomenklatura.Code),
+                PriceId = priceId,
+                Secret = gmdescript,
+                LifeStyle = price.Sku.Nomenklatura.Lifestyle,
+                Count = count,
+                FullPrice = price.Sku.Nomenklatura.Specialisation.ProductType.Alias == ProductTypeEnum.Charity.ToString()
+            };
+            Add(renta);
+            price.Confirmed = true;
+            SaveContext();
+            ProcessBuyScoring(sin, price.Sku);
+            var mir = GetMIR();
+            ProcessRenta(renta, mir, sin, true);
+            SaveContext();
+            if (instantConsume)
+            {
+                var erService = new EreminService();
+                erService.ConsumeFood(renta.Id, (Lifestyles)renta.LifeStyle, modelId).GetAwaiter().GetResult();
+            }
+            return renta;
+        }
+
+        protected bool GetAnon(int modelId)
+        {
+            try
+            {
+                var erService = new EreminService();
+                return erService.GetAnonimous(modelId);
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine("Ошибка получения anonimous");
+            }
+            return false;
+        }
+
+        protected Price CreateNewPrice(Sku sku, ShopWallet shop, SIN sin)
+        {
+            decimal discount = 1;
+            if (sin.Passport.Mortgagee == sku.Corporation.Alias)
+                discount *= 0.9m;
+            decimal modeldiscount;
+            try
+            {
+                var eService = new EreminService();
+                modeldiscount = eService.GetDiscount(sin.Character.Model, BillingHelper.GetDiscountType(sku.Nomenklatura.Specialisation.ProductType.DiscountType));
+            }
+            catch
+            {
+                modeldiscount = 1;
+            }
+            discount *= modeldiscount;
+            var currentScoring = sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative;
+            if (currentScoring == 0)
+            {
+                currentScoring = 1;
+            }
+            var price = new Price
+            {
+                Sku = sku,
+                Shop = shop,
+                BasePrice = sku.Nomenklatura.BasePrice,
+                CurrentScoring = currentScoring,
+                DateCreated = DateTime.Now.ToUniversalTime(),
+                Discount = discount,
+                Sin = sin,
+                ShopComission = shop.Commission,
+                FinalPrice = BillingHelper.GetFinalPrice(sku, discount, currentScoring)
+            };
+            Add(price);
+            Context.SaveChanges();
+            return price;
         }
 
         /// <summary>
@@ -311,6 +475,105 @@ namespace Billing
             return result;
         }
 
+        /// <summary>
+        /// НЕ ВЫПОЛНЯЕТСЯ SAVECONTEXT
+        /// </summary>
+        protected void ProcessRenta(Renta renta, Wallet mir, SIN sin, bool first = false)
+        {
+            if (renta?.Shop?.Wallet == null
+                || renta?.Sku?.Corporation?.Wallet == null
+                || sin?.Character == null
+                || sin?.Wallet == null)
+            {
+                throw new Exception("Ошибка загрузки моделей по ренте");
+            }
+            var finalPrice = BillingHelper.GetFinalPrice(renta);
+            //если баланс положительный
+            if (sin.Wallet.Balance > 0)
+            {
+                AddNewTransfer(sin.Wallet, mir, finalPrice, $"Рентный платеж: { renta.Sku.Name} в {renta.Shop.Name}", false, renta.Id, false);
+                CloseOverdraft(renta, mir, sin, first);
+                //close overdraft here
+                var allOverdrafts = GetList<Transfer>(t => t.Overdraft && t.WalletFromId == sin.Wallet.Id && t.RentaId > 0);
+                foreach (var overdraft in allOverdrafts)
+                {
+                    overdraft.Overdraft = false;
+                    var closingRenta = Get<Renta>(r => r.Id == overdraft.RentaId, r => r.Sku.Corporation, r => r.Shop.Wallet);
+                    CloseOverdraft(closingRenta, mir, sin);
+                }
+            }
+            else
+            {
+                AddNewTransfer(sin.Wallet, mir, finalPrice, $"Рентный платеж: {renta.Sku.Name} в {renta.Shop.Name}", false, renta.Id, true);
+            }
+        }
+        private void CloseOverdraft(Renta renta, Wallet mir, SIN sin, bool first = false)
+        {
+            decimal comission;
+            if (renta.FullPrice)
+            {
+                comission = BillingHelper.GetFinalPrice(renta);
+            }
+            else
+            {
+                comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
+            }
+            //create KPI here
+            renta.Sku.Corporation.CurrentKPI += renta.BasePrice;
+            if (first)
+                renta.Sku.Corporation.SkuSold += renta.BasePrice;
+            //comission
+            AddNewTransfer(mir, renta.Shop.Wallet, comission, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} от {sin.Passport.PersonName} ({sin.Passport.Sin})", false, renta.Id, false);
+        }
+
+        private void ProcessBuyScoring(SIN sin, Sku sku)
+        {
+            var type = sku.Nomenklatura.Specialisation.ProductType;
+            if (type == null)
+                throw new Exception("type not found");
+            IScoringManager manager;
+            switch (type.Alias)
+            {
+                case "Implant":
+                    manager = IoC.IocContainer.Get<IScoringManager>();
+                    manager.OnImplantBuy(sin, sku.Nomenklatura.Lifestyle);
+                    break;
+                case "Food":
+                case "EdibleFood":
+                    manager = IoC.IocContainer.Get<IScoringManager>();
+                    manager.OnFoodBuy(sin, sku.Nomenklatura.Lifestyle);
+                    break;
+                case "Weapon":
+                    manager = IoC.IocContainer.Get<IScoringManager>();
+                    manager.OnWeaponBuy(sin, sku.Nomenklatura.Lifestyle);
+                    break;
+                case "Pill":
+                    manager = IoC.IocContainer.Get<IScoringManager>();
+                    manager.OnPillBuy(sin, sku.Nomenklatura.Lifestyle);
+                    break;
+                case "Magic":
+                    manager = IoC.IocContainer.Get<IScoringManager>();
+                    manager.OnMagicBuy(sin, sku.Nomenklatura.Lifestyle);
+                    break;
+                case "Insurance":
+                    manager = IoC.IocContainer.Get<IScoringManager>();
+                    manager.OnInsuranceBuy(sin, sku.Nomenklatura.Lifestyle);
+                    break;
+                case "Charity":
+                    manager = IoC.IocContainer.Get<IScoringManager>();
+                    manager.OnInsuranceBuy(sin, sku.Nomenklatura.Lifestyle);
+                    break;
+                case "drone":
+                    break;
+                case "matrix":
+                    break;
+                default:
+                    manager = IoC.IocContainer.Get<IScoringManager>();
+                    manager.OnOtherBuy(sin, sku.Nomenklatura.Lifestyle);
+                    break;
+            }
+        }
+
         private List<int> GetSkuIds(int shopId)
         {
             return ExecuteQuery<int>($"SELECT * FROM get_sku({shopId})");
@@ -320,6 +583,7 @@ namespace Billing
         {
             return _settings.GetIntValue(SystemSettingsEnum.MIR_ID);
         }
+
 
     }
 }

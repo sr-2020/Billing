@@ -48,21 +48,6 @@ namespace BillingAPI.Controllers
         #region admin
 
         /// <summary>
-        /// Fill all tables related with wallet for current character
-        /// </summary>
-        /// <param name="character">ID from table Character</param>
-        /// <param name="balance">initial wallet amount</param>
-        /// <returns></returns>
-        [HttpGet("admin/createphysicalwallet")]
-        [Obsolete]
-        public DataResult<SIN> CreatePhysicalWallet(int character, decimal balance)
-        {
-            var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.CreateOrUpdatePhysicalWallet(character, balance), $"createphysicalwallet {character} {balance}");
-            return result;
-        }
-
-        /// <summary>
         /// InitCharacter
         /// </summary>
         /// <returns></returns>
@@ -83,22 +68,7 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        ///// <summary>
-        ///// Get corporation wallet. If wallet not exists, then create it
-        ///// </summary>
-        ///// <param name="id">0 for create new, specified for update</param>
-        ///// <param name="amount">if negative then amount will not change</param>
-        ///// <param name="name">Some name</param>
-        ///// <param name="logoUrl">Url to picture</param>
-        ///// <returns></returns>
-        //[HttpPut("admin/createorupdatecorporationwallet")]
-        //[AdminAuthorization]
-        //public DataResult<CorporationWallet> CreateOrUpdateCorporationWallet(int id, decimal amount, string name, string logoUrl)
-        //{
-        //    var manager = IocContainer.Get<IAdminManager>();
-        //    var result = RunAction(() => manager.CreateOrUpdateCorporationWallet(id, amount, name, logoUrl), $"createorupdatecorporationwallet {id}:{amount}:{name}:{logoUrl}");
-        //    return result;
-        //}
+
 
         #endregion
 

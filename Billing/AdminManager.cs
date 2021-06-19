@@ -381,19 +381,5 @@ namespace Billing
             }
             return transfer;
         }
-
-        protected bool GetAnon(int modelId)
-        {
-            try
-            {
-                var erService = new EreminService();
-                return erService.GetAnonimous(modelId);
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine("Ошибка получения anonimous");
-            }
-            return false;
-        }
     }
 }
