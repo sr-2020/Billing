@@ -27,6 +27,7 @@ namespace Billing.DTO
             QRRecorded = renta.QRRecorded;
             DateCreated = renta.DateCreated;
             Specialisation = renta.Sku?.Nomenklatura?.Specialisation?.Name;
+            Stealable = renta.HasQRWrite;
         }
         [Display(Name = "SIN")]
         public string ModelId { get; set; }
@@ -51,6 +52,7 @@ namespace Billing.DTO
         public decimal BasePrice { get; set; }
         public decimal Discount { get; set; }
         public decimal Scoring { get; set; }
+        public bool Stealable { get; set; }
     }
 
     public class RentaSumDto

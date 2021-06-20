@@ -38,6 +38,7 @@ namespace BillingAPI
             {
                 options.Filters.Add(new HttpResponseExceptionFilter());
                 options.Filters.Add(new EvarunAuthorizationFilter());
+                options.Filters.Add(new HackerAttribute());
             })
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
