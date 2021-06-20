@@ -12,9 +12,26 @@ namespace Billing
         void StealRenta(int rentaId, int? modelTo);
         void HackShop(int shopId, int[] models);
     }
-    public class HackerManager: AdminManager, IHackerManager
+    public class HackerManager : AdminManager, IHackerManager
     {
-        
+        public void HackShop(int shopId, int[] models)
+        {
+            throw new NotImplementedException();
+        }
 
+        public void StealMoney(int modelFrom, int modelTo, decimal amount, string comment)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void StealRenta(int rentaId, int? modelTo)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void StealShopMoney(int shopId, int modelTo, decimal amount, string comment)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
