@@ -55,7 +55,7 @@ namespace BillingAPI.Controllers
         [HttpGet("a-shops")]
         public DataResult<List<ShopDto>> GetShops()
         {
-            var manager = IocContainer.Get<IAdminManager>();
+            var manager = IocContainer.Get<IShopManager>();
             var result = RunAction(() => manager.GetShops(s => true));
             return result;
         }
@@ -65,10 +65,10 @@ namespace BillingAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("a-shop")]
-        public DataResult<ShopDto> GetShop(int shopid)
+        public DataResult<ShopDetailedDto> GetShop(int shopid)
         {
-            var manager = IocContainer.Get<IAdminManager>();
-            var result = RunAction(() => manager.GetShops(s => s.Id == shopid)?.FirstOrDefault());
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.GetShop(shopid));
             return result;
         }
 

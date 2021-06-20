@@ -21,14 +21,14 @@ namespace BillingAPI.Controllers
     {
         #region refactored
 
-        [HttpGet("getshop")]
-        [AdminAuthorization]
-        public DataResult<ShopDto> GetShop(int shopId)
-        {
-            var manager = IocContainer.Get<IAdminManager>();
-            var result = RunAction(() => manager.GetShops(s => s.Id == shopId).FirstOrDefault());
-            return result;
-        }
+        //[HttpGet("getshop")]
+        //[AdminAuthorization]
+        //public DataResult<ShopDto> GetShop(int shopId)
+        //{
+        //    var manager = IocContainer.Get<IShopManager>();
+        //    var result = RunAction(() => manager.GetShops(s => s.Id == shopId).FirstOrDefault());
+        //    return result;
+        //}
 
         /// <summary>
         /// 

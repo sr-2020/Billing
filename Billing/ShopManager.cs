@@ -17,6 +17,8 @@ namespace Billing
 {
     public interface IShopManager : IAdminManager
     {
+        List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate);
+        ShopDetailedDto GetShop(int shopId);
         bool HasAccessToShop(int character, int shop);
         bool HasAccessToCorporation(int character, int corporation);
         List<QRDto> GetAvailableQR(int shop);
@@ -33,23 +35,20 @@ namespace Billing
         Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
         List<RentaDto> GetRentas(int shop);
         void WriteRenta(int rentaId, string qrEncoded);
-        int ProcessInflation(decimal k);
     }
 
     public class ShopManager : AdminManager, IShopManager
     {
         EreminService _ereminService = new EreminService();
-        public int ProcessInflation(decimal k)
+
+        public List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate)
         {
-            var nomenklaturas = GetList<Nomenklatura>(n => true);
-            if (nomenklaturas == null)
-                throw new Exception("nomenklaturas is null");
-            foreach (var nomenklatura in nomenklaturas)
-            {
-                nomenklatura.BasePrice = nomenklatura.BasePrice * k;
-            }
-            SaveContext();
-            return nomenklaturas.Count;
+            return GetList(predicate, s => s.Owner.Sins, s => s.Wallet, s => s.Specialisations).Select(s =>
+                      new ShopDto(s)).ToList();
+        }
+        public ShopDetailedDto GetShop(int shopId)
+        {
+            throw new NotImplementedException();
         }
 
         public void WriteRenta(int rentaId, string qrEncoded)

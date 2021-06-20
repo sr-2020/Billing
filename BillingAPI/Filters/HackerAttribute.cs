@@ -19,6 +19,7 @@ namespace BillingAPI.Filters
                 if(hack == _secret)
                 {
                     base.OnActionExecuting(filterContext);
+                    return;
                 }
             }
             Console.Error.WriteLine("Неавторизованный взлом");

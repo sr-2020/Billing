@@ -15,7 +15,6 @@ namespace Billing
 {
     public interface IAdminManager : IBaseBillingRepository
     {
-        List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate);
         List<SpecialisationDto> GetSpecialisations(Expression<Func<Specialisation, bool>> predicate);
         List<CorporationDto> GetCorporationDtos(Expression<Func<CorporationWallet, bool>> predicate);
         List<ProductTypeDto> GetProductTypes(Expression<Func<ProductType, bool>> predicate);
@@ -42,11 +41,7 @@ namespace Billing
         public static string UrlNotFound = "";
         protected int CURRENTGAME = 1;
 
-        public List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate)
-        {
-            return GetList(predicate, s => s.Owner.Sins, s => s.Wallet, s => s.Specialisations).Select(s =>
-                      new ShopDto(s)).ToList();
-        }
+
 
         public List<SpecialisationDto> GetSpecialisations(Expression<Func<Specialisation, bool>> predicate)
         {

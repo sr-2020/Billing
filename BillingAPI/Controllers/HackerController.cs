@@ -1,4 +1,5 @@
 ﻿using Billing.Dto.Shop;
+using Billing.DTO;
 using BillingAPI.Filters;
 using BillingAPI.Model;
 using Microsoft.AspNetCore.Mvc;
@@ -10,39 +11,40 @@ using System.Threading.Tasks;
 namespace BillingAPI.Controllers
 {
     [Route("")]
+    [Hacker]
     public class HackerController : EvarunApiController
     {
-     
         [HttpPost("h-transfer")]
-        [Hacker]
         public DataResult<string> StealTransfer([FromBody] StealTransferRequest request)
         {
             throw new NotImplementedException();
         }
 
         [HttpPost("h-shop-transfer")]
-        [Hacker]
         public DataResult<string> StealShopTransfer([FromBody] StealTransferRequest request)
         {
             throw new NotImplementedException();
         }
 
         [HttpPost("h-renta")]
-        [Hacker]
         public DataResult<string> StealRenta([FromBody] StealRentaRequest request)
         {
             throw new NotImplementedException();
         }
 
         [HttpGet("h-shop")]
-        [Hacker]
-        public DataResult<List<QRDto>> GetShopProducts(int shopId)
+        public DataResult<ShopDto> GetShop(int shopId)
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpGet("h-shops")]
+        public DataResult<List<ShopDto>> GetShops()
         {
             throw new NotImplementedException();
         }
 
         [HttpPost("h-shop")]
-        [Hacker]
         public DataResult<string> HackShop([FromBody] HackShopRequest request)
         {
             throw new NotImplementedException();
