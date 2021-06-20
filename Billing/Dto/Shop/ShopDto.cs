@@ -42,7 +42,10 @@ namespace Billing.DTO
     }
     public class ShopDetailedDto : ShopDto
     {
-        public ShopDetailedDto(ShopWallet shop) : base(shop) { }
+        public ShopDetailedDto(ShopWallet shop, List<QRDto> products) : base(shop) 
+        {
+            Products = products;
+        }
 
         public List<QRDto> Products { get; set; }
     }

@@ -48,7 +48,11 @@ namespace Billing
         }
         public ShopDetailedDto GetShop(int shopId)
         {
-            throw new NotImplementedException();
+            var shop = Get<ShopWallet>(s => s.Id == shopId, s => s.Owner.Sins, s => s.Wallet, s => s.Specialisations);
+            if (shop == null)
+                throw new BillingNotFoundException($"Магазин {shopId} не найден");
+            var products = GetAvailableQR(shopId);
+            return new ShopDetailedDto(shop, products);
         }
 
         public void WriteRenta(int rentaId, string qrEncoded)

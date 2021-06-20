@@ -24,7 +24,10 @@ namespace Billing.DTO
             this.LifeStyle = BillingHelper.GetLifestyle(nomenklatura.Lifestyle).ToString();
             this.Code = nomenklatura.Code;
             this.Description = nomenklatura.Description;
-            this.PictureUrl = nomenklatura.PictureUrl;
+            if (string.IsNullOrEmpty(nomenklatura.PictureUrl))
+                this.PictureUrl = nomenklatura?.Specialisation?.ProductType?.PictureUrl ?? "";
+            else
+                this.PictureUrl = nomenklatura.PictureUrl;
             this.BaseCount = nomenklatura.BaseCount;
         }
         public int NomenklaturaId { get; set; }

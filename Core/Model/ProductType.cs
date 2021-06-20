@@ -15,6 +15,8 @@ namespace Core.Model
         public int ExternalId { get; set; }
         [Column("alias")]
         public string Alias { get; set; }
+        [Column("picture_url")]
+        public string PictureUrl { get; set; }
 
         public bool InstantConsume { get => this.Alias == ProductTypeEnum.EdibleFood.ToString(); }
     }

@@ -28,6 +28,7 @@ namespace Core
         public DbSet<CurrentFactor> CurrentFactor { get; set; }
         public DbSet<ScoringEventLifestyle> EventLifestyle { get; set; }
         public DbSet<HangfireJob> Job { get; set; }
+        public DbSet<HackerHistory> HackerHistory { get; set; }
         public DbSet<JoinCharacter> JoinCharacter { get; set; }
         public DbSet<JoinFieldValue> JoinFieldValue { get; set; }
         public DbSet<JoinField> JoinField { get; set; }
