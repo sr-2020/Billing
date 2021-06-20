@@ -33,7 +33,7 @@ namespace BillingAPI.Controllers
         }
 
         [HttpGet("h-shop")]
-        public DataResult<ShopDto> GetShop(int shopId)
+        public DataResult<ShopDetailedDto> GetShop(int shopId)
         {
             throw new NotImplementedException();
         }

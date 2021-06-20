@@ -46,7 +46,7 @@ namespace Billing.DTO
         {
             Products = products;
         }
-
+        //List<>
         public List<QRDto> Products { get; set; }
     }
 }

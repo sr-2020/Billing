@@ -110,8 +110,12 @@ namespace Billing
                 CurrentCharacterName = GetCharacterName(modelId)
             };
             var sin = GetSINByModelId(modelId);
-            model.Shops = GetShops(s => s.OwnerId == sin.Id || isAdmin);
-            model.Corporations = GetCorporationDtos(s => s.OwnerId == sin.Id || isAdmin);
+            if(sin == null)
+            {
+                throw new BillingNotFoundException($"sin not found {modelId}");
+            }
+            model.Shops = GetShops(s => s.OwnerId == modelId || isAdmin);
+            model.Corporations = GetCorporationDtos(s => s.OwnerId == modelId || isAdmin);
             return model;
         }
 
@@ -198,12 +202,16 @@ namespace Billing
                 return false;
             }
             var sin = GetSINByModelId(modelId);
+            if(sin == null)
+            {
+                throw new BillingNotFoundException("sin not found");
+            }
             var shop = Get<ShopWallet>(s => s.Id == shopId, s => s.Owner);
             if (shop == null)
             {
                 throw new BillingException("shop not found");
             }
-            return shop.OwnerId == sin.Id;
+            return shop.OwnerId == modelId;
         }
 
         public bool HasAccessToCorporation(int modelId, int corporation)
@@ -218,7 +226,7 @@ namespace Billing
             {
                 throw new BillingException("corporation not found");
             }
-            return corp.OwnerId == sin.Id;
+            return corp.OwnerId == modelId;
         }
         public List<QRDto> GetAvailableQR(int shop)
         {
