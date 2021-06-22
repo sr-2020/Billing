@@ -411,9 +411,7 @@ namespace Billing
         {
             var sin = GetSINByModelId(modelId, s => s.Wallet);
             sin.InGame = false;
-            var transfers = GetList<Transfer>(t => t.WalletFromId == sin.WalletId || t.WalletToId == sin.WalletId);
             var rents = GetList<Renta>(r => r.SinId == sin.Id);
-            RemoveRange(transfers);
             SaveContext();
             foreach (var renta in rents)
             {
@@ -421,14 +419,13 @@ namespace Billing
                 {
                     try
                     {
-                        CleanRenta(renta, renta.QRRecorded);
+                        CleanRenta(renta);
                     }
                     catch (Exception e)
                     {
                         Console.Error.WriteLine(e.ToString());
                     }
                 }
-                RemoveAndSave(renta);
             }
             return sin;
         }

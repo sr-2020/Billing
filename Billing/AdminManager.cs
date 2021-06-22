@@ -34,7 +34,7 @@ namespace Billing
         void DeleteSku(int skuId);
         Transfer MakeTransferSINSIN(int characterFrom, string sinTo, decimal amount, string comment);
         Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment);
-        void CleanRenta(Renta renta, string qrDecoded);
+        void CleanRenta(Renta renta);
     }
     public class AdminManager : BaseBillingRepository, IAdminManager
     {
@@ -83,7 +83,7 @@ namespace Billing
         public List<SIN> GetActiveSins(params Expression<Func<SIN, object>>[] includes)
         {
             var currentGame = 1;
-            var sins = GetListAsNoTracking(s => s.InGame ?? false && s.Character.Game == currentGame, includes);
+            var sins = GetListAsNoTracking(s => s.InGame ?? false && s.Character.Game == currentGame && s.EVersion == "4", includes);
             return sins;
         }
 
@@ -336,11 +336,14 @@ namespace Billing
             return MakeTransferSINSIN(d1, d2, amount, comment);
         }
 
-        public void CleanRenta(Renta renta, string qrDecoded)
+        public void CleanRenta(Renta renta)
         {
-            var ereminService = new EreminService();
-            ereminService.CleanQR(qrDecoded).GetAwaiter().GetResult();
-            renta.QRRecorded = string.Empty;
+            if (!string.IsNullOrEmpty(renta.QRRecorded))
+            {
+                var ereminService = new EreminService();
+                ereminService.CleanQR(renta.QRRecorded).GetAwaiter().GetResult();
+                renta.QRRecorded = string.Empty;
+            }
             renta.Expired = true;
             SaveContext();
         }
