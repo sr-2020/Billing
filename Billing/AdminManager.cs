@@ -342,7 +342,7 @@ namespace Billing
             {
                 var ereminService = new EreminService();
                 ereminService.CleanQR(renta.QRRecorded).GetAwaiter().GetResult();
-                renta.QRRecorded = string.Empty;
+                renta.QRRecorded = $"deleted {renta.QRRecorded}";
             }
             renta.Expired = true;
             SaveContext();
@@ -363,7 +363,7 @@ namespace Billing
             allList.AddRange(listTo
                 .Select(s => CreateTransferDto(s, TransferType.Incoming, sins, shops, owner))
                 .ToList());
-            return allList.OrderBy(t => t.OperationTime).ToList();
+            return allList.OrderByDescending(t => t.OperationTime).ToList();
         }
 
         protected Transfer MakeTransferSINSIN(SIN sinFrom, SIN sinTo, decimal amount, string comment)
