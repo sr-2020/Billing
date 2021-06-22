@@ -136,12 +136,16 @@ namespace Billing
             if (lifestyle == Lifestyles.Iridium)
             {
                 citizen = Get<CorporationWallet>(c => c.Alias == "JoyCorp");
+                if (citizen == null)
+                    throw new BillingNotFoundException("Гражданство при инициализации не найдено");
                 shop = Get<ShopWallet>(s => s.Name == "А-Мур");
                 sin.Wallet.IsIrridium = true;
             }
             else
             {
                 citizen = Get<CorporationWallet>(c => c.Alias == sin.Passport.Citizenship);
+                if (citizen == null)
+                    throw new BillingNotFoundException("Гражданство при инициализации не найдено");
                 if (citizen.Alias == "Россия")
                 {
                     shop = Get<ShopWallet>(s => s.Name == "Мэрия г. Иркутск");
@@ -152,8 +156,6 @@ namespace Billing
                 }
             }
             sku = Get<Sku>(s => s.CorporationId == citizen.Id && s.Nomenklatura.Specialisation.ProductType.Alias == pt && s.Nomenklatura.Lifestyle == ls, s => s.Nomenklatura.Specialisation.ProductType, s => s.Corporation);
-            if (citizen == null)
-                throw new BillingNotFoundException("Гражданство при инициализации не найдено");
             if (sku == null)
                 throw new BillingNotFoundException("Страховка при инициализации не найдена");
             if (shop == null)
@@ -349,7 +351,7 @@ namespace Billing
             //баланса хватает, или один из кошельков MIR
             if (walletFrom.Balance < amount && walletFrom.WalletType != (int)WalletTypes.MIR && walletTo.WalletType != (int)WalletTypes.MIR)
                 throw new BillingException($"Денег нет, но вы держитесь");
-            if (amount <= 0)
+            if (amount < 0)
                 throw new BillingException($"Нельзя перевести отрицательное значение");
             if (comment.Length > 255)
                 comment = comment.Substring(0, 254);

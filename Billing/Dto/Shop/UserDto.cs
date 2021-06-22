@@ -15,13 +15,16 @@ namespace Billing.Dto.Shop
             if (sin.Character != null)
             {
                 ModelId = sin.Character.Model.ToString();
+                Id = sin.Character.Model;
             }
             else
             {
                 ModelId = sin.Passport?.Sin;
             }
             Balance = sin.Wallet?.Balance ?? 0;
+            
         }
+        public int Id { get; set; }
         public string Name { get; set; }
         public string ModelId { get; set; }
         public decimal Balance { get; set; }
