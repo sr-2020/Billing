@@ -55,7 +55,6 @@ namespace Billing
             catch (Exception e)
             {
                 Console.Error.WriteLine(e.ToString());
-                throw;
             }
             try
             {
@@ -64,7 +63,6 @@ namespace Billing
             catch (Exception e2)
             {
                 Console.Error.WriteLine(e2.ToString());
-                throw;
             }
             return new BalanceDto(sin);
         }
@@ -351,8 +349,10 @@ namespace Billing
             //баланса хватает, или один из кошельков MIR
             if (walletFrom.Balance < amount && walletFrom.WalletType != (int)WalletTypes.MIR && walletTo.WalletType != (int)WalletTypes.MIR)
                 throw new BillingException($"Денег нет, но вы держитесь");
-            if (amount < 0)
+            if (amount <= 0)
                 throw new BillingException($"Нельзя перевести отрицательное значение");
+            if (comment.Length > 255)
+                comment = comment.Substring(0, 254);
             walletFrom.Balance -= amount;
             walletTo.Balance += amount;
             var transfer = new Transfer
