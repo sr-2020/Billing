@@ -247,6 +247,7 @@ namespace Jobs
                 foreach (var sku in skus)
                 {
                     sku.Count = sku.SkuBaseCount ?? sku.Nomenklatura.BaseCount;
+                    sku.Price = sku.SkuBasePrice ?? sku.Nomenklatura.BasePrice;
                 }
                 Factory.Billing.SaveContext();
                 Console.WriteLine($"Корпорация {corporation.Name} обработана");
