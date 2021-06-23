@@ -23,6 +23,7 @@ namespace Billing.DTO
             this.CorporationId = sku.CorporationId;
             this.SkuBaseCount = sku.SkuBaseCount;
             this.SkuBasePrice = sku.SkuBasePrice;
+            this.Price = sku.Price;
         }
         public int SkuId { get; set; }
         public string SkuName { get; set; }
@@ -31,5 +32,6 @@ namespace Billing.DTO
         public bool Enabled { get; set; }
         public int? SkuBasePrice { get; set; }
         public int? SkuBaseCount { get; set; }
+        public decimal Price { get; set; }
     }
 }
