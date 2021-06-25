@@ -153,18 +153,6 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        /// <summary>
-        /// Get all corporations
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("info/getcorps")]
-        public DataResult<List<CorporationDto>> GetCorps()
-        {
-            var manager = IocContainer.Get<IAdminManager>();
-            var result = RunAction(() => manager.GetCorporationDtos(s => true), "getcorps");
-            return result;
-        }
-
         [HttpGet("info/getcharacteridbysin")]
         public DataResult<int> GetCharacterIdBySin(string sinString)
         {

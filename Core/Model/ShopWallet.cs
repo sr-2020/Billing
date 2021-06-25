@@ -21,5 +21,6 @@ namespace Core.Model
         [Column("master")]
         public string Location { get; set; }
         public virtual List<ShopSpecialisation> Specialisations { get; set; }
+        public virtual List<ShopTrusted> TrustedUsers { get; set; }
     }
 }

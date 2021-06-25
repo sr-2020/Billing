@@ -42,6 +42,7 @@ namespace Core
         public DbSet<ScoringFactor> ScoringFactor { get; set; }
         public DbSet<ShopQR> ShopQR { get; set; }
         public DbSet<ShopSpecialisation> ShopSpecialisation { get; set; }
+        public DbSet<ShopTrusted> ShopTrusted { get; set; }
         public DbSet<ShopWallet> ShopWallet { get; set; }
         public DbSet<SIN> SIN { get; set; }
         public DbSet<Sku> Sku { get; set; }

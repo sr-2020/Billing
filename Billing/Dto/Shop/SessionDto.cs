@@ -1,6 +1,8 @@
-﻿using Core.Model;
+﻿using Billing.DTO;
+using Core.Model;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Billing.Dto.Shop
@@ -27,11 +29,9 @@ namespace Billing.Dto.Shop
             }
         }
 
-        public class BeatCharactersDto
+        public class BeatCharactersDto : BeatDto
         {
-            public int Number { get; set; }
-            public DateTime StartTime { get; set; }
-            public DateTime FinishTime { get; set; }
+
             public decimal SumAll { get; set; }
             public decimal ForecastSumAll { get; set; }
             public decimal? Min { get; set; }
@@ -44,13 +44,10 @@ namespace Billing.Dto.Shop
             public int Irridium { get; set; }
             public int Count { get; set; }
             public BeatCharactersDto(BillingBeat beat, JobLifeStyleDto ls)
+                : base(beat)
             {
                 if (beat == null || ls == null)
                     return;
-
-                Number = beat.Number;
-                StartTime = beat.StartTime;
-                FinishTime = beat.FinishTime;
                 SumAll = ls.SumAll;
                 ForecastSumAll = ls.ForecastSumAll;
                 Min = ls.Min;
@@ -65,10 +62,36 @@ namespace Billing.Dto.Shop
             }
         }
 
-        public class BeatItemsDto
+        public class BeatItemsDto : BeatDto
         {
+            public BeatItemsDto(BillingBeat beat, List<CorporationDto> corporations, List<ShopDto> shops)
+                : base(beat)
+            {
+                if (beat == null || corporations == null)
+                    return;
+                Corporations = corporations;
+                ShopsSum = shops.Sum(s => s.Balance);
+            }
+            public List<CorporationDto> Corporations { get; set; }
+            public decimal ShopsSum { get; set; }
 
         }
+
+        public class BeatDto
+        {
+            public BeatDto(BillingBeat beat)
+            {
+                if (beat == null)
+                    return;
+                Number = beat.Number;
+                StartTime = beat.StartTime;
+                FinishTime = beat.FinishTime;
+            }
+            public int Number { get; set; }
+            public DateTime StartTime { get; set; }
+            public DateTime FinishTime { get; set; }
+        }
+
 
         public class LifeStyleDto
         {

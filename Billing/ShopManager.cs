@@ -19,6 +19,7 @@ namespace Billing
     {
         List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate);
         ShopDetailedDto GetShop(int shopId);
+        List<CorporationDto> GetCorporationDtos(Expression<Func<CorporationWallet, bool>> predicate);
         bool HasAccessToShop(int character, int shop);
         bool HasAccessToCorporation(int character, int corporation);
         List<QRDto> GetAvailableQR(int shop);
@@ -35,6 +36,7 @@ namespace Billing
         Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
         List<RentaDto> GetRentas(int shop);
         void WriteRenta(int rentaId, string qrEncoded);
+        void UpdateShopTrustedUsers(int shopId, List<int> trustedModels);
     }
 
     public class ShopManager : AdminManager, IShopManager
@@ -43,16 +45,23 @@ namespace Billing
 
         public List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate)
         {
-            return GetList(predicate, s => s.Owner.Sins, s => s.Wallet, s => s.Specialisations).Select(s =>
+            return GetList(predicate, s => s.Owner.Sins, s => s.Wallet, s => s.Specialisations, s=>s.TrustedUsers).Select(s =>
                       new ShopDto(s)).ToList();
         }
+
         public ShopDetailedDto GetShop(int shopId)
         {
-            var shop = Get<ShopWallet>(s => s.Id == shopId, s => s.Owner.Sins, s => s.Wallet, s => s.Specialisations);
+            var shop = Get<ShopWallet>(s => s.Id == shopId, s => s.Owner.Sins, s => s.Wallet, s => s.Specialisations, s => s.TrustedUsers);
             if (shop == null)
                 throw new BillingNotFoundException($"Магазин {shopId} не найден");
             var products = GetAvailableQR(shopId);
             return new ShopDetailedDto(shop, products);
+        }
+
+        public List<CorporationDto> GetCorporationDtos(Expression<Func<CorporationWallet, bool>> predicate)
+        {
+            return GetList(predicate, c => c.Wallet, c => c.Owner.Sins).Select(c =>
+                    new CorporationDto(c)).ToList();
         }
 
         public void WriteRenta(int rentaId, string qrEncoded)
@@ -84,7 +93,7 @@ namespace Billing
 
         public Transfer MakeTransferLegSIN(int shop, string sintext, decimal amount, string comment)
         {
-            var sin = BillingBlocked(sintext, s => s.Wallet, s=>s.Character);
+            var sin = BillingBlocked(sintext, s => s.Wallet, s => s.Character);
             var anon = GetAnon(sin.Character.Model);
             var shopWallet = Get<ShopWallet>(s => s.Id == shop, s => s.Wallet);
             var transfer = AddNewTransfer(shopWallet.Wallet, sin.Wallet, amount, comment, anon);
@@ -110,7 +119,7 @@ namespace Billing
                 CurrentCharacterName = GetCharacterName(modelId)
             };
             var sin = GetSINByModelId(modelId);
-            if(sin == null)
+            if (sin == null)
             {
                 throw new BillingNotFoundException($"sin not found {modelId}");
             }
@@ -187,8 +196,8 @@ namespace Billing
 
         public string GetCharacterName(int modelId)
         {
-            var sin = Get<SIN>(s => s.Character.Model == modelId, s=>s.Passport);
-            if(sin?.Passport == null)
+            var sin = Get<SIN>(s => s.Character.Model == modelId, s => s.Passport);
+            if (sin?.Passport == null)
             {
                 return $"Unknown name for {modelId}";
             }
@@ -202,16 +211,17 @@ namespace Billing
                 return false;
             }
             var sin = GetSINByModelId(modelId);
-            if(sin == null)
+            if (sin == null)
             {
                 throw new BillingNotFoundException("sin not found");
             }
             var shop = Get<ShopWallet>(s => s.Id == shopId, s => s.Owner);
             if (shop == null)
             {
-                throw new BillingException("shop not found");
+                throw new BillingNotFoundException("shop not found");
             }
-            return shop.OwnerId == modelId;
+            var trusted = Get<ShopTrusted>(t => t.Model == modelId && t.ShopId == shopId);
+            return shop.OwnerId == modelId || trusted != null;
         }
 
         public bool HasAccessToCorporation(int modelId, int corporation)
@@ -240,6 +250,11 @@ namespace Billing
             return qrs;
         }
 
+        public void UpdateShopTrustedUsers(int shopId, List<int> trustedModels)
+        {
+            throw new NotImplementedException();
+        }
+
         #region private
 
         protected void RecalculateRenta(Renta renta, string qrDecoded, SIN newsin)
@@ -248,10 +263,10 @@ namespace Billing
             var anon = GetAnon(newsin.Character.Model);
             renta.CurrentScoring = newsin.Scoring.CurerentRelative + newsin.Scoring.CurrentFix;
             var gmdescript = BillingHelper.GetGmDescription(newsin.Passport, renta.Sku, anon);
-            _ereminService.UpdateQR(qrDecoded, renta.BasePrice, 
-                BillingHelper.GetFinalPrice(renta), 
-                gmdescript, 
-                renta.Id, 
+            _ereminService.UpdateQR(qrDecoded, renta.BasePrice,
+                BillingHelper.GetFinalPrice(renta),
+                gmdescript,
+                renta.Id,
                 BillingHelper.GetLifestyle(renta.LifeStyle)).GetAwaiter().GetResult();
             SaveContext();
         }
@@ -293,6 +308,8 @@ namespace Billing
         {
             return GetSkuList(shop, s => s.Corporation.Wallet, s => s.Nomenklatura.Specialisation.ProductType).Select(s => new SkuDto(s, true)).ToList();
         }
+
+
         #endregion
     }
 }

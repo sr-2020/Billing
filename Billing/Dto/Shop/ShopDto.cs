@@ -27,6 +27,14 @@ namespace Billing.DTO
             {
                 Specialisations = shop.Specialisations.Select(s => s.SpecialisationId).ToList();
             }
+            if(shop.TrustedUsers == null)
+            {
+                TrustedUsers = new List<int>();
+            }
+            else
+            {
+                TrustedUsers = shop.TrustedUsers.Select(s => s.Model).ToList();
+            }
             if (shop.Wallet == null)
                 return;
             Balance = shop.Wallet.Balance;
@@ -38,7 +46,7 @@ namespace Billing.DTO
         public string Comment { get; set; }
         public string Location { get; set; }
         public List<int> Specialisations { get; set; }
-
+        public List<int> TrustedUsers { get; set; }
     }
     public class ShopDetailedDto : ShopDto
     {

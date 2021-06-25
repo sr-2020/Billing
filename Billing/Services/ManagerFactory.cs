@@ -16,5 +16,7 @@ namespace Billing
         public IJobManager Job => _lazyJob.Value;
         private Lazy<IScoringManager> _lazyScoring { get; set; } = new Lazy<IScoringManager>(IocContainer.Get<ScoringManager>);
         public IScoringManager Scoring => _lazyScoring.Value;
+        private Lazy<IShopManager> _lazyShop { get; set; } = new Lazy<IShopManager>(IocContainer.Get<IShopManager>);
+        public IShopManager Shop => _lazyShop.Value;
     }
 }

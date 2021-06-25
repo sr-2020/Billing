@@ -178,7 +178,7 @@ namespace BillingAPI.Controllers
         [HttpGet("a-corporations")]
         public DataResult<List<CorporationDto>> GetCorporations()
         {
-            var manager = IocContainer.Get<IAdminManager>();
+            var manager = IocContainer.Get<IShopManager>();
             var result = RunAction(() => manager.GetCorporationDtos(r => true));
             return result;
         }
@@ -191,7 +191,7 @@ namespace BillingAPI.Controllers
         [HttpGet("a-corporation")]
         public DataResult<CorporationDto> GetCorporation(int corporationId)
         {
-            var manager = IocContainer.Get<IAdminManager>();
+            var manager = IocContainer.Get<IShopManager>();
             var result = RunAction(() => manager.GetCorporationDtos(r => r.Id == corporationId).FirstOrDefault());
             return result;
         }

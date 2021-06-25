@@ -16,7 +16,7 @@ namespace Billing
     public interface IAdminManager : IBaseBillingRepository
     {
         List<SpecialisationDto> GetSpecialisations(Expression<Func<Specialisation, bool>> predicate);
-        List<CorporationDto> GetCorporationDtos(Expression<Func<CorporationWallet, bool>> predicate);
+
         List<ProductTypeDto> GetProductTypes(Expression<Func<ProductType, bool>> predicate);
         List<NomenklaturaDto> GetNomenklaturas(Expression<Func<Nomenklatura, bool>> predicate);
         List<SkuDto> GetSkus(Expression<Func<Sku, bool>> predicate);
@@ -50,11 +50,7 @@ namespace Billing
                 .ToList();
         }
 
-        public List<CorporationDto> GetCorporationDtos(Expression<Func<CorporationWallet, bool>> predicate)
-        {
-            return GetList(predicate, c => c.Wallet, c => c.Owner.Sins).Select(c =>
-                    new CorporationDto(c)).ToList();
-        }
+
 
         public List<ProductTypeDto> GetProductTypes(Expression<Func<ProductType, bool>> predicate)
         {
@@ -83,7 +79,7 @@ namespace Billing
         public List<SIN> GetActiveSins(params Expression<Func<SIN, object>>[] includes)
         {
             var currentGame = 1;
-            var sins = GetListAsNoTracking(s => s.InGame ?? false && s.Character.Game == currentGame && s.EVersion == "4", includes);
+            var sins = GetListAsNoTracking(s => (s.InGame ?? false) && s.Character.Game == currentGame && s.EVersion == "4", includes);
             return sins;
         }
 

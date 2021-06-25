@@ -32,9 +32,13 @@ namespace Billing.Services
                 var cycle = Factory.Job.GetLastCycle();
                 result.Cycle = new SessionDto.CycleDto(cycle);
                 var beatCharacters = Factory.Job.GetLastBeatAsNoTracking(Core.Primitives.BeatTypes.Characters);
+                var beatItems = Factory.Job.GetLastBeatAsNoTracking(Core.Primitives.BeatTypes.Items);
                 var jsoncharacters = Factory.Settings.GetValue(Core.Primitives.SystemSettingsEnum.beat_characters_dto);
                 var lsDto = Serialization.Serializer.Deserialize<JobLifeStyleDto>(jsoncharacters);
                 result.BeatCharacters = new SessionDto.BeatCharactersDto(beatCharacters, lsDto);
+                var corps = Factory.Shop.GetCorporationDtos(c => true);
+                var shops = Factory.Shop.GetShops(S => true);
+                result.BeatItems = new SessionDto.BeatItemsDto(beatItems, corps, shops);
                 result.Deploy = Environment.GetEnvironmentVariable(SystemHelper.Billing);
                 var sin = Factory.Billing.GetSINByModelId(character, s => s.Passport);
                 result.PersonName = BillingHelper.GetPassportName(sin.Passport);

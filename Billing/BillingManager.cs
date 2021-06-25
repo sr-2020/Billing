@@ -451,8 +451,6 @@ namespace Billing
             sin.Blocked = false;
         }
 
-        
-
         private List<SIN> GetSinsInGame(params Expression<Func<SIN, object>>[] includes)
         {
             return GetList(s => (s.InGame ?? false) && s.Character.Game == CURRENTGAME, includes);

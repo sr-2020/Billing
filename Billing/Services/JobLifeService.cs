@@ -161,7 +161,7 @@ namespace Jobs
             Console.WriteLine("Пересчеты персонажей закончены, записывается история и ошибки");
             foreach (var error in errorList)
             {
-                beat.AddHistory($"ошибка обработки {error.Sin.CharacterId}: {error.ErrorText}");
+                beat.AddHistory($"ошибка обработки {error.Sin.Character.Model}: {error.ErrorText}");
             }
             try
             {
@@ -237,6 +237,7 @@ namespace Jobs
             Console.WriteLine("Запущен пересчет товаров");
             //Получить список корпораций с специализациями
             var corporations = Factory.Billing.GetList<CorporationWallet>(c => true, c => c.Specialisations);
+            var inflation = Factory.Settings.GetDecimalValue(SystemSettingsEnum.pre_inflation);
             foreach (var corporation in corporations)
             {
                 corporation.LastSkuSold = corporation.SkuSold;
@@ -247,7 +248,7 @@ namespace Jobs
                 foreach (var sku in skus)
                 {
                     sku.Count = sku.SkuBaseCount ?? sku.Nomenklatura.BaseCount;
-                    sku.Price = sku.SkuBasePrice ?? sku.Nomenklatura.BasePrice;
+                    sku.Price = (sku.SkuBasePrice ?? sku.Nomenklatura.BasePrice) * inflation;
                 }
                 Factory.Billing.SaveContext();
                 Console.WriteLine($"Корпорация {corporation.Name} обработана");

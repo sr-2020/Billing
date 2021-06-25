@@ -21,6 +21,15 @@ namespace BillingAPI.Controllers
     {
         #region refactored
 
+        [HttpPost("shop")]
+        [ShopAuthorization]
+        public Result UpdateTrustedShop(int shop, [FromBody] UpdateTrustedShopRequest request)
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.UpdateShopTrustedUsers(request.Shop, request.TrustedModels));
+            return result;
+        }
+
         [HttpGet("organisations")]
         public DataResult<OrganisationViewModel> GetMyOrganisations(int character)
         {
