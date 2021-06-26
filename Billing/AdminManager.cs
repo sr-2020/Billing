@@ -79,7 +79,7 @@ namespace Billing
         public List<SIN> GetActiveSins(params Expression<Func<SIN, object>>[] includes)
         {
             var currentGame = 1;
-            var sins = GetListAsNoTracking(s => (s.InGame ?? false) && s.Character.Game == currentGame && s.EVersion == "4", includes);
+            var sins = GetListAsNoTracking(s => (s.InGame ?? false) && s.Character.Game == currentGame && (s.EVersion == "4" || s.EVersion == "3"), includes);
             return sins;
         }
 
