@@ -44,6 +44,12 @@ namespace BillingAPI.Controllers
             throw new NotImplementedException();
         }
 
+        [HttpGet("h-corps")]
+        public DataResult<List<CorporationDto>> GetCorps()
+        {
+            throw new NotImplementedException();
+        }
+
         [HttpPost("h-shop")]
         public DataResult<string> HackShop([FromBody] HackShopRequest request)
         {

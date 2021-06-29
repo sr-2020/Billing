@@ -403,7 +403,7 @@ namespace Scoringspace
 
         public List<ScoringFactorDto> GetScoringFactors(int categoryId)
         {
-            var list = GetList<ScoringFactor>(sf => sf.CategoryId == categoryId).Select(s => new ScoringFactorDto(s)).ToList();
+            var list = GetList<ScoringFactor>(sf => sf.CategoryId == categoryId || categoryId == -1).Select(s => new ScoringFactorDto(s)).ToList();
             return list;
         }
 
