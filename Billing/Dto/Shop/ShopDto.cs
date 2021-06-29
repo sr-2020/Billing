@@ -9,7 +9,7 @@ namespace Billing.DTO
 {
     public class ShopDto : OrganisationBaseDto
     {
-        public ShopDto(ShopWallet shop) : base(shop)
+        public ShopDto(int modelId, ShopWallet shop) : base(modelId, shop)
         {
             if (shop == null)
                 return;
@@ -47,10 +47,11 @@ namespace Billing.DTO
         public string Location { get; set; }
         public List<int> Specialisations { get; set; }
         public List<int> TrustedUsers { get; set; }
+        
     }
     public class ShopDetailedDto : ShopDto
     {
-        public ShopDetailedDto(ShopWallet shop, List<QRDto> products) : base(shop) 
+        public ShopDetailedDto(ShopWallet shop, List<QRDto> products) : base(0, shop) 
         {
             Products = products;
         }

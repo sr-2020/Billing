@@ -131,7 +131,7 @@ namespace Billing
                 SaveContext();
             }
             shop = GetAsNoTracking<ShopWallet>(w => w.Id == shopId, s => s.Owner, s => s.Wallet, s => s.Specialisations);
-            var dto = new ShopDto(shop);
+            var dto = new ShopDto(ownerId, shop);
             return dto;
         }
 

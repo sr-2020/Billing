@@ -37,7 +37,7 @@ namespace Billing.Services
                 var lsDto = Serialization.Serializer.Deserialize<JobLifeStyleDto>(jsoncharacters);
                 result.BeatCharacters = new SessionDto.BeatCharactersDto(beatCharacters, lsDto);
                 var corps = Factory.Shop.GetCorporationDtos(c => true);
-                var shops = Factory.Shop.GetShops(S => true);
+                var shops = Factory.Shop.GetShops(character, s => true);
                 result.BeatItems = new SessionDto.BeatItemsDto(beatItems, corps, shops);
                 result.Deploy = Environment.GetEnvironmentVariable(SystemHelper.Billing);
                 var sin = Factory.Billing.GetSINByModelId(character, s => s.Passport);

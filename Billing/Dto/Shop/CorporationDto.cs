@@ -7,7 +7,7 @@ namespace Billing.Dto.Shop
 {
     public class CorporationDto : OrganisationBaseDto
     {
-        public CorporationDto(CorporationWallet corporation) : base(corporation)
+        public CorporationDto(CorporationWallet corporation) : base(0, corporation)
         {
             CorporationUrl = corporation.CorporationLogoUrl;
             CurrentKPI = corporation.CurrentKPI;

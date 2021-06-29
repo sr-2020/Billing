@@ -17,7 +17,7 @@ namespace Billing
 {
     public interface IShopManager : IAdminManager
     {
-        List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate);
+        List<ShopDto> GetShops(int modelId, Expression<Func<ShopWallet, bool>> predicate);
         ShopDetailedDto GetShop(int shopId);
         List<CorporationDto> GetCorporationDtos(Expression<Func<CorporationWallet, bool>> predicate);
         bool HasAccessToShop(int character, int shop);
@@ -43,10 +43,10 @@ namespace Billing
     {
         EreminService _ereminService = new EreminService();
 
-        public List<ShopDto> GetShops(Expression<Func<ShopWallet, bool>> predicate)
+        public List<ShopDto> GetShops(int modelId, Expression<Func<ShopWallet, bool>> predicate)
         {
-            return GetList(predicate, s => s.Owner.Sins, s => s.Wallet, s => s.Specialisations, s=>s.TrustedUsers).Select(s =>
-                      new ShopDto(s)).ToList();
+            return GetList(predicate, s => s.Owner.Sins, s => s.Wallet, s => s.Specialisations, s => s.TrustedUsers).Select(s =>
+                        new ShopDto(modelId, s)).ToList();
         }
 
         public ShopDetailedDto GetShop(int shopId)
@@ -123,7 +123,9 @@ namespace Billing
             {
                 throw new BillingNotFoundException($"sin not found {modelId}");
             }
-            model.Shops = GetShops(s => s.OwnerId == modelId || isAdmin);
+            model.Shops = GetShops(modelId, s => (isAdmin || s.OwnerId == modelId || s.TrustedUsers.Any(t=>t.Model == modelId)));
+            if (isAdmin)
+                model.Shops.ForEach(s => s.IsOwner = true);
             model.Corporations = GetCorporationDtos(s => s.OwnerId == modelId || isAdmin);
             return model;
         }
@@ -144,7 +146,7 @@ namespace Billing
             var contract = Get<Contract>(c => c.CorporationId == corporation && c.ShopId == shop);
             if (contract != null)
             {
-                if(contract.Status == (int)ContractStatusEnum.Terminating)
+                if (contract.Status == (int)ContractStatusEnum.Terminating)
                 {
                     contract.Status = (int)ContractStatusEnum.Approved;
                     SaveContext();
