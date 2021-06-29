@@ -144,6 +144,12 @@ namespace Billing
             var contract = Get<Contract>(c => c.CorporationId == corporation && c.ShopId == shop);
             if (contract != null)
             {
+                if(contract.Status == (int)ContractStatusEnum.Terminating)
+                {
+                    contract.Status = (int)ContractStatusEnum.Approved;
+                    SaveContext();
+                    return;
+                }
                 throw new BillingException("Контракт уже создан");
             }
             contract = new Contract { CorporationId = corporation, ShopId = shop, Status = (int)ContractStatusEnum.Suggested };
