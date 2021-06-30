@@ -498,12 +498,12 @@ namespace Scoringspace
                             }
                             var oldCatValue = curCategory.Value;
                             var newCatValue = curCategory.Value;
-                            var curCategories = context.Set<CurrentCategory>().AsNoTracking().Include(f => f.Category).Where(c => c.Category.CategoryType == category.CategoryType && c.ScoringId == scoringId);
+                            var curCategories = context.Set<CurrentCategory>().AsNoTracking().Include(f => f.Category).Where(c => c.Category.CategoryType == category.CategoryType  && c.ScoringId == scoringId);
                             var curCatCount = curCategories.ToList().Count;
                             var k = (decimal)Math.Pow((curCatCount > 0 ? curCatCount : 2) * 2, -1);
                             var temp = curFactors.Sum(f => f.Value) / factorsCount;
-                            var catWeight = context.Set<ScoringCategory>().AsNoTracking().Where(c => c.Id == curCategory.CategoryId).FirstOrDefault();
-                            curCategory.Value = (decimal)Math.Pow((double)temp, (double)GetCatWeight(catWeight?.Weight ?? 0)) * k;
+                            var catWeight = curCategories.Where(c => c.CategoryId == curCategory.CategoryId).FirstOrDefault();
+                            curCategory.Value = (decimal)Math.Pow((double)temp, (double)GetCatWeight(catWeight.Category?.Weight ?? 0)) * k;
                             Add(curCategory);
                             if (category.CategoryType == (int)ScoringCategoryType.Fix)
                             {

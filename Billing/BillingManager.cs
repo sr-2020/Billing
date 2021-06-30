@@ -51,7 +51,6 @@ namespace Billing
         #endregion
 
         #region admin
-
         List<SIN> GetSinsInGame();
         List<CharacterDto> GetCharactersInGame();
         #endregion

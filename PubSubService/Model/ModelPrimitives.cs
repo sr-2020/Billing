@@ -15,6 +15,7 @@ namespace PubSubService.Model
             { "let-me-pay", ActiveAbility.Letme},
             { "re-rent", ActiveAbility.Rerent},
             { "marauder-2", ActiveAbility.Marauder},
+            {"sleep-check", ActiveAbility.SleepCheck }
         };
         public static Dictionary<string, HealthState> HealthStates = new Dictionary<string, Model.HealthState>
         {
@@ -43,7 +44,8 @@ namespace PubSubService.Model
         LetHim,
         Letme,
         Rerent,
-        Marauder
+        Marauder,
+        SleepCheck
 
     }
 
