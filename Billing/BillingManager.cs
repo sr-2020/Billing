@@ -152,8 +152,6 @@ namespace Billing
             return dto;
         }
 
-
-
         public JobLifeStyleDto ProcessCharacterBeat(int sinId, decimal karmaCount, bool dividends1, bool dividends2, bool dividends3, JobLifeStyleDto dto)
         {
             var sin = BlockCharacter(sinId, s => s.Wallet, s => s.Character, s => s.Passport, s => s.Scoring);
@@ -217,11 +215,11 @@ namespace Billing
                 }
                 sin.OldInsurance = insurance?.LifeStyle;
             }
-
+            //summary
             AddScoring(sin.Scoring, dto);
             //forecast
             outcome -= rentas.Sum(r => BillingHelper.GetFinalPrice(r));
-            //todo add scoring here
+
             sin.Wallet.IncomeOutcome = income - outcome;
             dto = AddLifeStyle(sin.Wallet, dto);
             UnblockCharacter(sin);

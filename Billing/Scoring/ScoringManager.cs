@@ -497,19 +497,21 @@ namespace Scoringspace
                                 factorsCount = 1;
                             }
                             var oldCatValue = curCategory.Value;
-                            curCategory.Value = curFactors.Sum(f => f.Value) / factorsCount;
+
                             var newCatValue = curCategory.Value;
-                            Add(curCategory, context);
                             var curCategories = context.Set<CurrentCategory>().AsNoTracking().Include(f => f.Category).Where(c => c.Category.CategoryType == category.CategoryType && c.ScoringId == scoringId);
                             var curCatCount = curCategories.ToList().Count;
                             var k = (decimal)Math.Pow((curCatCount > 0 ? curCatCount : 2) * 2, -1);
+                            var temp = curFactors.Sum(f => f.Value) / factorsCount;
+                            curCategory.Value = (decimal)Math.Pow((double)temp, (double)GetCatWeight(curCategory.Category.Weight)) * k;
+                            Add(curCategory);
                             if (category.CategoryType == (int)ScoringCategoryType.Fix)
                             {
-                                scoring.CurrentFix = (decimal)curCategories.Sum(c => Math.Pow((double)c.Value, (double)(c.Category.Weight > 1 || c.Category.Weight < 0 ? 0 : c.Category.Weight))) * k;
+                                scoring.CurrentFix = curCategories.Sum(c => c.Value);
                             }
                             else if (category.CategoryType == (int)ScoringCategoryType.Relative)
                             {
-                                scoring.CurerentRelative = (decimal)curCategories.Sum(c => Math.Pow((double)c.Value, (double)(c.Category.Weight > 1 || c.Category.Weight < 0 ? 0 : c.Category.Weight))) * k;
+                                scoring.CurerentRelative = curCategories.Sum(c => c.Value);
                             }
                             Add(scoring, context);
                             var end = DateTime.Now;
@@ -535,6 +537,11 @@ namespace Scoringspace
                     Console.Error.WriteLine(e.ToString());
                 }
             });
+        }
+
+        private decimal GetCatWeight(decimal weight)
+        {
+            return (weight > 1 || weight < 0 ? 0 : weight);
         }
 
         private decimal CalculateFactor(double lifestyle, double current)

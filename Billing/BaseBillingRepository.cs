@@ -228,6 +228,7 @@ namespace Billing
             {
                 throw new BillingException("Недостаточно средств");
             }
+
             price.Sku.Count -= count;
             var instantConsume = price.Sku.Nomenklatura.Specialisation.ProductType.InstantConsume;
             var anon = GetAnon(sin.Character.Model);
@@ -253,7 +254,7 @@ namespace Billing
             Add(renta);
             price.Confirmed = true;
             SaveContext();
-            ProcessBuyScoring(sin, price.Sku);
+            ProcessBuyScoring(sin, price.Sku, price.Shop);
             var mir = GetMIR();
             ProcessRenta(renta, mir, sin, true);
             SaveContext();
@@ -528,49 +529,43 @@ namespace Billing
             AddNewTransfer(mir, renta.Shop.Wallet, comission, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} от {sin.Passport.PersonName} ({sin.Passport.Sin})", false, renta.Id, false);
         }
 
-        private void ProcessBuyScoring(SIN sin, Sku sku)
+        private void ProcessBuyScoring(SIN sin, Sku sku, ShopWallet shop)
         {
             var type = sku.Nomenklatura.Specialisation.ProductType;
             if (type == null)
                 throw new Exception("type not found");
-            IScoringManager manager;
+            var manager = IoC.IocContainer.Get<IScoringManager>();
             switch (type.Alias)
             {
                 case "Implant":
-                    manager = IoC.IocContainer.Get<IScoringManager>();
                     manager.OnImplantBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
                 case "Food":
                 case "EdibleFood":
-                    manager = IoC.IocContainer.Get<IScoringManager>();
                     manager.OnFoodBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
                 case "Weapon":
-                    manager = IoC.IocContainer.Get<IScoringManager>();
                     manager.OnWeaponBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
                 case "Pill":
-                    manager = IoC.IocContainer.Get<IScoringManager>();
                     manager.OnPillBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
                 case "Magic":
-                    manager = IoC.IocContainer.Get<IScoringManager>();
                     manager.OnMagicBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
                 case "Insurance":
-                    manager = IoC.IocContainer.Get<IScoringManager>();
                     manager.OnInsuranceBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
                 case "Charity":
-                    manager = IoC.IocContainer.Get<IScoringManager>();
                     manager.OnInsuranceBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
                 case "drone":
+                    manager.OnDroneBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
                 case "matrix":
+                    manager.OnMatrixBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
                 default:
-                    manager = IoC.IocContainer.Get<IScoringManager>();
                     manager.OnOtherBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
             }
