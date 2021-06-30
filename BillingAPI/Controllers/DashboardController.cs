@@ -112,6 +112,32 @@ namespace BillingAPI.Controllers
         }
 
         /// <summary>
+        /// add specialisation for corporation
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("a-add-corp-specialisation")]
+        //[AdminAuthorization]
+        public Result AddCorpSpecialisations(CorporationSpecialisationsRequest request)
+        {
+            var manager = IocContainer.Get<IAdminManager>();
+            var result = RunAction(() => manager.AddCorpSpecialisation(request.Corporation, request.Specialisation, request.Ratio));
+            return result;
+        }
+
+        /// <summary>
+        /// remove specialisation for corporation
+        /// </summary>
+        /// <returns></returns>
+        [HttpDelete("a-del-corp-specialisation")]
+        //[AdminAuthorization]
+        public Result DeleteCorpSpecialisations(CorporationSpecialisationsRequest request)
+        {
+            var manager = IocContainer.Get<IAdminManager>();
+            var result = RunAction(() => manager.DeleteCorpSpecialisation(request.Corporation, request.Specialisation));
+            return result;
+        }
+
+        /// <summary>
         /// GetSpecialisations
         /// </summary>
         /// <returns></returns>
@@ -189,10 +215,10 @@ namespace BillingAPI.Controllers
         /// <param name="corporationId"></param>
         /// <returns></returns>
         [HttpGet("a-corporation")]
-        public DataResult<CorporationDto> GetCorporation(int corporationId)
+        public DataResult<CorporationDetailedDto> GetCorporation(int corporationId)
         {
             var manager = IocContainer.Get<IShopManager>();
-            var result = RunAction(() => manager.GetCorporationDtos(r => r.Id == corporationId).FirstOrDefault());
+            var result = RunAction(() => manager.GetCorporationDto(corporationId));
             return result;
         }
 

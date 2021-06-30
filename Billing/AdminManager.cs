@@ -2,6 +2,7 @@
 using Billing.Dto.Shop;
 using Billing.DTO;
 using Core;
+using Core.Exceptions;
 using Core.Model;
 using Core.Primitives;
 using InternalServices;
@@ -16,7 +17,8 @@ namespace Billing
     public interface IAdminManager : IBaseBillingRepository
     {
         List<SpecialisationDto> GetSpecialisations(Expression<Func<Specialisation, bool>> predicate);
-
+        void AddCorpSpecialisation(int corporation, int specialisation, decimal ratio);
+        void DeleteCorpSpecialisation(int corporation, int specialisation);
         List<ProductTypeDto> GetProductTypes(Expression<Func<ProductType, bool>> predicate);
         List<NomenklaturaDto> GetNomenklaturas(Expression<Func<Nomenklatura, bool>> predicate);
         List<SkuDto> GetSkus(Expression<Func<Sku, bool>> predicate);
@@ -41,8 +43,6 @@ namespace Billing
         public static string UrlNotFound = "";
         protected int CURRENTGAME = 1;
 
-
-
         public List<SpecialisationDto> GetSpecialisations(Expression<Func<Specialisation, bool>> predicate)
         {
             return GetList(predicate, s => s.ProductType)
@@ -50,12 +50,41 @@ namespace Billing
                 .ToList();
         }
 
+        public void AddCorpSpecialisation(int corporation, int specialisation, decimal ratio)
+        {
+            var corp = Get<CorporationWallet>(c => c.Id == corporation);
+            if (corp == null)
+            {
+                throw new BillingNotFoundException($"corporation {corporation} not found");
+            }
+            var dbspec = Get<Specialisation>(s => s.Id == specialisation);
+            if(dbspec== null)
+            {
+                throw new BillingNotFoundException($"specialisation {specialisation} not found");
+            }
+            var corpspec = Get<CorporationSpecialisation>(c => c.SpecialisationId == specialisation && c.CorporationId == corporation);
+            if(corpspec == null)
+            {
+                corpspec = new CorporationSpecialisation { CorporationId = corporation, SpecialisationId = specialisation };
+            }
+            corpspec.Ratio = ratio;
+            SaveContext();
+        }
 
+        public void DeleteCorpSpecialisation(int corporation, int specialisation)
+        {
+            var corpspec = Get<CorporationSpecialisation>(c => c.SpecialisationId == specialisation && c.CorporationId == corporation);
+            if (corpspec == null)
+            {
+                throw new BillingNotFoundException($"corporationspecialisation {corporation}-{specialisation} not found");
+            }
+            RemoveAndSave(corpspec);
+        }
 
         public List<ProductTypeDto> GetProductTypes(Expression<Func<ProductType, bool>> predicate)
         {
             return GetList(predicate).Select(p =>
-            new ProductTypeDto(p, true)).ToList();
+                new ProductTypeDto(p, true)).ToList();
         }
 
         public List<NomenklaturaDto> GetNomenklaturas(Expression<Func<Nomenklatura, bool>> predicate)

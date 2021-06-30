@@ -20,6 +20,7 @@ namespace Billing
         List<ShopDto> GetShops(int modelId, Expression<Func<ShopWallet, bool>> predicate);
         ShopDetailedDto GetShop(int shopId);
         List<CorporationDto> GetCorporationDtos(Expression<Func<CorporationWallet, bool>> predicate);
+        CorporationDetailedDto GetCorporationDto(int corporationId);
         bool HasAccessToShop(int character, int shop);
         bool HasAccessToCorporation(int character, int corporation);
         List<QRDto> GetAvailableQR(int shop);
@@ -60,8 +61,19 @@ namespace Billing
 
         public List<CorporationDto> GetCorporationDtos(Expression<Func<CorporationWallet, bool>> predicate)
         {
-            return GetList(predicate, c => c.Wallet, c => c.Owner.Sins).Select(c =>
-                    new CorporationDto(c)).ToList();
+            return GetList(predicate, c => c.Wallet, c => c.Owner.Sins, s => s.Specialisations).Select(c =>
+                      new CorporationDto(c)).ToList();
+        }
+
+        public CorporationDetailedDto GetCorporationDto(int corporationId)
+        {
+            var corporation = Get<CorporationWallet>(s => s.Id == corporationId, s => s.Specialisations);
+            if (corporation == null)
+                throw new BillingNotFoundException($"Корпорация {corporationId} не найдена");
+
+            var specialisationIds = corporation.Specialisations.Select(s => s.SpecialisationId);
+            var specialisations = GetList<Specialisation>(s => specialisationIds.Contains(s.Id));
+            return new CorporationDetailedDto(corporation, specialisations);
         }
 
         public void WriteRenta(int rentaId, string qrEncoded)
@@ -123,7 +135,7 @@ namespace Billing
             {
                 throw new BillingNotFoundException($"sin not found {modelId}");
             }
-            model.Shops = GetShops(modelId, s => (isAdmin || s.OwnerId == modelId || s.TrustedUsers.Any(t=>t.Model == modelId)));
+            model.Shops = GetShops(modelId, s => (isAdmin || s.OwnerId == modelId || s.TrustedUsers.Any(t => t.Model == modelId)));
             if (isAdmin)
                 model.Shops.ForEach(s => s.IsOwner = true);
             model.Corporations = GetCorporationDtos(s => s.OwnerId == modelId || isAdmin);
@@ -260,7 +272,28 @@ namespace Billing
 
         public void UpdateShopTrustedUsers(int shopId, List<int> trustedModels)
         {
-            throw new NotImplementedException();
+            var shop = Get<ShopWallet>(s => s.Id == shopId);
+            if (shop == null)
+            {
+                throw new BillingNotFoundException($"shop {shopId} not found");
+            }
+            foreach (var model in trustedModels)
+            {
+                var sin = Get<SIN>(s => s.Character.Model == model);
+                if (sin == null)
+                {
+                    throw new BillingNotFoundException($"model {model} not found");
+                }
+            }
+            var oldDB = GetList<ShopTrusted>(t => t.ShopId == shopId);
+            RemoveRange(oldDB);
+            SaveContext();
+            foreach (var model in trustedModels)
+            {
+                var newdb = new ShopTrusted { Model = model, ShopId = shopId };
+                Add(newdb);
+            }
+            SaveContext();
         }
 
         #region private

@@ -22,12 +22,13 @@ namespace Billing.Dto.Shop
                 ModelId = sin.Passport?.Sin;
             }
             Balance = sin.Wallet?.Balance ?? 0;
-            
+            Eversion = sin.EVersion;
         }
         public int Id { get; set; }
         public string Name { get; set; }
         public string ModelId { get; set; }
         public decimal Balance { get; set; }
         public string Rights { get; set; }
+        public string Eversion { get; set; }
     }
 }
