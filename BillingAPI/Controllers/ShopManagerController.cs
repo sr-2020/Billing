@@ -131,10 +131,19 @@ namespace BillingAPI.Controllers
 
         [HttpPost("getproducts")]
         [ShopAuthorization]
-        public DataResult<List<QRDto>> GetProducts([FromBody] GetProductsRequest request)
+        public DataResult<List<QRDto>> GetProducts([FromBody] ShopBasedRequest request)
         {
             var manager = IocContainer.Get<IShopManager>();
             var result = RunAction(() => manager.GetAvailableQR(request.Shop), $"getproducts {request.Shop}");
+            return result;
+        }
+
+        [HttpPost("getcorporationproducts")]
+        [CorpAuthorization]
+        public DataResult<List<SkuDto>> GetCorporationProducts([FromBody] CorporationBasedRequest request)
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.GetSkus(s=>s.CorporationId == request.Corporation));
             return result;
         }
 
