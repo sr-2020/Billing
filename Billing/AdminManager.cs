@@ -391,11 +391,11 @@ namespace Billing
             return allList.OrderByDescending(t => t.OperationTime).ToList();
         }
 
-        protected Transfer MakeTransferSINSIN(SIN sinFrom, SIN sinTo, decimal amount, string comment)
+        protected Transfer MakeTransferSINSIN(SIN sinFrom, SIN sinTo, decimal amount, string comment, bool allAnon = false)
         {
             var anonFrom = GetAnon(sinFrom.Character.Model);
             var anonto = GetAnon(sinTo.Character.Model);
-            var anon = anonFrom || anonto;
+            var anon = allAnon|| anonFrom || anonto;
             var transfer = AddNewTransfer(sinFrom.Wallet, sinTo.Wallet, amount, comment, anon);
             Context.SaveChanges();
             if (transfer != null)

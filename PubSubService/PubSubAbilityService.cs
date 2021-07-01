@@ -62,7 +62,7 @@ namespace PubSubService
                     IocContainer.Get<IAbilityManager>().Marauder(BillingHelper.ParseId(model?.CharacterId, "characterId"), BillingHelper.ParseId(model?.TargetCharacterId, "TargetCharacterId"));
                     break;
                 case ActiveAbility.SleepCheck:
-                    IocContainer.Get<IAbilityManager>().Marauder(BillingHelper.ParseId(model?.CharacterId, "characterId"), BillingHelper.ParseId(model?.bodyStorage?.Data?.Body?.CharacterId, "TargetCharacterId"));
+                    IocContainer.Get<IAbilityManager>().Marauder(BillingHelper.ParseId(model?.CharacterId, "characterId"), BillingHelper.ParseId(model?.bodyStorage?.Data?.Body?.CharacterId, "TargetCharacterId"), true);
                     break;
 
                 default:

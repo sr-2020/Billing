@@ -13,12 +13,12 @@ namespace Billing
         void LetHimPay(int modelId, int targetId, int rentaId, string qrCode);
         void LetMePay(int modelId, int rentaId, string qrCode);
         void Rerent(int modelId, int rentaId, string qrCode);
-        void Marauder(int modelId, int targetId);
+        void Marauder(int modelId, int targetId, bool anon = false);
     }
 
     public class AbilityManager : ShopManager, IAbilityManager
     {
-        public void Marauder(int modelId, int targetId)
+        public void Marauder(int modelId, int targetId, bool anon = false)
         {
             var sinFrom = BillingBlocked(targetId, s => s.Wallet, s => s.Character, s => s.Passport);
             var sinTo = BillingBlocked(modelId, s => s.Wallet, s => s.Character, s => s.Passport);
