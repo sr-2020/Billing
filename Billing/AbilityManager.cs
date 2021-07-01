@@ -29,7 +29,7 @@ namespace Billing
             }
             decimal amount = sinFrom.Wallet.Balance * 0.1m;
             var message = $"Ограбление {sinFrom.Passport.Sin} на сумму {amount} в пользу {sinTo.Passport.Sin}";
-            MakeTransferSINSIN(sinFrom, sinTo, amount, message);
+            MakeTransferSINSIN(sinFrom, sinTo, amount, message, anon);
             EreminPushAdapter.SendNotification(modelId, "Marauder", message);
         }
 
