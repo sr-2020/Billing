@@ -10,12 +10,17 @@ namespace PubSubService.Model
         public string Name { get; set; }
         public QrCodeModel QrCode { get; set; }
         public string TargetCharacterId { get; set; }
-        public BodyStorageModel BodyStorageModel { get; set; }
+        public BodyStorageModel bodyStorage { get; set; }
+    }
+
+    public class DataModel
+    {
+        public BodyModel Body { get; set; }
     }
 
     public class BodyStorageModel
     {
-        public BodyModel BodyModel { get; set; }
+        public DataModel Data { get; set; }
     }
 
     public class BodyModel
