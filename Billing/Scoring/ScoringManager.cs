@@ -514,12 +514,12 @@ namespace Scoringspace
                             var k = (decimal)Math.Pow((curCatCount > 0 ? curCatCount : 2) * 2, -1);
                             var temp = curFactors.Sum(f => f.Value) / factorsCount;
                             var catWeight = curCategory?.Category?.Weight;
-                            curCategory.Value = (decimal)Math.Pow((double)temp, (double)GetCatWeight(catWeight ?? 0)) * k;
+                            curCategory.Value = (decimal)Math.Pow((double)temp, (double)GetCatWeight(catWeight ?? 0));
                             Add(curCategory, context);
                             var newCatValue = curCategory.Value;
                             if (category.CategoryType == (int)ScoringCategoryType.Fix)
                             {
-                                scoring.CurrentFix = allCates.Sum(c => c.Value);
+                                scoring.CurrentFix = allCates.Sum(c => c.Value) * k;
                             }
                             else if (category.CategoryType == (int)ScoringCategoryType.Relative)
                             {
