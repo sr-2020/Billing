@@ -465,17 +465,14 @@ namespace Scoringspace
                             var scoring = context.Set<Scoring>().AsTracking().FirstOrDefault(s => s.Id == scoringId);
                             var systemsettings = IocContainer.Get<ISettingsManager>();
                             var oldScoring = scoring.CurerentRelative + scoring.CurrentFix;
-                            var curCategory = context.Set<CurrentCategory>().AsNoTracking().FirstOrDefault(c => c.ScoringId == scoringId && c.CategoryId == factor.CategoryId);
+                            var curCategory = context.Set<CurrentCategory>().AsNoTracking().Include(f => f.Category)
+                                                        .FirstOrDefault(c => c.ScoringId == scoringId && c.CategoryId == factor.CategoryId);
                             if (curCategory == null)
                             {
-                                curCategory = new CurrentCategory
-                                {
-                                    ScoringId = scoringId,
-                                    CategoryId = factor.CategoryId
-                                };
-                                Add(curCategory, context);
+                                throw new BillingNotFoundException($"категория скоринга не найдена для {scoringId}");
                             }
-                            var curFactor = context.Set<CurrentFactor>().AsNoTracking().FirstOrDefault(s => s.CurrentCategoryId == curCategory.Id && s.ScoringFactorId == factorId);
+                            var curFactor = context.Set<CurrentFactor>().AsNoTracking()
+                                                        .FirstOrDefault(s => s.CurrentCategoryId == curCategory.Id && s.ScoringFactorId == factorId);
                             if (curFactor == null)
                             {
                                 curFactor = new CurrentFactor
@@ -490,7 +487,9 @@ namespace Scoringspace
                             var newValue = CalculateFactor((double)lifestyle, (double)curFactor.Value);
                             curFactor.Value = newValue;
                             Add(curFactor, context);
-                            var curFactors = context.Set<CurrentFactor>().AsNoTracking().Include(f => f.ScoringFactor).Where(f => f.CurrentCategoryId == curCategory.Id).ToList();
+                            var curFactors = context.Set<CurrentFactor>().AsNoTracking().Include(f => f.ScoringFactor)
+                                                        .Where(f => f.CurrentCategoryId == curCategory.Id).ToList();
+                            var curCatIds = curFactors.Select(f => f.CurrentCategoryId).Distinct().ToList();
                             var factorsCount = curFactors.Count;
                             if (factorsCount == 0)
                             {
@@ -498,13 +497,16 @@ namespace Scoringspace
                             }
                             var oldCatValue = curCategory.Value;
                             var newCatValue = curCategory.Value;
-                            var curCategories = context.Set<CurrentCategory>().AsNoTracking().Include(f => f.Category).Where(c => c.Category.CategoryType == category.CategoryType  && c.ScoringId == scoringId);
-                            var curCatCount = curCategories.ToList().Count;
+
+                            var curCatCount = curCatIds.Count;
                             var k = (decimal)Math.Pow((curCatCount > 0 ? curCatCount : 2) * 2, -1);
                             var temp = curFactors.Sum(f => f.Value) / factorsCount;
-                            var catWeight = curCategories.Where(c => c.CategoryId == curCategory.CategoryId).FirstOrDefault();
-                            curCategory.Value = (decimal)Math.Pow((double)temp, (double)GetCatWeight(catWeight.Category?.Weight ?? 0)) * k;
-                            Add(curCategory);
+                            var catWeight = curCategory?.Category?.Weight;
+                            curCategory.Value = (decimal)Math.Pow((double)temp, (double)GetCatWeight(catWeight ?? 0)) * k;
+                            Add(curCategory, context);
+                            var curCategories = context.Set<CurrentCategory>().AsNoTracking().Include(f => f.Category)
+                                    .Where(c => curCatIds.Contains(c.Id)).Distinct();
+
                             if (category.CategoryType == (int)ScoringCategoryType.Fix)
                             {
                                 scoring.CurrentFix = curCategories.Sum(c => c.Value);
