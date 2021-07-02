@@ -557,7 +557,7 @@ namespace Billing
                     manager.OnInsuranceBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
                 case "Charity":
-                    manager.OnInsuranceBuy(sin, sku.Nomenklatura.Lifestyle);
+                    manager.OnCharityBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
                 case "drone":
                     manager.OnDroneBuy(sin, sku.Nomenklatura.Lifestyle);

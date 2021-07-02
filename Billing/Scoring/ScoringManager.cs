@@ -469,7 +469,13 @@ namespace Scoringspace
                                                         .FirstOrDefault(c => c.ScoringId == scoringId && c.CategoryId == factor.CategoryId);
                             if (curCategory == null)
                             {
-                                throw new BillingNotFoundException($"категория скоринга не найдена для {scoringId}");
+                                curCategory = new CurrentCategory
+                                {
+                                    ScoringId = scoringId,
+                                    CategoryId = factor.CategoryId,
+                                    Category = category
+                                };
+                                Add(curCategory, context);
                             }
                             var curFactor = context.Set<CurrentFactor>().AsNoTracking()
                                                         .FirstOrDefault(s => s.CurrentCategoryId == curCategory.Id && s.ScoringFactorId == factorId);
