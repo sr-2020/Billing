@@ -23,7 +23,7 @@ namespace BillingAPI.Controllers
 
         [HttpPost("shop")]
         [ShopAuthorization]
-        public Result UpdateTrustedShop(int shop, [FromBody] UpdateTrustedShopRequest request)
+        public Result UpdateTrustedShop([FromBody] UpdateTrustedShopRequest request)
         {
             var manager = IocContainer.Get<IShopManager>();
             var result = RunAction(() => manager.UpdateShopTrustedUsers(request.Shop, request.TrustedModels));
