@@ -10,7 +10,7 @@ namespace Billing.Dto
         public int Character { get; set; }
         public decimal CurrentFix { get; set; }
         public decimal CurrentRelative { get; set; }
-        public List<ScoringCategoryDto> RelativeCategories {get;set;}
-        public List<ScoringCategoryDto> FixCategories { get; set; }
+        public List<CurrentScoringCategoryDto> RelativeCategories {get;set;}
+        public List<CurrentScoringCategoryDto> FixCategories { get; set; }
     }
 }

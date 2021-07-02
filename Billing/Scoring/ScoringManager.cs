@@ -317,40 +317,37 @@ namespace Scoringspace
         }
         #endregion
 
+        private List<CurrentScoringCategoryDto> GetScoringResultView(List<CurrentFactor> factors, decimal currentresult)
+        {
+            return factors.GroupBy(f => f.CurrentCategory)
+                .Select(g => new CurrentScoringCategoryDto(g.Key, factors.Select(f => f.CurrentCategory).Distinct().Sum(cc => cc.Value), currentresult)
+                {
+                    Factors = g.Select(f => new ScoringFactorDto(f.ScoringFactor)
+                    {
+                        Value = Math.Round(f.Value, 2),
+                    }).ToList()
+                }).ToList();
+        }
+
         public ScoringDto GetFullScoring(int character)
         {
             var scoring = GetScoringByModelId(character);
             var fixenum = (int)ScoringCategoryType.Fix;
             var relativenum = (int)ScoringCategoryType.Relative;
+            var currentFix = Math.Round(scoring.CurrentFix, 2);
+            var currentRelative = Math.Round(scoring.CurerentRelative, 2);
+
 
             var fixFactors = GetList<CurrentFactor>(f => f.CurrentCategory.Category.CategoryType == fixenum && f.CurrentCategory.ScoringId == scoring.Id, f => f.ScoringFactor, f => f.CurrentCategory.Category);
             var relativFactors = GetList<CurrentFactor>(f => f.CurrentCategory.Category.CategoryType == relativenum && f.CurrentCategory.ScoringId == scoring.Id, f => f.ScoringFactor, f => f.CurrentCategory.Category);
-            var fixCategories = fixFactors
-                .GroupBy(f => f.ScoringFactor.Category)
-                .Select(g => new ScoringCategoryDto(g.Key)
-                {
-                    Value = Math.Round(g.FirstOrDefault()?.CurrentCategory?.Value ?? 0, 2),
-                    Factors = g.Select(f => new ScoringFactorDto(f.ScoringFactor)
-                    {
-                        Value = Math.Round(f.Value, 2),
-                    }).ToList()
-                }).ToList();
-            var relativCategories = relativFactors
-                .GroupBy(f => f.ScoringFactor.Category)
-                .Select(g => new ScoringCategoryDto(g.Key)
-                {
-                    Value = Math.Round(g.FirstOrDefault()?.CurrentCategory?.Value ?? 0, 2),
-                    Factors = g.Select(f => new ScoringFactorDto(f.ScoringFactor)
-                    {
-                        Value = Math.Round(f.Value, 2),
-                    }).ToList()
-                }).ToList();
+            var fixCategories = GetScoringResultView(fixFactors, currentFix);
+            var relativCategories = GetScoringResultView(relativFactors, currentRelative);
 
             return new ScoringDto
             {
                 Character = character,
-                CurrentFix = Math.Round(scoring.CurrentFix, 2),
-                CurrentRelative = Math.Round(scoring.CurerentRelative, 2),
+                CurrentFix = currentFix,
+                CurrentRelative = currentRelative,
                 FixCategories = fixCategories,
                 RelativeCategories = relativCategories
             };
@@ -501,7 +498,7 @@ namespace Scoringspace
                             var allCates = context.Set<CurrentCategory>().AsNoTracking()
                                                     .Where(c => c.ScoringId == scoringId && c.Category.CategoryType == category.CategoryType && c.CurrentFactors.Count > 0).ToList();
 
-                            
+
                             var factorsCount = curFactors.Count;
                             if (factorsCount == 0)
                             {
