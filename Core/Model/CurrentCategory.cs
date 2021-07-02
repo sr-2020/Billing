@@ -19,5 +19,6 @@ namespace Core.Model
         [Column("current_value")]
         public decimal Value { get; set; }
 
+        public virtual List<CurrentFactor> CurrentFactors { get; set; }
     }
 }
