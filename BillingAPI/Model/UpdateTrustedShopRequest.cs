@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 
 namespace BillingAPI.Model
 {
-    public class UpdateTrustedShopRequest
+    public class UpdateTrustedShopRequest: ShopBasedRequest
     {
-        public int Shop { get; set; }
         public List<int> TrustedModels { get; set; }
     }
 }
