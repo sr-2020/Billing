@@ -28,6 +28,7 @@ namespace Billing.DTO
             DateCreated = renta.DateCreated;
             Specialisation = renta.Sku?.Nomenklatura?.Specialisation?.Name;
             Stealable = renta.HasQRWrite;
+            Count = renta.Count;
         }
         [Display(Name = "SIN")]
         public string ModelId { get; set; }
@@ -35,6 +36,7 @@ namespace Billing.DTO
         public string CharacterName { get; set; }
         public int RentaId { get; set; }
         [Display(Name = "Сумма по ренте")]
+        public int Count { get; set; }
         public decimal FinalPrice { get; set; }
         public string ProductType { get; set; }
         public string Specialisation { get; set; }
