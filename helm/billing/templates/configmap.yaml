@@ -6,3 +6,4 @@ data:
   DBHOST: {{ .Values.app.postgres.dbHost | quote }}
   POSTGRESQLHANGFIRE_DBNAME: {{ .Values.app.postgres.dbnameHangfire | quote }}
   POSTGRESQLBILLING_DBNAME: {{ .Values.app.postgres.dbnameBilling | quote }}
+  MODELS_MANAGER_URL: {{ .Values.app.services.modelsManager | quote }}

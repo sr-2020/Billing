@@ -32,6 +32,11 @@ spec:
                 configMapKeyRef:
                   name: {{ .Release.Name }}-configmap
                   key: DBHOST
+            - name: MODELS_MANAGER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-configmap
+                  key: MODELS_MANAGER_URL
             - name: POSTGRESQLHANGFIRE_DBNAME
               valueFrom:
                 configMapKeyRef:

@@ -9,6 +9,8 @@ app:
     dbHost: postgres
     dbnameHangfire: Hangfire
     dbnameBilling: rc_sr2020
+  services:
+    modelsManager: http://models-manager
 
 image:
   repository: sr2020/billingapi
