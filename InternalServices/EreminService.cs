@@ -12,7 +12,8 @@ namespace InternalServices
 {
     public class EreminService
     {
-        string _URL = Environment.GetEnvironmentVariable("MODELS_MANAGER_URL") ?? "https://models-manager.evarun.ru";
+        //string _URL = Environment.GetEnvironmentVariable("MODELS_MANAGER_URL") ?? "https://models-manager.evarun.ru";
+        string _URL = Environment.GetEnvironmentVariable("MODELS_MANAGER_URL");
 
         public CharacterModel GetCharacter(int characterId)
         {

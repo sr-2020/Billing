@@ -520,7 +520,7 @@ namespace Scoringspace
                             }
                             else if (category.CategoryType == (int)ScoringCategoryType.Relative)
                             {
-                                scoring.CurerentRelative = allCates.Sum(c => c.Value);
+                                scoring.CurerentRelative = allCates.Sum(c => c.Value) * k;
                             }
                             Add(scoring, context);
                             var end = DateTime.Now;
