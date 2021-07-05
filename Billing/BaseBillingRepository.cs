@@ -310,7 +310,7 @@ namespace Billing
                 DateCreated = DateTime.Now.ToUniversalTime(),
                 Discount = discount,
                 Sin = sin,
-                ShopComission = shop.Commission,
+                ShopComission = BillingHelper.GetShopComission(shop.LifeStyle),
                 FinalPrice = BillingHelper.GetFinalPrice(sku, discount, currentScoring)
             };
             Add(price);

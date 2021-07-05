@@ -175,6 +175,29 @@ namespace Billing
                 return false;
             }
         }
+
+        public static decimal GetShopComission(int shopls)
+        {
+            var manager = IocContainer.Get<ISettingsManager>();
+            switch (GetLifestyle(shopls))
+            {
+                case Lifestyles.Wood:
+                    return manager.GetDecimalValue(SystemSettingsEnum.shopwood);
+                case Lifestyles.Bronze:
+                    return manager.GetDecimalValue(SystemSettingsEnum.shopbronze);
+                case Lifestyles.Silver:
+                    return manager.GetDecimalValue(SystemSettingsEnum.shopsilver);
+                case Lifestyles.Gold:
+                    return manager.GetDecimalValue(SystemSettingsEnum.shopgold);
+                case Lifestyles.Platinum:
+                    return manager.GetDecimalValue(SystemSettingsEnum.shopplatinum);
+                case Lifestyles.Iridium:
+                    return manager.GetDecimalValue(SystemSettingsEnum.shopiridium);
+                default:
+                    return manager.GetDecimalValue(SystemSettingsEnum.shopwood);
+            }
+        }
+
         private static decimal GetFinalPrice(decimal price, decimal discount, decimal scoring)
         {
             return Round((price * discount) / scoring);
