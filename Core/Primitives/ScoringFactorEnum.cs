@@ -7,7 +7,6 @@ namespace Core.Primitives
     public enum ScoringFactorEnum
     {
         test,
-        ls_change,
         food_consume,
         implant_install,
         buy_other,
@@ -28,6 +27,8 @@ namespace Core.Primitives
         buy_drone,
         buy_matrix,
         implant_uninstalled,
-        implant_deleted
+        implant_deleted,
+        finish_him,
+        shop_lifestyle
     }
 }

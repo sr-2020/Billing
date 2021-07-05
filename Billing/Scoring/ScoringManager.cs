@@ -21,7 +21,6 @@ namespace Scoringspace
 {
     public interface IScoringManager : IBaseBillingRepository
     {
-        Task OnLifeStyleChanged(Scoring scoring, Lifestyles from, Lifestyles to);
         Task OnPillConsumed(int model, string pillLifestyle);
         Task OnWounded(int model);
         Task OnClinicalDeath(int model);
