@@ -381,7 +381,7 @@ namespace Billing
 
         public FullUserDto GetFullUser(int modelid)
         {
-            return new FullUserDto();
+            return new FullUserDto(modelid);
         }
         public List<SIN> GetSinsInGame()
         {

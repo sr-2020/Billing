@@ -28,5 +28,9 @@ namespace Core.Model
         public decimal OldScoring { get; set; }
         [Column("new_scoring_value")]
         public decimal NewScoring { get; set; }
+        [Column("save_k")]
+        public decimal SaveK { get; set; }
+        [Column("aver_factors")]
+        public decimal AverFactors { get; set; }
     }
 }

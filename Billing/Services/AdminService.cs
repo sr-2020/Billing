@@ -11,7 +11,7 @@ namespace Billing.Services
     {
         public FullUserDto GetFullUser(int modelid)
         {
-            var user = new FullUserDto
+            var user = new FullUserDto(modelid)
             {
                 Sin = Factory.Billing.GetBalance(modelid),
                 Transfers = Factory.Billing.GetTransfers(modelid),

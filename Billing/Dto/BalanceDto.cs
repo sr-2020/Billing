@@ -17,7 +17,9 @@ namespace Billing.DTO
             Citizenship = sin.Passport.Citizenship ?? "неизвестно";
             Viza = sin.Passport.Viza ?? "неизвестно";
             Pledgee = sin.Passport.Mortgagee ?? "неизвестно";
+            Id = ModelId;
         }
+        public int Id { get; set; }
         public int ModelId { get; set; }
         public string SIN { get; set; }
         public decimal CurrentBalance { get; set; }
