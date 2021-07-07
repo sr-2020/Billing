@@ -282,7 +282,7 @@ namespace Billing
 
         public PriceShopDto GetPrice(int modelId, int shopid, int skuid)
         {
-            var sin = BillingBlocked(modelId, s => s.Scoring, s => s.Passport);
+            var sin = BillingBlocked(modelId, s => s.Scoring, s => s.Passport, s => s.Character);
             var sku = SkuAllowed(shopid, skuid, s => s.Corporation, s => s.Nomenklatura.Specialisation.ProductType);
             var shop = GetAsNoTracking<ShopWallet>(s => s.Id == shopid);
             if (shop == null || sin == null)
