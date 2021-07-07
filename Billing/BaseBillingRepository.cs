@@ -291,8 +291,9 @@ namespace Billing
                 var eService = new EreminService();
                 modeldiscount = eService.GetDiscount(sin.Character.Model, BillingHelper.GetDiscountType(sku.Nomenklatura.Specialisation.ProductType.DiscountType));
             }
-            catch
+            catch(Exception e)
             {
+                Console.Error.WriteLine(e.ToString());
                 modeldiscount = 1;
             }
             discount *= modeldiscount;
