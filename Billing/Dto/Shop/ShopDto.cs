@@ -51,11 +51,12 @@ namespace Billing.DTO
     }
     public class ShopDetailedDto : ShopDto
     {
-        public ShopDetailedDto(ShopWallet shop, List<QRDto> products) : base(0, shop) 
+        public ShopDetailedDto(ShopWallet shop, List<QRDto> products, List<Specialisation> specialisations) : base(0, shop) 
         {
             Products = products;
+            SpecialisationNames = specialisations.Select(s => s.Name).ToList();
         }
-        //List<>
+        public List<string> SpecialisationNames { get; set; }
         public List<QRDto> Products { get; set; }
     }
 }

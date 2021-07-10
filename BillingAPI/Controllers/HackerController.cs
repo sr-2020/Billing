@@ -1,4 +1,5 @@
-﻿using Billing.Dto.Shop;
+﻿using Billing;
+using Billing.Dto.Shop;
 using Billing.DTO;
 using BillingAPI.Filters;
 using BillingAPI.Model;
@@ -15,45 +16,52 @@ namespace BillingAPI.Controllers
     public class HackerController : EvarunApiController
     {
         [HttpPost("h-transfer")]
-        public DataResult<string> StealTransfer([FromBody] StealTransferRequest request)
+        public Result StealTransfer([FromBody] StealTransferRequest request)
         {
-            throw new NotImplementedException();
+            var manager = IoC.IocContainer.Get<IHackerManager>();
+            return RunAction(() => manager.StealMoney(request.From, request.To, request.Amount, request.Comment));
         }
 
         [HttpPost("h-shop-transfer")]
-        public DataResult<string> StealShopTransfer([FromBody] StealTransferRequest request)
+        public Result StealShopTransfer([FromBody] StealTransferRequest request)
         {
-            throw new NotImplementedException();
+            var manager = IoC.IocContainer.Get<IHackerManager>();
+            return RunAction(() => manager.StealShopMoney(request.From, request.To, request.Amount, request.Comment));
         }
 
         [HttpPost("h-renta")]
-        public DataResult<string> StealRenta([FromBody] StealRentaRequest request)
+        public Result StealRenta([FromBody] StealRentaRequest request)
         {
-            throw new NotImplementedException();
+            var manager = IoC.IocContainer.Get<IHackerManager>();
+            return RunAction(() => manager.StealRenta(request.RentaId,request.To));
         }
 
         [HttpGet("h-shop")]
         public DataResult<ShopDetailedDto> GetShop(int shopId)
         {
-            throw new NotImplementedException();
+            var manager = IoC.IocContainer.Get<IHackerManager>();
+            return RunAction(() => manager.GetHackerDetailedShop(shopId));
         }
 
         [HttpGet("h-shops")]
         public DataResult<List<ShopDto>> GetShops()
         {
-            throw new NotImplementedException();
+            var manager = IoC.IocContainer.Get<IHackerManager>();
+            return RunAction(() => manager.GetHackerShops());
         }
 
         [HttpGet("h-corps")]
         public DataResult<List<CorporationDto>> GetCorps()
         {
-            throw new NotImplementedException();
+            var manager = IoC.IocContainer.Get<IHackerManager>();
+            return RunAction(() => manager.GetHackerCorps());
         }
 
         [HttpPost("h-shop")]
-        public DataResult<string> HackShop([FromBody] HackShopRequest request)
+        public Result HackShop([FromBody] HackShopRequest request)
         {
-            throw new NotImplementedException();
+            var manager = IoC.IocContainer.Get<IHackerManager>();
+            return RunAction(() => manager.HackShop(request.ShopId, request.Models));
         }
     }
 }

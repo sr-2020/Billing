@@ -18,7 +18,7 @@ namespace Core.Model
         public virtual ShopWallet Shop { get; set; }
         [ForeignKey("sin")]
         [Column("sin")]
-        public int SinId { get; set; }
+        public int? SinId { get; set; }
         public SIN Sin { get; set; }
         [Column("base_price")]
         public decimal BasePrice { get; set; }
@@ -48,5 +48,10 @@ namespace Core.Model
         public bool Expired { get; set; }
         [Column("full_price")]
         public bool FullPrice { get; set; }
+
+        public bool Stealable
+        {
+            get { return HasQRWrite; }
+        }
     }
 }

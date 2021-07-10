@@ -68,7 +68,7 @@ namespace BillingAPI.Controllers
         public DataResult<ShopDetailedDto> GetShop(int shopid)
         {
             var manager = IocContainer.Get<IShopManager>();
-            var result = RunAction(() => manager.GetShop(shopid));
+            var result = RunAction(() => manager.GetDetailedShop(shopid));
             return result;
         }
 

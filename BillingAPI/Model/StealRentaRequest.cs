@@ -8,6 +8,6 @@ namespace BillingAPI.Model
     public class StealRentaRequest
     {
         public int RentaId { get; set; }
-        public int? MoveTo { get; set; }
+        public int? To { get; set; }
     }
 }

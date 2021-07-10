@@ -16,7 +16,14 @@ namespace Billing
 {
     public interface IAdminManager : IBaseBillingRepository
     {
+        Transfer MakeTransferLegSIN(int legFrom, string sinTo, decimal amount, string comment);
+        Transfer MakeTransferLegSIN(int shop, int modelId, decimal amount, string comment);
         List<SpecialisationDto> GetSpecialisations(Expression<Func<Specialisation, bool>> predicate);
+        List<ShopDto> GetShops(int modelId, Expression<Func<ShopWallet, bool>> predicate);
+        ShopDetailedDto GetDetailedShop(int shopId);
+        List<CorporationDto> GetCorporationDtos(Expression<Func<CorporationWallet, bool>> predicate);
+        CorporationDetailedDto GetCorporationDto(int corporationId);
+        List<QRDto> GetAvailableQR(int shop);
         void AddCorpSpecialisation(int corporation, int specialisation, decimal ratio);
         void DeleteCorpSpecialisation(int corporation, int specialisation);
         List<ProductTypeDto> GetProductTypes(Expression<Func<ProductType, bool>> predicate);
@@ -29,7 +36,6 @@ namespace Billing
         NomenklaturaDto CreateOrUpdateNomenklatura(int id, string name, string code, int specialisationId, int lifestyle, decimal baseprice, int baseCount, string description, string pictureurl, int externalId = 0);
         SkuDto CreateOrUpdateSku(int id, int nomenklatura, int count, int corporation, string name, bool enabled, int? skubaseprice = null, int? skubasecount = null);
         CorporationWallet CreateOrUpdateCorporationWallet(int id, decimal amount, string name, string logoUrl);
-
         void DeleteSpecialisation(int id);
         void DeleteNomenklatura(int id);
         void DeleteShop(int shopid);
@@ -37,17 +43,76 @@ namespace Billing
         Transfer MakeTransferSINSIN(int characterFrom, string sinTo, decimal amount, string comment);
         Transfer MakeTransferSINSIN(int characterFrom, int characterTo, decimal amount, string comment);
         void CleanRenta(Renta renta);
+        void UpdateShopTrustedUsers(int shopId, List<int> trustedModels);
     }
     public class AdminManager : BaseBillingRepository, IAdminManager
     {
         public static string UrlNotFound = "";
         protected int CURRENTGAME = 1;
 
+        public Transfer MakeTransferLegSIN(int shop, string sintext, decimal amount, string comment)
+        {
+            var sin = BillingBlocked(sintext, s => s.Wallet, s => s.Character);
+            return MakeTransferLegSIN(shop, sin, amount, comment);
+        }
+
+        public Transfer MakeTransferLegSIN(int shop, int modelId, decimal amount, string comment)
+        {
+            var sin = BillingBlocked(modelId, s => s.Wallet, s => s.Character);
+            return MakeTransferLegSIN(shop, sin, amount, comment);
+        }
+
         public List<SpecialisationDto> GetSpecialisations(Expression<Func<Specialisation, bool>> predicate)
         {
             return GetList(predicate, s => s.ProductType)
                 .Select(s => new SpecialisationDto(s, true))
                 .ToList();
+        }
+
+        public List<ShopDto> GetShops(int modelId, Expression<Func<ShopWallet, bool>> predicate)
+        {
+            return GetList(predicate, s => s.Owner.Sins, s => s.Wallet, s => s.Specialisations, s => s.TrustedUsers).Select(s =>
+                        new ShopDto(modelId, s)).ToList();
+        }
+
+        public ShopDetailedDto GetDetailedShop(int shopId)
+        {
+            var shop = Get<ShopWallet>(s => s.Id == shopId, s => s.Owner.Sins, s => s.Wallet, s => s.Specialisations, s => s.TrustedUsers);
+            if (shop == null)
+                throw new BillingNotFoundException($"Магазин {shopId} не найден");
+            var sIds = shop.Specialisations.Select(s => s.SpecialisationId);
+            var specialisations = GetList<Specialisation>(s => sIds.Contains(s.Id));
+            var products = GetAvailableQR(shopId);
+            return new ShopDetailedDto(shop, products, specialisations);
+        }
+
+        public List<CorporationDto> GetCorporationDtos(Expression<Func<CorporationWallet, bool>> predicate)
+        {
+            return GetList(predicate, c => c.Wallet, c => c.Owner.Sins, s => s.Specialisations).Select(c =>
+                      new CorporationDto(c)).ToList();
+        }
+
+        public CorporationDetailedDto GetCorporationDto(int corporationId)
+        {
+            var corporation = Get<CorporationWallet>(s => s.Id == corporationId, s => s.Specialisations);
+            if (corporation == null)
+                throw new BillingNotFoundException($"Корпорация {corporationId} не найдена");
+
+            var specialisationIds = corporation.Specialisations.Select(s => s.SpecialisationId);
+            var specialisations = GetList<Specialisation>(s => specialisationIds.Contains(s.Id));
+            return new CorporationDetailedDto(corporation, specialisations);
+        }
+
+        public List<QRDto> GetAvailableQR(int shop)
+        {
+            var skus = GetSkusForShop(shop);
+            var qrs = new List<QRDto>();
+            foreach (var sku in skus)
+            {
+                var qr = CreateQRDto(shop, sku);
+                qrs.Add(qr);
+            }
+            return qrs;
         }
 
         public void AddCorpSpecialisation(int corporation, int specialisation, decimal ratio)
@@ -373,6 +438,32 @@ namespace Billing
             SaveContext();
         }
 
+        public void UpdateShopTrustedUsers(int shopId, List<int> trustedModels)
+        {
+            var shop = Get<ShopWallet>(s => s.Id == shopId);
+            if (shop == null)
+            {
+                throw new BillingNotFoundException($"shop {shopId} not found");
+            }
+            foreach (var model in trustedModels)
+            {
+                var sin = Get<SIN>(s => s.Character.Model == model);
+                if (sin == null)
+                {
+                    throw new BillingNotFoundException($"model {model} not found");
+                }
+            }
+            var oldDB = GetList<ShopTrusted>(t => t.ShopId == shopId);
+            RemoveRange(oldDB);
+            SaveContext();
+            foreach (var model in trustedModels)
+            {
+                var newdb = new ShopTrusted { Model = model, ShopId = shopId };
+                Add(newdb);
+            }
+            SaveContext();
+        }
+
         protected List<TransferDto> CreateTransfersDto(List<Transfer> listFrom, List<Transfer> listTo, string owner)
         {
             var walletdtos = listFrom.GroupBy(t => new { t.WalletToId, t.WalletTo.WalletType }).Select(t => new WalletDto { WalletId = t.Key.WalletToId, WalletType = (WalletTypes)t.Key.WalletType }).ToList();
@@ -403,6 +494,43 @@ namespace Billing
                 EreminPushAdapter.SendNotification(sinTo.Character.Model, "Кошелек", $"Вам переведено денег {amount}");
             }
             return transfer;
+        }
+
+        protected Transfer MakeTransferLegSIN(int shopId, SIN sin, decimal amount, string comment)
+        {
+            var anon = GetAnon(sin.Character.Model);
+            var shop = Get<ShopWallet>(s => s.Id == shopId, s => s.Wallet);
+            if (shop == null)
+                throw new BillingNotFoundException($"shop {shopId} not found");
+            var transfer = AddNewTransfer(shop.Wallet, sin.Wallet, amount, comment, anon);
+            Context.SaveChanges();
+            return transfer;
+        }
+
+        private List<SkuDto> GetSkusForShop(int shop)
+        {
+            return GetSkuList(shop, s => s.Corporation.Wallet, s => s.Nomenklatura.Specialisation.ProductType).Select(s => new SkuDto(s, true)).ToList();
+        }
+
+        private QRDto CreateQRDto(int shop, SkuDto sku)
+        {
+            var qr = new QRDto();
+            qr.Shop = shop;
+            qr.Sku = sku;
+            qr.QRID = QRHelper.Concatenate(sku.SkuId, shop);
+            var cache = Get<CacheQRContent>(q => q.QRID == qr.QRID);
+            if (cache == null)
+            {
+                cache = new CacheQRContent
+                {
+                    QRID = qr.QRID,
+                    Encoded = EreminQrService.GetQRUrl(qr.QRID)
+                };
+                Add(cache);
+                Context.SaveChanges();
+            }
+            qr.QR = cache.Encoded;
+            return qr;
         }
     }
 }
