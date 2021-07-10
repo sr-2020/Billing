@@ -179,6 +179,25 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.ConfirmRenta(request.Character, request.PriceId, request.Count), $"createrenta {request.Character}:{request.PriceId}:{request.Count}");
             return result;
         }
+
+        [HttpGet("corporation-overdrafts")]
+        [CorporationAuthorization]
+        public DataResult<List<TransferDto>> GetCorpOverdrafts(int corporation)
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.GetCorporationOverdrafts(corporation));
+            return result;
+        }
+
+        [HttpGet("shop-overdrafts")]
+        [ShopAuthorization]
+        public DataResult<List<TransferDto>> GetShopOverdrafts(int shop)
+        {
+            var manager = IocContainer.Get<IShopManager>();
+            var result = RunAction(() => manager.GetShopOverdrafts(shop));
+            return result;
+        }
+
     }
 
 }

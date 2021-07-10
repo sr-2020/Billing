@@ -31,6 +31,8 @@ namespace Billing
         Transfer MakeTransferLegLeg(int legFrom, int legTo, decimal amount, string comment);
         List<RentaDto> GetRentas(int shop);
         void WriteRenta(int rentaId, string qrEncoded);
+        List<TransferDto> GetCorporationOverdrafts(int corporation);
+        List<TransferDto> GetShopOverdrafts(int shop);
     }
 
     public class ShopManager : AdminManager, IShopManager
@@ -213,6 +215,24 @@ namespace Billing
             return corp.OwnerId == modelId;
         }
 
+        public List<TransferDto> GetCorporationOverdrafts(int corporation)
+        {
+            var rentIds = GetList<Renta>(r => r.Sku.CorporationId == corporation).Select(r => r.Id).ToList();
+            var transfers = GetList<Transfer>(t => t.Overdraft && rentIds.Contains(t.RentaId ?? 0));
+            var owner = Get<CorporationWallet>(c => c.Id == corporation);
+            var list = CreateTransfersDto(transfers, owner.Name, TransferType.Incoming);
+            return list;
+        }
+
+        public List<TransferDto> GetShopOverdrafts(int shop)
+        {
+            var rentIds = GetList<Renta>(r => r.ShopId == shop).Select(r => r.Id).ToList();
+            var transfers = GetList<Transfer>(t => t.Overdraft && rentIds.Contains(t.RentaId ?? 0), t => t.WalletFrom, t => t.WalletTo);
+            var owner = Get<ShopWallet>(c => c.Id == shop);
+            var list = CreateTransfersDto(transfers, owner.Name, TransferType.Incoming);
+            return list;
+        }
+
         #region private
 
         protected void RecalculateRenta(Renta renta, string qrDecoded, SIN newsin)
@@ -240,7 +260,7 @@ namespace Billing
                 oldQR.QRRecorded = $"{qrDecoded} deleted";
             renta.QRRecorded = qrDecoded;
         }
-        
+
         #endregion
     }
 }
