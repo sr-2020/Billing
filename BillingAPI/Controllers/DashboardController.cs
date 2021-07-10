@@ -402,7 +402,17 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-        
+        /// <summary>
+        /// fill sku for corpotaion by specialisations
+        /// </summary>
+
+        [HttpPost("a-fill-sku")]
+        public Result FillSku([FromBody] FillSkuRequest request)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.FillSku(request.Corporation));
+            return result;
+        }
 
     }
 }

@@ -53,6 +53,7 @@ namespace Billing
         #region admin
         List<SIN> GetSinsInGame();
         List<CharacterDto> GetCharactersInGame();
+        void FillSku(int corporationId);
         #endregion
 
         #region events
@@ -392,6 +393,35 @@ namespace Billing
         {
             var result = GetSinsInGame(s => s.Character, s => s.Passport).Select(s => new CharacterDto { PersonName = s.Passport?.PersonName, ModelId = s.Character.Model.ToString() }).ToList();
             return result;
+        }
+        public void FillSku(int corporationId)
+        {
+            var corporation = Get<CorporationWallet>(c => c.Id == corporationId);
+            if (corporation == null)
+                throw new BillingNotFoundException("Corporation not found");
+            var specialissations = GetList<CorporationSpecialisation>(c => c.CorporationId == corporationId);
+            foreach (var specialisation in specialissations)
+            {
+                var nomenklaturas = GetList<Nomenklatura>(n => n.SpecialisationId == specialisation.Id);
+                foreach (var nomenklatura in nomenklaturas)
+                {
+                    var sku = Get<Sku>(s => s.NomenklaturaId == nomenklatura.Id && s.CorporationId == corporationId);
+                    if(sku != null)
+                    {
+                        continue;
+                    }
+                    sku = new Sku
+                    {
+                        CorporationId = corporationId,
+                        Count = 1,
+                        Enabled = false,
+                        Name = $"{nomenklatura.Name} ({corporation.Name})",
+                        NomenklaturaId = nomenklatura.Id,
+                        Price = nomenklatura.BasePrice * specialisation.Ratio
+                    };
+                    AddAndSave(sku);
+                }
+            }
         }
 
         public void DropInsurance(int modelId)

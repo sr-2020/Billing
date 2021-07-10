@@ -527,7 +527,7 @@ namespace Billing
             if (first)
                 renta.Sku.Corporation.SkuSold += renta.BasePrice;
             //comission
-            AddNewTransfer(mir, renta.Shop.Wallet, comission, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} от {sin.Passport.PersonName} ({sin.Passport.Sin})", false, renta.Id, false);
+            AddNewTransfer(mir, renta.Shop.Wallet, comission, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} от {sin.Passport.PersonName}", false, renta.Id, false);
         }
 
         private void ProcessBuyScoring(SIN sin, Sku sku, ShopWallet shop)
