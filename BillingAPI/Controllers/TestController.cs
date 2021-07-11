@@ -48,7 +48,7 @@ namespace BillingAPI.Controllers
 
 
         /// <summary>
-        /// Пересчитать ренты
+        /// 
         /// </summary>
         /// <returns></returns>
         [HttpGet("addinsurances")]

@@ -39,12 +39,10 @@ namespace Billing
     {
         EreminService _ereminService = new EreminService();
 
-
-
         public void WriteRenta(int rentaId, string qrEncoded)
         {
             var qr = EreminQrService.GetPayload(qrEncoded);
-            var renta = Get<Renta>(p => p.Id == rentaId && p.HasQRWrite && string.IsNullOrEmpty(p.QRRecorded), r => r.Sku.Nomenklatura);
+            var renta = Get<Renta>(p => p.Id == rentaId && p.HasQRWrite && string.IsNullOrEmpty(p.QRRecorded), r => r.Sku.Nomenklatura.Specialisation.ProductType);
             if (renta == null)
                 throw new BillingNotFoundException($"offer {rentaId} записать на qr невозможно");
             WriteRenta(renta, qr);
@@ -252,6 +250,12 @@ namespace Billing
         private void WriteRenta(Renta renta, string qrDecoded)
         {
             var code = renta.Sku.Nomenklatura.Code;
+            var pt = ProductTypeEnum.Spirit.ToString();
+            if(renta.Sku.Nomenklatura.Specialisation.ProductType.Alias == pt)
+            {
+                var magic = new MagicService();
+                
+            }
             var name = renta.Sku.Name;
             var description = renta.Sku.Nomenklatura.Description;
             _ereminService.WriteQR(qrDecoded, code, name, description, renta.Count, renta.BasePrice, BillingHelper.GetFinalPrice(renta), renta.Secret, renta.Id, (Lifestyles)renta.LifeStyle).GetAwaiter().GetResult();

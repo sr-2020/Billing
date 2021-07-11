@@ -11,7 +11,7 @@ namespace Billing
     public interface IInsuranceManager : IBaseBillingRepository
     {
         void AddInsurances();
-        bool AddInsurance(int modelId, int skuId, int shopId);
+        bool AddInsurance(int modelId);
         InsuranceDto GetInsurance(int modelId);
     }
 
@@ -47,22 +47,24 @@ namespace Billing
 
         public void AddInsurances()
         {
-            var shopId = 3;
-            var skuId = 3;
-            var allsins = GetList<SIN>(s => true, s => s.Character);
+            var allsins = GetActiveSins(s => s.Character);
             var suc = 0;
             var err = 0;
             foreach (var sin in allsins)
             {
                 try
                 {
-                    if (AddInsurance(sin.Character.Model, skuId, shopId))
+                    if (AddInsurance(sin.Character.Model))
                     {
                         suc++;
                     }
                     else
                     {
                         err++;
+                    }
+                    for (int i = 0; i < 250; i++)
+                    {
+                        AddFood(sin.Character.Model);
                     }
                 }
                 catch (Exception e)
@@ -71,11 +73,27 @@ namespace Billing
                 }
             }
         }
-        public bool AddInsurance(int modelId, int skuId, int shopId)
+
+        public bool AddFood(int modelId)
+        {
+            var shop = 3;
+            var sku = 662;
+            return AddItem(modelId, sku, shop);
+        }
+
+        public bool AddInsurance(int modelId)
+        {
+            var shopId = 3;
+            var skuId = 663;
+            return AddItem(modelId, skuId, shopId);
+        }
+
+        public bool AddItem(int modelId, int skuId, int shopId)
         {
             var price = GetPrice(modelId, shopId, skuId);
             var renta = ConfirmRenta(modelId, price.PriceId);
             return renta.RentaId > 0;
         }
+
     }
 }

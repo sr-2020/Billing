@@ -15,6 +15,7 @@ namespace Core.Primitives
         EdibleFood,
         Charity,
         drone,
-        matrix
+        matrix,
+        Spirit
     }
 }

@@ -217,7 +217,7 @@ namespace Billing
             if (price.Sin.Character.Model != modelId)
                 throw new Exception("Персональное предложение заведено на другого персонажа");
             var dateTill = price.DateCreated.AddMinutes(_settings.GetIntValue(SystemSettingsEnum.price_minutes));
-            if (dateTill < DateTime.Now)
+            if (dateTill < DateTime.Now.ToUniversalTime())
                 throw new BillingException($"Персональное предложение больше не действительно, оно истекло {dateTill:HH:mm:ss}");
             var allowed = SkuAllowed(price.ShopId, price.SkuId);
             if (allowed == null)
