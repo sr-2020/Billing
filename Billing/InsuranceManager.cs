@@ -62,7 +62,7 @@ namespace Billing
                     {
                         err++;
                     }
-                    for (int i = 0; i < 250; i++)
+                    for (int i = 0; i < 200; i++)
                     {
                         AddFood(sin.Character.Model);
                     }
