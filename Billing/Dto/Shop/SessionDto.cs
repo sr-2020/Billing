@@ -31,7 +31,6 @@ namespace Billing.Dto.Shop
 
         public class BeatCharactersDto : BeatDto
         {
-
             public decimal SumAll { get; set; }
             public decimal ForecastSumAll { get; set; }
             public decimal? Min { get; set; }
@@ -40,6 +39,7 @@ namespace Billing.Dto.Shop
             public decimal? ForecastMax { get; set; }
             public decimal SumRents { get; set; }
             public decimal SumKarma { get; set; }
+            public decimal SumDividends { get; set; }
             public int Insolvent { get; set; }
             public int Irridium { get; set; }
             public int Count { get; set; }
@@ -56,6 +56,7 @@ namespace Billing.Dto.Shop
                 ForecastMax = ls.ForecastMax;
                 SumRents = ls.SumRents;
                 SumKarma = ls.SumKarma;
+                SumDividends = ls.SumDividends;
                 Insolvent = ls.Insolvent;
                 Irridium = ls.Irridium;
                 Count = ls.Count;

@@ -53,9 +53,12 @@ namespace Jobs
             {
                 return "цикл не запущен";
             }
-            if (!Factory.Job.BlockBilling())
+            if (type == BeatTypes.Characters)
             {
-                throw new BillingException(BillingException);
+                if (!Factory.Job.BlockBilling())
+                {
+                    throw new BillingException(BillingException);
+                }
             }
             var task = Task.Run(() =>
             {
@@ -98,9 +101,12 @@ namespace Jobs
                 }
                 finally
                 {
-                    if (!Factory.Job.UnblockBilling())
+                    if (type == BeatTypes.Characters)
                     {
-                        throw new Exception("Биллинг был разблокирован раньше времени");
+                        if (!Factory.Job.UnblockBilling())
+                        {
+                            throw new Exception("Биллинг был разблокирован раньше времени");
+                        }
                     }
                 }
             });
