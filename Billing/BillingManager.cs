@@ -147,7 +147,7 @@ namespace Billing
         public RentaDto ConfirmRenta(int modelId, int priceId, int count = 1)
         {
             var renta = CreateRenta(modelId, priceId, count);
-            EreminPushAdapter.SendNotification(modelId, "Покупка совершена", $"Вы купили {renta.Sku.Name}");
+            //EreminPushAdapter.SendNotification(modelId, "Покупка совершена", $"Вы купили {renta.Sku.Name}");
             var dto = new RentaDto(renta);
             return dto;
         }
