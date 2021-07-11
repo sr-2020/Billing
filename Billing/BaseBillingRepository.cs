@@ -280,6 +280,11 @@ namespace Billing
             return false;
         }
 
+        protected CorporationWallet GetMortagee(Passport passport)
+        {
+            return Get<CorporationWallet>(c => c.Alias == passport.Mortgagee);
+        }
+
         protected Price CreateNewPrice(Sku sku, ShopWallet shop, SIN sin)
         {
             decimal discount = 1;

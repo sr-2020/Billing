@@ -46,7 +46,7 @@ namespace Billing
 
         #region jobs
 
-        JobLifeStyleDto ProcessCharacterBeat(int sinId, decimal karmaCount, bool dividents1, bool dividents2, bool dividents3, JobLifeStyleDto dto);
+        JobLifeStyleDto ProcessCharacterBeat(int sinId, WorkModelDto workDto, JobLifeStyleDto dto);
 
         #endregion
 
@@ -152,44 +152,60 @@ namespace Billing
             return dto;
         }
 
-        public JobLifeStyleDto ProcessCharacterBeat(int sinId, decimal karmaCount, bool dividends1, bool dividends2, bool dividends3, JobLifeStyleDto dto)
+        private decimal GetDividends(CorporationWallet mortagee, decimal percent, decimal defaultValue)
+        {
+            decimal sum = 0;
+            if(mortagee != null)
+            {
+                sum = mortagee.LastSkuSold * percent;
+            }
+            if (sum < defaultValue)
+                sum = defaultValue;
+            return sum;
+        }
+
+        public JobLifeStyleDto ProcessCharacterBeat(int sinId, WorkModelDto workDto, JobLifeStyleDto dto)
         {
             var sin = BlockCharacter(sinId, s => s.Wallet, s => s.Character, s => s.Passport, s => s.Scoring);
             SaveContext();
             var mir = GetMIR();
             decimal income = 0;
             decimal outcome = 0;
+            var mortagee = GetMortagee(sin.Passport);
             //ability
-            if (dividends1)
+            if (workDto.Dividends1)
             {
-                var dk1 = _settings.GetDecimalValue(SystemSettingsEnum.dividents1_k);
-                AddNewTransfer(mir, sin.Wallet, dk1, "Дивиденды *");
-                income += dk1;
-                dto.SumDividends += dk1;
+                var def1 = _settings.GetDecimalValue(SystemSettingsEnum.dividents1_k);
+                var sum = GetDividends(mortagee, 0.03m, def1);
+                AddNewTransfer(mir, sin.Wallet, sum, "Дивиденды *");
+                income += sum;
+                dto.SumDividends += sum;
             }
-            if (dividends2)
+            if (workDto.Dividends2)
             {
-                var dk2 = _settings.GetDecimalValue(SystemSettingsEnum.dividents2_k);
-                AddNewTransfer(mir, sin.Wallet, dk2, "Дивиденды **");
-                income += dk2;
-                dto.SumDividends += dk2;
+                var def2 = _settings.GetDecimalValue(SystemSettingsEnum.dividents2_k);
+                var sum = GetDividends(mortagee, 0.05m, def2);
+                AddNewTransfer(mir, sin.Wallet, sum, "Дивиденды **");
+                income += sum;
+                dto.SumDividends += sum;
             }
-            if (dividends3)
+            if (workDto.Dividends3)
             {
-                var dk3 = _settings.GetDecimalValue(SystemSettingsEnum.dividents3_k);
-                AddNewTransfer(mir, sin.Wallet, dk3, "Дивиденды ***");
-                income += dk3;
-                dto.SumDividends += dk3;
+                var def3 = _settings.GetDecimalValue(SystemSettingsEnum.dividents3_k);
+                var sum = GetDividends(mortagee, 0.08m, def3);
+                AddNewTransfer(mir, sin.Wallet, sum, "Дивиденды ***");
+                income += sum;
+                dto.SumDividends += sum;
             }
             dto.SumDividends += income;
             //karma
-            if (karmaCount > 0)
+            if (workDto.KarmaCount > 0)
             {
                 var k = _settings.GetDecimalValue(SystemSettingsEnum.karma_k);
-                var karmasum = k * karmaCount;
+                var karmasum = k * workDto.KarmaCount;
                 income += karmasum;
                 dto.SumKarma += karmasum;
-                AddNewTransfer(mir, sin.Wallet, karmasum, "пассивный доход");
+                AddNewTransfer(mir, sin.Wallet, karmasum, "Пассивный доход");
             }
             //rentas
             var rentas = GetList<Renta>(r => r.SinId == sin.Id, r => r.Shop.Wallet, r => r.Sku.Corporation.Wallet);
@@ -218,8 +234,12 @@ namespace Billing
             //summary
             AddScoring(sin.Scoring, dto);
             //forecast
-            outcome -= rentas.Sum(r => BillingHelper.GetFinalPrice(r));
-
+            outcome += rentas.Sum(r => BillingHelper.GetFinalPrice(r));
+            if (workDto.StockGainPercentage > 0)
+            {
+                AddNewTransfer(mir, sin.Wallet, outcome * workDto.StockGainPercentage, "Игра на бирже");
+            }
+            dto.SumRents += outcome;
             sin.Wallet.IncomeOutcome = income - outcome;
             dto = AddLifeStyle(sin.Wallet, dto);
             UnblockCharacter(sin);

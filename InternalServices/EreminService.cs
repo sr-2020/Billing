@@ -3,6 +3,7 @@ using Core.Primitives;
 using InternalServices.EreminModel;
 using Serialization;
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -44,11 +45,26 @@ namespace InternalServices
             decimal every = 1;
             if (model != null)
             {
-                var gesheft = model?.workModel?.discounts?.everything ?? 1;
-                decimal samurai = 1;
+                every = model?.workModel?.discounts?.everything ?? 1;
                 if (discountType == DiscountType.Samurai)
-                    samurai = model?.workModel?.discounts?.weaponsArmor ?? 1;
-                every = gesheft < samurai ? gesheft : samurai;
+                    every = every * ( model?.workModel?.discounts?.weaponsArmor ?? 1);
+                var discount1 = model?.workModel?.passiveAbilities?.Any(p => p.id == "discount-all-1") ?? false;
+                var discount2 = model?.workModel?.passiveAbilities?.Any(p => p.id == "discount-all-2") ?? false;
+                var discount3 = model?.workModel?.passiveAbilities?.Any(p => p.id == "discount-all-3") ?? false;
+                var discount4 = model?.workModel?.passiveAbilities?.Any(p => p.id == "discount-all-4") ?? false;
+                var discount5 = model?.workModel?.passiveAbilities?.Any(p => p.id == "discount-all-5") ?? false;
+                decimal totalDisc = 0;
+                if (discount1)
+                    totalDisc += 0.1m;
+                if(discount2)
+                    totalDisc += 0.1m;
+                if (discount3)
+                    totalDisc += 0.1m;
+                if (discount4)
+                    totalDisc += 0.1m;
+                if (discount5)
+                    totalDisc = totalDisc * 2;
+                every = every * (1 - totalDisc);
             }
             return every;
         }

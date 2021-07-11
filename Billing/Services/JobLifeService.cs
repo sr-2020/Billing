@@ -90,7 +90,6 @@ namespace Jobs
                     dto.Beat.FinishTime = DateTime.Now;
                     Factory.Job.AddAndSave(dto.Beat);
                     Factory.Job.AddRangeAndSave(dto.History);
-
                 }
                 catch (Exception e)
                 {
@@ -198,10 +197,16 @@ namespace Jobs
         private JobLifeStyleDto ProcessModelCharacter(ImportDto character, JobLifeStyleDto dto)
         {
             var billing = IocContainer.Get<IBillingManager>();
-            var d1 = character.EreminModel.workModel.passiveAbilities?.Any(p => p.id == "dividends-1");
-            var d2 = character.EreminModel.workModel.passiveAbilities?.Any(p => p.id == "dividends-2");
-            var d3 = character.EreminModel.workModel.passiveAbilities?.Any(p => p.id == "dividends-3");
-            dto = billing.ProcessCharacterBeat(character.Sin.Id, character.EreminModel.workModel.karma.spent ?? 0, d1 ?? false, d2 ?? false, d3 ?? false, dto);
+            var workModel = new WorkModelDto
+            {
+                Dividends1 = character?.EreminModel?.workModel?.passiveAbilities?.Any(p => p.id == "dividends-1") ?? false,
+                Dividends2 = character?.EreminModel?.workModel?.passiveAbilities?.Any(p => p.id == "dividends-2") ?? false,
+                Dividends3 = character?.EreminModel?.workModel?.passiveAbilities?.Any(p => p.id == "dividends-3") ?? false,
+                StockGainPercentage = character?.EreminModel?.workModel?.billing?.stockGainPercentage ?? 0,
+                KarmaCount = character?.EreminModel?.workModel?.karma?.spent ?? 0
+            };
+
+            dto = billing.ProcessCharacterBeat(character.Sin.Id, workModel, dto);
             try
             {
                 EreminPushAdapter.SendNotification(character.Sin.Character.Model, "Кошелек", "Экономический пересчет завершен");
