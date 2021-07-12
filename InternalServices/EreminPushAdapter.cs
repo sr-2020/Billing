@@ -23,7 +23,7 @@ namespace InternalServices
                 };
                 var json = Serializer.ToJSON(message);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                await client.PostAsync(url, content);
+                //await client.PostAsync(url, content);
             }
             catch (Exception e)
             {

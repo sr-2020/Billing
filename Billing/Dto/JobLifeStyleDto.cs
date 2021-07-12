@@ -2,12 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace Billing.Dto
 {
     public class JobLifeStyleDto
     {
-        public decimal ScoringComposition { get; set; }
         public decimal ScoringMin { get; set; }
         public decimal ScoringMax { get; set; }
         public decimal SumAll { get; set; }
@@ -21,7 +21,7 @@ namespace Billing.Dto
         public decimal SumDividends { get; set; }
         public int Insolvent { get; set; }
         public int Irridium { get; set; }
-        public int Count { get; set; } 
+        public int Count { get; set; }
 
         public decimal Bronze()
         {
@@ -61,6 +61,42 @@ namespace Billing.Dto
         public decimal ForecastPlatinum()
         {
             return ForecastSumAll / Count + 2 * ((ForecastMax ?? 0) - ForecastSumAll / Count) / 3;
+        }
+
+        public void AddConcurrent(BeatCharacterLocalDto dto)
+        {
+            lock(this)
+            {
+                Count++;
+                if (!dto.IsIrridium)
+                {
+                    this.Irridium++;
+                    return;
+                }
+                if (dto.Balance < 0)
+                {
+                    this.Insolvent++;
+                    return;
+                }
+                this.SumAll += dto.Balance;
+                ForecastSumAll += dto.Forecast;
+                if (ScoringMin == 0 || dto.Scoringvalue < ScoringMin)
+                {
+                    ScoringMin = dto.Scoringvalue;
+                }
+                if (ScoringMax == 0 || dto.Scoringvalue > ScoringMax)
+                {
+                    ScoringMax = dto.Scoringvalue;
+                }
+                if (Min == null || ((Min ?? 0) > dto.Balance))
+                    Min = dto.Balance;
+                if (Max == null || ((Max ?? 0) < dto.Balance))
+                    Max = dto.Balance;
+                if (ForecastMin == null || ((ForecastMin ?? 0) > dto.Forecast))
+                    ForecastMin = dto.Forecast;
+                if (ForecastMax == null || ((ForecastMax ?? 0) < dto.Forecast))
+                    ForecastMax = dto.Forecast;
+            }
         }
 
     }

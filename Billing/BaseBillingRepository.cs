@@ -503,13 +503,13 @@ namespace Billing
                 AddNewTransfer(sin.Wallet, mir, finalPrice, $"Рентный платеж: { renta.Sku.Name} в {renta.Shop.Name}", false, renta.Id, false);
                 CloseOverdraft(renta, mir, sin, first);
                 //close overdraft here
-                var allOverdrafts = GetList<Transfer>(t => t.Overdraft && t.WalletFromId == sin.Wallet.Id && t.RentaId > 0);
-                foreach (var overdraft in allOverdrafts)
-                {
-                    overdraft.Overdraft = false;
-                    var closingRenta = Get<Renta>(r => r.Id == overdraft.RentaId, r => r.Sku.Corporation, r => r.Shop.Wallet);
-                    CloseOverdraft(closingRenta, mir, sin);
-                }
+                //var allOverdrafts = GetList<Transfer>(t => t.Overdraft && t.WalletFromId == sin.Wallet.Id && t.RentaId > 0);
+                //foreach (var overdraft in allOverdrafts)
+                //{
+                //    overdraft.Overdraft = false;
+                //    var closingRenta = Get<Renta>(r => r.Id == overdraft.RentaId, r => r.Sku.Corporation, r => r.Shop.Wallet);
+                //    CloseOverdraft(closingRenta, mir, sin);
+                //}
             }
             else
             {

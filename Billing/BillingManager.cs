@@ -12,6 +12,7 @@ using Scoringspace;
 using Settings;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -46,7 +47,7 @@ namespace Billing
 
         #region jobs
 
-        JobLifeStyleDto ProcessCharacterBeat(int sinId, WorkModelDto workDto, JobLifeStyleDto dto);
+        BeatCharacterLocalDto ProcessCharacterBeat(int sinId, WorkModelDto workDto);
 
         #endregion
 
@@ -147,7 +148,7 @@ namespace Billing
         public RentaDto ConfirmRenta(int modelId, int priceId, int count = 1)
         {
             var renta = CreateRenta(modelId, priceId, count);
-            //EreminPushAdapter.SendNotification(modelId, "Покупка совершена", $"Вы купили {renta.Sku.Name}");
+            EreminPushAdapter.SendNotification(modelId, "Покупка совершена", $"Вы купили {renta.Sku.Name}");
             var dto = new RentaDto(renta);
             return dto;
         }
@@ -164,8 +165,11 @@ namespace Billing
             return sum;
         }
 
-        public JobLifeStyleDto ProcessCharacterBeat(int sinId, WorkModelDto workDto, JobLifeStyleDto dto)
+        public BeatCharacterLocalDto ProcessCharacterBeat(int sinId, WorkModelDto workDto)
         {
+            var sw = new Stopwatch();
+            sw.Start();
+            var localDto = new BeatCharacterLocalDto();
             var sin = BlockCharacter(sinId, s => s.Wallet, s => s.Character, s => s.Passport, s => s.Scoring);
             SaveContext();
             var mir = GetMIR();
@@ -179,7 +183,7 @@ namespace Billing
                 var sum = GetDividends(mortagee, 0.03m, def1);
                 AddNewTransfer(mir, sin.Wallet, sum, "Дивиденды *");
                 income += sum;
-                dto.SumDividends += sum;
+                localDto.SumDividends += sum;
             }
             if (workDto.Dividends2)
             {
@@ -187,7 +191,7 @@ namespace Billing
                 var sum = GetDividends(mortagee, 0.05m, def2);
                 AddNewTransfer(mir, sin.Wallet, sum, "Дивиденды **");
                 income += sum;
-                dto.SumDividends += sum;
+                localDto.SumDividends += sum;
             }
             if (workDto.Dividends3)
             {
@@ -195,16 +199,15 @@ namespace Billing
                 var sum = GetDividends(mortagee, 0.08m, def3);
                 AddNewTransfer(mir, sin.Wallet, sum, "Дивиденды ***");
                 income += sum;
-                dto.SumDividends += sum;
+                localDto.SumDividends += sum;
             }
-            dto.SumDividends += income;
             //karma
             if (workDto.KarmaCount > 0)
             {
                 var k = _settings.GetDecimalValue(SystemSettingsEnum.karma_k);
                 var karmasum = k * workDto.KarmaCount;
                 income += karmasum;
-                dto.SumKarma += karmasum;
+                localDto.SumKarma += karmasum;
                 AddNewTransfer(mir, sin.Wallet, karmasum, "Пассивный доход");
             }
             //rentas
@@ -232,63 +235,35 @@ namespace Billing
                 sin.OldInsurance = insurance?.LifeStyle;
             }
             //summary
-            AddScoring(sin.Scoring, dto);
+            localDto.Scoringvalue = BillingHelper.GetFullScoring(sin.Scoring);
             //forecast
             outcome += rentas.Sum(r => BillingHelper.GetFinalPrice(r));
             if (workDto.StockGainPercentage > 0)
             {
-                AddNewTransfer(mir, sin.Wallet, outcome * workDto.StockGainPercentage, "Игра на бирже");
+                var stock = outcome * workDto.StockGainPercentage;
+                income += stock;
+                AddNewTransfer(mir, sin.Wallet, stock, "Игра на бирже");
             }
-            dto.SumRents += outcome;
+            localDto.SumRents += outcome;
             sin.Wallet.IncomeOutcome = income - outcome;
-            dto = AddLifeStyle(sin.Wallet, dto);
+            localDto = AddLifeStyle(sin.Wallet, localDto);
+            sw.Stop();
+            sin.DebugTime = (long)Math.Truncate(sw.Elapsed.TotalSeconds);
             UnblockCharacter(sin);
-            SaveContext();
-            return dto;
+            return localDto;
         }
 
-        private JobLifeStyleDto AddScoring(Scoring scoring, JobLifeStyleDto dto)
-        {
-            var scoringvalue = BillingHelper.GetFullScoring(scoring);
-            dto.ScoringComposition *= scoringvalue;
-            if (dto.ScoringMin == 0 || scoringvalue < dto.ScoringMin)
-            {
-                dto.ScoringMin = scoringvalue;
-            }
-            if (dto.ScoringMax == 0 || scoringvalue > dto.ScoringMax)
-            {
-                dto.ScoringMax = scoringvalue;
-            }
-            return dto;
-        }
-
-        private JobLifeStyleDto AddLifeStyle(Wallet wallet, JobLifeStyleDto dto)
+        private BeatCharacterLocalDto AddLifeStyle(Wallet wallet, BeatCharacterLocalDto dto)
         {
             if (wallet.IsIrridium)
             {
-                dto.Irridium++;
+                dto.IsIrridium = true;
                 return dto;
             }
-            if (wallet.Balance < 0)
-            {
-                dto.Insolvent++;
-                return dto;
-            }
-            var forecast = BillingHelper.GetForecast(wallet);
-            if (dto.Min == null || ((dto.Min ?? 0) > wallet.Balance))
-                dto.Min = wallet.Balance;
-            if (dto.Max == null || ((dto.Max ?? 0) < wallet.Balance))
-                dto.Max = wallet.Balance;
-            if (dto.ForecastMin == null || ((dto.ForecastMin ?? 0) > forecast))
-                dto.ForecastMin = forecast;
-            if (dto.ForecastMax == null || ((dto.ForecastMax ?? 0) < forecast))
-                dto.ForecastMax = forecast;
-            dto.SumAll += wallet.Balance;
-            dto.ForecastSumAll += forecast;
+            dto.Balance = wallet.Balance;
+            dto.Forecast = BillingHelper.GetForecast(wallet);
             return dto;
         }
-
-
 
         public PriceShopDto GetPriceByQR(int modelId, string qrid)
         {
@@ -496,6 +471,7 @@ namespace Billing
         private void UnblockCharacter(SIN sin)
         {
             sin.Blocked = false;
+            SaveContext();
         }
 
         private List<SIN> GetSinsInGame(params Expression<Func<SIN, object>>[] includes)

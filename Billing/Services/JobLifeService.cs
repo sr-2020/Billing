@@ -116,50 +116,47 @@ namespace Jobs
             }
             return $"Пересчет для {cycle.Token}_{cycle.Number} запущен ";
         }
-
+        int _bulk = 1;
         private JobLifeDto DoCharactersBeat(JobLifeDto beat)
         {
             Console.WriteLine("Запущен пересчет персонажей");
             var sins = Factory.Billing.GetActiveSins(s => s.Wallet, s => s.Character);
             Console.WriteLine($"Обрабатывается {sins.Count} персонажей");
             var charactersLoaded = false;
-            var concurrent = new ConcurrentQueue<ImportDto>();
-            var processedList = new List<ImportDto>();
-            var errorList = new List<ImportDto>();
+            var incomeList = new ConcurrentQueue<ImportDto>();
+            var processedList = new ConcurrentQueue<ImportDto>();
+            var errorList = new ConcurrentQueue<ImportDto>();
             var lsDto = new JobLifeStyleDto();
             var taskLoad = Task.Run(() =>
             {
-                LoadCharacters(sins, concurrent);
+                Console.WriteLine("Пошла внешняя загрузка персонажей");
+                LoadCharacters(sins, incomeList);
+                Console.WriteLine("Внешняя загрузка персонажей закончена");
                 charactersLoaded = true;
             });
             var taskProcess = Task.Run(() =>
             {
-                while (!charactersLoaded || !concurrent.IsEmpty)
+                while (!charactersLoaded || !incomeList.IsEmpty)
                 {
-                    ImportDto loaded;
-                    if (!concurrent.TryDequeue(out loaded))
+                    if (!charactersLoaded && incomeList.Count < _bulk)
                     {
                         Thread.Sleep(100);
                         continue;
                     }
-                    if (string.IsNullOrEmpty(loaded.ErrorText))
+                    var parallelList = new List<ImportDto>();
+                    ImportDto loaded;
+                    while (incomeList.TryDequeue(out loaded))
                     {
-                        try
+                        if (string.IsNullOrEmpty(loaded.ErrorText))
                         {
-                            lsDto = ProcessModelCharacter(loaded, lsDto);
-                            lsDto.Count++;
-                            processedList.Add(loaded);
+                            parallelList.Add(loaded);
                         }
-                        catch (Exception e)
+                        else
                         {
-                            loaded.ErrorText = e.ToString();
-                            errorList.Add(loaded);
+                            errorList.Enqueue(loaded);
                         }
                     }
-                    else
-                    {
-                        errorList.Add(loaded);
-                    }
+                    ParallelCharacters(parallelList, lsDto, processedList, errorList);
                 }
             });
             Task.WaitAll(taskLoad, taskProcess);
@@ -181,6 +178,30 @@ namespace Jobs
             return beat;
         }
 
+        private void ParallelCharacters(List<ImportDto> characters, JobLifeStyleDto lsDto, ConcurrentQueue<ImportDto> processed, ConcurrentQueue<ImportDto> errors)
+        {
+            Parallel.ForEach(characters, new ParallelOptions { MaxDegreeOfParallelism = _bulk },
+                () => new BeatCharacterLocalDto(),
+                (character, loopState, localDto) =>
+                {
+                    try
+                    {
+                        localDto = ProcessModelCharacter(character);
+                        processed.Enqueue(character);
+                    }
+                    catch (Exception e)
+                    {
+                        character.ErrorText = e.ToString();
+                        errors.Enqueue(character);
+                    }
+                    return localDto;
+                },
+                (final) =>
+                {
+                    lsDto.AddConcurrent(final);
+                });
+        }
+
         private string ProcessLifestyle(JobLifeStyleDto dto)
         {
             var db = new LifeStyleAppDto();
@@ -200,7 +221,7 @@ namespace Jobs
             return beat;
         }
 
-        private JobLifeStyleDto ProcessModelCharacter(ImportDto character, JobLifeStyleDto dto)
+        private BeatCharacterLocalDto ProcessModelCharacter(ImportDto character)
         {
             var billing = IocContainer.Get<IBillingManager>();
             var workModel = new WorkModelDto
@@ -211,8 +232,7 @@ namespace Jobs
                 StockGainPercentage = character?.EreminModel?.workModel?.billing?.stockGainPercentage ?? 0,
                 KarmaCount = character?.EreminModel?.workModel?.karma?.spent ?? 0
             };
-
-            dto = billing.ProcessCharacterBeat(character.Sin.Id, workModel, dto);
+            var dto = billing.ProcessCharacterBeat(character.Sin.Id, workModel);
             try
             {
                 EreminPushAdapter.SendNotification(character.Sin.Character.Model, "Кошелек", "Экономический пересчет завершен");

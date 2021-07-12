@@ -36,5 +36,7 @@ namespace Core.Model
         public Passport Passport { get; set; }
         [Column("insurance_last")]
         public int? OldInsurance { get; set; }
+        [Column("debug_time")]
+        public long? DebugTime { get; set; }
     }
 }
