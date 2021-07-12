@@ -116,7 +116,7 @@ namespace Jobs
             }
             return $"Пересчет для {cycle.Token}_{cycle.Number} запущен ";
         }
-        int _bulk = 1;
+        int _bulk = 5;
         private JobLifeDto DoCharactersBeat(JobLifeDto beat)
         {
             Console.WriteLine("Запущен пересчет персонажей");

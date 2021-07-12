@@ -78,7 +78,7 @@ namespace Billing
             var blocked = _settings.GetBoolValue(SystemSettingsEnum.block);
             if (blocked)
                 return false;
-            //_settings.SetValue(SystemSettingsEnum.block, "true");
+            _settings.SetValue(SystemSettingsEnum.block, "true");
             return true;
         }
 
@@ -87,7 +87,7 @@ namespace Billing
             var blocked = _settings.GetBoolValue(SystemSettingsEnum.block);
             if (!blocked)
                 return false;
-            //_settings.SetValue(SystemSettingsEnum.block, "false");
+            _settings.SetValue(SystemSettingsEnum.block, "false");
             return true;
         }
         public string GetCurrentToken()
