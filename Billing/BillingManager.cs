@@ -210,12 +210,14 @@ namespace Billing
                 localDto.SumKarma += karmasum;
                 AddNewTransfer(mir, sin.Wallet, karmasum, "Пассивный доход");
             }
+            var swIncome = Cut(sw);
             //rentas
             var rentas = GetList<Renta>(r => r.SinId == sin.Id, r => r.Shop.Wallet, r => r.Sku.Corporation.Wallet);
             foreach (var renta in rentas)
             {
                 ProcessRenta(renta, mir, sin);
             }
+            var swRentas = Cut(sw);
             //metatype
             if (sin.Passport.MetatypeId != sin.OldMetaTypeId)
             {
@@ -247,10 +249,19 @@ namespace Billing
             localDto.SumRents += outcome;
             sin.Wallet.IncomeOutcome = income - outcome;
             localDto = AddLifeStyle(sin.Wallet, localDto);
+            SaveContext();
+            var swOther = Cut(sw);
             sw.Stop();
-            sin.DebugTime = (long)Math.Truncate(sw.Elapsed.TotalSeconds);
+            sin.DebugTime = Serialization.Serializer.ToJSON(new { swOther, swRentas, swIncome });
             UnblockCharacter(sin);
             return localDto;
+        }
+
+        private double Cut(Stopwatch sw)
+        {
+            var result = sw.Elapsed.TotalSeconds;
+            sw.Restart();
+            return result;
         }
 
         private BeatCharacterLocalDto AddLifeStyle(Wallet wallet, BeatCharacterLocalDto dto)

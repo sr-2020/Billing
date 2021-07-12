@@ -156,7 +156,9 @@ namespace Jobs
                             errorList.Enqueue(loaded);
                         }
                     }
+                    Console.WriteLine($"Внутренняя обработка пачки из {parallelList.Count} персонажей");
                     ParallelCharacters(parallelList, lsDto, processedList, errorList);
+                    Console.WriteLine($"Внутренняя обработка пачки из {parallelList.Count} персонажей");
                 }
             });
             Task.WaitAll(taskLoad, taskProcess);

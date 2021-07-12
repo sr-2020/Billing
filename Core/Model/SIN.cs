@@ -37,6 +37,6 @@ namespace Core.Model
         [Column("insurance_last")]
         public int? OldInsurance { get; set; }
         [Column("debug_time")]
-        public long? DebugTime { get; set; }
+        public string DebugTime { get; set; }
     }
 }
