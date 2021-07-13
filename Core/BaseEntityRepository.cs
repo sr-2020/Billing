@@ -47,6 +47,7 @@ namespace Core
 
         public void SaveContext()
         {
+            this.Context.ChangeTracker.DetectChanges();
             Context?.SaveChanges();
         }
 

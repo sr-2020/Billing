@@ -67,7 +67,7 @@ namespace Jobs
                     var beat = Factory.Job.GetLastBeatAsNoTracking(cycle.Id, type);
                     var newBeat = new BillingBeat();
                     newBeat.Number = beat != null ? ++beat.Number : 1;
-                    newBeat.StartTime = DateTime.Now;
+                    newBeat.StartTime = DateTime.Now.ToUniversalTime();
                     newBeat.CycleId = cycle.Id;
                     newBeat.BeatType = (int)type;
                     Factory.Job.AddAndSave(newBeat);
@@ -90,7 +90,7 @@ namespace Jobs
                             dto.AddHistory("unknown beat type");
                             break;
                     }
-                    dto.Beat.FinishTime = DateTime.Now;
+                    dto.Beat.FinishTime = DateTime.Now.ToUniversalTime();
                     Factory.Job.AddAndSave(dto.Beat);
                     Factory.Job.AddRangeAndSave(dto.History);
                 }
@@ -116,7 +116,7 @@ namespace Jobs
             }
             return $"Пересчет для {cycle.Token}_{cycle.Number} запущен ";
         }
-        int _bulk = 5;
+        int _bulk = 1;
         private JobLifeDto DoCharactersBeat(JobLifeDto beat)
         {
             Console.WriteLine("Запущен пересчет персонажей");

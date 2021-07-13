@@ -285,7 +285,7 @@ namespace Billing
             nomenklatura.SpecialisationId = specialisation.Id;
             nomenklatura.Lifestyle = lifestyle;
             nomenklatura.Lifestyle = (int)BillingHelper.GetLifestyle(nomenklatura.Lifestyle);
-            Context.SaveChanges();
+            SaveContext();
             nomenklatura = GetAsNoTracking<Nomenklatura>(n => n.Id == nomenklatura.Id, n => n.Specialisation.ProductType);
             if (nomenklatura == null)
                 throw new Exception("Создать nomenklatura не получилось");
@@ -330,7 +330,7 @@ namespace Billing
                 throw new BillingException("Nomenklatura not found");
             }
             sku.NomenklaturaId = nomenklatura.Id;
-            Context.SaveChanges();
+            SaveContext();
             sku = GetAsNoTracking<Sku>(s => s.Id == sku.Id, s => s.Nomenklatura.Specialisation.ProductType);
             if (sku == null)
                 throw new Exception("создать sku не получилось");
@@ -503,7 +503,7 @@ namespace Billing
             var anonto = GetAnon(sinTo.Character.Model);
             var anon = allAnon|| anonFrom || anonto;
             var transfer = AddNewTransfer(sinFrom.Wallet, sinTo.Wallet, amount, comment, anon);
-            Context.SaveChanges();
+            SaveContext();
             if (transfer != null)
             {
                 EreminPushAdapter.SendNotification(sinTo.Character.Model, "Кошелек", $"Вам переведено денег {amount}");
@@ -518,7 +518,7 @@ namespace Billing
             if (shop == null)
                 throw new BillingNotFoundException($"shop {shopId} not found");
             var transfer = AddNewTransfer(shop.Wallet, sin.Wallet, amount, comment, anon);
-            Context.SaveChanges();
+            SaveContext();
             return transfer;
         }
 
@@ -542,7 +542,7 @@ namespace Billing
                     Encoded = EreminQrService.GetQRUrl(qr.QRID)
                 };
                 Add(cache);
-                Context.SaveChanges();
+                SaveContext();
             }
             qr.QR = cache.Encoded;
             return qr;

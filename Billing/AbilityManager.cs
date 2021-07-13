@@ -35,7 +35,7 @@ namespace Billing
 
         public void Rerent(int modelId, int rentaId, string qrCode)
         {
-            var renta = Get<Renta>(r => r.Id == rentaId && r.QRRecorded == qrCode.ToString(), r => r.Sin.Character, r => r.Sin.Scoring, r => r.Sin.Passport, r => r.Sku.Nomenklatura);
+            var renta = Get<Renta>(r => r.Id == rentaId, r => r.Sin.Character, r => r.Sin.Scoring, r => r.Sin.Passport, r => r.Sku.Nomenklatura);
             if (renta == null)
             {
                 ErrorNotify("Переоформить ренту", rentaId, qrCode, modelId);

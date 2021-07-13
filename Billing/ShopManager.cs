@@ -62,7 +62,7 @@ namespace Billing
             var shopWalletFrom = Get<ShopWallet>(s => s.Id == shopFrom, s => s.Wallet);
             var shopWalletTo = Get<ShopWallet>(s => s.Id == shopTo, s => s.Wallet);
             var transfer = AddNewTransfer(shopWalletFrom.Wallet, shopWalletTo.Wallet, amount, comment);
-            Context.SaveChanges();
+            SaveContext();
             return transfer;
         }
 

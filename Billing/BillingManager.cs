@@ -73,7 +73,7 @@ namespace Billing
             if (contract == null)
                 throw new BillingException("Контракт не найден");
             Remove(contract);
-            Context.SaveChanges();
+            SaveContext();
         }
 
         public Contract CreateContract(int corporation, int shop)
@@ -89,7 +89,7 @@ namespace Billing
                 Status = (int)ContractStatusEnum.Approved
             };
             Add(newContract);
-            Context.SaveChanges();
+            SaveContext();
             return newContract;
         }
 
@@ -156,7 +156,7 @@ namespace Billing
         private decimal GetDividends(CorporationWallet mortagee, decimal percent, decimal defaultValue)
         {
             decimal sum = 0;
-            if(mortagee != null)
+            if (mortagee != null)
             {
                 sum = mortagee.LastSkuSold * percent;
             }
@@ -218,6 +218,18 @@ namespace Billing
                 ProcessRenta(renta, mir, sin);
             }
             var swRentas = Cut(sw);
+            //overdrafts
+            if (sin.Wallet.Balance > 0)
+            {
+                var allOverdrafts = GetList<Transfer>(t => t.Overdraft && t.WalletFromId == sin.Wallet.Id && t.RentaId > 0);
+                foreach (var overdraft in allOverdrafts)
+                {
+                    overdraft.Overdraft = false;
+                    var closingRenta = Get<Renta>(r => r.Id == overdraft.RentaId, r => r.Sku.Corporation, r => r.Shop.Wallet);
+                    CloseOverdraft(closingRenta, mir, sin);
+                }
+            }
+            var swoverdrafts = Cut(sw);
             //metatype
             if (sin.Passport.MetatypeId != sin.OldMetaTypeId)
             {
@@ -252,7 +264,7 @@ namespace Billing
             SaveContext();
             var swOther = Cut(sw);
             sw.Stop();
-            sin.DebugTime = Serialization.Serializer.ToJSON(new { swOther, swRentas, swIncome });
+            sin.DebugTime = Serialization.Serializer.ToJSON(new { swIncome, swRentas, swoverdrafts, swOther });
             UnblockCharacter(sin);
             return localDto;
         }
@@ -372,7 +384,7 @@ namespace Billing
             }
             if (!string.IsNullOrEmpty(name))
                 type.Name = name;
-            Context.SaveChanges();
+            SaveContext();
             return type;
         }
 
@@ -408,19 +420,22 @@ namespace Billing
             var specialissations = GetList<CorporationSpecialisation>(c => c.CorporationId == corporationId);
             foreach (var specialisation in specialissations)
             {
-                var nomenklaturas = GetList<Nomenklatura>(n => n.SpecialisationId == specialisation.Id);
+                var nomenklaturas = GetList<Nomenklatura>(n => n.SpecialisationId == specialisation.Id, n => n.Specialisation);
                 foreach (var nomenklatura in nomenklaturas)
                 {
                     var sku = Get<Sku>(s => s.NomenklaturaId == nomenklatura.Id && s.CorporationId == corporationId);
-                    if(sku != null)
+                    if (sku != null)
                     {
                         continue;
                     }
+                    var enabled = true;
+                    if (nomenklatura.Specialisation.Name.Contains("анлок"))
+                        enabled = false;
                     sku = new Sku
                     {
                         CorporationId = corporationId,
-                        Count = 1,
-                        Enabled = false,
+                        Count = nomenklatura.BaseCount,
+                        Enabled = enabled,
                         Name = $"{nomenklatura.Name} ({corporation.Name})",
                         NomenklaturaId = nomenklatura.Id,
                         Price = nomenklatura.BasePrice * specialisation.Ratio

@@ -89,7 +89,7 @@ namespace Settings
             if (ss == null)
                 throw new Exception($"systemSetting {key} not found");
             ss.Value = value;
-            Context.SaveChanges();
+            SaveContext();
             return ss;
         }
 

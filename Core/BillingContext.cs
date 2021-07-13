@@ -2,19 +2,58 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
 using System.Text;
 
 namespace Core
 {
+    class TraceLoggerProvider : ILoggerProvider
+    {
+        public ILogger CreateLogger(string categoryName)
+        {
+            return new TraceLogger(categoryName);
+        }
+
+        public void Dispose()
+        {
+        }
+    }
+    public class TraceLogger : ILogger
+    {
+        private readonly string categoryName;
+        public TraceLogger(string categoryName) => this.categoryName = categoryName;
+        public bool IsEnabled(LogLevel logLevel) => true;
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception exception,
+            Func<TState, Exception, string> formatter)
+        {
+            Trace.WriteLine($"{DateTime.Now.ToString("o")} {logLevel} {eventId.Id} {this.categoryName}");
+            Trace.WriteLine(formatter(state, exception));
+        }
+        public IDisposable BeginScope<TState>(TState state) => null;
+    }
+
     public class BillingContext : DbContext
     {
+        public BillingContext()
+        {
+            ChangeTracker.AutoDetectChangesEnabled = false;
+        }
+        private static readonly Lazy<LoggerFactory> LoggerFactory = new Lazy<LoggerFactory>(() => new LoggerFactory(new[] { new TraceLoggerProvider() }), false);
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql(SystemHelper.GetConnectionString());
-            optionsBuilder.EnableSensitiveDataLogging();
+            
+            //optionsBuilder.UseLoggerFactory(LoggerFactory.Value);
+            //optionsBuilder.EnableSensitiveDataLogging();
         }
         public DbSet<BillingAbilityLog> AbilityLogs { get; set; }
         public DbSet<BillingBeat> BillingCycle { get; set; }

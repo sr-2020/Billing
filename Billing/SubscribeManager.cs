@@ -22,7 +22,7 @@ namespace Billing
                 Message = message
             };
             Context.Add(log);
-            Context.SaveChanges();
+            SaveContext();
         }
     }
 }
