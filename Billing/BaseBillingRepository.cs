@@ -85,6 +85,7 @@ namespace Billing
             scoring.StartFactor = 1;
             scoring.CurrentFix = 0.5m;
             scoring.CurerentRelative = 0.5m;
+            SaveContext();
             var categories = GetList<ScoringCategory>(c => c.CategoryType > 0);
             foreach (var category in categories)
             {
@@ -103,6 +104,7 @@ namespace Billing
                 };
                 Add(current);
             }
+            SaveContext();
             var transfers = GetList<Transfer>(t => t.WalletFromId == sin.WalletId || t.WalletToId == sin.WalletId);
             RemoveRange(transfers);
             SaveContext();
