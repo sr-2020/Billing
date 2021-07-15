@@ -420,7 +420,7 @@ namespace Billing
             var specialissations = GetList<CorporationSpecialisation>(c => c.CorporationId == corporationId);
             foreach (var specialisation in specialissations)
             {
-                var nomenklaturas = GetList<Nomenklatura>(n => n.SpecialisationId == specialisation.Id, n => n.Specialisation);
+                var nomenklaturas = GetList<Nomenklatura>(n => n.SpecialisationId == specialisation.SpecialisationId, n => n.Specialisation);
                 foreach (var nomenklatura in nomenklaturas)
                 {
                     var sku = Get<Sku>(s => s.NomenklaturaId == nomenklatura.Id && s.CorporationId == corporationId);
