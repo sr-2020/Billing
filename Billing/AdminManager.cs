@@ -99,7 +99,7 @@ namespace Billing
                 throw new BillingNotFoundException($"Корпорация {corporationId} не найдена");
 
             var specialisationIds = corporation.Specialisations.Select(s => s.SpecialisationId);
-            var specialisations = GetList<Specialisation>(s => specialisationIds.Contains(s.Id));
+            var specialisations = GetList<Specialisation>(s => specialisationIds.Contains(s.Id), s=> s.ProductType);
             return new CorporationDetailedDto(corporation, specialisations);
         }
 
