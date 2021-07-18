@@ -22,6 +22,11 @@ namespace Jobs
 {
     public class JobLifeService : BaseService
     {
+        int _bulk = 1;
+        public JobLifeService():base()
+        {
+            _bulk = Factory.Settings.GetIntValue(SystemSettingsEnum.parallel_count);
+        }
         public const string BillingException = "Биллинг заблокирован";
 
         public string ToggleCycle(string token = "")
@@ -116,7 +121,7 @@ namespace Jobs
             }
             return $"Пересчет для {cycle.Token}_{cycle.Number} запущен ";
         }
-        int _bulk = 1;
+
         private JobLifeDto DoCharactersBeat(JobLifeDto beat)
         {
             Console.WriteLine("Запущен пересчет персонажей");

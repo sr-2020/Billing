@@ -251,17 +251,22 @@ namespace Billing
         {
             var code = renta.Sku.Nomenklatura.Code;
             var pt = ProductTypeEnum.Spirit.ToString();
-            if(renta.Sku.Nomenklatura.Specialisation.ProductType.Alias == pt)
+            if (renta.Sku.Nomenklatura.Specialisation.ProductType.Alias == pt)
             {
                 var magic = new MagicService();
-                
+                var intqr = int.Parse(qrDecoded);
+                magic.PutSpiritInJar(intqr, code).GetAwaiter().GetResult();
+                qrDecoded = $"spirit {qrDecoded}";
             }
-            var name = renta.Sku.Name;
-            var description = renta.Sku.Nomenklatura.Description;
-            _ereminService.WriteQR(qrDecoded, code, name, description, renta.Count, renta.BasePrice, BillingHelper.GetFinalPrice(renta), renta.Secret, renta.Id, (Lifestyles)renta.LifeStyle).GetAwaiter().GetResult();
-            var oldQR = Get<Renta>(r => r.QRRecorded == qrDecoded);
-            if (oldQR != null)
-                oldQR.QRRecorded = $"{qrDecoded} deleted";
+            else
+            {
+                var name = renta.Sku.Name;
+                var description = renta.Sku.Nomenklatura.Description;
+                _ereminService.WriteQR(qrDecoded, code, name, description, renta.Count, renta.BasePrice, BillingHelper.GetFinalPrice(renta), renta.Secret, renta.Id, (Lifestyles)renta.LifeStyle).GetAwaiter().GetResult();
+                var oldQR = Get<Renta>(r => r.QRRecorded == qrDecoded);
+                if (oldQR != null)
+                    oldQR.QRRecorded = $"{qrDecoded} deleted";
+            }
             renta.QRRecorded = qrDecoded;
         }
 

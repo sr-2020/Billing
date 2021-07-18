@@ -33,8 +33,8 @@ namespace Billing
 
         public void StealMoney(int modelFrom, int modelTo, decimal amount, string comment)
         {
-            var from = GetSINByModelId(modelFrom);
-            var to = GetSINByModelId(modelTo);
+            var from = GetSINByModelId(modelFrom, s => s.Character, s => s.Wallet);
+            var to = GetSINByModelId(modelTo, s => s.Character, s => s.Wallet);
             if (BillingHelper.IsAdmin(modelFrom))
             {
                 throw new BillingException("У него нельзя воровать. Ваше местоположение зафиксировано, информация в нужные службы поступила");

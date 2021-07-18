@@ -32,6 +32,7 @@ namespace Core.Primitives
         dividents2_k,
         dividents3_k,
         ls_dto,
-        beat_characters_dto
+        beat_characters_dto,
+        parallel_count
     }
 }
