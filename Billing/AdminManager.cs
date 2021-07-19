@@ -99,7 +99,7 @@ namespace Billing
                 throw new BillingNotFoundException($"Корпорация {corporationId} не найдена");
 
             var specialisationIds = corporation.Specialisations.Select(s => s.SpecialisationId);
-            var specialisations = GetList<Specialisation>(s => specialisationIds.Contains(s.Id), s=> s.ProductType);
+            var specialisations = GetList<Specialisation>(s => specialisationIds.Contains(s.Id), s => s.ProductType);
             return new CorporationDetailedDto(corporation, specialisations);
         }
 
@@ -123,12 +123,12 @@ namespace Billing
                 throw new BillingNotFoundException($"corporation {corporation} not found");
             }
             var dbspec = Get<Specialisation>(s => s.Id == specialisation);
-            if(dbspec== null)
+            if (dbspec == null)
             {
                 throw new BillingNotFoundException($"specialisation {specialisation} not found");
             }
             var corpspec = Get<CorporationSpecialisation>(c => c.SpecialisationId == specialisation && c.CorporationId == corporation);
-            if(corpspec == null)
+            if (corpspec == null)
             {
                 corpspec = new CorporationSpecialisation { CorporationId = corporation, SpecialisationId = specialisation };
             }
@@ -166,14 +166,16 @@ namespace Billing
 
         public List<UserDto> GetUsers()
         {
-            var list = GetActiveSins(u => u.Character, u => u.Wallet, u => u.Passport); 
+            var list = GetActiveSins(u => u.Character, u => u.Wallet, u => u.Passport);
             return list.Select(c => new UserDto(c)).ToList();
         }
 
         public List<SIN> GetActiveSins(params Expression<Func<SIN, object>>[] includes)
         {
             var currentGame = 1;
-            var sins = GetListAsNoTracking(s => (s.InGame ?? false) && s.Character.Game == currentGame && (s.EVersion == "4" || s.EVersion == "3"), includes);
+            var join = GetListAsNoTracking<JoinCharacter>(c => !c.Payed).Select(j => j.CharacterId);
+            var sins = GetListAsNoTracking(s => (s.InGame ?? false) && s.Character.Game == currentGame && (s.EVersion == "4"), includes);
+            sins = sins.Where(s => !join.Contains(s.CharacterId)).ToList();
             return sins;
         }
 
@@ -501,7 +503,7 @@ namespace Billing
         {
             var anonFrom = GetAnon(sinFrom.Character.Model);
             var anonto = GetAnon(sinTo.Character.Model);
-            var anon = allAnon|| anonFrom || anonto;
+            var anon = allAnon || anonFrom || anonto;
             var transfer = AddNewTransfer(sinFrom.Wallet, sinTo.Wallet, amount, comment, anon);
             SaveContext();
             if (transfer != null)

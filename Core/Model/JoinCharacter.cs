@@ -14,6 +14,7 @@ namespace Core.Model
         public virtual Character Character { get; set; }
         [Column("name")]
         public string Name { get; set; }
-
+        [Column("payed")]
+        public bool Payed { get; set; }
     }
 }

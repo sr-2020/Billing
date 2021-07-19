@@ -135,27 +135,30 @@ namespace Billing
             }
             var ls = (int)lifestyle;
             var pt = ProductTypeEnum.Insurance.ToString();
-            if (lifestyle == Lifestyles.Iridium)
+            if (lifestyle == Lifestyles.Wood)
             {
-                citizen = Get<CorporationWallet>(c => c.Alias == "JoyCorp");
+                citizen = Get<CorporationWallet>(c => c.Alias == "Omnistar");
                 if (citizen == null)
                     throw new BillingNotFoundException("Гражданство при инициализации не найдено");
-                shop = Get<ShopWallet>(s => s.Name == "А-Мур");
-                sin.Wallet.IsIrridium = true;
+                shop = Get<ShopWallet>(s => s.Name == "МЧС");
             }
-            else
+            else 
             {
-                citizen = Get<CorporationWallet>(c => c.Alias == sin.Passport.Citizenship);
-                if (citizen == null)
-                    throw new BillingNotFoundException("Гражданство при инициализации не найдено");
-                if (citizen.Alias == "Россия")
+                if(sin.Passport.Citizenship == "Россия")
                 {
-                    shop = Get<ShopWallet>(s => s.Name == "Мэрия г. Иркутск");
+                    citizen = Get<CorporationWallet>(c => c.Alias == "Россия");
+                    shop = Get<ShopWallet>(s => s.Name == "МЧС");
                 }
                 else
                 {
+                    citizen = Get<CorporationWallet>(c => c.Alias == "Zurich-Orbital");
                     shop = Get<ShopWallet>(s => s.Name == "CrashCart");
                 }
+                
+                if (citizen == null)
+                    throw new BillingNotFoundException("Гражданство при инициализации не найдено");
+                if(shop == null)
+                    throw new BillingNotFoundException("Продавец страховки при инициализации не найден");
             }
             sku = Get<Sku>(s => s.CorporationId == citizen.Id && s.Nomenklatura.Specialisation.ProductType.Alias == pt && s.Nomenklatura.Lifestyle == ls, s => s.Nomenklatura.Specialisation.ProductType, s => s.Corporation);
             if (sku == null)
