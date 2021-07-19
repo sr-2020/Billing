@@ -17,7 +17,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
   deploy_rc:
-#    if: github.ref == 'refs/heads/rc'
+    if: github.ref == 'refs/heads/rc'
     runs-on: ubuntu-20.04
     needs: [build]
     steps:
@@ -37,7 +37,7 @@ jobs:
             --set image.tag=$GITHUB_SHA
 
   deploy_production:
-#    if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-20.04
     needs: [build]
     steps:
