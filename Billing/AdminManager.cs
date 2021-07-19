@@ -133,6 +133,7 @@ namespace Billing
                 corpspec = new CorporationSpecialisation { CorporationId = corporation, SpecialisationId = specialisation };
             }
             corpspec.Ratio = ratio;
+            Add(corpspec);
             SaveContext();
         }
 
