@@ -2,4 +2,3 @@ app:
   postgres:
     dbHost: postgres13
     dbnameBilling: sr2020
-    
