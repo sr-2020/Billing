@@ -414,5 +414,17 @@ namespace BillingAPI.Controllers
             return result;
         }
 
+        /// <summary>
+        /// GetUsers
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("a-user-balance")]
+        public DataResult<Transfer> UpdateBalance([FromBody] CreateTransferSinSinRequest request)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.CreateTransferMIRSIN(request.CharacterTo, request.Amount), "createtransfermir");
+            return result;
+        }
+
     }
 }

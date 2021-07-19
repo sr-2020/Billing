@@ -40,6 +40,14 @@ namespace Core
         public IDisposable BeginScope<TState>(TState state) => null;
     }
 
+    public class SecondBillingContext: BillingContext
+    {
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseNpgsql(SystemHelper.GetConnectionString());
+        }
+    }
+
     public class BillingContext : DbContext
     {
         public BillingContext()
@@ -52,8 +60,6 @@ namespace Core
         {
             optionsBuilder.UseNpgsql(SystemHelper.GetConnectionString());
             
-            //optionsBuilder.UseLoggerFactory(LoggerFactory.Value);
-            //optionsBuilder.EnableSensitiveDataLogging();
         }
         public DbSet<BillingAbilityLog> AbilityLogs { get; set; }
         public DbSet<BillingBeat> BillingCycle { get; set; }

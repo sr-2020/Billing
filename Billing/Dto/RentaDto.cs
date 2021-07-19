@@ -27,7 +27,7 @@ namespace Billing.DTO
             QRRecorded = renta.QRRecorded;
             DateCreated = renta.DateCreated;
             Specialisation = renta.Sku?.Nomenklatura?.Specialisation?.Name;
-            Stealable = !renta.HasQRWrite;
+            Stealable = renta.Stealable;
             Count = renta.Count;
         }
         [Display(Name = "SIN")]

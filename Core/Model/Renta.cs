@@ -51,7 +51,7 @@ namespace Core.Model
 
         public bool Stealable
         {
-            get { return HasQRWrite; }
+            get { return !HasQRWrite; }
         }
     }
 }
