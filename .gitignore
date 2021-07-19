@@ -38,3 +38,4 @@ bld/
 BillingAPI/Dockerfile
 elixirkey.json
 BillingTests/*
+TestConsole/*
