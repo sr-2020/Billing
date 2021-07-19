@@ -64,7 +64,9 @@ namespace PubSubService
                 case ActiveAbility.SleepCheck:
                     IocContainer.Get<IAbilityManager>().Marauder(BillingHelper.ParseId(model?.CharacterId, "characterId"), BillingHelper.ParseId(model?.bodyStorage?.Data?.Body?.CharacterId, "TargetCharacterId"), true);
                     break;
-
+                case ActiveAbility.SaveScoring:
+                    IocContainer.Get<IAbilityManager>().SaveScoring(BillingHelper.ParseId(model?.TargetCharacterId, "TargetCharacterId"), BillingHelper.ParseId(model?.QrCode?.Data?.DealId, "DealId"), model?.QrCode?.ModelId);
+                    break;
                 default:
                     break;
             }

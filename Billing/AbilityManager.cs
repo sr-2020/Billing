@@ -14,6 +14,7 @@ namespace Billing
         void LetMePay(int modelId, int rentaId, string qrCode);
         void Rerent(int modelId, int rentaId, string qrCode);
         void Marauder(int modelId, int targetId, bool anon = false);
+        void SaveScoring(int modelId, int rentaId, string qrCode);
     }
 
     public class AbilityManager : ShopManager, IAbilityManager
@@ -70,11 +71,29 @@ namespace Billing
             EreminPushAdapter.SendNotification(modelId, "Давай он заплатит", "Рента переоформлена");
         }
 
-        private void ErrorNotify(string subject, int rentaId, string qrCode, int modelId)
+        public void SaveScoring(int modelId, int rentaId, string qrCode)
         {
-            var errormessage = $"Рента {rentaId} записанная на {qrCode} не найдена";
-            EreminPushAdapter.SendNotification(modelId, subject, errormessage);
-            throw new BillingNotFoundException(errormessage);
+            var renta = Get<Renta>(r => r.Id == rentaId, r => r.Sin.Character, r => r.Sin.Scoring, r => r.Sin.Passport, r => r.Sku.Nomenklatura);
+            if (renta == null)
+            {
+                ErrorNotify("Переоформить ренту", rentaId, qrCode, modelId);
+            }
+            var sin = GetSINByModelId(modelId);
+            if(sin == null)
+            {
+                ErrorNotify("Переоформить ренту", rentaId, qrCode, modelId, "Ошибка получения пользователя");
+            }
+            renta.SinId = sin.Id;
+            SaveContext();
+            EreminPushAdapter.SendNotification(modelId, "Переоформить ренту", "Рента переоформлена");
+        }
+
+        private void ErrorNotify(string subject, int rentaId, string qrCode, int modelId, string message = "")
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                message = $"Рента {rentaId} записанная на {qrCode} не найдена";
+            EreminPushAdapter.SendNotification(modelId, subject, message);
+            throw new BillingNotFoundException(message);
         }
 
     }
