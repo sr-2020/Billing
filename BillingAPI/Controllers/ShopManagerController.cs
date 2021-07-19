@@ -176,7 +176,17 @@ namespace BillingAPI.Controllers
         public DataResult<RentaDto> CreateRenta([FromBody] CreateRentaRequest request)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.ConfirmRenta(request.Character, request.PriceId, request.Count), $"createrenta {request.Character}:{request.PriceId}:{request.Count}");
+            var job = IocContainer.Get<IJobManager>();
+            var beat = 0;
+            try
+            {
+                beat = job.GetLastBeatAsNoTracking(Core.Primitives.BeatTypes.Characters)?.Id ?? 0;
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e.ToString());
+            }
+            var result = RunAction(() => manager.ConfirmRenta(request.Character, request.PriceId, beat, request.Count), $"createrenta {request.Character}:{request.PriceId}:{request.Count}");
             return result;
         }
 

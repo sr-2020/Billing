@@ -47,17 +47,5 @@ namespace BillingAPI.Controllers
         }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("addinsurances")]
-        public ActionResult AddInsurances()
-        {
-            var manager = IocContainer.Get<IInsuranceManager>();
-            manager.AddInsurances();
-            return new JsonResult("success");
-        }
-
     }
 }

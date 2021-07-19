@@ -163,7 +163,7 @@ namespace Billing
             if (shop == null)
                 throw new BillingNotFoundException("Магазин стартовой страховки не найден");
             var price = CreateNewPrice(sku, shop, sin);
-            var renta = CreateRenta(sin.Character.Model, price.Id, 1);
+            var renta = CreateRenta(sin.Character.Model, price.Id, 0, 1);
             sin.EVersion = "4";
             SaveContext();
         }
@@ -202,7 +202,7 @@ namespace Billing
             }
         }
 
-        protected Renta CreateRenta(int modelId, int priceId, int count = 1)
+        protected Renta CreateRenta(int modelId, int priceId, int beat, int count = 1)
         {
             var sin = BillingBlocked(modelId, s => s.Wallet, s => s.Character, s => s.Passport);
             if (count == 0)
@@ -251,7 +251,8 @@ namespace Billing
                 Secret = gmdescript,
                 LifeStyle = price.Sku.Nomenklatura.Lifestyle,
                 Count = count,
-                FullPrice = price.Sku.Nomenklatura.Specialisation.ProductType.Alias == ProductTypeEnum.Charity.ToString()
+                FullPrice = price.Sku.Nomenklatura.Specialisation.ProductType.Alias == ProductTypeEnum.Charity.ToString(),
+                BeatId = beat
             };
             Add(renta);
             price.Confirmed = true;

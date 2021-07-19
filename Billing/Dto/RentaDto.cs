@@ -29,6 +29,7 @@ namespace Billing.DTO
             Specialisation = renta.Sku?.Nomenklatura?.Specialisation?.Name;
             Stealable = renta.Stealable;
             Count = renta.Count;
+            BeatId = renta.BeatId;
         }
         [Display(Name = "SIN")]
         public string ModelId { get; set; }
@@ -55,6 +56,7 @@ namespace Billing.DTO
         public decimal Discount { get; set; }
         public decimal Scoring { get; set; }
         public bool Stealable { get; set; }
+        public int BeatId { get; set; }
     }
 
     public class RentaSumDto

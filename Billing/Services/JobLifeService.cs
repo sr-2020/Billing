@@ -23,7 +23,7 @@ namespace Jobs
     public class JobLifeService : BaseService
     {
         int _bulk = 1;
-        public JobLifeService():base()
+        public JobLifeService() : base()
         {
             _bulk = Factory.Settings.GetIntValue(SystemSettingsEnum.parallel_count);
         }
@@ -71,7 +71,7 @@ namespace Jobs
                 {
                     var beat = Factory.Job.GetLastBeatAsNoTracking(cycle.Id, type);
                     var newBeat = new BillingBeat();
-                    newBeat.Number = beat != null ? ++beat.Number : 1;
+                    newBeat.Number = beat != null ? beat.Number + 1 : 1;
                     newBeat.StartTime = DateTime.Now.ToUniversalTime();
                     newBeat.CycleId = cycle.Id;
                     newBeat.BeatType = (int)type;

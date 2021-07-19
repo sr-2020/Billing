@@ -37,7 +37,7 @@ namespace Billing
         PriceShopDto GetPrice(int modelId, int shop, int sku);
         void BreakContract(int corporation, int shop);
         Contract CreateContract(int corporation, int shop);
-        RentaDto ConfirmRenta(int modelId, int priceId, int count = 1);
+        RentaDto ConfirmRenta(int modelId, int priceId, int beat, int count = 1);
         List<SkuDto> GetSkuDtos(int corporationId, int nomenklaturaId, bool? enabled, int id = -1);
         ProductType GetExtProductType(string name);
         Nomenklatura GetExtNomenklatura(string name);
@@ -145,9 +145,9 @@ namespace Billing
 
         }
 
-        public RentaDto ConfirmRenta(int modelId, int priceId, int count = 1)
+        public RentaDto ConfirmRenta(int modelId, int priceId, int beat, int count = 1)
         {
-            var renta = CreateRenta(modelId, priceId, count);
+            var renta = CreateRenta(modelId, priceId, beat, count);
             EreminPushAdapter.SendNotification(modelId, "Покупка совершена", $"Вы купили {renta.Sku.Name}");
             var dto = new RentaDto(renta);
             return dto;
@@ -340,10 +340,29 @@ namespace Billing
             if (sin == null)
                 throw new BillingException("sin not found");
             var listFrom = GetListAsNoTracking<Transfer>(t => t.WalletFromId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
+            var listFromTruncated = listFrom.Where(t => t.RentaId == null).ToList();
             var listTo = GetListAsNoTracking<Transfer>(t => t.WalletToId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
             var owner = BillingHelper.GetPassportName(sin.Passport);
-            result.Transfers = CreateTransfersDto(listFrom, listTo, owner);
+            result.Transfers = CreateTransfersDto(listFromTruncated, listTo, owner);
+            result.Transfers.Insert(0, CreateFakeTransferDto(-1, listFrom.Where(r => r.RentaId != null && !r.Overdraft).Sum(t => t.Amount), false, "Выплаченная сумма по рентам", owner, false));
+            result.Transfers.Insert(0, CreateFakeTransferDto(-2, listFrom.Where(r => r.RentaId != null && r.Overdraft).Sum(t => t.Amount), false, "Задолженность по рентам", owner, false));
             return result;
+        }
+
+        private TransferDto CreateFakeTransferDto(int id, decimal amount, bool anon, string comment, string owner, bool overdraft)
+        {
+            return new TransferDto
+            {
+                Amount = amount,
+                Anonimous = anon,
+                Comment = comment,
+                From = owner,
+                OperationTime = DateTime.Now.ToUniversalTime(),
+                Overdraft = overdraft,
+                To = "MIR",
+                TransferType = TransferType.Outcoming.ToString(),
+                Id = id
+            };
         }
 
         public string GetSinStringByCharacter(int modelId)
