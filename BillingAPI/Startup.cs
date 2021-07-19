@@ -8,6 +8,7 @@ using Core;
 using IoC.Init;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -54,10 +55,11 @@ namespace BillingAPI
             {
                 options.AddPolicy("FullAccessPolicy", builder =>
                 {
-                    builder.AllowAnyOrigin()
+                    builder
                         .AllowAnyMethod()
-                        .AllowAnyHeader();
-                        //.AllowCredentials();
+                        .AllowAnyHeader()
+                        .SetIsOriginAllowed(origin => true) // allow any origin
+                        .AllowCredentials(); // allow credentials
                 });
             });
             #endregion
@@ -102,6 +104,15 @@ namespace BillingAPI
 
             #region cors
             app.UseCors("FullAccessPolicy");
+            app.UseCookiePolicy(
+                new CookiePolicyOptions()
+                {
+                    MinimumSameSitePolicy = SameSiteMode.None,
+                    Secure = CookieSecurePolicy.Always,
+                    HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.None
+                }
+            );
+
             #endregion
 
             app.UseRouting();
