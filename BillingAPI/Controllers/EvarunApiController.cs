@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web.Http;
 using BillingAPI.Model;
 using Core;
 using Core.Exceptions;
@@ -47,10 +46,6 @@ namespace BillingAPI.Controllers
             catch (BillingException ex)
             {
                 return HandleException(422, ex.Message, guid, result, actionName, logmessage);
-            }
-            catch (HttpResponseException re)
-            {
-                return HandleException((int)re.Response.StatusCode, re.Message, guid, result, actionName, logmessage);
             }
             catch (Exception exc)
             {

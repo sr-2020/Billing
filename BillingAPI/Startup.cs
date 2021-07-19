@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using BillingAPI.Extensions;
 using BillingAPI.Filters;
 using Core;
-using Hangfire;
-using Hangfire.PostgreSql;
 using IoC.Init;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -14,6 +12,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PubSubService;
@@ -39,7 +38,7 @@ namespace BillingAPI
                 options.Filters.Add(new HttpResponseExceptionFilter());
                 options.Filters.Add(new EvarunAuthorizationFilter());
             })
-            .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             #region swagger
             services.AddEvaSwaggerGen();
@@ -57,8 +56,8 @@ namespace BillingAPI
                 {
                     builder.AllowAnyOrigin()
                         .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials();
+                        .AllowAnyHeader();
+                        //.AllowCredentials();
                 });
             });
             #endregion
@@ -77,7 +76,7 @@ namespace BillingAPI
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             Console.WriteLine("configuring");
             if (env.IsDevelopment())
@@ -104,11 +103,17 @@ namespace BillingAPI
             #region cors
             app.UseCors("FullAccessPolicy");
             #endregion
-            app.UseMvc(routes =>
+
+            app.UseRouting();
+            app.UseEndpoints(options =>
             {
-                routes
-                    .MapRoute(name: "default", template: "{controller}/{action=Index}/");
-            }).UseStaticFiles(); 
+                options.MapControllers();
+            });
+            //app.UseMvc(routes =>
+            //{
+            //    routes
+            //        .MapRoute(name: "default", template: "{controller}/{action=Index}/");
+            //}).UseStaticFiles(); 
         }
     }
 }

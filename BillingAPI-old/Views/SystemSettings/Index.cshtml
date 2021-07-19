@@ -1,0 +1,38 @@
+﻿@model IEnumerable<Core.Model.SystemSettings>
+
+    @{
+    ViewData["Title"] = "SystemSettings";
+    }
+
+    <p>
+        @Html.ActionLink("Добавить", "Edit")
+    </p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Key)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Value)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Key)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Value)
+                </td>
+                <td>
+                    @Html.ActionLink("Править", "Edit", new {id = item.Id})
+                    @Html.ActionLink("Удалить", "Delete", new {id = item.Id})
+                </td>
+            </tr>
+}
+        </tbody>
+    </table>

@@ -9,9 +9,9 @@ namespace Billing.Dto.Shop
 {
     public class CorporationDetailedDto: CorporationDto
     {
-        public CorporationDetailedDto(CorporationWallet corporation, List<Specialisation> specialisations) : base(corporation)
+        public CorporationDetailedDto(CorporationWallet corporation, List<Specialisation> specialisations, List<CorporationSpecialisation> corpspecs) : base(corporation)
         {
-            Specialisations = specialisations.Select(s => new SpecialisationDto(s, true)).ToList();
+            Specialisations = specialisations.Select(s => new SpecialisationDto(s, true, (corpspecs.FirstOrDefault(c=>c.SpecialisationId == s.Id)?.Ratio) ?? 0)).ToList();
         }
         public List<SpecialisationDto> Specialisations { get; set; }
     }

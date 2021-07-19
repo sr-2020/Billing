@@ -8,7 +8,6 @@ using BillingAPI.Model;
 using Core;
 using Core.Model;
 using Core.Primitives;
-using Hangfire;
 using IoC;
 using Jobs;
 using Microsoft.AspNetCore.Http;

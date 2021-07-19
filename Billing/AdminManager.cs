@@ -100,7 +100,7 @@ namespace Billing
 
             var specialisationIds = corporation.Specialisations.Select(s => s.SpecialisationId);
             var specialisations = GetList<Specialisation>(s => specialisationIds.Contains(s.Id), s => s.ProductType);
-            return new CorporationDetailedDto(corporation, specialisations);
+            return new CorporationDetailedDto(corporation, specialisations, corporation.Specialisations);
         }
 
         public List<QRDto> GetAvailableQR(int shop)

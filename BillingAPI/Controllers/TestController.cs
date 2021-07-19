@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Billing;
 using BillingAPI.Filters;
 using Core;
-using Hangfire;
 using InternalServices;
 using IoC;
 using Jobs;
