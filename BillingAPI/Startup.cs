@@ -39,6 +39,7 @@ namespace BillingAPI
                 options.Filters.Add(new HttpResponseExceptionFilter());
                 options.Filters.Add(new EvarunAuthorizationFilter());
             })
+            .AddNewtonsoftJson()
             .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             #region swagger
@@ -62,6 +63,7 @@ namespace BillingAPI
                         .AllowCredentials(); // allow credentials
                 });
             });
+            
             #endregion
 
             #region pubsub

@@ -50,6 +50,14 @@ namespace InternalServices
             if (model != null)
             {
                 every = model?.workModel?.discounts?.everything ?? 1;
+                if (every < 1)
+                {
+                    every = Math.Max(every, 0.7m);
+                }
+                else
+                {
+                    every = Math.Min(every, 1.5m);
+                }
                 if (discountType == DiscountType.Samurai)
                     every = every * ( model?.workModel?.discounts?.weaponsArmor ?? 1);
                 var discount1 = model?.workModel?.passiveAbilities?.Any(p => p.id == "discount-all-1") ?? false;

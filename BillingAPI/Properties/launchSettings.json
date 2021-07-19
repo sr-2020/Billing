@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:32768",
+      "applicationUrl": "http://localhost:32768/swagger/v1/index.html",
       "sslPort": 0
     }
   },
@@ -15,7 +15,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:32769"
+      "applicationUrl": "http://localhost:32769/swagger/v1/index.html"
     },
     "PubSubTest": {
       "commandName": "Project",
@@ -28,7 +28,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Test"
       },
-      "applicationUrl": "http://localhost:32769"
+      "applicationUrl": "http://localhost:32769/swagger/v1/index.html"
     },
     "Docker": {
       "commandName": "Docker",

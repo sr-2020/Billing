@@ -301,14 +301,7 @@ namespace Billing
             {
                 var eService = new EreminService();
                 modeldiscount = eService.GetDiscount(sin.Character.Model, BillingHelper.GetDiscountType(sku.Nomenklatura.Specialisation.ProductType.DiscountType));
-                if(modeldiscount < 1)
-                {
-                    modeldiscount = Math.Max(modeldiscount, 0.7m);
-                }
-                else
-                {
-                    modeldiscount = Math.Min(modeldiscount, 1.5m);
-                }
+
             }
             catch(Exception e)
             {

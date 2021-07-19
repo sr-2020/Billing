@@ -119,7 +119,11 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.MakeTransferLegLeg(request.Shop, request.ShopTo, request.Amount, request.Comment), "maketransfertoleg");
             return result;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("gettransfers")]
         [ShopAuthorization]
         public DataResult<List<TransferDto>> GetTranfers([FromBody] GetTranfersRequest request)
@@ -128,7 +132,11 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetTransfers(request.Shop), $"gettransfers {request.Shop}");
             return result;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("getproducts")]
         [ShopAuthorization]
         public DataResult<List<QRDto>> GetProducts([FromBody] ShopBasedRequest request)
@@ -137,7 +145,11 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetAvailableQR(request.Shop), $"getproducts {request.Shop}");
             return result;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("getcorporationproducts")]
         [CorpAuthorization]
         public DataResult<List<SkuDto>> GetCorporationProducts([FromBody] CorporationBasedRequest request)
@@ -146,7 +158,11 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetSkus(s=>s.CorporationId == request.Corporation));
             return result;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("getrentas")]
         [ShopAuthorization]
         public DataResult<List<RentaDto>> GetRentas([FromBody] GetRentasRequest request)
@@ -155,7 +171,11 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetRentas(request.Shop), $"getrentas {request.Shop}");
             return result;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("writerenta2qr")]
         public Result WriteOffer([FromBody] WriteOfferRequest request)
         {
@@ -163,7 +183,11 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.WriteRenta(request.RentaId, request.Qr), $"writerenta2qr {request.RentaId}:{request.Qr}");
             return result;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("createpricebyqr")]
         public DataResult<PriceShopDto> GetPriceByQR([FromBody] GetPriceByQRRequest request)
         {
@@ -171,7 +195,11 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetPriceByQR(request.Character, request.Qr), $"createpricebyqr {request.Character}:{request.Qr}");
             return result;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("createrenta")]
         public DataResult<RentaDto> CreateRenta([FromBody] CreateRentaRequest request)
         {
@@ -189,7 +217,11 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.ConfirmRenta(request.Character, request.PriceId, beat, request.Count), $"createrenta {request.Character}:{request.PriceId}:{request.Count}");
             return result;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="corporation"></param>
+        /// <returns></returns>
         [HttpGet("corporation-overdrafts")]
         [CorporationAuthorization]
         public DataResult<List<TransferDto>> GetCorpOverdrafts(int corporation)
@@ -198,7 +230,11 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetCorporationOverdrafts(corporation));
             return result;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="shop"></param>
+        /// <returns></returns>
         [HttpGet("shop-overdrafts")]
         [ShopAuthorization]
         public DataResult<List<TransferDto>> GetShopOverdrafts(int shop)
