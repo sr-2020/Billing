@@ -14,11 +14,15 @@ namespace Core
 {
     public interface IBaseRepository : IDisposable
     {
+        Task<T> GetAsNoTrackingAsync<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class;
         T GetAsNoTracking<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class;
+        Task<T> GetAsNoTrackingAsync<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class;
         T GetAsNoTracking<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class;
         T Get<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class;
         T Get<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class;
+        Task<List<T>> GetListAsNoTrackingAsync<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class;
         List<T> GetListAsNoTracking<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class;
+        Task<List<T>> GetListAsNoTrackingAsync<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class;
         List<T> GetListAsNoTracking<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class;
         List<T> GetList<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class;
         List<T> GetList<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class;
@@ -63,11 +67,27 @@ namespace Core
             return connection.Query<T>(query).ToList();
         }
 
+        public async Task<T> GetAsNoTrackingAsync<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class
+        {
+            var res = AddIncludes(QueryAsNoTracking<T>(), includes);
+            if (res != null)
+                return await res.FirstOrDefaultAsync(predicate);
+            return null;
+        }
+
         public T GetAsNoTracking<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class
         {
             var res = AddIncludes(QueryAsNoTracking<T>(), includes);
             if (res != null)
                 return res.FirstOrDefault(predicate);
+            return null;
+        }
+
+        public async Task<T> GetAsNoTrackingAsync<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class
+        {
+            var res = AddIncludes(QueryAsNoTracking<T>(), includes);
+            if (res != null)
+                return await res.FirstOrDefaultAsync(predicate);
             return null;
         }
 
@@ -79,11 +99,27 @@ namespace Core
             return null;
         }
 
+        public async Task<List<T>> GetListAsNoTrackingAsync<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class
+        {
+            var res = await AddIncludes(QueryAsNoTracking<T>(), includes)
+                .Where(predicate)
+                .ToListAsync();
+            return res;
+        }
+
         public List<T> GetListAsNoTracking<T>(Expression<Func<T, bool>> predicate, string[] includes) where T : class
         {
             var res = AddIncludes(QueryAsNoTracking<T>(), includes)
                 .Where(predicate)
                 .ToList();
+            return res;
+        }
+
+        public async Task<List<T>> GetListAsNoTrackingAsync<T>(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes) where T : class
+        {
+            var res = await AddIncludes(QueryAsNoTracking<T>(), includes)
+                .Where(predicate)
+                .ToListAsync();
             return res;
         }
 

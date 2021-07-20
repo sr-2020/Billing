@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Billing
 {
@@ -485,6 +486,18 @@ namespace Billing
             return allList.OrderByDescending(t => t.OperationTime).ToList();
         }
 
+        protected async Task<List<TransferDto>> CreateTransfersDtoAsync(List<Transfer> list, string owner, TransferType type)
+        {
+            var walletdtos = list.GroupBy(t => new { t.WalletToId, t.WalletTo.WalletType }).Select(t => new WalletDto { WalletId = t.Key.WalletToId, WalletType = (WalletTypes)t.Key.WalletType }).ToList();
+            var sinIds = walletdtos.Where(w => w.WalletType == WalletTypes.Character).Select(w => w.WalletId).ToList();
+            var sins = await GetListAsNoTrackingAsync<SIN>(s => sinIds.Contains(s.WalletId ?? 0), s => s.Passport);
+            var shopIds = walletdtos.Where(w => w.WalletType == WalletTypes.Shop).Select(w => w.WalletId).ToList();
+            var shops = await GetListAsNoTrackingAsync<ShopWallet>(s => shopIds.Contains(s.WalletId ?? 0));
+            var allList = new List<TransferDto>(list.Select(s => CreateTransferDto(s, type, sins, shops, owner)).ToList());
+            return allList.OrderByDescending(t => t.OperationTime).ToList();
+        }
+
+        [Obsolete("use CreateTransfersDtoAsync instead")]
         protected List<TransferDto> CreateTransfersDto(List<Transfer> list, string owner, TransferType type)
         {
             var walletdtos = list.GroupBy(t => new { t.WalletToId, t.WalletTo.WalletType }).Select(t => new WalletDto { WalletId = t.Key.WalletToId, WalletType = (WalletTypes)t.Key.WalletType }).ToList();
@@ -498,7 +511,6 @@ namespace Billing
                 .ToList());
             return allList.OrderByDescending(t => t.OperationTime).ToList();
         }
-
 
         protected Transfer MakeTransferSINSIN(SIN sinFrom, SIN sinTo, decimal amount, string comment, bool allAnon = false)
         {
