@@ -201,11 +201,12 @@ namespace Jobs
                         character.ErrorText = e.ToString();
                         errors.Enqueue(character);
                     }
+                    lsDto.AddConcurrent(localDto);
                     return localDto;
                 },
                 (final) =>
                 {
-                    lsDto.AddConcurrent(final);
+                    
                 });
         }
 
