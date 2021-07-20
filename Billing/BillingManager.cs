@@ -254,7 +254,7 @@ namespace Billing
             outcome += rentas.Sum(r => BillingHelper.GetFinalPrice(r));
             if (workDto.StockGainPercentage > 0)
             {
-                var stock = outcome * workDto.StockGainPercentage;
+                var stock = outcome * (workDto.StockGainPercentage / 100);
                 income += stock;
                 AddNewTransfer(mir, sin.Wallet, stock, "Игра на бирже");
             }

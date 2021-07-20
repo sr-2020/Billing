@@ -293,9 +293,6 @@ namespace Billing
 
         protected Price CreateNewPrice(Sku sku, ShopWallet shop, SIN sin)
         {
-            decimal discount = 1;
-            if (sin.Passport.Mortgagee == sku.Corporation.Alias)
-                discount *= 0.9m;
             decimal modeldiscount;
             try
             {
@@ -308,6 +305,9 @@ namespace Billing
                 Console.Error.WriteLine(e.ToString());
                 modeldiscount = 1;
             }
+            decimal discount = 1;
+            if (sin.Passport.Mortgagee == sku.Corporation.Alias)
+                discount *= 0.9m;
             discount *= modeldiscount;
             var currentScoring = sin.Scoring.CurrentFix + sin.Scoring.CurerentRelative;
             if (currentScoring == 0)
