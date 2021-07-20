@@ -17,9 +17,12 @@ using System.Threading.Tasks;
 
 namespace BillingAPI.Controllers
 {
+    /// <summary>
+    /// Public actions for all services
+    /// </summary>
     [Route("")]
     [ApiController]
-    public class BillingPublicController : EvarunApiController
+    public class BillingPublicController : EvarunApiAsyncController
     {
         /// <summary>
         /// GetUsers
@@ -32,7 +35,6 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetUsers());
             return result;
         }
-
 
         /// <summary>
         /// GetShops
@@ -105,6 +107,7 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetSkus(p => true));
             return result;
         }
+
         /// <summary>
         /// get Lifestyles
         /// </summary>
@@ -149,10 +152,10 @@ namespace BillingAPI.Controllers
         /// <param name="character"></param>
         /// <returns></returns>
         [HttpGet("transfers")]
-        public DataResult<TransferSum> GetTransfers(int character)
+        public async Task<DataResult<TransferSum>> GetTransfers(int character)
         {
             var manager = IocContainer.Get<IBillingManager>();
-            var result = RunAction(() => manager.GetTransfers(character), $"gettransfers {character}");
+            var result = await RunActionAsync(() => manager.GetTransfersAsync(character), $"gettransfers {character}");
             return result;
         }
 

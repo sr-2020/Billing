@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BillingAPI.Controllers
 {
+    /// <summary>
+    /// api entry point 
+    /// </summary>
     public abstract class EvarunApiController : ControllerBase
     {
         private DataResult<T> Handle<T>(Func<T> func, Action action, string actionName = "", string logmessage = "")
@@ -64,7 +67,7 @@ namespace BillingAPI.Controllers
             return Handle<string>(null, action, action.Method.Name, logmessage);
         }
 
-        private void Start(string action, string message, Guid guid)
+        protected void Start(string action, string message, Guid guid)
         {
             if(string.IsNullOrEmpty(message))
             {
@@ -73,11 +76,12 @@ namespace BillingAPI.Controllers
             Console.WriteLine($"Action {action}: {message} for {guid} started");
         }
 
-        private void Finish(Guid guid)
+        protected void Finish(Guid guid)
         {
             //Console.WriteLine($"Action for {guid} finished");
         }
-        private T HandleException<T>(int code, string message, Guid guid, T result, string action, string logmessage) where T : Result 
+
+        protected T HandleException<T>(int code, string message, Guid guid, T result, string action, string logmessage) where T : Result 
         {
             Response.StatusCode = code;
             Console.Error.WriteLine($"ERROR for {logmessage}:{guid}({action}): {message}: code {code}");

@@ -1,4 +1,4 @@
 app:
   postgres:
-    dbHost: postgres13
+    dbHost: pg13-postgresql-read
     dbnameBilling: rc_sr2020

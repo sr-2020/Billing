@@ -16,6 +16,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Billing
 {
@@ -27,6 +28,7 @@ namespace Billing
 
         string GetSinStringByCharacter(int modelId);
         int GetModelIdBySinString(string sinString);
+        Task<TransferSum> GetTransfersAsync(int modelId);
         TransferSum GetTransfers(int modelId);
         BalanceDto GetBalance(int modelId);
         RentaSumDto GetRentas(int modelId);
@@ -333,6 +335,25 @@ namespace Billing
             return balance;
         }
 
+        public async Task<TransferSum> GetTransfersAsync(int modelId)
+        {
+            var result = new TransferSum();
+            var sin = GetSINByModelId(modelId, s => s.Wallet, s => s.Passport);
+            if (sin == null)
+                throw new BillingException("sin not found");
+            var owner = BillingHelper.GetPassportName(sin.Passport);
+            var listFrom = await GetListAsNoTrackingAsync<Transfer>(t => t.WalletFromId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
+            var listFromTruncated = listFrom.Where(t => t.RentaId == null).ToList();
+            var listTo = await GetListAsNoTrackingAsync<Transfer>(t => t.WalletToId == sin.WalletId, t => t.WalletFrom, t => t.WalletTo);
+            var allTransfers = await CreateTransfersDtoAsync(listFromTruncated, owner, TransferType.Incoming);
+            allTransfers.AddRange(await CreateTransfersDtoAsync(listTo, owner, TransferType.Outcoming));
+            result.Transfers = allTransfers.OrderByDescending(t => t.OperationTime).ToList();
+            result.Transfers.Insert(0, CreateFakeTransferDto(-1, listFrom.Where(r => r.RentaId != null && !r.Overdraft).Sum(t => t.Amount), false, "Выплаченная сумма по рентам", owner, false));
+            result.Transfers.Insert(0, CreateFakeTransferDto(-2, listFrom.Where(r => r.RentaId != null && r.Overdraft).Sum(t => t.Amount), false, "Задолженность по рентам", owner, false));
+            return result;
+        }
+
+        [Obsolete("use GetTransfersAsync instead")]
         public TransferSum GetTransfers(int modelId)
         {
             var result = new TransferSum();

@@ -68,7 +68,7 @@ namespace Billing.Dto
             lock(this)
             {
                 Count++;
-                if (!dto.IsIrridium)
+                if (dto.IsIrridium)
                 {
                     this.Irridium++;
                     return;
