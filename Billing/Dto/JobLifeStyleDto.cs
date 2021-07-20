@@ -78,6 +78,10 @@ namespace Billing.Dto
                     this.Insolvent++;
                     return;
                 }
+                this.SumKarma += dto.SumKarma;
+                this.SumRents += dto.SumRents;
+                this.SumDividends += dto.SumDividends;
+
                 this.SumAll += dto.Balance;
                 ForecastSumAll += dto.Forecast;
                 if (ScoringMin == 0 || dto.Scoringvalue < ScoringMin)
