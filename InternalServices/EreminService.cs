@@ -20,10 +20,6 @@ namespace InternalServices
         {
             var client = new HttpClient();
             var url = $"{_URL}/character/model/{characterId}";
-            if (_URL.StartsWith("https://gateway"))
-            {
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI0NDA0MyIsImF1dGgiOiJST0xFX0RFVkVMT1AsUk9MRV9NQVNURVIsUk9MRV9QTEFZRVIiLCJtb2RlbElkIjo0NDA0MywiY2hhcmFjdGVySWQiOjUwMywiZXhwIjoxNjY5ODIxMTgxfQ.1no_86uyViOyqQjofkvzu2T2_KxPnfmi5Sj4FtPd0H7S3tXG7ZaCCDp25hivWRKmkF--L9JtpkcoCaQhqv1DRA");
-            }
             var response = client.GetAsync(url).Result;
             if (response.StatusCode == System.Net.HttpStatusCode.OK)
             {

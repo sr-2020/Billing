@@ -18,7 +18,7 @@ namespace BillingAPI.Filters
         }
         private void AddCharacter(ActionExecutingContext context, string value)
         {
-            int character;
+            int character = 0;
             if (int.TryParse(value, out character))
             {
                 object model;
@@ -35,7 +35,6 @@ namespace BillingAPI.Filters
                 {
                     context.ActionArguments.Add("character", character);
                 }
-
             }
         }
 
@@ -48,7 +47,7 @@ namespace BillingAPI.Filters
             else
             {
                 //TODO disable it on prod
-                //AddCharacter(context, "9570");
+                AddCharacter(context, "0");
 #if (DEBUG)
 
 #else
