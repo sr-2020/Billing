@@ -37,7 +37,7 @@ namespace BillingAPI.Controllers
         }
 
         /// <summary>
-        /// GetUsers
+        /// GetUser
         /// </summary>
         /// <returns></returns>
         [HttpGet("a-user")]
@@ -283,6 +283,11 @@ namespace BillingAPI.Controllers
             return result;
         }
 
+        /// <summary>
+        /// get sku
+        /// </summary>
+        /// <param name="skuId"></param>
+        /// <returns></returns>
         [HttpGet("a-sku")]
         public DataResult<SkuDto> GetSku(int skuId)
         {
@@ -415,7 +420,7 @@ namespace BillingAPI.Controllers
         }
 
         /// <summary>
-        /// GetUsers
+        /// Update user balance
         /// </summary>
         /// <returns></returns>
         [HttpPost("a-user-balance")]

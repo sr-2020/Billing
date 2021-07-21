@@ -3,6 +3,7 @@ using Billing.Dto.Shop;
 using Billing.DTO;
 using BillingAPI.Filters;
 using BillingAPI.Model;
+using IoC;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace BillingAPI.Controllers
 {
     [Route("")]
     [Hacker]
-    public class HackerController : EvarunApiController
+    public class HackerController : EvarunApiAsyncController
     {
         [HttpPost("h-transfer")]
         public Result StealTransfer([FromBody] StealTransferRequest request)
@@ -62,6 +63,42 @@ namespace BillingAPI.Controllers
         {
             var manager = IoC.IocContainer.Get<IHackerManager>();
             return RunAction(() => manager.HackShop(request.ShopId, request.Models));
+        }
+
+
+        /// <summary>
+        /// Get base info for current character
+        /// </summary>
+        [HttpGet("h-sin")]
+        public DataResult<BalanceDto> GetSin(int characterId)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetBalance(characterId), $"h-getsin {characterId}");
+            return result;
+        }
+
+        /// <summary>
+        /// Get all rentas for character
+        /// </summary>
+        /// <param name="characterId"></param>
+        /// <returns></returns>
+        [HttpGet("h-rentas")]
+        public DataResult<RentaSumDto> GetRentas(int characterId)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = RunAction(() => manager.GetRentas(characterId), $"getrentas {characterId}");
+            return result;
+        }
+
+        /// <summary>
+        ///  Get all transfers for character
+        /// </summary>
+        [HttpGet("h-transfers")]
+        public async Task<DataResult<TransferSum>> GetTransfers(int characterId)
+        {
+            var manager = IocContainer.Get<IBillingManager>();
+            var result = await RunActionAsync(() => manager.GetTransfersAsync(characterId), $"gettransfers {characterId}");
+            return result;
         }
     }
 }
