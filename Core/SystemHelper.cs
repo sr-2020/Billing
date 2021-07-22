@@ -14,6 +14,8 @@ namespace Core
         static IConfiguration _configuration;
         public static string Host = "DBHOST";
         public static string Billing = "POSTGRESQLBILLING_DBNAME";
+        public static string Hacking = "HACKING";
+        public static string Replica = "REPLICA";
         public static string BillingUser = "POSTGRESQLBILLING_USER";
         public static string BillingPassword = "POSTGRESQLBILLING_PASSWORD";
 

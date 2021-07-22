@@ -63,18 +63,23 @@ namespace BillingAPI
                         .AllowCredentials(); // allow credentials
                 });
             });
-            
+
             #endregion
 
             #region pubsub
 
-            services.AddSingleton<IPubSubFoodService, PubSubFoodService>();
-            services.AddSingleton<IPubSubHealthService, PubSubHealthService>();
-            services.AddSingleton<IPubSubAbilityService, PubSubAbilityService>();
-            services.AddSingleton<IPubSubDampshockService, PubSubDampshockService>();
-            services.AddSingleton<IPubSubImplantInstallService, PubSubImplantInstallService>();
-            services.AddSingleton<IPubSubPillConsumptionService, PubSubPillConsumptionService>();
-            services.AddHostedService<PubSubSubscriber>();
+            var replica = Environment.GetEnvironmentVariable(SystemHelper.Replica);
+            if (replica != "true")
+            {
+
+                services.AddSingleton<IPubSubFoodService, PubSubFoodService>();
+                services.AddSingleton<IPubSubHealthService, PubSubHealthService>();
+                services.AddSingleton<IPubSubAbilityService, PubSubAbilityService>();
+                services.AddSingleton<IPubSubDampshockService, PubSubDampshockService>();
+                services.AddSingleton<IPubSubImplantInstallService, PubSubImplantInstallService>();
+                services.AddSingleton<IPubSubPillConsumptionService, PubSubPillConsumptionService>();
+                services.AddHostedService<PubSubSubscriber>();
+            }
 
             #endregion
         }
