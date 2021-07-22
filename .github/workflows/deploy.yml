@@ -55,3 +55,6 @@ jobs:
           helm upgrade billing helm/billing/ --wait \
             -f helm/billing/values/prod/values.yaml \
             --set image.tag=$GITHUB_SHA
+          helm upgrade billing-replica helm/billing/ --wait \
+            -f helm/billing/values/prod-replica/values.yaml \
+            --set image.tag=$GITHUB_SHA

@@ -27,6 +27,11 @@ spec:
               path: /swagger/v1/index.html
               port: 80
           env:
+            - name: REPLICA
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-configmap
+                  key: REPLICA
             - name: DBHOST
               valueFrom:
                 configMapKeyRef:
@@ -67,3 +72,8 @@ spec:
                 secretKeyRef:
                   name: postgres
                   key: passwordBackend
+            - name: HACKING
+              valueFrom:
+                secretKeyRef:
+                  name: hacking
+                  key: secret
