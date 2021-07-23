@@ -19,6 +19,7 @@ namespace Billing.Dto
         public decimal SumRents { get; set; }
         public decimal SumKarma { get; set; }
         public decimal SumDividends { get; set; }
+        public decimal KarmaK { get; set; }
         public int Insolvent { get; set; }
         public int Irridium { get; set; }
         public int Count { get; set; }
@@ -67,7 +68,6 @@ namespace Billing.Dto
         {
             lock(this)
             {
-                Count++;
                 if (dto.IsIrridium)
                 {
                     this.Irridium++;
@@ -78,10 +78,10 @@ namespace Billing.Dto
                     this.Insolvent++;
                     return;
                 }
+                Count++;
                 this.SumKarma += dto.SumKarma;
                 this.SumRents += dto.SumRents;
                 this.SumDividends += dto.SumDividends;
-
                 this.SumAll += dto.Balance;
                 ForecastSumAll += dto.Forecast;
                 if (ScoringMin == 0 || dto.Scoringvalue < ScoringMin)

@@ -51,19 +51,20 @@ namespace Billing
                 service.GetCharacter(sin.Character.Model);
                 sin.EVersion = "3";
                 SaveContext();
+                try
+                {
+                    InitEcoSecondStage(sin);
+                }
+                catch (Exception e2)
+                {
+                    Console.Error.WriteLine(e2.ToString());
+                }
             }
             catch (Exception e)
             {
                 Console.Error.WriteLine(e.ToString());
             }
-            try
-            {
-                InitEcoSecondStage(sin);
-            }
-            catch (Exception e2)
-            {
-                Console.Error.WriteLine(e2.ToString());
-            }
+
             return new BalanceDto(sin);
         }
 
@@ -298,7 +299,6 @@ namespace Billing
             {
                 var eService = new EreminService();
                 modeldiscount = eService.GetDiscount(sin.Character.Model, BillingHelper.GetDiscountType(sku.Nomenklatura.Specialisation.ProductType.DiscountType));
-
             }
             catch(Exception e)
             {

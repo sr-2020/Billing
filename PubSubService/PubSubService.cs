@@ -21,7 +21,6 @@ namespace PubSubService
     {
         public PubSubService(string id)
         {
-
             var env = Environment.GetEnvironmentVariable(SystemHelper.Billing);
             SubscriptionId = $"{env}_{id}";
             _adapter = new PubSubAdapter();

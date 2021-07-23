@@ -141,6 +141,13 @@ namespace Jobs
             });
             var taskProcess = Task.Run(() =>
             {
+                var k = (Factory.Settings.GetDecimalValue(SystemSettingsEnum.karma_k) / 100);
+                var x1 = ((lsDto.SumRents/lsDto.Count) * k) / (lsDto.SumKarma/lsDto.Count);
+                if (x1 > lsDto.KarmaK)
+                {
+                    lsDto.KarmaK = x1;
+                }
+
                 while (!charactersLoaded || !incomeList.IsEmpty)
                 {
                     if (!charactersLoaded && incomeList.Count < _bulk)
@@ -193,7 +200,7 @@ namespace Jobs
                 {
                     try
                     {
-                        localDto = ProcessModelCharacter(character);
+                        localDto = ProcessModelCharacter(character, lsDto.KarmaK);
                         processed.Enqueue(character);
                     }
                     catch (Exception e)
@@ -229,7 +236,7 @@ namespace Jobs
             return beat;
         }
 
-        private BeatCharacterLocalDto ProcessModelCharacter(ImportDto character)
+        private BeatCharacterLocalDto ProcessModelCharacter(ImportDto character, decimal karmaK)
         {
             var billing = IocContainer.Get<IBillingManager>();
             var workModel = new WorkModelDto
@@ -240,7 +247,7 @@ namespace Jobs
                 StockGainPercentage = character?.EreminModel?.workModel?.billing?.stockGainPercentage ?? 0,
                 KarmaCount = character?.EreminModel?.workModel?.karma?.spent ?? 0
             };
-            var dto = billing.ProcessCharacterBeat(character.Sin.Id, workModel);
+            var dto = billing.ProcessCharacterBeat(character.Sin.Id, workModel, karmaK);
             try
             {
                 EreminPushAdapter.SendNotification(character.Sin.Character.Model, "Кошелек", "Экономический пересчет завершен");

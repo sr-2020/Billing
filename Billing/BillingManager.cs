@@ -49,7 +49,7 @@ namespace Billing
 
         #region jobs
 
-        BeatCharacterLocalDto ProcessCharacterBeat(int sinId, WorkModelDto workDto);
+        BeatCharacterLocalDto ProcessCharacterBeat(int sinId, WorkModelDto workDto, decimal karmaK);
 
         #endregion
 
@@ -167,7 +167,7 @@ namespace Billing
             return sum;
         }
 
-        public BeatCharacterLocalDto ProcessCharacterBeat(int sinId, WorkModelDto workDto)
+        public BeatCharacterLocalDto ProcessCharacterBeat(int sinId, WorkModelDto workDto, decimal karmaK)
         {
             var sw = new Stopwatch();
             sw.Start();
@@ -206,8 +206,8 @@ namespace Billing
             //karma
             if (workDto.KarmaCount > 0)
             {
-                var k = _settings.GetDecimalValue(SystemSettingsEnum.karma_k);
-                var karmasum = k * workDto.KarmaCount;
+                
+                var karmasum = karmaK * workDto.KarmaCount;
                 income += karmasum;
                 localDto.SumKarma += karmasum;
                 AddNewTransfer(mir, sin.Wallet, karmasum, "Пассивный доход");
@@ -262,7 +262,15 @@ namespace Billing
             }
             localDto.SumRents += outcome;
             sin.Wallet.IncomeOutcome = income - outcome;
-            localDto = AddLifeStyle(sin.Wallet, localDto);
+            if (sin.Wallet.IsIrridium)
+            {
+                localDto.IsIrridium = true;
+            }
+            else
+            {
+                localDto.Balance = sin.Wallet.Balance;
+                localDto.Forecast = BillingHelper.GetForecast(sin.Wallet);
+            }
             SaveContext();
             var swOther = Cut(sw);
             sw.Stop();
