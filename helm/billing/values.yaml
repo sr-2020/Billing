@@ -5,6 +5,7 @@
 replicaCount: 1
 
 app:
+  replica: false
   postgres:
     dbHost: postgres
     dbnameHangfire: Hangfire
