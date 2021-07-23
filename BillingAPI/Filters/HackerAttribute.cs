@@ -10,7 +10,7 @@ namespace BillingAPI.Filters
 {
     public class HackerAttribute : ActionFilterAttribute
     {
-        string _secret = Environment.GetEnvironmentVariable(SystemHelper.Hacking) ?? "8eaaf947d4b4";
+        string _secret = Environment.GetEnvironmentVariable(SystemHelper.Hacking);
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             if (filterContext.HttpContext.Request.Headers.ContainsKey("hacking"))
