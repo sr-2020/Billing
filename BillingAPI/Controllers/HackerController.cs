@@ -1,10 +1,12 @@
 ﻿using Billing;
+using Billing.Dto;
 using Billing.Dto.Shop;
 using Billing.DTO;
 using BillingAPI.Filters;
 using BillingAPI.Model;
 using IoC;
 using Microsoft.AspNetCore.Mvc;
+using Scoringspace;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -99,6 +101,16 @@ namespace BillingAPI.Controllers
             var manager = IocContainer.Get<IBillingManager>();
             var result = await RunActionAsync(() => manager.GetTransfersAsync(characterId), $"gettransfers {characterId}");
             return result;
+        }
+
+        /// <summary>
+        ///  Get scoring for character
+        /// </summary>
+        [HttpGet("h-scoring")]
+        public DataResult<ScoringDto> GetScoring(int characterId)
+        {
+            var manager = IocContainer.Get<IScoringManager>();
+            return RunAction(() => manager.GetFullScoring(characterId), $"get full scoring {characterId}");
         }
     }
 }
