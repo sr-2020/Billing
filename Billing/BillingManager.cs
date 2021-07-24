@@ -206,7 +206,7 @@ namespace Billing
             //karma
             if (workDto.KarmaCount > 0)
             {
-                
+
                 var karmasum = karmaK * workDto.KarmaCount;
                 income += karmasum;
                 localDto.SumKarma += karmasum;
@@ -227,7 +227,7 @@ namespace Billing
                 foreach (var overdraft in allOverdrafts)
                 {
                     overdraft.Overdraft = false;
-                    var closingRenta = Get<Renta>(r => r.Id == overdraft.RentaId, r => r.Sku.Corporation, r => r.Shop.Wallet);
+                    var closingRenta = Get<Renta>(r => r.Id == overdraft.RentaId, r => r.Sku.Corporation, r => r.Shop.Wallet, r => r.Sku.Nomenklatura);
                     CloseOverdraft(closingRenta, mir, sin);
                 }
             }

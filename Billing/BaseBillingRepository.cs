@@ -48,7 +48,7 @@ namespace Billing
             try
             {
                 var service = new EreminService();
-                service.GetCharacter(sin.Character.Model);
+                //service.GetCharacter(sin.Character.Model);
                 sin.EVersion = "3";
                 SaveContext();
                 try
@@ -499,7 +499,8 @@ namespace Billing
             if (renta?.Shop?.Wallet == null
                 || renta?.Sku?.Corporation?.Wallet == null
                 || sin?.Character == null
-                || sin?.Wallet == null)
+                || sin?.Wallet == null
+                || renta?.Sku?.Nomenklatura == null)
             {
                 throw new Exception("Ошибка загрузки моделей по ренте");
             }
@@ -524,7 +525,7 @@ namespace Billing
             }
             else
             {
-                comission = BillingHelper.CalculateComission(renta.BasePrice, renta.ShopComission);
+                comission = BillingHelper.CalculateComission(renta);
             }
             //create KPI here
             renta.Sku.Corporation.CurrentKPI += renta.BasePrice;

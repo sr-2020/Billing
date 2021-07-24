@@ -142,9 +142,14 @@ namespace Billing
             return GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
         }
 
-        public static decimal CalculateComission(decimal basePrice, decimal comission)
+        public static decimal CalculateComission(Renta renta)
         {
-            return basePrice * (comission / 100);
+            var basePrice = renta.BasePrice;
+            if(renta.Sku?.Nomenklatura != null)
+            {
+                basePrice = renta.Sku.Nomenklatura.BasePrice;
+            }
+            return basePrice * (renta.ShopComission / 100);
         }
 
         public static bool HasQrWrite(string code)

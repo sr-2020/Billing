@@ -112,6 +112,8 @@ namespace Scoringspace
             var factorId = GetFactorId(ScoringFactorEnum.metatype);
             await RaiseScoringEvent(sin.ScoringId ?? 0, factorId, (context) =>
             {
+                if (sin.Passport == null)
+                    throw new BillingException("Паспорт персонажа утерян");
                 var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == sin.Passport.MetatypeId);
                 return value?.Value ?? 1;
             });
