@@ -16,10 +16,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace BillingAPI.Controllers
 {
     [Route("[controller]")]
+    [CheckSecret]
     public class JobController : EvarunApiController
     {
         [HttpGet("cycle")]
-        //[CheckSecret]
+        [CheckSecret]
         public DataResult<string> ProcessCycle()
         {
             var result = RunAction(() => 
@@ -31,7 +32,6 @@ namespace BillingAPI.Controllers
         }
 
         [HttpGet("beatcharacters")]
-        //[CheckSecret]
         public DataResult<string> ProcessBeat()
         {
             var result = RunAction(() =>
@@ -42,9 +42,7 @@ namespace BillingAPI.Controllers
             return result;
         }
 
-
         [HttpGet("beatitems")]
-        //[CheckSecret]
         public DataResult<string> ProcessBeatItems()
         {
             var result = RunAction(() =>

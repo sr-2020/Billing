@@ -12,14 +12,13 @@ namespace BillingAPI.Filters
 {
     public class CheckSecretAttribute : ActionFilterAttribute
     {
-        private const string SECRET = "fee6f53e";
         const string KEY = "secret";
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            //var dbSecret = IocContainer.Get<ISettingsManager>().GetValue(KEY); TODO
+            var dbSecret = IocContainer.Get<ISettingsManager>().GetValue(Core.Primitives.SystemSettingsEnum.secret); 
             if (filterContext.ActionArguments.ContainsKey(KEY))
             {
-                if (filterContext.ActionArguments[KEY].ToString() == SECRET)
+                if (filterContext.ActionArguments[KEY].ToString() == dbSecret)
                 {
                     base.OnActionExecuting(filterContext);
                 }
@@ -28,7 +27,7 @@ namespace BillingAPI.Filters
             {
                 Console.Error.WriteLine("WARNING!! HACK DETECTED!!");
             }
-            throw new BillingException("Процесс пересчета уже запущен! Повторите позже");
+            throw new BillingException("WARNING Процесс пересчета уже запущен! Повторите позже");
             
         }
     }
