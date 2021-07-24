@@ -1,4 +1,5 @@
 app:
+  replica: false
   postgres:
-    dbHost: postgres13
+    dbHost: pg13-postgresql
     dbnameBilling: sr2020
