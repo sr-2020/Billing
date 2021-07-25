@@ -20,7 +20,6 @@ namespace BillingAPI.Controllers
     public class JobController : EvarunApiController
     {
         [HttpGet("cycle")]
-        [CheckSecret]
         public DataResult<string> ProcessCycle(string secret)
         {
             var result = RunAction(() => 
