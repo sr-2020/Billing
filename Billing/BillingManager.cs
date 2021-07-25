@@ -25,7 +25,6 @@ namespace Billing
         #region application
 
         Transfer CreateTransferMIRSIN(int characterTo, decimal amount);
-
         string GetSinStringByCharacter(int modelId);
         int GetModelIdBySinString(string sinString);
         Task<TransferSum> GetTransfersAsync(int modelId);
@@ -478,16 +477,22 @@ namespace Billing
                     }
                     var enabled = true;
                     if (nomenklatura.Specialisation.Name.Contains("анлок"))
+                    {
                         enabled = false;
+                    }
+                    var price = BillingHelper.GetSpecialisationPrice(specialisation, nomenklatura);
                     sku = new Sku
                     {
                         CorporationId = corporationId,
                         Count = nomenklatura.BaseCount,
                         Enabled = enabled,
                         Name = $"{nomenklatura.Name} ({corporation.Name})",
+                        Nomenklatura = nomenklatura,
                         NomenklaturaId = nomenklatura.Id,
-                        Price = nomenklatura.BasePrice * specialisation.Ratio
+                        Price = price
                     };
+
+                    
                     AddAndSave(sku);
                 }
             }

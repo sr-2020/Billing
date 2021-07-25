@@ -291,10 +291,21 @@ namespace Jobs
                 corporation.LastKPI = corporation.CurrentKPI;
                 corporation.CurrentKPI = 0;
                 var skus = Factory.Billing.GetList<Sku>(s => s.CorporationId == corporation.Id, s => s.Nomenklatura.Specialisation);
+                var specs = corporation.Specialisations.Select(s => s.SpecialisationId);
                 foreach (var sku in skus)
                 {
                     sku.Count = sku.SkuBaseCount ?? sku.Nomenklatura.BaseCount;
-                    sku.Price = (sku.SkuBasePrice ?? sku.Nomenklatura.BasePrice) * inflation;
+                    decimal price = 0;
+                    if(sku.SkuBasePrice == null)
+                    {
+                        price = BillingHelper.GetSpecialisationPrice(corporation.Specialisations.FirstOrDefault(s => s.SpecialisationId == sku.Nomenklatura.SpecialisationId), sku.Nomenklatura);
+                    }
+                    else
+                    {
+                        price = sku.SkuBasePrice ?? 0;
+                    }
+
+                    sku.Price = price * inflation;
                 }
                 Factory.Billing.SaveContext();
                 Console.WriteLine($"Корпорация {corporation.Name} обработана");

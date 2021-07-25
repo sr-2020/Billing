@@ -124,6 +124,16 @@ namespace Billing
             return $"{ passport.PersonName} ({ passport.Sin})";
         }
 
+        public static decimal GetSpecialisationPrice(CorporationSpecialisation specialisation, Nomenklatura nomenklatura)
+        {
+            decimal ratio = 5;
+            if(specialisation != null)
+            {
+                ratio = specialisation.Ratio;
+            }
+            return nomenklatura.BasePrice * ratio;
+        }
+
         public static decimal GetFinalPrice(Sku sku, decimal discount, decimal scoring)
         {
             var price = sku.Price;
