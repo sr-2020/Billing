@@ -42,6 +42,9 @@ namespace Scoringspace
         Task OnImplantDeletedBlack(int model);
         Task OnImplantDeletedActive(int model);
         Task OnMetatypeChanged(SIN sin);
+        Task OnFinishHim(SIN sin);
+        Task OnShopLifestyle(SIN sin, int shoplifestyle);
+        Task OnTest(SIN sin);
         ScoringDto GetFullScoring(int character);
         ScoringCategoryDto AddScoringCategory(string categoryName, bool relative, decimal weight);
         void DeleteScoringCategory(int id);
@@ -106,6 +109,8 @@ namespace Scoringspace
                 return value?.Value ?? 1;
             });
         }
+
+
 
         public async Task OnMetatypeChanged(SIN sin)
         {
@@ -306,7 +311,40 @@ namespace Scoringspace
                 return value?.Value ?? 1;
             });
         }
+
+        public async Task OnFinishHim(SIN sin)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.finish_him);
+            var scoring = sin.Scoring;
+            await RaiseScoringEvent(scoring.Id, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == 1);
+                return value?.Value ?? 1;
+            });
+        }
+
+        public async Task OnShopLifestyle(SIN sin, int shoplifestyle)
+        {
+            var factorId = GetFactorId(ScoringFactorEnum.shop_lifestyle);
+            var dto = BillingHelper.GetLifeStyleDto();
+            var sinlifestyle = dto.GetLifeStyle(sin.Wallet);
+            var scoring = sin.Scoring;
+            var lifestyle = CompareLifestyle(shoplifestyle, (int)sinlifestyle);
+            await RaiseScoringEvent(scoring.Id, factorId, (context) =>
+            {
+                var value = context.Set<ScoringEventLifestyle>().AsNoTracking().FirstOrDefault(s => s.ScoringFactorId == factorId && s.EventNumber == lifestyle);
+                return value?.Value ?? 1;
+            });
+        }
+
+        public async Task OnTest(SIN sin)
+        {
+            throw new NotImplementedException("123");
+        }
+
         #endregion
+
+
 
         private List<CurrentScoringCategoryDto> GetScoringResultView(List<CurrentFactor> factors, decimal currentresult)
         {
@@ -433,6 +471,27 @@ namespace Scoringspace
         }
 
         #region mathematic
+
+        private int CompareLifestyle(int x1, int x2)
+        {
+            if (x1 <= x2 && x2 < x1 + 3)
+            {
+                return 1;
+            }
+            if (x1 + 3 <= x2)
+            {
+                return 2;
+            }
+            if (x1 - 2 <= x2 && x2 < x1)
+            {
+                return 3;
+            }
+            if (x2 <= x1 - 3)
+            {
+                return 4;
+            }
+            return 0;
+        }
 
         private Task RaiseScoringEvent(int scoringId, int factorId, Func<BillingContext, decimal> action)
         {
