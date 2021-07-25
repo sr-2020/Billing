@@ -21,6 +21,7 @@ namespace BillingAPI.Filters
                 if (filterContext.ActionArguments[KEY].ToString() == dbSecret)
                 {
                     base.OnActionExecuting(filterContext);
+                    return;
                 }
             }
             for (int i = 0; i < 10; i++)

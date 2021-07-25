@@ -21,7 +21,7 @@ namespace BillingAPI.Controllers
     {
         [HttpGet("cycle")]
         [CheckSecret]
-        public DataResult<string> ProcessCycle()
+        public DataResult<string> ProcessCycle(string secret)
         {
             var result = RunAction(() => 
             {
