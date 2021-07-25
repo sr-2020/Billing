@@ -31,7 +31,7 @@ namespace BillingAPI.Controllers
         }
 
         [HttpGet("beatcharacters")]
-        public DataResult<string> ProcessBeat()
+        public DataResult<string> ProcessBeat(string secret)
         {
             var result = RunAction(() =>
             {
@@ -42,7 +42,7 @@ namespace BillingAPI.Controllers
         }
 
         [HttpGet("beatitems")]
-        public DataResult<string> ProcessBeatItems()
+        public DataResult<string> ProcessBeatItems(string secret)
         {
             var result = RunAction(() =>
             {
