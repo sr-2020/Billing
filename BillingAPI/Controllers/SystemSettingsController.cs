@@ -16,8 +16,7 @@ namespace BillingAPI.Controllers
     public class SystemSettingsController : EvarunApiController
     {
         private readonly Lazy<ISettingsManager> _manager = new Lazy<ISettingsManager>(IocContainer.Get<ISettingsManager>);
-        private ISettingsManager Manager => _manager.Value;
-
+        /
         /// <summary>
         /// Get list of all system settings
         /// </summary>

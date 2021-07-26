@@ -205,7 +205,6 @@ namespace Billing
             //karma
             if (workDto.KarmaCount > 0)
             {
-
                 var karmasum = karmaK * workDto.KarmaCount;
                 income += karmasum;
                 localDto.SumKarma += karmasum;
@@ -491,8 +490,6 @@ namespace Billing
                         NomenklaturaId = nomenklatura.Id,
                         Price = price
                     };
-
-                    
                     AddAndSave(sku);
                 }
             }

@@ -298,7 +298,7 @@ namespace Jobs
                     decimal price = 0;
                     if(sku.SkuBasePrice == null)
                     {
-                        price = BillingHelper.GetSpecialisationPrice(corporation.Specialisations.FirstOrDefault(s => s.SpecialisationId == sku.Nomenklatura.SpecialisationId), sku.Nomenklatura);
+                        price = BillingHelper.GetSpecialisationPrice(corporation.Specialisations.FirstOrDefault(s => s.SpecialisationId == sku.Nomenklatura.SpecialisationId && s.CorporationId == sku.CorporationId), sku.Nomenklatura);
                     }
                     else
                     {
