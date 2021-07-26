@@ -36,19 +36,19 @@ namespace BillingAPI.Controllers
             }
             catch (BillingAuthException e)
             {
-                return HandleException(403, e.Message, guid, result, actionName, logmessage);
+                return HandleWarning(403, e.Message, guid, result, actionName, logmessage);
             }
             catch (BillingNotFoundException e)
             {
-                return HandleException(404, e.Message, guid, result, actionName, logmessage);
+                return HandleWarning(404, e.Message, guid, result, actionName, logmessage);
             }
             catch (BillingUnauthorizedException e)
             {
-                return HandleException(401, e.Message, guid, result, actionName, logmessage);
+                return HandleWarning(401, e.Message, guid, result, actionName, logmessage);
             }
             catch (BillingException ex)
             {
-                return HandleException(422, ex.Message, guid, result, actionName, logmessage);
+                return HandleWarning(422, ex.Message, guid, result, actionName, logmessage);
             }
             catch (Exception exc)
             {
@@ -89,7 +89,14 @@ namespace BillingAPI.Controllers
             result.Status = false;
             return result;
         }
-
+        protected T HandleWarning<T>(int code, string message, Guid guid, T result, string action, string logmessage) where T : Result
+        {
+            Response.StatusCode = code;
+            Console.WriteLine($"ERROR for {logmessage}:{guid}({action}): {message}: code {code}");
+            result.Message = message;
+            result.Status = false;
+            return result;
+        }
 
     }
 }

@@ -22,6 +22,7 @@ namespace BillingAPI.Controllers
         public Result StealTransfer([FromBody] StealTransferRequest request)
         {
             var manager = IoC.IocContainer.Get<IHackerManager>();
+            manager.SaveHistory("h-transfer", request.From, request.To, $"amount = {request.Amount}, comment={request.Comment}");
             return RunAction(() => manager.StealMoney(request.From, request.To, request.Amount, request.Comment));
         }
 
@@ -29,6 +30,7 @@ namespace BillingAPI.Controllers
         public Result StealShopTransfer([FromBody] StealTransferRequest request)
         {
             var manager = IoC.IocContainer.Get<IHackerManager>();
+            manager.SaveHistory("h-shop-transfer", request.From, request.To, $"amount = {request.Amount}, comment={request.Comment}");
             return RunAction(() => manager.StealShopMoney(request.From, request.To, request.Amount, request.Comment));
         }
 
@@ -36,6 +38,7 @@ namespace BillingAPI.Controllers
         public Result StealRenta([FromBody] StealRentaRequest request)
         {
             var manager = IoC.IocContainer.Get<IHackerManager>();
+            manager.SaveHistory("h-renta", request.RentaId, request.To ?? 0, $"");
             return RunAction(() => manager.StealRenta(request.RentaId,request.To));
         }
 
@@ -64,9 +67,9 @@ namespace BillingAPI.Controllers
         public Result HackShop([FromBody] HackShopRequest request)
         {
             var manager = IoC.IocContainer.Get<IHackerManager>();
+            manager.SaveHistory("h-shop", request.ShopId, 0, string.Join(",", request.Models));
             return RunAction(() => manager.HackShop(request.ShopId, request.Models));
         }
-
 
         /// <summary>
         /// Get base info for current character

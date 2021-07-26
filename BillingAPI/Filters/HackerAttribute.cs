@@ -1,4 +1,5 @@
-﻿using Core;
+﻿using Billing;
+using Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
@@ -18,6 +19,7 @@ namespace BillingAPI.Filters
                 var hack = filterContext.HttpContext.Request.Headers["hacking"];
                 if(hack == _secret)
                 {
+
                     base.OnActionExecuting(filterContext);
                     return;
                 }

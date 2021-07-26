@@ -548,8 +548,6 @@ namespace Scoringspace
 
                             var allCates = context.Set<CurrentCategory>()
                                                     .Where(c => c.ScoringId == scoringId && c.Category.CategoryType == category.CategoryType && c.CurrentFactors.Count > 0).ToList();
-
-
                             var factorsCount = curFactors.Count;
                             if (factorsCount == 0)
                             {

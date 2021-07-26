@@ -19,6 +19,7 @@ namespace Billing
         ShopDetailedDto GetHackerDetailedShop(int shopId);
         List<ShopDto> GetHackerShops();
         List<CorporationDto> GetHackerCorps();
+        void SaveHistory(string action, int main, int second, string parameters);
     }
     public class HackerManager : AdminManager, IHackerManager
     {
@@ -79,6 +80,18 @@ namespace Billing
         public List<CorporationDto> GetHackerCorps()
         {
             return GetCorporationDtos(s => true);
+        }
+        public void SaveHistory(string action, int main, int second, string parameters)
+        {
+            var history = new HackerHistory
+            {
+                Action = action,
+                Parameters = parameters,
+                Main = main,
+                Second = second
+            };
+            AddAndSave(history);
+            
         }
     }
 }
