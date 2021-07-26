@@ -127,7 +127,7 @@ namespace Billing
             var fields = GetList<JoinFieldValue>(jfv => jfv.JoinCharacterId == joinchacter.Id, jfv => jfv.JoinField);
             var insurance = fields.FirstOrDefault(f => f.JoinField.Name == "Страховка");
             var lifestyle = Lifestyles.Wood;
-   
+
 
             CorporationWallet citizen;
             ShopWallet shop;
@@ -146,9 +146,9 @@ namespace Billing
                     throw new BillingNotFoundException("Гражданство при инициализации не найдено");
                 shop = Get<ShopWallet>(s => s.Name == "МЧС");
             }
-            else 
+            else
             {
-                if(sin.Passport.Citizenship == "Россия")
+                if (sin.Passport.Citizenship == "Россия")
                 {
                     citizen = Get<CorporationWallet>(c => c.Alias == "Россия");
                     shop = Get<ShopWallet>(s => s.Name == "МЧС");
@@ -158,10 +158,10 @@ namespace Billing
                     citizen = Get<CorporationWallet>(c => c.Alias == "Zurich-Orbital");
                     shop = Get<ShopWallet>(s => s.Name == "CrashCart");
                 }
-                
+
                 if (citizen == null)
                     throw new BillingNotFoundException("Гражданство при инициализации не найдено");
-                if(shop == null)
+                if (shop == null)
                     throw new BillingNotFoundException("Продавец страховки при инициализации не найден");
             }
             sku = Get<Sku>(s => s.CorporationId == citizen.Id && s.Nomenklatura.Specialisation.ProductType.Alias == pt && s.Nomenklatura.Lifestyle == ls, s => s.Nomenklatura.Specialisation.ProductType, s => s.Corporation);
@@ -231,7 +231,7 @@ namespace Billing
 
         protected Renta CreateRenta(int modelId, int priceId, int beat, int count = 1)
         {
-            var sin = BillingBlocked(modelId, s => s.Wallet, s => s.Character, s => s.Passport);
+            var sin = BillingBlocked(modelId, s => s.Wallet, s => s.Character, s => s.Passport, s => s.Scoring);
             if (count == 0)
                 count = 1;
             var price = Get<Price>(p => p.Id == priceId,
@@ -324,7 +324,7 @@ namespace Billing
                 var eService = new EreminService();
                 modeldiscount = eService.GetDiscount(sin.Character.Model, BillingHelper.GetDiscountType(sku.Nomenklatura.Specialisation.ProductType.DiscountType));
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.Error.WriteLine(e.ToString());
                 modeldiscount = 1;
