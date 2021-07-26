@@ -499,7 +499,7 @@ namespace Scoringspace
             {
                 try
                 {
-                    using (var context = new BillingContext())
+                    using (var context = new BillingContext(true))
                     {
                         using (var dbContextTransaction = context.Database.BeginTransaction())
                         {
@@ -512,7 +512,7 @@ namespace Scoringspace
                             var scoring = context.Set<Scoring>().AsTracking().FirstOrDefault(s => s.Id == scoringId);
                             var systemsettings = IocContainer.Get<ISettingsManager>();
                             var oldScoring = scoring.CurerentRelative + scoring.CurrentFix;
-                            var curCategory = context.Set<CurrentCategory>().AsNoTracking().Include(f => f.Category)
+                            var curCategory = context.Set<CurrentCategory>().Include(f => f.Category)
                                                         .FirstOrDefault(c => c.ScoringId == scoringId && c.CategoryId == factor.CategoryId);
                             if (curCategory == null)
                             {
@@ -525,7 +525,7 @@ namespace Scoringspace
                                 };
                                 Add(curCategory, context);
                             }
-                            var curFactor = context.Set<CurrentFactor>().AsNoTracking()
+                            var curFactor = context.Set<CurrentFactor>()
                                                         .FirstOrDefault(s => s.CurrentCategoryId == curCategory.Id && s.ScoringFactorId == factorId);
                             if (curFactor == null)
                             {
@@ -546,7 +546,7 @@ namespace Scoringspace
                             var curFactors = context.Set<CurrentFactor>().AsNoTracking().Include(f => f.ScoringFactor)
                                                         .Where(f => f.CurrentCategoryId == curCategory.Id).ToList();
 
-                            var allCates = context.Set<CurrentCategory>().AsNoTracking()
+                            var allCates = context.Set<CurrentCategory>()
                                                     .Where(c => c.ScoringId == scoringId && c.Category.CategoryType == category.CategoryType && c.CurrentFactors.Count > 0).ToList();
 
 
@@ -556,8 +556,6 @@ namespace Scoringspace
                                 factorsCount = 1;
                             }
                             var oldCatValue = curCategory.Value;
-
-
                             var curCatCount = allCates.Count;
                             var k = (decimal)Math.Pow((curCatCount > 0 ? curCatCount : 2) * 2, -1);
                             var averFactors = curFactors.Sum(f => f.Value) / factorsCount;

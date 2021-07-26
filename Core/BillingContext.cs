@@ -50,9 +50,9 @@ namespace Core
 
     public class BillingContext : DbContext
     {
-        public BillingContext()
+        public BillingContext(bool autodetect = false)
         {
-            ChangeTracker.AutoDetectChangesEnabled = false;
+            ChangeTracker.AutoDetectChangesEnabled = autodetect;
         }
         private static readonly Lazy<LoggerFactory> LoggerFactory = new Lazy<LoggerFactory>(() => new LoggerFactory(new[] { new TraceLoggerProvider() }), false);
 
