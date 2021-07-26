@@ -134,32 +134,36 @@ namespace Billing
             return nomenklatura.BasePrice * ratio;
         }
 
-        public static decimal GetFinalPrice(Sku sku, decimal discount, decimal scoring)
+        //public static decimal GetFinalPrice(Sku sku, decimal discount, decimal scoring)
+        //{
+        //    var price = sku.Price;
+        //    if (price == 0)
+        //        price = sku.SkuBasePrice ?? sku.Nomenklatura.BasePrice;
+        //    return GetFinalPrice(price, discount, scoring);
+        //}
+
+
+        public static decimal GetShopPrice(Sku sku)
         {
             var price = sku.Price;
             if (price == 0)
                 price = sku.SkuBasePrice ?? sku.Nomenklatura.BasePrice;
-            return GetFinalPrice(price, discount, scoring);
+            return price;
         }
 
         public static decimal GetFinalPrice(Price price) 
         {
-            return GetFinalPrice(price.BasePrice, price.Discount, price.CurrentScoring);
+            return GetFinalPrice(price.ShopPrice, price.Discount, price.CurrentScoring);
         }
 
         public static decimal GetFinalPrice(Renta renta) 
         {
-            return GetFinalPrice(renta.BasePrice, renta.Discount, renta.CurrentScoring);
+            return GetFinalPrice(renta.ShopPrice, renta.Discount, renta.CurrentScoring);
         }
 
         public static decimal CalculateComission(Renta renta)
         {
-            var basePrice = renta.BasePrice;
-            if(renta.Sku?.Nomenklatura != null)
-            {
-                basePrice = renta.Sku.Nomenklatura.BasePrice;
-            }
-            return basePrice * (renta.ShopComission / 100);
+            return renta.BasePrice * (renta.ShopComission / 100);
         }
 
         public static bool HasQrWrite(string code)

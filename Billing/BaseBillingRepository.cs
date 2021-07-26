@@ -248,6 +248,7 @@ namespace Billing
                 DateCreated = DateTime.Now.ToUniversalTime(),
                 Discount = price.Discount,
                 ShopComission = price.ShopComission,
+                ShopPrice = price.ShopPrice,
                 ShopId = price.ShopId,
                 Shop = price.Shop,
                 HasQRWrite = instantConsume ? false : BillingHelper.HasQrWrite(price.Sku.Nomenklatura.Code),
@@ -324,8 +325,9 @@ namespace Billing
                 Discount = discount,
                 Sin = sin,
                 ShopComission = BillingHelper.GetShopComission(shop.LifeStyle),
-                FinalPrice = BillingHelper.GetFinalPrice(sku, discount, currentScoring)
+                ShopPrice = BillingHelper.GetShopPrice(sku)
             };
+            price.FinalPrice = BillingHelper.GetFinalPrice(price);
             Add(price);
             SaveContext();
             return price;
@@ -528,9 +530,9 @@ namespace Billing
                 comission = BillingHelper.CalculateComission(renta);
             }
             //create KPI here
-            renta.Sku.Corporation.CurrentKPI += renta.BasePrice;
+            renta.Sku.Corporation.CurrentKPI += renta.ShopPrice;
             if (first)
-                renta.Sku.Corporation.SkuSold += renta.BasePrice;
+                renta.Sku.Corporation.SkuSold += renta.ShopPrice;
             //comission
             AddNewTransfer(mir, renta.Shop.Wallet, comission, $"Рентное начисление: {renta.Sku.Name} в {renta.Shop.Name} от {sin.Passport.PersonName}", false, renta.Id, false);
         }

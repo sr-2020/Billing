@@ -34,5 +34,7 @@ namespace Core.Model
         public decimal FinalPrice { get; set; }
         [Column("confirmed")]
         public bool Confirmed { get; set; }
+        [Column("shopprice")]
+        public decimal ShopPrice { get; set; }
     }
 }

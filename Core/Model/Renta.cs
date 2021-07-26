@@ -48,6 +48,9 @@ namespace Core.Model
         public bool Expired { get; set; }
         [Column("full_price")]
         public bool FullPrice { get; set; }
+
+        [Column("shopprice")]
+        public decimal ShopPrice { get; set; }
         [ForeignKey("beat")]
         [Column("beat")]
         public int BeatId { get; set; }
