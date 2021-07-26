@@ -73,8 +73,8 @@ namespace Billing
             sin.InGame = true;
             sin.OldMetaTypeId = null;
             sin.OldInsurance = null;
-            var defaultbalance = _settings.GetDecimalValue(SystemSettingsEnum.defaultbalance);
-            var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId ?? 0, defaultbalance);
+
+            var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId ?? 0, 0);
             sin.Wallet = wallet;
             var scoring = Get<Scoring>(s => s.Id == sin.ScoringId);
             if (scoring == null)
@@ -127,6 +127,8 @@ namespace Billing
             var fields = GetList<JoinFieldValue>(jfv => jfv.JoinCharacterId == joinchacter.Id, jfv => jfv.JoinField);
             var insurance = fields.FirstOrDefault(f => f.JoinField.Name == "Страховка");
             var lifestyle = Lifestyles.Wood;
+   
+
             CorporationWallet citizen;
             ShopWallet shop;
             Sku sku;
@@ -134,6 +136,7 @@ namespace Billing
             {
                 lifestyle = BillingHelper.GetLifestyleFromJoin(insurance.Value);
             }
+            sin.Wallet.Balance = GetStartBalance(lifestyle);
             var ls = (int)lifestyle;
             var pt = ProductTypeEnum.Insurance.ToString();
             if (lifestyle == Lifestyles.Wood)
@@ -172,6 +175,26 @@ namespace Billing
             SaveContext();
         }
 
+        private decimal GetStartBalance(Lifestyles lifestyle)
+        {
+            var defaultbalance = _settings.GetDecimalValue(SystemSettingsEnum.defaultbalance);
+            switch (lifestyle)
+            {
+                case Lifestyles.Wood:
+                    return 0.9m * defaultbalance;
+                case Lifestyles.Silver:
+                    return 1.2m * defaultbalance;
+                case Lifestyles.Bronze:
+                case Lifestyles.Gold:
+                case Lifestyles.Platinum:
+                case Lifestyles.Iridium:
+                default:
+
+                    break;
+            }
+
+            return defaultbalance;
+        }
         private string ErrorWalletName(string message)
         {
             Console.Error.WriteLine(message);

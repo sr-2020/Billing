@@ -24,6 +24,19 @@ namespace Billing.Dto
         public int Irridium { get; set; }
         public int Count { get; set; }
 
+        public decimal GetAvergeKarma()
+        {
+            if (Count == 0)
+                return 0;
+            return SumKarma / Count;
+        }
+        public decimal GetAvergeRents()
+        {
+            if (Count == 0)
+                return 0;
+            return SumRents / Count;
+        }
+
         public decimal Bronze()
         {
             return (Min ?? 0) + (SumAll / Count - (Min ?? 0)) / 3;
@@ -66,7 +79,7 @@ namespace Billing.Dto
 
         public void AddConcurrent(BeatCharacterLocalDto dto)
         {
-            lock(this)
+            lock (this)
             {
                 if (dto.IsIrridium)
                 {

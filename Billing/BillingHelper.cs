@@ -68,6 +68,23 @@ namespace Billing
             return deserialized;
         }
 
+        public static JobLifeStyleDto GetBeatDto()
+        {
+            var manager = IocContainer.Get<ISettingsManager>();
+            var dto = manager.GetValue(SystemSettingsEnum.beat_characters_dto);
+            JobLifeStyleDto deserialized;
+            try
+            {
+                deserialized = Serialization.Serializer.Deserialize<JobLifeStyleDto>(dto);
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine($"Ошибка десериализации ls_dto: {dto}");
+                return new JobLifeStyleDto();
+            }
+            return deserialized;
+        }
+
         public static decimal GetForecast(Wallet wallet)
         {
             return wallet.Balance + (wallet.IncomeOutcome * 3);

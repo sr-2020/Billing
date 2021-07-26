@@ -131,7 +131,8 @@ namespace Jobs
             var incomeList = new ConcurrentQueue<ImportDto>();
             var processedList = new ConcurrentQueue<ImportDto>();
             var errorList = new ConcurrentQueue<ImportDto>();
-            var lsDto = new JobLifeStyleDto();
+            var lastlsDto = BillingHelper.GetBeatDto();
+            var lsDto =  new JobLifeStyleDto();
             var taskLoad = Task.Run(() =>
             {
                 Console.WriteLine("Пошла внешняя загрузка персонажей");
@@ -142,8 +143,13 @@ namespace Jobs
             var taskProcess = Task.Run(() =>
             {
                 var k = (Factory.Settings.GetDecimalValue(SystemSettingsEnum.karma_k) / 100);
-                var x1 = ((lsDto.SumRents/lsDto.Count) * k) / (lsDto.SumKarma/lsDto.Count);
-                if (x1 > lsDto.KarmaK)
+                var avg = lastlsDto.GetAvergeKarma();
+                decimal x1 = 0;
+                if(avg != 0)
+                {
+                    x1 = (lastlsDto.GetAvergeRents() * k) / lastlsDto.GetAvergeKarma();
+                }
+                if (x1 > lastlsDto.KarmaK)
                 {
                     lsDto.KarmaK = x1;
                 }
