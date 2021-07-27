@@ -27,6 +27,8 @@ namespace IoC.Init
             For<IAdminManager>().Use<AdminManager>().SetLifecycleTo(Lifecycles.Transient);
             For<IAbilityManager>().Use<AbilityManager>().SetLifecycleTo(Lifecycles.Transient);
             For<IHackerManager>().Use<HackerManager>().SetLifecycleTo(Lifecycles.Transient);
+            For<IReadOnlyManager>().Use<ReadOnlyManager>().SetLifecycleTo(Lifecycles.Transient);
+            
         }
     }
 }

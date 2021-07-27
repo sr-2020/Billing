@@ -20,11 +20,16 @@ namespace Billing
         List<ShopDto> GetHackerShops();
         List<CorporationDto> GetHackerCorps();
         void SaveHistory(string action, int main, int second, string parameters);
+
     }
     public class HackerManager : AdminManager, IHackerManager
     {
         public void HackShop(int shopId, int[] models)
         {
+            if(BillingHelper.IsShopAdmin(shopId))
+            {
+                throw new BillingException("доступ запрещен");
+            }
             if (models == null)
             {
                 models = new int[0] { };
@@ -64,11 +69,19 @@ namespace Billing
 
         public void StealShopMoney(int shopId, int modelTo, decimal amount, string comment)
         {
+            if (BillingHelper.IsShopAdmin(shopId))
+            {
+                throw new BillingException("доступ запрещен");
+            }
             MakeTransferLegSIN(shopId, modelTo, amount, comment);
         }
 
         public ShopDetailedDto GetHackerDetailedShop(int shopId)
         {
+            if (BillingHelper.IsShopAdmin(shopId))
+            {
+                throw new BillingException("доступ запрещен");
+            }
             return GetDetailedShop(shopId);
         }
 
@@ -81,6 +94,7 @@ namespace Billing
         {
             return GetCorporationDtos(s => true);
         }
+
         public void SaveHistory(string action, int main, int second, string parameters)
         {
             var history = new HackerHistory
@@ -91,7 +105,6 @@ namespace Billing
                 Second = second
             };
             AddAndSave(history);
-            
         }
     }
 }

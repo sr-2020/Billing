@@ -115,5 +115,15 @@ namespace BillingAPI.Controllers
             var manager = IocContainer.Get<IScoringManager>();
             return RunAction(() => manager.GetFullScoring(characterId), $"get full scoring {characterId}");
         }
+
+        /// <summary>
+        ///  Get insolvents
+        /// </summary>
+        [HttpGet("i-insolvents")]
+        public DataResult<List<InsolventDto>> GetInsolvents()
+        {
+            var manager = IocContainer.Get<IReadOnlyManager>();
+            return RunAction(() => manager.GetInsolvents());
+        }
     }
 }

@@ -212,6 +212,25 @@ namespace Billing
             }
         }
 
+        public static bool IsShopAdmin(int shop)
+        {
+            var manager = IocContainer.Get<ISettingsManager>();
+            try
+            {
+                var list = manager.GetValue(SystemSettingsEnum.admin_shops).Split(';').ToList();
+                if (list.Contains(shop.ToString()))
+                {
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception e)
+            {
+
+                return false;
+            }
+        }
+
         public static decimal GetShopComission(int shopls)
         {
             var manager = IocContainer.Get<ISettingsManager>();

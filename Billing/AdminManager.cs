@@ -17,6 +17,7 @@ namespace Billing
 {
     public interface IAdminManager : IBaseBillingRepository
     {
+        BalanceDto InitCharacter(int modelId);
         Transfer MakeTransferLegSIN(int legFrom, string sinTo, decimal amount, string comment);
         Transfer MakeTransferLegSIN(int shop, int modelId, decimal amount, string comment);
         List<SpecialisationDto> GetSpecialisations(Expression<Func<Specialisation, bool>> predicate);
@@ -50,6 +51,175 @@ namespace Billing
     {
         public static string UrlNotFound = "";
         protected int CURRENTGAME = 1;
+
+        #region initcharacter
+        public BalanceDto InitCharacter(int modelId)
+        {
+            if (modelId == 0)
+                throw new BillingNotFoundException($"character {modelId} not found");
+            var character = GetAsNoTracking<Character>(c => c.Model == modelId);
+            if (character == null)
+                throw new BillingNotFoundException($"character {modelId} not found");
+            var sin = Get<SIN>(s => s.Character.Model == modelId, s => s.Passport, s => s.Character);
+            if (sin == null)
+                throw new BillingNotFoundException($"character {modelId} not found");
+            if (sin.PassportId == 0)
+                throw new BillingNotFoundException($"Не найден пасспорт при инициализации персонажа {modelId}");
+            sin.EVersion = "1";
+            SaveContext();
+            InitEcoFirstStage(sin);
+            //проверяем, что персонаж присутствует во внешней системе
+            try
+            {
+                var service = new EreminService();
+                //service.GetCharacter(sin.Character.Model);
+                sin.EVersion = "3";
+                SaveContext();
+                try
+                {
+                    InitEcoSecondStage(sin);
+                }
+                catch (Exception e2)
+                {
+                    Console.Error.WriteLine(e2.ToString());
+                }
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e.ToString());
+            }
+
+            return new BalanceDto(sin);
+        }
+
+        private void InitEcoFirstStage(SIN sin)
+        {
+            sin.InGame = true;
+            sin.OldMetaTypeId = null;
+            sin.OldInsurance = null;
+
+            var wallet = CreateOrUpdateWallet(WalletTypes.Character, sin.WalletId ?? 0, 0);
+            sin.Wallet = wallet;
+            var scoring = Get<Scoring>(s => s.Id == sin.ScoringId);
+            if (scoring == null)
+            {
+                scoring = new Scoring();
+                sin.Scoring = scoring;
+                Add(scoring);
+            }
+            scoring.StartFactor = 1;
+            scoring.CurrentFix = 0.5m;
+            scoring.CurerentRelative = 0.5m;
+            SaveContext();
+            var categories = GetList<ScoringCategory>(c => c.CategoryType > 0);
+            foreach (var category in categories)
+            {
+                var current = Get<CurrentCategory>(c => c.CategoryId == category.Id && c.ScoringId == sin.ScoringId);
+                if (current != null)
+                {
+                    var factors = GetList<CurrentFactor>(c => c.CurrentCategoryId == current.Id);
+                    RemoveRange(factors);
+                    Remove(current);
+                }
+                current = new CurrentCategory
+                {
+                    CategoryId = category.Id,
+                    ScoringId = sin.ScoringId ?? 0,
+                    Value = sin.Scoring.StartFactor ?? 1
+                };
+                Add(current);
+            }
+            SaveContext();
+            var transfers = GetList<Transfer>(t => t.WalletFromId == sin.WalletId || t.WalletToId == sin.WalletId);
+            RemoveRange(transfers);
+            SaveContext();
+            var rentas = GetList<Renta>(r => r.SinId == sin.Id);
+            RemoveRange(rentas);
+            sin.EVersion = "2";
+            SaveContext();
+        }
+
+        private void InitEcoSecondStage(SIN sin)
+        {
+            if ((sin.Passport.MetatypeId ?? 0) > 5)
+            {
+                sin.EVersion = "4";
+                SaveContext();
+                return;
+            }
+            var joinchacter = Get<JoinCharacter>(jc => jc.CharacterId == sin.CharacterId);
+            var fields = GetList<JoinFieldValue>(jfv => jfv.JoinCharacterId == joinchacter.Id, jfv => jfv.JoinField);
+            var insurance = fields.FirstOrDefault(f => f.JoinField.Name == "Страховка");
+            var lifestyle = Lifestyles.Wood;
+
+
+            CorporationWallet citizen;
+            ShopWallet shop;
+            Sku sku;
+            if (insurance != null)
+            {
+                lifestyle = BillingHelper.GetLifestyleFromJoin(insurance.Value);
+            }
+            sin.Wallet.Balance = GetStartBalance(lifestyle);
+            var ls = (int)lifestyle;
+            var pt = ProductTypeEnum.Insurance.ToString();
+            if (lifestyle == Lifestyles.Wood)
+            {
+                citizen = Get<CorporationWallet>(c => c.Alias == "Omnistar");
+                if (citizen == null)
+                    throw new BillingNotFoundException("Гражданство при инициализации не найдено");
+                shop = Get<ShopWallet>(s => s.Name == "МЧС");
+            }
+            else
+            {
+                if (sin.Passport.Citizenship == "Россия")
+                {
+                    citizen = Get<CorporationWallet>(c => c.Alias == "Россия");
+                    shop = Get<ShopWallet>(s => s.Name == "МЧС");
+                }
+                else
+                {
+                    citizen = Get<CorporationWallet>(c => c.Alias == "Zurich-Orbital");
+                    shop = Get<ShopWallet>(s => s.Name == "CrashCart");
+                }
+
+                if (citizen == null)
+                    throw new BillingNotFoundException("Гражданство при инициализации не найдено");
+                if (shop == null)
+                    throw new BillingNotFoundException("Продавец страховки при инициализации не найден");
+            }
+            sku = Get<Sku>(s => s.CorporationId == citizen.Id && s.Nomenklatura.Specialisation.ProductType.Alias == pt && s.Nomenklatura.Lifestyle == ls, s => s.Nomenklatura.Specialisation.ProductType, s => s.Corporation);
+            if (sku == null)
+                throw new BillingNotFoundException("Страховка при инициализации не найдена");
+            if (shop == null)
+                throw new BillingNotFoundException("Магазин стартовой страховки не найден");
+            var price = CreateNewPrice(sku, shop, sin);
+            var renta = CreateRenta(sin.Character.Model, price.Id, 0, 1);
+            sin.EVersion = "4";
+            SaveContext();
+        }
+
+        private decimal GetStartBalance(Lifestyles lifestyle)
+        {
+            var defaultbalance = _settings.GetDecimalValue(SystemSettingsEnum.defaultbalance);
+            switch (lifestyle)
+            {
+                case Lifestyles.Wood:
+                    return 0.8m * defaultbalance;
+                case Lifestyles.Bronze:
+                    return 1.2m * defaultbalance;
+                case Lifestyles.Silver:
+                    return 1.5m * defaultbalance;
+                case Lifestyles.Gold:
+                case Lifestyles.Platinum:
+                case Lifestyles.Iridium:
+                default:
+                    break;
+            }
+            return defaultbalance;
+        }
+
+        #endregion
 
         public Transfer MakeTransferLegSIN(int shop, string sintext, decimal amount, string comment)
         {
