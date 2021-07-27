@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace InternalServices
 {
@@ -10,7 +11,7 @@ namespace InternalServices
     {
         const string URL = "https://push.evarun.ru";
 
-        public async static void SendNotification(int characterId, string title, string body)
+        public async static Task SendNotification(int characterId, string title, string body)
         {
             try
             {
@@ -23,7 +24,7 @@ namespace InternalServices
                 };
                 var json = Serializer.ToJSON(message);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                //await client.PostAsync(url, content);
+                await client.PostAsync(url, content);
             }
             catch (Exception e)
             {

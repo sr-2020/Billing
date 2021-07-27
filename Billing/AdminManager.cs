@@ -168,15 +168,21 @@ namespace Billing
 
         public List<UserDto> GetUsers()
         {
-            var list = GetActiveSins(u => u.Character, u => u.Wallet, u => u.Passport);
+            var list = GetSins(u => u.Character, u => u.Wallet, u => u.Passport);
             return list.Select(c => new UserDto(c)).ToList();
         }
 
         public List<SIN> GetActiveSins(params Expression<Func<SIN, object>>[] includes)
         {
+            var sins = GetSins(includes);
+            return sins.Where(s => s.EVersion == "4").ToList();
+        }
+
+        private List<SIN> GetSins(params Expression<Func<SIN, object>>[] includes)
+        {
             var currentGame = 1;
             var join = GetListAsNoTracking<JoinCharacter>(c => !c.Payed).Select(j => j.CharacterId);
-            var sins = GetListAsNoTracking(s => (s.InGame ?? false) && s.Character.Game == currentGame && (s.EVersion == "4"), includes);
+            var sins = GetListAsNoTracking(s => (s.InGame ?? false) && s.Character.Game == currentGame, includes);
             sins = sins.Where(s => !join.Contains(s.CharacterId)).ToList();
             return sins;
         }

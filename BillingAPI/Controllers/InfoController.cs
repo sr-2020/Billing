@@ -16,7 +16,11 @@ namespace BillingAPI.Controllers
     [AdminAuthorization]
     public class InfoController : EvarunApiController
     {
-
+        [HttpPost("i-insolvents")]
+        public void GetOnsolvents(bool beat, bool corporation, bool shop)
+        {
+            
+        }
 
     }
 }
