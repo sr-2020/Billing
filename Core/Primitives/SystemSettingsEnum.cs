@@ -35,6 +35,6 @@ namespace Core.Primitives
         beat_characters_dto,
         parallel_count,
         secret,
-        admin_shops
+        admin_shop
     }
 }
