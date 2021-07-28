@@ -19,7 +19,8 @@ namespace Billing.Dto
         public decimal SumRents { get; set; }
         public decimal SumKarma { get; set; }
         public decimal SumDividends { get; set; }
-        public decimal KarmaK { get; set; }
+        public JobLifeStyleDto lastDto { get; set; }
+        public decimal K { get; set; }
         public int Insolvent { get; set; }
         public int Irridium { get; set; }
         public int Count { get; set; }

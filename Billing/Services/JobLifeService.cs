@@ -132,7 +132,9 @@ namespace Jobs
             var processedList = new ConcurrentQueue<ImportDto>();
             var errorList = new ConcurrentQueue<ImportDto>();
             var lastlsDto = BillingHelper.GetBeatDto();
-            var lsDto =  new JobLifeStyleDto();
+            var lsDto = new JobLifeStyleDto();
+            lsDto.lastDto = lastlsDto;
+            lsDto.K = (Factory.Settings.GetDecimalValue(SystemSettingsEnum.karma_k) / 100);
             var taskLoad = Task.Run(() =>
             {
                 Console.WriteLine("Пошла внешняя загрузка персонажей");
@@ -142,18 +144,6 @@ namespace Jobs
             });
             var taskProcess = Task.Run(() =>
             {
-                var k = (Factory.Settings.GetDecimalValue(SystemSettingsEnum.karma_k) / 100);
-                var avg = lastlsDto.GetAvergeKarma();
-                decimal x1 = 0;
-                if(avg != 0)
-                {
-                    x1 = (lastlsDto.GetAvergeRents() * k) / lastlsDto.GetAvergeKarma();
-                }
-                if (x1 > lastlsDto.KarmaK)
-                {
-                    lsDto.KarmaK = x1;
-                }
-
                 while (!charactersLoaded || !incomeList.IsEmpty)
                 {
                     if (!charactersLoaded && incomeList.Count < _bulk)
@@ -206,7 +196,7 @@ namespace Jobs
                 {
                     try
                     {
-                        localDto = ProcessModelCharacter(character, lsDto.KarmaK);
+                        localDto = ProcessModelCharacter(character, lsDto.K, lsDto.lastDto);
                         processed.Enqueue(character);
                     }
                     catch (Exception e)
@@ -219,7 +209,7 @@ namespace Jobs
                 },
                 (final) =>
                 {
-                    
+
                 });
         }
 
@@ -242,7 +232,7 @@ namespace Jobs
             return beat;
         }
 
-        private BeatCharacterLocalDto ProcessModelCharacter(ImportDto character, decimal karmaK)
+        private BeatCharacterLocalDto ProcessModelCharacter(ImportDto character, decimal K, JobLifeStyleDto lastdto)
         {
             var billing = IocContainer.Get<IBillingManager>();
             var workModel = new WorkModelDto
@@ -253,7 +243,7 @@ namespace Jobs
                 StockGainPercentage = character?.EreminModel?.workModel?.billing?.stockGainPercentage ?? 0,
                 KarmaCount = character?.EreminModel?.workModel?.karma?.spent ?? 0
             };
-            var dto = billing.ProcessCharacterBeat(character.Sin.Id, workModel, karmaK);
+            var dto = billing.ProcessCharacterBeat(character.Sin.Id, workModel, K, lastdto);
             try
             {
                 EreminPushAdapter.SendNotification(character.Sin.Character.Model, "Кошелек", "Экономический пересчет завершен");
@@ -302,7 +292,7 @@ namespace Jobs
                 {
                     sku.Count = sku.SkuBaseCount ?? sku.Nomenklatura.BaseCount;
                     decimal price = 0;
-                    if(sku.SkuBasePrice == null)
+                    if (sku.SkuBasePrice == null)
                     {
                         price = BillingHelper.GetSpecialisationPrice(corporation.Specialisations.FirstOrDefault(s => s.SpecialisationId == sku.Nomenklatura.SpecialisationId && s.CorporationId == sku.CorporationId), sku.Nomenklatura);
                     }
