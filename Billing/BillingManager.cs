@@ -212,7 +212,7 @@ namespace Billing
             }
             var swIncome = Cut(sw);
             //rentas
-            var rentas = GetList<Renta>(r => r.SinId == sin.Id, r => r.Shop.Wallet, r => r.Sku.Corporation.Wallet);
+            var rentas = GetList<Renta>(r => r.SinId == sin.Id, r => r.Shop.Wallet, r => r.Sku.Corporation.Wallet, r => r.Sku.Nomenklatura);
             foreach (var renta in rentas)
             {
                 ProcessRenta(renta, mir, sin);
