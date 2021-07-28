@@ -33,7 +33,7 @@ namespace BillingAPI.Filters
                     corporation = ((CorporationBasedRequest)model).Corporation;
                 }
             }
-            if (!BillingHelper.IsAdmin(character) && !manager.HasAccessToShop(character, corporation))
+            if (!BillingHelper.IsAdmin(character) && !manager.HasAccessToCorporation(character, corporation))
             {
                 filterContext.Result = new StatusCodeResult(403);
                 return;

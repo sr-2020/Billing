@@ -137,7 +137,7 @@ namespace BillingAPI.Controllers
         }
 
         /// <summary>
-        ///  Get skusold
+        ///  Get anons
         /// </summary>
         [HttpGet("i-anons")]
         public DataResult<List<AnonDto>> GetAnons()

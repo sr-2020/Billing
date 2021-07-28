@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Billing;
+using BillingAPI.Model;
+using IoC;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,30 +14,30 @@ namespace BillingAPI.Filters
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            //var manager = IocContainer.Get<IShopManager>();
-            //var character = 0;
-            //var shop = 0;
-            //if (filterContext.ActionArguments.ContainsKey("character"))
-            //{
-            //    int.TryParse(filterContext.ActionArguments["character"].ToString(), out character);
-            //}
-            //if (filterContext.ActionArguments.ContainsKey("shop"))
-            //{
-            //    int.TryParse(filterContext.ActionArguments["shop"].ToString(), out shop);
-            //}
-            //else
-            //{
-            //    object model;
-            //    if (filterContext.ActionArguments.TryGetValue("request", out model) && model is ShopBasedRequest)
-            //    {
-            //        shop = ((ShopBasedRequest)model).Shop;
-            //    }
-            //}
-            //if (!BillingHelper.IsAdmin(character) && !manager.HasAccessToShop(character, shop))
-            //{
-            //    filterContext.Result = new StatusCodeResult(403);
-            //    return;
-            //}
+            var manager = IocContainer.Get<IShopManager>();
+            var character = 0;
+            var corporation = 0;
+            if (filterContext.ActionArguments.ContainsKey("character"))
+            {
+                int.TryParse(filterContext.ActionArguments["character"].ToString(), out character);
+            }
+            if (filterContext.ActionArguments.ContainsKey("corporation"))
+            {
+                int.TryParse(filterContext.ActionArguments["corporation"].ToString(), out corporation);
+            }
+            else
+            {
+                object model;
+                if (filterContext.ActionArguments.TryGetValue("request", out model) && model is CorporationBasedRequest)
+                {
+                    corporation = ((CorporationBasedRequest)model).Corporation;
+                }
+            }
+            if (!BillingHelper.IsAdmin(character) && !manager.HasAccessToCorporation(character, corporation))
+            {
+                filterContext.Result = new StatusCodeResult(403);
+                return;
+            }
             base.OnActionExecuting(filterContext);
         }
     }

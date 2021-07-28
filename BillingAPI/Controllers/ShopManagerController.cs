@@ -151,7 +151,7 @@ namespace BillingAPI.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("getcorporationproducts")]
-        [CorpAuthorization]
+        [CorporationAuthorization]
         public DataResult<List<SkuDto>> GetCorporationProducts([FromBody] CorporationBasedRequest request)
         {
             var manager = IocContainer.Get<IShopManager>();
