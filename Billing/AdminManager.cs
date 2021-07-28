@@ -72,7 +72,7 @@ namespace Billing
             try
             {
                 var service = new EreminService();
-                //service.GetCharacter(sin.Character.Model);
+                service.GetCharacter(sin.Character.Model);
                 sin.EVersion = "3";
                 SaveContext();
                 try
@@ -172,6 +172,14 @@ namespace Billing
             }
             else
             {
+                if(lifestyle == Lifestyles.Iridium)
+                {
+                    sin.Wallet.IsIrridium = true;
+                }
+                else
+                {
+                    sin.Wallet.IsIrridium = false;
+                }
                 if (sin.Passport.Citizenship == "Россия")
                 {
                     citizen = Get<CorporationWallet>(c => c.Alias == "Россия");
