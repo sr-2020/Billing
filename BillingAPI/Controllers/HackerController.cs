@@ -130,10 +130,10 @@ namespace BillingAPI.Controllers
         ///  Get skusold
         /// </summary>
         [HttpGet("i-skusolds")]
-        public DataResult<List<InsolventDto>> GetSkuSold()
+        public DataResult<List<CorporationSkuSoldDto>> GetSkuSold(int beat)
         {
             var manager = IocContainer.Get<IReadOnlyManager>();
-            return RunAction(() => manager.GetInsolvents());
+            return RunAction(() => manager.GetSkuSolds(beat));
         }
 
         /// <summary>
