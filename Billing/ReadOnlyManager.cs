@@ -9,10 +9,55 @@ namespace Billing
 {
     public interface IReadOnlyManager : IBaseBillingRepository
     {
+        List<CorporationSkuSoldDto> GetSkuSolds(int beatId);
+        List<AnonDto> GetAnons();
         List<InsolventDto> GetInsolvents();
     }
     public class ReadOnlyManager : BaseBillingRepository, IReadOnlyManager
     {
+        public List<CorporationSkuSoldDto> GetSkuSolds(int beatId)
+        {
+            var allRents = GetList<Renta>(r => r.BeatId == beatId, r => r.Sku.Nomenklatura.Specialisation);
+            var corpIds = allRents.Select(c => c.Sku.CorporationId);
+            var corporations = GetList<CorporationWallet>(c => corpIds.Contains(c.Id));
+            var result = new List<CorporationSkuSoldDto>();
+            foreach (var corporation in corporations)
+            {
+                var corpskusolddto = new CorporationSkuSoldDto
+                {
+                    CorporationId = corporation.Id,
+                    CorporationName = corporation.Name
+                };
+                var corprents = allRents.Where(r => r.Sku.CorporationId == corporation.Id);
+                corpskusolddto.SumCorpSkuSold = corprents.Sum(s => s.ShopPrice);
+                var groupped1 = corprents.GroupBy(g => g.Sku);
+                corpskusolddto.Specialisations = new List<SpecialisationSkuSold>();
+                foreach (var rentagroup in groupped1)
+                {
+                    var skusolddto = new SpecialisationSkuSold
+                    {
+                        Count = rentagroup.Count(),
+                        SpecialisationName = rentagroup.Key.Nomenklatura.Specialisation.Name,
+                        NomenklaturaName = rentagroup.Key.Nomenklatura.Name,
+                        SkuName = rentagroup.Key.Name,
+                        ShopPriceSum = rentagroup.Sum(r => r.ShopPrice),
+                        HackedPriceSum = rentagroup.Where(h => h.SinId == null).Sum(h => h.ShopPrice)
+                    };
+                    corpskusolddto.Specialisations.Add(skusolddto);
+                }
+                result.Add(corpskusolddto);
+            }
+            return result;
+        }
+        public List<AnonDto> GetAnons()
+        {
+            var list = GetList<Transfer>(t => t.Anonymous, t=>t.WalletFrom, t=>t.WalletTo);
+            var sins = GetList<SIN>(s => true);
+            var shops = GetList<ShopWallet>(s => true);
+            
+            return list.Select(t => new AnonDto { Amount = t.Amount, From = GetWalletName(t.WalletFrom, false, sins, shops), OperationTime = t.OperationTime, To = GetWalletName(t.WalletTo, false, sins, shops)}).ToList();
+        }
+
         public List<InsolventDto> GetInsolvents()
         {
             var overdrafts = GetList<Transfer>(t => t.Overdraft == true);

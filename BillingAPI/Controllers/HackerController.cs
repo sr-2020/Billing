@@ -125,5 +125,25 @@ namespace BillingAPI.Controllers
             var manager = IocContainer.Get<IReadOnlyManager>();
             return RunAction(() => manager.GetInsolvents());
         }
+
+        /// <summary>
+        ///  Get skusold
+        /// </summary>
+        [HttpGet("i-skusolds")]
+        public DataResult<List<InsolventDto>> GetSkuSold()
+        {
+            var manager = IocContainer.Get<IReadOnlyManager>();
+            return RunAction(() => manager.GetInsolvents());
+        }
+
+        /// <summary>
+        ///  Get skusold
+        /// </summary>
+        [HttpGet("i-anons")]
+        public DataResult<List<AnonDto>> GetAnons()
+        {
+            var manager = IocContainer.Get<IReadOnlyManager>();
+            return RunAction(() => manager.GetAnons());
+        }
     }
 }

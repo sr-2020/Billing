@@ -217,7 +217,7 @@ namespace Billing
             var manager = IocContainer.Get<ISettingsManager>();
             try
             {
-                var list = manager.GetValue(SystemSettingsEnum.admin_shops).Split(';').ToList();
+                var list = manager.GetValue(SystemSettingsEnum.admin_shop).Split(';').ToList();
                 if (list.Contains(shop.ToString()))
                 {
                     return true;

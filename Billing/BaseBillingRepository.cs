@@ -434,9 +434,7 @@ namespace Billing
                     manager.OnOtherBuy(sin, sku.Nomenklatura.Lifestyle);
                     break;
             }
-
             manager.OnShopLifestyle(sin, shop.LifeStyle);
-
         }
 
         private List<int> GetSkuIds(int shopId)

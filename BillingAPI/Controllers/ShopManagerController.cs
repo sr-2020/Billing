@@ -217,6 +217,7 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.ConfirmRenta(request.Character, request.PriceId, beat, request.Count), $"createrenta {request.Character}:{request.PriceId}:{request.Count}");
             return result;
         }
+
         /// <summary>
         /// 
         /// </summary>
@@ -230,6 +231,7 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetCorporationOverdrafts(corporation));
             return result;
         }
+
         /// <summary>
         /// 
         /// </summary>
@@ -243,8 +245,6 @@ namespace BillingAPI.Controllers
             var result = RunAction(() => manager.GetShopOverdrafts(shop));
             return result;
         }
-
     }
-
 }
 
