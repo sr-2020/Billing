@@ -181,7 +181,7 @@ namespace Billing
             if (workDto.Dividends1)
             {
                 var def1 = _settings.GetDecimalValue(SystemSettingsEnum.dividents1_k);
-                var sum = GetDividends(mortagee, 0.03m, def1);
+                var sum = GetDividends(mortagee, 0.01m, def1);
                 AddNewTransfer(mir, sin.Wallet, sum, "Дивиденды *");
                 income += sum;
                 localDto.SumDividends += sum;
@@ -189,7 +189,7 @@ namespace Billing
             if (workDto.Dividends2)
             {
                 var def2 = _settings.GetDecimalValue(SystemSettingsEnum.dividents2_k);
-                var sum = GetDividends(mortagee, 0.05m, def2);
+                var sum = GetDividends(mortagee, 0.03m, def2);
                 AddNewTransfer(mir, sin.Wallet, sum, "Дивиденды **");
                 income += sum;
                 localDto.SumDividends += sum;
@@ -197,7 +197,7 @@ namespace Billing
             if (workDto.Dividends3)
             {
                 var def3 = _settings.GetDecimalValue(SystemSettingsEnum.dividents3_k);
-                var sum = GetDividends(mortagee, 0.08m, def3);
+                var sum = GetDividends(mortagee, 0.05m, def3);
                 AddNewTransfer(mir, sin.Wallet, sum, "Дивиденды ***");
                 income += sum;
                 localDto.SumDividends += sum;
