@@ -213,11 +213,11 @@ namespace Billing
                 }
                 else
                 {
-                    x1 = (lastdto.GetAvergeRents() * K) / 250;
+                    x1 = (lastdto.GetAvergeRents() * K) / 700;
                 }
                 if (x1 == 0)
                 {
-                    x1 = 0.7m;
+                    x1 = 0.3m;
                 }
                 var karmasum = x1 * workDto.KarmaCount;
                 income += karmasum;
