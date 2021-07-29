@@ -193,7 +193,7 @@ namespace Billing
         /// <summary>
         /// TODO need caching
         /// </summary>
-        protected TransferDto CreateTransferDto(Transfer transfer, TransferType type, List<SIN> sinCache, List<ShopWallet> shopCache, string owner = "владелец кошелька")
+        protected TransferDto CreateTransferDto(Transfer transfer, TransferType type, List<SIN> sinCache, List<ShopWallet> shopCache, string owner = "владелец кошелька", bool overdraft = false)
         {
             bool anon = transfer.Anonymous;
             return new TransferDto
@@ -202,7 +202,7 @@ namespace Billing
                 Comment = transfer.Comment,
                 TransferType = type.ToString(),
                 Amount = BillingHelper.Round(transfer.Amount),
-                NewBalance = type == TransferType.Incoming ? transfer.NewBalanceTo : transfer.NewBalanceFrom,
+                NewBalance = overdraft ? 0 : type == TransferType.Incoming ? transfer.NewBalanceTo : transfer.NewBalanceFrom,
                 OperationTime = transfer.OperationTime,
                 From = type == TransferType.Incoming ? GetWalletName(transfer.WalletFrom, anon, sinCache, shopCache) : owner,
                 To = type == TransferType.Incoming ? owner : GetWalletName(transfer.WalletTo, anon, sinCache, shopCache),

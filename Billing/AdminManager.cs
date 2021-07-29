@@ -682,7 +682,7 @@ namespace Billing
         }
 
         [Obsolete("use CreateTransfersDtoAsync instead")]
-        protected List<TransferDto> CreateTransfersDto(List<Transfer> list, string owner, TransferType type)
+        protected List<TransferDto> CreateTransfersDto(List<Transfer> list, string owner, TransferType type, bool overdraft = false)
         {
             var walletdtos = list.GroupBy(t => new { t.WalletFromId, t.WalletFrom.WalletType }).Select(t => new WalletDto { WalletId = t.Key.WalletFromId, WalletType = (WalletTypes)t.Key.WalletType }).ToList();
             var sinIds = walletdtos.Where(w => w.WalletType == WalletTypes.Character).Select(w => w.WalletId).ToList();

@@ -218,7 +218,7 @@ namespace Billing
             var rentIds = GetList<Renta>(r => r.Sku.CorporationId == corporation).Select(r => r.Id).ToList();
             var transfers = GetList<Transfer>(t => t.Overdraft && rentIds.Contains(t.RentaId ?? 0));
             var owner = Get<CorporationWallet>(c => c.Id == corporation);
-            var list = CreateTransfersDto(transfers, owner.Name, TransferType.Incoming).OrderByDescending(t => t.OperationTime).ToList();
+            var list = CreateTransfersDto(transfers, owner.Name, TransferType.Incoming, true).OrderByDescending(t => t.OperationTime).ToList();
             return list;
         }
 
@@ -227,7 +227,7 @@ namespace Billing
             var rentIds = GetList<Renta>(r => r.ShopId == shop).Select(r => r.Id).ToList();
             var transfers = GetList<Transfer>(t => t.Overdraft && rentIds.Contains(t.RentaId ?? 0), t => t.WalletFrom, t => t.WalletTo);
             var owner = Get<ShopWallet>(c => c.Id == shop);
-            var list = CreateTransfersDto(transfers, owner.Name, TransferType.Incoming).OrderByDescending(t => t.OperationTime).ToList();
+            var list = CreateTransfersDto(transfers, owner.Name, TransferType.Incoming, true).OrderByDescending(t => t.OperationTime).ToList();
             return list;
         }
 
