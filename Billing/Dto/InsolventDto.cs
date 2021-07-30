@@ -13,8 +13,9 @@ namespace Billing.Dto
         public decimal SumRents { get; set; }
         public decimal SumOverdraft { get; set; }
         public decimal Balance { get; set; }
-        public List<Debt> Debts { get; set; }
         public bool IsIrridium { get; set; }
+        public List<Debt> Debts { get; set; }
+
     }
 
     public class Debt

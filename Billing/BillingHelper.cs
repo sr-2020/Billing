@@ -144,7 +144,7 @@ namespace Billing
         public static decimal GetSpecialisationPrice(CorporationSpecialisation specialisation, Nomenklatura nomenklatura)
         {
             decimal ratio = 5;
-            if(specialisation != null)
+            if (specialisation != null)
             {
                 ratio = specialisation.Ratio;
             }
@@ -168,14 +168,14 @@ namespace Billing
             return price;
         }
 
-        public static decimal GetFinalPrice(Price price) 
+        public static decimal GetFinalPrice(Price price)
         {
-            return GetFinalPrice(price.ShopPrice, price.Discount, price.CurrentScoring);
+            return GetFinalPrice(price.ShopPrice, price.Discount, price.CurrentScoring, 1);
         }
 
-        public static decimal GetFinalPrice(Renta renta) 
+        public static decimal GetFinalPrice(Renta renta)
         {
-            return GetFinalPrice(renta.ShopPrice, renta.Discount, renta.CurrentScoring);
+            return GetFinalPrice(renta.ShopPrice, renta.Discount, renta.CurrentScoring, renta.Count);
         }
 
         public static decimal CalculateComission(Renta renta)
@@ -253,9 +253,9 @@ namespace Billing
             }
         }
 
-        private static decimal GetFinalPrice(decimal price, decimal discount, decimal scoring)
+        private static decimal GetFinalPrice(decimal price, decimal discount, decimal scoring, int count)
         {
-            return Round((price * discount) / scoring);
+            return Round((price * discount) / scoring) * count;
         }
     }
 }
