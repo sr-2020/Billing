@@ -1,5 +1,6 @@
 ﻿using Billing.Dto;
 using Core.Model;
+using Core.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -75,10 +76,11 @@ namespace Billing
                     Citizenship = sin.Passport.Citizenship,
                     ModelId = sin.Character.Model,
                     SinText = sin.Passport.Sin,
-                    PersonName = sin.Passport.PersonName
+                    PersonName = sin.Passport.PersonName,
+                    IsIrridium = sin.Wallet.IsIrridium
                 };
                 insolvent.SumOverdraft = personOverdrafts.Where(t => t.WalletFromId == sin.WalletId).Sum(s => s.Amount);
-                insolvent.SumRents = rents.Sum(r => BillingHelper.GetFinalPrice(r));
+                insolvent.SumRents = rents.Where(r=>r.SinId == sin.Id).Sum(r => BillingHelper.GetFinalPrice(r));
                 insolvent.Debts = new List<Debt>();
                 foreach (var personaloverdraft in personOverdrafts)
                 {
