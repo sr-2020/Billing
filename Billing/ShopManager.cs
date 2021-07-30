@@ -216,7 +216,7 @@ namespace Billing
         public List<TransferDto> GetCorporationOverdrafts(int corporation)
         {
             var rentIds = GetList<Renta>(r => r.Sku.CorporationId == corporation).Select(r => r.Id).ToList();
-            var transfers = GetList<Transfer>(t => t.Overdraft && rentIds.Contains(t.RentaId ?? 0));
+            var transfers = GetList<Transfer>(t => t.Overdraft && rentIds.Contains(t.RentaId ?? 0), t=>t.WalletFrom);
             var owner = Get<CorporationWallet>(c => c.Id == corporation);
             var list = CreateTransfersDto(transfers, owner.Name, TransferType.Incoming, true).OrderByDescending(t => t.OperationTime).ToList();
             return list;
