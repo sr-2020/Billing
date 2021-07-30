@@ -21,7 +21,7 @@ namespace Billing.DTO
             CharacterName = renta.Sin?.Passport?.PersonName ?? "Unknown";
             ProductType = renta.Sku?.Nomenklatura?.Specialisation?.ProductType?.Name;
             Shop = renta.Shop?.Name;
-            NomenklaturaName = renta.Sku?.Nomenklatura?.Name;
+            NomenklaturaName = $"{renta.Sku?.Nomenklatura?.Name} x {renta.Count}";
             SkuName = renta.Sku?.Name;
             Corporation = renta.Sku?.Corporation?.Name;
             QRRecorded = renta.QRRecorded;
