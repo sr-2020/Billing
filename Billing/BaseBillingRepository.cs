@@ -35,7 +35,7 @@ namespace Billing
             return string.Empty;
         }
 
-        protected string GetWalletName(Wallet wallet, bool anon, List<SIN> sinCache, List<ShopWallet> shopCache)
+        protected string GetWalletName(Wallet wallet, bool anon, List<SIN> sinCache, List<ShopWallet> shopCache, string owner = "")
         {
             if (wallet == null)
                 return ErrorWalletName($"Передан пустой кошелек");
@@ -45,7 +45,7 @@ namespace Billing
                     var sin = sinCache.FirstOrDefault(s => s.WalletId == wallet.Id);
                     if (sin == null)
                     {
-                        return ErrorWalletName($"Не найден sin для wallet {wallet.Id}");
+                        return owner;
                     }
                     return BillingHelper.GetPassportName(sin.Passport, anon);
                 case (int)WalletTypes.Corporation:
@@ -205,8 +205,8 @@ namespace Billing
                 Amount = BillingHelper.Round(transfer.Amount),
                 NewBalance = overdraft ? 0 : type == TransferType.Incoming ? transfer.NewBalanceTo : transfer.NewBalanceFrom,
                 OperationTime = transfer.OperationTime,
-                From = type == TransferType.Incoming ? owner: GetWalletName(transfer.WalletFrom, anon, sinCache, shopCache),
-                To = type == TransferType.Incoming ?  GetWalletName(transfer.WalletTo, anon, sinCache, shopCache): owner,
+                From = GetWalletName(transfer.WalletFrom, anon, sinCache, shopCache, owner),
+                To =  GetWalletName(transfer.WalletTo, anon, sinCache, shopCache, owner),
                 Anonimous = transfer.Anonymous,
                 Id = transfer.Id,
                 Overdraft = transfer.Overdraft,
