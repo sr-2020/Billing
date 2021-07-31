@@ -86,7 +86,8 @@ namespace Billing
             if (allowed == null)
                 throw new BillingException("Sku недоступно для продажи в данный момент");
             price.BasePrice *= count;
-            var finalPrice = BillingHelper.GetFinalPrice(price);
+            price.ShopPrice *= count;
+            price.FinalPrice *= count;
             if (sin.Wallet.Balance - price.FinalPrice < 0)
             {
                 throw new BillingException("Недостаточно средств");
