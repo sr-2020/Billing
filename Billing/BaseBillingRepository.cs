@@ -85,8 +85,6 @@ namespace Billing
             var allowed = SkuAllowed(price.ShopId, price.SkuId);
             if (allowed == null)
                 throw new BillingException("Sku недоступно для продажи в данный момент");
-            price.BasePrice *= count;
-            price.ShopPrice *= count;
             price.FinalPrice *= count;
             if (sin.Wallet.Balance - price.FinalPrice < 0)
             {
